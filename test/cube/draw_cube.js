@@ -13,15 +13,15 @@ const scene = new THREE.Scene();
 // Three.js를 사용하여 사각형 지오메트리 생성
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+const draw_cube = new THREE.Mesh(geometry, material);
+scene.add(draw_cube);
 // 애니메이션 루프 설정
 function animate() {
     requestAnimationFrame(animate);
     // 사각형 회전
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
+    draw_cube.rotation.x += 0.01;
+    draw_cube.rotation.y += 0.01;
     renderer.render(scene, camera);
 }
 animate();
-export { cube };
+export { draw_cube };

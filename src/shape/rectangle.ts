@@ -1,47 +1,38 @@
 import * as THREE from 'three';
+import {Shape} from './shape';
 
-export class Rectangle {
-    private vertices: THREE.Vector3[];
-    private local_translation: THREE.Vector2;
-    private global_translation: THREE.Vector2;
-    private color: THREE.Vector4; // RGB 및 Alpha 값
-    private draw_border: boolean;
-    private is_visible: boolean;
 
-    constructor(vertices: THREE.Vector3[], local_translation: THREE.Vector2, global_translation: THREE.Vector2, color: THREE.Vector4, draw_border: boolean, is_visible: boolean) {
-        this.vertices = vertices;
-        this.local_translation = local_translation;
-        this.global_translation = global_translation;
-        this.color = color;
-        this.draw_border = draw_border;
-        this.is_visible = is_visible;
+export class Rectangle extends Shape {
+    constructor(width: number, height: number, local_translation: THREE.Vector2, global_translation: THREE.Vector2, color: THREE.Color, opacity: number, draw_border: boolean, is_visible: boolean) {
+        super(width, height, local_translation, global_translation, color, opacity, draw_border, is_visible);
     }
 
-    public getVertices(): THREE.Vector3[] {
-        return this.vertices;
-    }
+    public draw(scene: THREE.Scene): void {
+        const width = this.getWidth();
+        const height = this.getHeight();
+        const color = this.getColor();
+        const opacity = this.getOpacity();
+        const isVisible = this.isVisible();
 
-    public getLocalTranslation(): THREE.Vector2 {
-        return this.local_translation;
-    }
+        if (!isVisible) {
+            return; // 가시성이 false이면 더 이상 진행하지 않고 종료합니다.
+        }
 
-    public getGlobalTranslation(): THREE.Vector2 {
-        return this.global_translation;
-    }
+        // Geometry 생성
+        const geometry = new THREE.PlaneGeometry(width, height);
 
-    public getColor(): THREE.Vector4 {
-        return this.color;
-    }
+        // 색상 및 투명도 설정
+        const material = new THREE.MeshBasicMaterial({
+            color: color, // 색상 적용
+            transparent: true, // 투명도 적용
+            opacity: opacity // 투명도 값 적용
+        });
 
-    public isDrawBorder(): boolean {
-        return this.draw_border;
-    }
+        // Mesh 생성
+        const mesh = new THREE.Mesh(geometry, material);
 
-    public isVisible(): boolean {
-        return this.is_visible;
-    }
-
-    public setVisibility(visible: boolean): void {
-        this.is_visible = visible;
+        // Mesh를 씬에 추가
+        scene.add(mesh);
     }
 }
+

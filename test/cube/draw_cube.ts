@@ -33,5 +33,3 @@ function animate() {
 }
 
 animate();
-
-export { cube };
