@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
     entry: {
-        cube: "./test/draw_cube/draw_cube.ts",
+        cube: "./test/cube/draw_cube.ts",
     },
     module: {
         rules: [
@@ -18,6 +18,6 @@ module.exports = {
     },
     output: {
         filename: "bundle.js",
-        path: path.resolve(__dirname, "../../dist/client"),
+        path: path.resolve(__dirname, "../../dist/cube"),
     },
 };

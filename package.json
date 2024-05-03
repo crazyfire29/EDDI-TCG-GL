@@ -13,6 +13,8 @@
   },
   "scripts": {
     "dev": "webpack serve --config ./src/client/webpack.dev.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cube-test": "webpack serve --config ./test/cube/config/webpack.dev.js",
+    "rectangle-test": "webpack serve --config ./test/rectangle/config/webpack.dev.js"
   }
 }
