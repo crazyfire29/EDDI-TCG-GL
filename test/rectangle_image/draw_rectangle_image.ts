@@ -1,23 +1,41 @@
 import * as THREE from 'three';
-import { Scene } from 'three';
-import { RectangleImage} from "../../src/shape/image/RectangleImage";
+import { RectangleImage } from "../../src/shape/image/RectangleImage";
 
-// 이미지 경로 설정
-const cardId = 'example_card_id'; // 실제 카드 ID로 변경해야 합니다.
-const imagePath = `/assets/eddi_tcg_game/images/battle_field_card/${cardId}.png`;
+// HTML 파일의 body 요소에 Three.js 캔버스를 렌더링
+const container = document.body;
 
-// 씬 생성
+// Three.js를 사용하여 WebGL 렌더러 생성
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+// Three.js를 사용하여 카메라 생성
+const aspect = window.innerWidth / window.innerHeight;
+const camera = new THREE.OrthographicCamera(-aspect, aspect, 1, -1, 0.1, 1000);
+camera.position.set(0, 0, 5);
+
+// Three.js를 사용하여 씬 생성
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
 
 // RectangleImage 생성
-const width = 10; // 적절한 너비 설정
-const height = 10; // 적절한 높이 설정
+const cardId = 19;
+const imagePath = `resource/${cardId}.png`;
+
+console.log(imagePath);
+
+const width = 1; // 적절한 너비 설정
+const height = 1; // 적절한 높이 설정
 const imageRectangle = new RectangleImage(width, height, imagePath, 1, 1);
 
 // 씬에 이미지 렌더링
 imageRectangle.draw(scene);
 
-// 렌더러 생성 및 렌더링
-const renderer = new THREE.WebGLRenderer();
-// 렌더러 설정 코드 생략
-renderer.render(scene, camera); // camera 객체는 적절하게 정의되어야 합니다.
+// 애니메이션 루프 설정
+function animate() {
+    requestAnimationFrame(animate);
+
+    renderer.render(scene, camera);
+}
+
+animate();

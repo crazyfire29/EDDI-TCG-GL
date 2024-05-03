@@ -22,14 +22,15 @@ export class RectangleImage extends Shape {
         // 이미지 텍스처를 로드합니다.
         const textureLoader = new THREE.TextureLoader();
         textureLoader.load(imageSrc, (texture) => {
-            this.textureId = texture;
-            this.textureInitialized = true;
+            // this.textureId = texture;
+            // this.textureInitialized = true;
         });
     }
 
     public draw(scene: THREE.Scene): void {
         if (!this.textureInitialized || !this.textureId) {
             // 텍스처가 아직 준비되지 않았거나 로드되지 않은 경우, 아무 것도 하지 않습니다.
+            console.log('there are no texture')
             return;
         }
 
