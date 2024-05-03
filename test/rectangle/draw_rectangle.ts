@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {Rectangle} from "../../src/shape/rectangle";
+import {Rectangle} from "../../src/shape/Rectangle";
 
 // 씬 생성
 const scene = new THREE.Scene();
