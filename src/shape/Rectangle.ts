@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {Shape} from './shape';
+import {Shape} from './Shape';
 
 
 export class Rectangle extends Shape {
