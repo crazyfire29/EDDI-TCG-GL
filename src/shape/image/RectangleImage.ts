@@ -26,6 +26,9 @@ export class RectangleImage extends Shape {
             this.textureId = texture;
             this.textureInitialized = true;
             texture.colorSpace = THREE.SRGBColorSpace
+            texture.magFilter = THREE.NearestFilter; // 확대 시에 최근접 필터링 사용
+            texture.minFilter = THREE.NearestFilter; // 축소 시에 최근접 필터링 사용
+            texture.generateMipmaps = false
             // 콜백 함수가 제공되었다면 실행합니다.
             if (callback) {
                 callback();
