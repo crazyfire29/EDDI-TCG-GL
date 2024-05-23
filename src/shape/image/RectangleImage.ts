@@ -16,14 +16,20 @@ export class RectangleImage extends Shape {
         color: THREE.Color = new THREE.Color(1, 1, 1),
         opacity: number = 1,
         drawBorder: boolean = false,
-        isVisible: boolean = true
+        isVisible: boolean = true,
+        callback?: () => void // 콜백 함수 추가
     ) {
         super(width, height, localTranslation, globalTranslation, color, opacity, drawBorder, isVisible);
         // 이미지 텍스처를 로드합니다.
         const textureLoader = new THREE.TextureLoader();
         textureLoader.load(imageSrc, (texture) => {
-            // this.textureId = texture;
-            // this.textureInitialized = true;
+            this.textureId = texture;
+            this.textureInitialized = true;
+            texture.colorSpace = THREE.SRGBColorSpace
+            // 콜백 함수가 제공되었다면 실행합니다.
+            if (callback) {
+                callback();
+            }
         });
     }
 

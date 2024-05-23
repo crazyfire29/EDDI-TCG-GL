@@ -25,11 +25,16 @@ const imagePath = `resource/${cardId}.png`;
 console.log(imagePath);
 
 const width = 1; // 적절한 너비 설정
-const height = 1; // 적절한 높이 설정
-const imageRectangle = new RectangleImage(width, height, imagePath, 1, 1);
-
-// 씬에 이미지 렌더링
-imageRectangle.draw(scene);
+const height = 1.615; // 적절한 높이 설정
+// const imageRectangle = new RectangleImage(width, height, imagePath, 1, 1);
+//
+// // 씬에 이미지 렌더링
+// imageRectangle.draw(scene);
+const imageRectangle = new RectangleImage(width, height, imagePath, 1, 1, undefined, undefined, undefined, undefined, undefined, undefined, () => {
+    // 콜백 함수: 텍스처 로딩이 완료되었을 때 실행됨
+    // 씬에 이미지 렌더링
+    imageRectangle.draw(scene);
+});
 
 // 애니메이션 루프 설정
 function animate() {
