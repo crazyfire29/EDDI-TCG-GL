@@ -16,6 +16,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "cube-test": "webpack serve --config ./test/cube/config/webpack.dev.js",
     "rectangle-test": "webpack serve --config ./test/rectangle/config/webpack.dev.js",
-    "rectangle-image-test": "webpack serve --config ./test/rectangle_image/config/webpack.dev.js"
+    "rectangle-image-test": "webpack serve --config ./test/rectangle_image/config/webpack.dev.js",
+    "attach-non-background-image-test": "webpack serve --config ./test/attach_non_background_image/config/webpack.dev.js",
+    "draw-window-size-test": "webpack serve --config ./test/config_window_size/config/webpack.dev.js"
   }
 }
