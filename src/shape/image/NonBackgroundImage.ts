@@ -4,6 +4,7 @@ import { Shape } from '../Shape'; // Shape 클래스가 정의된 파일의 경�
 export class NonBackgroundImage extends Shape {
     private textureInitialized: boolean = false;
     private textureId: THREE.Texture | null = null;
+    public mesh: THREE.Mesh | null = null;
 
     constructor(
         width: number,
@@ -54,13 +55,13 @@ export class NonBackgroundImage extends Shape {
         const geometry = new THREE.PlaneGeometry(this.getWidth(), this.getHeight());
 
         // Mesh를 생성합니다.
-        const mesh = new THREE.Mesh(geometry, material);
+        this.mesh = new THREE.Mesh(geometry, material);
 
         // local_translation을 적용하여 위치를 설정합니다.
-        mesh.position.set(this.getLocalTranslation().x, this.getLocalTranslation().y, 0);
+        this.mesh.position.set(this.getLocalTranslation().x, this.getLocalTranslation().y, 0);
 
         // Mesh를 장면에 추가합니다.
-        scene.add(mesh);
+        scene.add(this.mesh);
     }
 
     public setWidthRatio(widthRatio: number): void {
