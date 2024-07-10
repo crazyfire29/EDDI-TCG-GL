@@ -29,8 +29,8 @@ export class NonBackgroundImage extends Shape {
             this.textureInitialized = true;
             texture.colorSpace = THREE.SRGBColorSpace;
             texture.magFilter = THREE.LinearFilter; // 확대 시에 최근접 필터링 사용
-            texture.minFilter = THREE.LinearMipmapLinearFilter; // 축소 시에 최근접 필터링 사용
-            texture.generateMipmaps = true;
+            texture.minFilter = THREE.LinearFilter; // 축소 시에 최근접 필터링 사용
+            texture.generateMipmaps = false;
             // 콜백 함수가 제공되었다면 실행합니다.
             if (callback) {
                 callback();

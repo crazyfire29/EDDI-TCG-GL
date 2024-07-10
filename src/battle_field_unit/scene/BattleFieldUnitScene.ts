@@ -23,7 +23,7 @@ export class BattleFieldUnitScene {
         const energyPath = resourceManager.getEnergyPath(battleFieldUnit.getEnergyId());
         const racePath = resourceManager.getRacePath(battleFieldUnit.getRaceId());
 
-        const cardWidth = 150;
+        const cardWidth = 120;
         const cardHeight = cardWidth * 1.615;
         const localTranslationPosition = battleFieldUnit.getLocalTranslationPosition();
 
