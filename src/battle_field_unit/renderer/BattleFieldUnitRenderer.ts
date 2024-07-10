@@ -1,15 +1,16 @@
 import * as THREE from 'three'
 import {BattleFieldUnitRepository} from "../repository/BattleFieldUnitRepository";
 import {ResourceManager} from "../../resouce_manager/ResourceManager";
+import {BattleFieldUnitScene} from "../scene/BattleFieldUnitScene";
 
 export class BattleFieldUnitRenderer {
-    private scene: THREE.Scene
+    private unitScene: BattleFieldUnitScene
     // TODO: Service로 수정해야함
     private battleFieldUnitRepository: BattleFieldUnitRepository
     private resourceManager: ResourceManager
 
-    constructor(scene: THREE.Scene, resourceManager: ResourceManager) {
-        this.scene = scene
+    constructor(unitScene: BattleFieldUnitScene, resourceManager: ResourceManager) {
+        this.unitScene = unitScene
         this.battleFieldUnitRepository = BattleFieldUnitRepository.getInstance()
         this.resourceManager = resourceManager
     }
@@ -18,7 +19,17 @@ export class BattleFieldUnitRenderer {
         const battleFieldUnitList = this.battleFieldUnitRepository.getBattleFieldUnitList()
 
         battleFieldUnitList.forEach(battleFieldUnit => {
-            const cardPath = this.resourceManager.getCardPath(battleFieldUnit.getCardId())
-        })
+            this.unitScene.addUnit(battleFieldUnit, this.resourceManager);
+        });
+    }
+
+    public render(renderer: THREE.WebGLRenderer, camera: THREE.OrthographicCamera): void {
+        this.renderBattleFieldUnit();
+        renderer.render(this.unitScene.getScene(), camera);
+    }
+
+    public animate(renderer: THREE.WebGLRenderer, camera: THREE.OrthographicCamera): void {
+        requestAnimationFrame(() => this.animate(renderer, camera));
+        this.render(renderer, camera);
     }
 }

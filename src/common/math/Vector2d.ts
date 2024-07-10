@@ -29,4 +29,12 @@ export class Vector2d {
     public length(): number {
         return Math.sqrt(this.x * this.x + this.y * this.y);
     }
+
+    public getX(): number {
+        return this.x
+    }
+
+    public getY(): number {
+        return this.y
+    }
 }
