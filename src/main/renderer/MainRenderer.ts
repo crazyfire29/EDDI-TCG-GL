@@ -99,6 +99,7 @@ export class MainRenderer {
 
         const scaleX = newWidth / this.originalWidth;
         const scaleY = newHeight / this.originalHeight;
+        // console.log('scaleX:', scaleX, ', scaleY:', scaleY)
         this.unitRenderer.scaleUnitList(scaleX, scaleY);
     }
 }

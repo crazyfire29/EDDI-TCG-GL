@@ -87,4 +87,11 @@ export class NonBackgroundImage extends Shape {
             this.mesh.scale.set(scaleX, scaleY, 1);
         }
     }
+
+    public setPosition(x: number, y: number): void {
+        this.getLocalTranslation().set(x, y);
+        if (this.mesh) {
+            this.mesh.position.set(x, y, 0);
+        }
+    }
 }
