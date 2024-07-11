@@ -3,6 +3,7 @@ import { BattleFieldUnitRenderer } from '../../battle_field_unit/renderer/Battle
 import { BattleFieldUnitScene } from '../../battle_field_unit/scene/BattleFieldUnitScene';
 import { ResourceManager } from '../../resouce_manager/ResourceManager';
 import { NonBackgroundImage } from '../../shape/image/NonBackgroundImage';
+import {BattleFieldUnitRepository} from "../../battle_field_unit/repository/BattleFieldUnitRepository";
 
 export class MainRenderer {
     private scene: THREE.Scene;
@@ -11,8 +12,13 @@ export class MainRenderer {
     private unitRenderer: BattleFieldUnitRenderer;
     private background: NonBackgroundImage | null = null;
     private resourceManager: ResourceManager;
+    private originalWidth: number;
+    private originalHeight: number;
 
     constructor(container: HTMLElement, width: number, height: number) {
+        this.originalWidth = width;
+        this.originalHeight = height;
+
         this.scene = new THREE.Scene();
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(width, height);
@@ -88,7 +94,11 @@ export class MainRenderer {
         if (this.background) {
             const newBackgroundWidth = newHeight * newAspect;
             const newBackgroundHeight = newHeight;
-            // this.background.setScale(newBackgroundWidth / this.background.getWidth(), newBackgroundHeight / this.background.getHeight());
+            this.background.setScale(newBackgroundWidth / this.background.getWidth(), newBackgroundHeight / this.background.getHeight());
         }
+
+        const scaleX = newWidth / this.originalWidth;
+        const scaleY = newHeight / this.originalHeight;
+        this.unitRenderer.scaleUnitList(scaleX, scaleY);
     }
 }

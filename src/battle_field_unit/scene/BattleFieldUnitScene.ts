@@ -2,10 +2,11 @@ import * as THREE from 'three';
 import {BattleFieldUnit} from "../entity/BattleFieldUnit";
 import {ResourceManager} from "../../resouce_manager/ResourceManager";
 import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
+import {BattleFieldUnitEntry} from "./BattleFieldUnitEntry";
 
 export class BattleFieldUnitScene {
     private scene: THREE.Scene
-    private unitList: { [id: number]: NonBackgroundImage } = {};
+    private unitList: { [id: number]: BattleFieldUnitEntry } = {};
     private nextUnitId: number = 1
 
     constructor() {
@@ -17,6 +18,8 @@ export class BattleFieldUnitScene {
             return;
         }
 
+        const unitId = this.nextUnitId;
+
         const cardPath = resourceManager.getCardPath(battleFieldUnit.getCardId());
         const weaponPath = resourceManager.getWeaponPath(battleFieldUnit.getWeaponId());
         const hpPath = resourceManager.getHpPath(battleFieldUnit.getHpId());
@@ -27,12 +30,21 @@ export class BattleFieldUnitScene {
         const cardHeight = cardWidth * 1.615;
         const localTranslationPosition = battleFieldUnit.getLocalTranslationPosition();
 
+        this.unitList[unitId] = {
+            unit: battleFieldUnit,
+            card: null,
+            weapon: null,
+            hp: null,
+            energy: null,
+            race: null
+        };
+
         const card = new NonBackgroundImage(cardWidth, cardHeight, cardPath, 1, 1,
                                             new THREE.Vector2(
                                                 0, 0
                                             ), undefined, undefined, undefined, undefined, undefined, () => {
             card.draw(this.scene)
-            this.unitList[this.nextUnitId] = card;
+            this.unitList[unitId].card = card
         }, 1);
 
         const weaponWidth = cardWidth * 0.63;
@@ -43,6 +55,7 @@ export class BattleFieldUnitScene {
                                                 localTranslationPosition.getY() - cardHeight / 2 + 8
                                             ), undefined, undefined, undefined, undefined, undefined, () => {
             weapon.draw(this.scene)
+            this.unitList[unitId].weapon = weapon;
         }, 2);
 
         const hpWidth = cardWidth * 0.33;
@@ -52,6 +65,7 @@ export class BattleFieldUnitScene {
                                                 localTranslationPosition.getX() - cardWidth / 2, localTranslationPosition.getY() - cardHeight / 2 + 13
                                             ), undefined, undefined, undefined, undefined, undefined, () => {
             hp.draw(this.scene)
+            this.unitList[unitId].hp = hp;
         }, 2);
 
         const energyWidth = cardWidth * 0.39;
@@ -62,6 +76,7 @@ export class BattleFieldUnitScene {
                                                 localTranslationPosition.getY() + cardHeight / 2
                                             ), undefined, undefined, undefined, undefined, undefined, () => {
             energy.draw(this.scene)
+            this.unitList[unitId].energy = energy;
         }, 2);
 
         const raceWidth = cardWidth * 0.4;
@@ -72,6 +87,7 @@ export class BattleFieldUnitScene {
                                                 localTranslationPosition.getY() + cardHeight / 2
                                             ), undefined, undefined, undefined, undefined, undefined, () => {
             race.draw(this.scene)
+            this.unitList[unitId].race = race;
         }, 2);
 
         this.nextUnitId++
@@ -81,7 +97,18 @@ export class BattleFieldUnitScene {
         return this.scene;
     }
 
-    public getUnitList(): { [id: number]: NonBackgroundImage } {
+    public getUnitList(): { [id: number]: BattleFieldUnitEntry } {
         return this.unitList;
+    }
+
+    public scaleUnitList(scaleX: number, scaleY: number): void {
+        for (const unitId in this.unitList) {
+            const unitEntry = this.unitList[unitId];
+            unitEntry.card?.setScale(scaleX, scaleY);
+            unitEntry.weapon?.setScale(scaleX, scaleY);
+            unitEntry.hp?.setScale(scaleX, scaleY);
+            unitEntry.energy?.setScale(scaleX, scaleY);
+            unitEntry.race?.setScale(scaleX, scaleY);
+        }
     }
 }

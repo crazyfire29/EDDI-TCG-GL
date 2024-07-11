@@ -22,6 +22,7 @@
     "draw-unit-card": "webpack serve --config ./test/unit_card/config/webpack.dev.js",
     "draw-background": "webpack serve --config ./test/draw_background/config/webpack.dev.js",
     "draw-positioning-card": "webpack serve --config ./test/draw_positioning_card/config/webpack.dev.js",
-    "add-main-renderer": "webpack serve --config ./test/add_main_renderer/config/webpack.dev.js"
+    "add-main-renderer": "webpack serve --config ./test/add_main_renderer/config/webpack.dev.js",
+    "scale-window": "webpack serve --config ./test/scale_window/config/webpack.dev.js"
   }
 }

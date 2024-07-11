@@ -4,6 +4,9 @@ import {HarmfulEffectInfo} from "./HarmfulEffectInfo";
 import {AttachedEnergyInfo} from "./AttachedEnergyInfo";
 
 export class BattleFieldUnit {
+    private static nextId: number = 1;
+    private id: number;
+
     private extraUsefulEffectInfo: ExtraUsefulEffectInfo | null = null
     private harmfulEffectInfo: HarmfulEffectInfo | null = null
 
@@ -30,6 +33,8 @@ export class BattleFieldUnit {
         harmfulEffectInfo: HarmfulEffectInfo | null = null,
         attachedEnergyInfo: AttachedEnergyInfo | null = null,
     ) {
+        this.id = BattleFieldUnit.nextId++;
+
         this.cardId = cardId
         this.weaponId = weaponId
         this.hpId = hpId
@@ -41,6 +46,10 @@ export class BattleFieldUnit {
         this.extraUsefulEffectInfo = extraUsefulEffectInfo
         this.harmfulEffectInfo = harmfulEffectInfo
         this.attachedEnergyInfo = attachedEnergyInfo
+    }
+
+    public getId(): number {
+        return this.id;
     }
 
     public getLocalTranslationPosition(): Vector2d {

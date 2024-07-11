@@ -46,24 +46,28 @@ export class NonBackgroundImage extends Shape {
         }
 
         // 이미지 텍스처를 이용하여 투명한 배경을 가진 재질을 만듭니다.
-        const material = new THREE.MeshBasicMaterial({
-            map: this.textureId,
-            transparent: true,
-            opacity: this.getOpacity()
-        });
+        if (!this.mesh) {
+            const material = new THREE.MeshBasicMaterial({
+                map: this.textureId,
+                transparent: true,
+                opacity: this.getOpacity()
+            });
 
-        // PlaneGeometry를 생성합니다.
-        const geometry = new THREE.PlaneGeometry(this.getWidth(), this.getHeight());
+            // PlaneGeometry를 생성합니다.
+            const geometry = new THREE.PlaneGeometry(this.getWidth(), this.getHeight());
 
-        // Mesh를 생성합니다.
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.renderOrder = this.renderOrder
+            // Mesh를 생성합니다.
+            this.mesh = new THREE.Mesh(geometry, material);
+            this.mesh.renderOrder = this.renderOrder
 
-        // local_translation을 적용하여 위치를 설정합니다.
-        this.mesh.position.set(this.getLocalTranslation().x, this.getLocalTranslation().y, 0);
+            // local_translation을 적용하여 위치를 설정합니다.
+            this.mesh.position.set(this.getLocalTranslation().x, this.getLocalTranslation().y, 0);
+        }
 
         // Mesh를 장면에 추가합니다.
-        scene.add(this.mesh);
+        if (!scene.children.includes(this.mesh)) {
+            scene.add(this.mesh);
+        }
     }
 
     public setWidthRatio(widthRatio: number): void {
@@ -76,5 +80,11 @@ export class NonBackgroundImage extends Shape {
 
     public getMesh(): THREE.Mesh {
         return <THREE.Mesh>this.mesh
+    }
+
+    public setScale(scaleX: number, scaleY: number): void {
+        if (this.mesh) {
+            this.mesh.scale.set(scaleX, scaleY, 1);
+        }
     }
 }
