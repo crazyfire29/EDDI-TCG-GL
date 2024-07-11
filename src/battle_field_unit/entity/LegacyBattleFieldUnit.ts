@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { ResourceManager } from "../resouce_manager/ResourceManager";
-import { NonBackgroundImage } from "../shape/image/NonBackgroundImage";
+import { ResourceManager } from "../../resouce_manager/ResourceManager";
+import { NonBackgroundImage } from "../../shape/image/NonBackgroundImage";
 
 interface PlacedLocation {
     card: THREE.Vector2;
@@ -10,7 +10,7 @@ interface PlacedLocation {
     race: THREE.Vector2;
 }
 
-export class BattleFieldUnit {
+export class LegacyBattleFieldUnit {
     private card: NonBackgroundImage | null = null;
     private weapon: NonBackgroundImage | null = null;
     private hp: NonBackgroundImage | null = null;

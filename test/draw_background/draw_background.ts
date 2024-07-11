@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ResourceManager } from "../../src/resouce_manager/ResourceManager";
-import { BattleFieldUnit } from "../../src/battle_field_unit/BattleFieldUnit";
+import { LegacyBattleFieldUnit } from "../../src/battle_field_unit/entity/LegacyBattleFieldUnit";
 import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
 
 const container = document.body;
@@ -60,7 +60,7 @@ function createBattleFieldUnit () {
         race: new THREE.Vector2(cardWidth / 2, cardHeight / 2) // 상대 위치 조정
     };
 
-    const battleFieldUnit = new BattleFieldUnit(scene, resourceManager, cardId, weaponId, hpId, energyId, raceId, cardWidth, placedLocation);
+    const battleFieldUnit = new LegacyBattleFieldUnit(scene, resourceManager, cardId, weaponId, hpId, energyId, raceId, cardWidth, placedLocation);
 }
 
 // 윈도우 크기가 변경될 때 카메라 및 렌더러 크기 조정
