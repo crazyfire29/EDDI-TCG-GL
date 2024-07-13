@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
     entry: {
-        rectangle_image: "./test/scale_window/scale_window.ts"
+        rectangle_image: "./test/pre_texture_load/pre_texture_load.ts"
     },
     module: {
         rules: [
@@ -11,13 +11,21 @@ module.exports = {
                 use: "ts-loader",
                 exclude: /node_modules/,
             },
+            {
+                test: /\.(png|jpg|gif)$/i,
+                type: 'asset/resource',
+            },
         ],
     },
     resolve: {
         extensions: [".tsx", ".ts", ".js"],
+        fallback: {
+            "fs": false,
+            "path": false
+        }
     },
     output: {
         filename: "bundle.js",
-        path: path.resolve(__dirname, "../../dist/scale_window"),
+        path: path.resolve(__dirname, "../../dist/pre_texture_load"),
     },
 };

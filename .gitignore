@@ -4,3 +4,10 @@ node_modules
 *.jpeg
 *.jpg
 *.DS_Store
+
+# exclude *.csv
+*.csv
+*.xlsx
+
+# exclude *.json
+*.json
