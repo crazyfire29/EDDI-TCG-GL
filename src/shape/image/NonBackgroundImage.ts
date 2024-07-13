@@ -5,6 +5,7 @@ export class NonBackgroundImage extends Shape {
     private textureInitialized: boolean = false;
     private textureId: THREE.Texture | null = null;
     private mesh: THREE.Mesh | null = null;
+    private imageSrc: string;
 
     constructor(
         width: number,
@@ -21,17 +22,35 @@ export class NonBackgroundImage extends Shape {
         callback?: () => void,
         private renderOrder: number = 0
     ) {
+        // super(width, height, local_translation, global_translation, color, opacity, drawBorder, isVisible);
+        // // 이미지 텍스처를 로드합니다.
+        // const textureLoader = new THREE.TextureLoader();
+        // textureLoader.load(imageSrc, (texture) => {
+        //     this.textureId = texture;
+        //     this.textureInitialized = true;
+        //     texture.colorSpace = THREE.SRGBColorSpace;
+        //     texture.magFilter = THREE.LinearFilter; // 확대 시에 최근접 필터링 사용
+        //     texture.minFilter = THREE.LinearFilter; // 축소 시에 최근접 필터링 사용
+        //     texture.generateMipmaps = false;
+        //     // 콜백 함수가 제공되었다면 실행합니다.
+        //     if (callback) {
+        //         callback();
+        //     }
+        // });
         super(width, height, local_translation, global_translation, color, opacity, drawBorder, isVisible);
-        // 이미지 텍스처를 로드합니다.
+        this.imageSrc = imageSrc
+        this.loadTexture(callback);
+    }
+
+    public loadTexture(callback?: () => void): void {
         const textureLoader = new THREE.TextureLoader();
-        textureLoader.load(imageSrc, (texture) => {
+        textureLoader.load(this.imageSrc, (texture) => {
             this.textureId = texture;
             this.textureInitialized = true;
             texture.colorSpace = THREE.SRGBColorSpace;
             texture.magFilter = THREE.LinearFilter; // 확대 시에 최근접 필터링 사용
             texture.minFilter = THREE.LinearFilter; // 축소 시에 최근접 필터링 사용
             texture.generateMipmaps = false;
-            // 콜백 함수가 제공되었다면 실행합니다.
             if (callback) {
                 callback();
             }
@@ -80,6 +99,11 @@ export class NonBackgroundImage extends Shape {
 
     public getMesh(): THREE.Mesh {
         return <THREE.Mesh>this.mesh
+    }
+
+    public setTexture(texture: THREE.Texture): void {
+        this.textureId = texture;
+        this.textureInitialized = true;
     }
 
     public setScale(scaleX: number, scaleY: number): void {
