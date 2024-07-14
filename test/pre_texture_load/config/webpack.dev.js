@@ -10,6 +10,9 @@ module.exports = merge(common, {
             {
                 directory: path.join(__dirname, "../"), // static 디렉토리 설정
             },
+            {
+                directory: path.join(__dirname, "../../../resource"), // 추가된 디렉토리 설정
+            },
         ],
         hot: true,
     },
