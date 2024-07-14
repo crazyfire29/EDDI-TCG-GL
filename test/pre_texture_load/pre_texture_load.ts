@@ -19,3 +19,7 @@ textureManager.preloadTextures('resource/image-paths.json').then(() => {
 }).catch((error: any) => {
     console.error('Error preloading textures:', error);
 });
+
+import imagePaths from '@resource/image-paths.json';
+
+console.log(imagePaths);

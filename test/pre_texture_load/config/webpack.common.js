@@ -19,6 +19,9 @@ module.exports = {
     },
     resolve: {
         extensions: [".tsx", ".ts", ".js"],
+        alias: {
+            '@resource': path.resolve(__dirname, '../../../resource'),
+        },
         fallback: {
             "fs": false,
             "path": false
