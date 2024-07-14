@@ -1,1 +1,1 @@
-# Just for Test resource images
+# Place Every Resource to here

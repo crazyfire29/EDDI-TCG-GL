@@ -15,6 +15,10 @@ module.exports = {
                 test: /\.(png|jpg|gif)$/i,
                 type: 'asset/resource',
             },
+            {
+                test: /\.json$/,
+                type: 'json'
+            },
         ],
     },
     resolve: {
