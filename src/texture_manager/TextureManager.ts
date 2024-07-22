@@ -23,35 +23,62 @@ export class TextureManager {
     }
 
     public async preloadTextures(jsonUrl: string): Promise<void> {
-        console.log(`Fetching image paths from: ${jsonUrl}`);
+        // console.log(`Fetching image paths from: ${jsonUrl}`);
 
-        const response = await fetch(jsonUrl);
-        const imageData = await response.json();
+        try {
+            const response = await fetch(jsonUrl);
+            const imageData = await response.json();
+            // console.log('imageData:', imageData);
 
-        this.loadTextures(imageData.card, this.battleFieldUnitCardTextureList);
-        this.loadTextures(imageData.weapon, this.battleFieldUnitWeaponTextureList);
-        this.loadTextures(imageData.hp, this.battleFieldUnitHpTextureList);
-        this.loadTextures(imageData.energy, this.battleFieldUnitEnergyTextureList);
-        this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList);
+            // if (imageData.card) this.loadTextures(imageData.card, this.battleFieldUnitCardTextureList);
+            // if (imageData.weapon) this.loadTextures(imageData.weapon, this.battleFieldUnitWeaponTextureList);
+            // if (imageData.hp) this.loadTextures(imageData.hp, this.battleFieldUnitHpTextureList);
+            // if (imageData.energy) this.loadTextures(imageData.energy, this.battleFieldUnitEnergyTextureList);
+            // if (imageData.race) this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList);
+
+            await Promise.all([
+                this.loadTextures(imageData.card, this.battleFieldUnitCardTextureList),
+                this.loadTextures(imageData.weapon, this.battleFieldUnitWeaponTextureList),
+                this.loadTextures(imageData.hp, this.battleFieldUnitHpTextureList),
+                this.loadTextures(imageData.energy, this.battleFieldUnitEnergyTextureList),
+                this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList)
+            ]);
+
+            console.log('All textures preloaded from TextureManager.ts');
+        } catch (error) {
+            console.error(`Failed to fetch or parse JSON from: ${jsonUrl}`, error);
+        }
     }
 
-    private loadTextures(images: ImageInfo[], textureList: { [id: number]: THREE.Texture }): void {
-        images.forEach((imageInfo) => {
-            const textureLoader = new THREE.TextureLoader();
-            textureLoader.load(
-                imageInfo.reference_path, // 경로를 relative_path 대신 reference_path 사용
-                (texture) => {
-                    const id = this.extractIdFromPath(imageInfo.reference_path);
-                    if (id !== null) {
-                        textureList[id] = texture;
+    private getBasePath(): string {
+        return window.location.origin; // 현재 작업 디렉토리 경로를 반환
+    }
+
+    private loadTextures(images: string[], textureList: { [id: number]: THREE.Texture }): Promise<void> {
+        const promises = images.map((imagePath) => {
+            return new Promise<void>((resolve, reject) => {
+                const textureLoader = new THREE.TextureLoader();
+                const fullPath = imagePath;
+                // console.log('Loading texture:', fullPath);
+                textureLoader.load(
+                    fullPath,
+                    (texture) => {
+                        const id = this.extractIdFromPath(imagePath);
+                        if (id !== null) {
+                            textureList[id] = texture;
+                            // console.log(`Loaded texture: ${fullPath} with id: ${id}`);
+                        }
+                        resolve();
+                    },
+                    undefined, // onProgress 콜백
+                    (error) => {
+                        console.error(`An error occurred loading the texture ${fullPath}:`, error);
+                        reject(error);
                     }
-                },
-                undefined, // onProgress 콜백
-                (error) => {
-                    console.error(`An error occurred loading the texture ${imageInfo.relative_path}:`, error);
-                }
-            );
+                );
+            });
         });
+        return Promise.all(promises).then(() => {});
     }
 
     private extractIdFromPath(path: string): number | null {
@@ -60,6 +87,7 @@ export class TextureManager {
     }
 
     public getTexture(category: string, id: number): THREE.Texture | undefined {
+        console.log('getTexture -> category:', category, ',id:', id)
         switch (category) {
             case 'card':
                 return this.battleFieldUnitCardTextureList[id];
@@ -78,7 +106,7 @@ export class TextureManager {
 }
 
 // // 예제 사용법:
-// const textureManager = TextureManager.getInstance();
+// const textureManager = LegacyTextureManager.getInstance();
 // textureManager.preloadTextures('image-paths.json').then(() => {
 //     console.log('All textures preloaded.');
 // });

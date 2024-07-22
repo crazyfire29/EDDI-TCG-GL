@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
     entry: {
-        rectangle_image: "./test/pre_texture_load/pre_texture_load.ts"
+        rectangle_image: "./test/button_click_route/button_click_route.ts"
     },
     module: {
         rules: [
