@@ -48,6 +48,7 @@ export class NonBackgroundImage extends Shape {
             this.textureId = texture;
             this.textureInitialized = true;
             texture.colorSpace = THREE.SRGBColorSpace;
+            // texture.colorSpace = THREE.NoColorSpace;
             texture.magFilter = THREE.LinearFilter; // 확대 시에 최근접 필터링 사용
             texture.minFilter = THREE.LinearFilter; // 축소 시에 최근접 필터링 사용
             texture.generateMipmaps = false;
@@ -69,7 +70,7 @@ export class NonBackgroundImage extends Shape {
             const material = new THREE.MeshBasicMaterial({
                 map: this.textureId,
                 transparent: true,
-                opacity: this.getOpacity()
+                opacity: this.getOpacity(),
             });
 
             // PlaneGeometry를 생성합니다.

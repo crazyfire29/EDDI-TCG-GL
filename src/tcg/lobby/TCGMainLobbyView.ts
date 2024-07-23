@@ -3,6 +3,9 @@ import {TextureManager} from "../../texture_manager/TextureManager";
 import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
 import {LobbyButtonConfigList} from "./LobbyButtonConfigList";
 import {LobbyButtonType} from "./LobbyButtonType";
+import {AudioController} from "../../audio/AudioController";
+
+import lobbyMusic from '@resource/music/lobby/lobby-menu.mp3'
 
 export class TCGMainLobbyView {
     private scene: THREE.Scene;
@@ -12,11 +15,19 @@ export class TCGMainLobbyView {
     private lobbyContainer: HTMLElement;
     private background: NonBackgroundImage | null = null;
     private buttons: NonBackgroundImage[] = [];
+    private audioController: AudioController;
 
     constructor(lobbyContainer: HTMLElement) {
         this.lobbyContainer = lobbyContainer;
         this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0xffffff);
         this.renderer = new THREE.WebGLRenderer();
+        // this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // alpha: true로 설정
+        // this.renderer.setClearColor(0xffffff, 0); // 배경을 흰색으로 설정하지만 투명하게 만듭니다.
+
+        // canvas 스타일 설정
+        // this.renderer.domElement.style.backgroundColor = 'rgba(255, 255, 255, 0)';
+        // this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         console.log('this.renderer:', this.renderer)
 
@@ -40,8 +51,22 @@ export class TCGMainLobbyView {
         this.camera.lookAt(0, 0, 0);
 
         this.textureManager = TextureManager.getInstance();
+        this.audioController = AudioController.getInstance();
+        this.audioController.setMusic(require('@resource/music/lobby/lobby-menu.mp3'));
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
+
+        // this.initializeAudio();
+
+        window.addEventListener('click', () => this.initializeAudio(), { once: true });
+    }
+
+    private async initializeAudio(): Promise<void> {
+        try {
+            await this.audioController.playMusic();
+        } catch (error) {
+            console.error('Initial audio play failed:', error);
+        }
     }
 
     public async initialize(): Promise<void> {
@@ -52,6 +77,7 @@ export class TCGMainLobbyView {
 
         this.addBackground();
         this.addButtons();
+        // this.setupAudio();
         this.animate();
 
         // requestAnimationFrame(() => {
@@ -59,6 +85,12 @@ export class TCGMainLobbyView {
         //     this.addButtons();
         //     this.animate();
         // });
+    }
+
+    private setupAudio(): void {
+        this.audioController.setMusic(require('@resource/music/lobby/lobby-menu.mp3'));
+        this.audioController.playMusic();
+        // this.audioController.addSoundEffect('buttonClick', 'path/to/your/buttonClick/sound.mp3');
     }
 
     private addBackground(): void {
@@ -72,7 +104,7 @@ export class TCGMainLobbyView {
                 window.innerHeight,
                 'resource/main_lobby/background.png',
                 1, 1,
-                new THREE.Vector2(0, 0)
+                new THREE.Vector2(0, 0),
             );
 
             console.log('background:', background)
@@ -86,14 +118,14 @@ export class TCGMainLobbyView {
 
     private addButtons(): void {
         LobbyButtonConfigList.buttonConfigs.forEach((config) => {
-            const buttonTexture = this.textureManager.getTexture('main_lobby_buttons', 1);
+            const buttonTexture = this.textureManager.getTexture('main_lobby_buttons', config.id);
             if (buttonTexture) {
                 const button = new NonBackgroundImage(
-                    200,
+                    800,
                     100,
                     config.imagePath,
                     1, 1,
-                    config.position
+                    config.position,
                 );
                 button.setTexture(buttonTexture);
                 button.draw(this.scene);

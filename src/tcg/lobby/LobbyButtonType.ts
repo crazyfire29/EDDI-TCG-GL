@@ -8,6 +8,7 @@ export enum LobbyButtonType {
 }
 
 export interface LobbyButtonConfig {
+    id: number;
     type: LobbyButtonType;
     imagePath: string;
     position: THREE.Vector2;
