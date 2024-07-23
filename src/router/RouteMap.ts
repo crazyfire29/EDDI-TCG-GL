@@ -4,9 +4,10 @@ export class RouteMap {
     private routes: Route[] = [];
     private rootElement: HTMLElement;
 
-    constructor(rootElement: HTMLElement) {
+    constructor(rootElement: HTMLElement, initialPath: string = '/') {
         this.rootElement = rootElement;
         window.addEventListener('popstate', this.handleRouteChange.bind(this));
+        // this.navigate(initialPath);
     }
 
     public registerRoutes(routes: Route[]): void {
@@ -24,8 +25,11 @@ export class RouteMap {
         const route = this.routes.find(route => route.path === currentPath);
 
         if (route) {
-            const component = new route.component();
-            this.rootElement.innerHTML = component.render();
+            // const component = new route.component();
+            // this.rootElement.innerHTML = component.render();
+            this.rootElement.innerHTML = '';
+            const component = new route.component(this.rootElement);
+            component.initialize();
         } else {
             this.rootElement.innerHTML = '<h1>404 - Page not found</h1>';
         }
