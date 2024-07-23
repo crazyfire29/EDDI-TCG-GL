@@ -15,5 +15,6 @@ module.exports = merge(common, {
             },
         ],
         hot: true,
+        historyApiFallback: true,
     },
 });

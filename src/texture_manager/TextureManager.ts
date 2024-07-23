@@ -30,7 +30,7 @@ export class TextureManager {
         try {
             const response = await fetch(jsonUrl);
             const imageData = await response.json();
-            // console.log('imageData:', imageData);
+            console.log('imageData:', imageData);
 
             // if (imageData.card) this.loadTextures(imageData.card, this.battleFieldUnitCardTextureList);
             // if (imageData.weapon) this.loadTextures(imageData.weapon, this.battleFieldUnitWeaponTextureList);
@@ -49,6 +49,7 @@ export class TextureManager {
             ]);
 
             console.log('All textures preloaded from TextureManager.ts');
+            console.log('mainLobbyBackgroundTextureList:', this.mainLobbyBackgroundTextureList);
         } catch (error) {
             console.error(`Failed to fetch or parse JSON from: ${jsonUrl}`, error);
         }
@@ -58,8 +59,35 @@ export class TextureManager {
         return window.location.origin; // 현재 작업 디렉토리 경로를 반환
     }
 
+    // private loadTextures(images: string[], textureList: { [id: number]: THREE.Texture }): Promise<void> {
+    //     const promises = images.map((imagePath) => {
+    //         return new Promise<void>((resolve, reject) => {
+    //             const textureLoader = new THREE.TextureLoader();
+    //             const fullPath = imagePath;
+    //             // console.log('Loading texture:', fullPath);
+    //             textureLoader.load(
+    //                 fullPath,
+    //                 (texture) => {
+    //                     const id = this.extractIdFromPath(imagePath);
+    //                     if (id !== null) {
+    //                         textureList[id] = texture;
+    //                         // console.log(`Loaded texture: ${fullPath} with id: ${id}`);
+    //                     }
+    //                     resolve();
+    //                 },
+    //                 undefined, // onProgress 콜백
+    //                 (error) => {
+    //                     console.error(`An error occurred loading the texture ${fullPath}:`, error);
+    //                     reject(error);
+    //                 }
+    //             );
+    //         });
+    //     });
+    //     return Promise.all(promises).then(() => {});
+    // }
+
     private loadTextures(images: string[], textureList: { [id: number]: THREE.Texture }): Promise<void> {
-        const promises = images.map((imagePath) => {
+        const promises = images.map((imagePath, index) => {
             return new Promise<void>((resolve, reject) => {
                 const textureLoader = new THREE.TextureLoader();
                 const fullPath = imagePath;
@@ -67,22 +95,21 @@ export class TextureManager {
                 textureLoader.load(
                     fullPath,
                     (texture) => {
-                        const id = this.extractIdFromPath(imagePath);
-                        if (id !== null) {
-                            textureList[id] = texture;
-                            // console.log(`Loaded texture: ${fullPath} with id: ${id}`);
-                        }
+                        textureList[index + 1] = texture;
+                        // console.log(`Loaded texture: ${fullPath} with id: ${index + 1}`);
                         resolve();
                     },
-                    undefined, // onProgress 콜백
+                    undefined,
                     (error) => {
-                        console.error(`An error occurred loading the texture ${fullPath}:`, error);
+                        // console.error(`An error occurred loading the texture ${fullPath}:`, error);
                         reject(error);
                     }
                 );
             });
         });
-        return Promise.all(promises).then(() => {});
+        return Promise.all(promises).then(() => {
+            console.log(`Loaded textures: ${Object.keys(textureList).length}`);
+        });
     }
 
     private extractIdFromPath(path: string): number | null {

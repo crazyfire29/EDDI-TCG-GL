@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import {TextureManager} from "../../texture_manager/TextureManager";
 import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
+import {LobbyButtonConfigList} from "./LobbyButtonConfigList";
+import {LobbyButtonType} from "./LobbyButtonType";
 
 export class TCGMainLobbyView {
     private scene: THREE.Scene;
@@ -15,8 +17,17 @@ export class TCGMainLobbyView {
         this.lobbyContainer = lobbyContainer;
         this.scene = new THREE.Scene();
         this.renderer = new THREE.WebGLRenderer();
+
+        console.log('this.renderer:', this.renderer)
+
+        console.log('Lobby Container Width:', lobbyContainer.clientWidth);
+        console.log('Lobby Container Height:', lobbyContainer.clientHeight);
+
+        // this.renderer.setSize(lobbyContainer.clientWidth, lobbyContainer.clientHeight);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.lobbyContainer.appendChild(this.renderer.domElement);
+
+        console.log('Window Inner Width / Height:', window.innerWidth, window.innerHeight);
 
         const aspect = window.innerWidth / window.innerHeight;
         const viewSize = window.innerHeight;
@@ -34,6 +45,7 @@ export class TCGMainLobbyView {
     }
 
     public async initialize(): Promise<void> {
+        console.log('TCGMainLobbyView initialize() operate!!!')
         await this.textureManager.preloadTextures("image-paths.json");
 
         console.log("Textures preloaded. Adding background and buttons...");
@@ -41,6 +53,12 @@ export class TCGMainLobbyView {
         this.addBackground();
         this.addButtons();
         this.animate();
+
+        // requestAnimationFrame(() => {
+        //     this.addBackground();
+        //     this.addButtons();
+        //     this.animate();
+        // });
     }
 
     private addBackground(): void {
@@ -48,39 +66,47 @@ export class TCGMainLobbyView {
         console.log('addBackground():', texture);
         if (texture) {
             const background = new NonBackgroundImage(
+                // this.lobbyContainer.clientWidth,
+                // this.lobbyContainer.clientHeight,
                 window.innerWidth,
                 window.innerHeight,
                 'resource/main_lobby/background.png',
                 1, 1,
                 new THREE.Vector2(0, 0)
             );
+
+            console.log('background:', background)
             background.setTexture(texture);
             background.draw(this.scene);
+            this.background = background
         } else {
             console.error("Background texture not found.");
         }
     }
 
     private addButtons(): void {
-        const buttonTexture = this.textureManager.getTexture('main_lobby_buttons', 1);
-        if (buttonTexture) {
-            const button = new NonBackgroundImage(
-                200,
-                100,
-                'resource/main_lobby/buttons/button1.png',
-                1, 1,
-                new THREE.Vector2(0, -200)
-            );
-            button.setTexture(buttonTexture);
-            button.draw(this.scene);
+        LobbyButtonConfigList.buttonConfigs.forEach((config) => {
+            const buttonTexture = this.textureManager.getTexture('main_lobby_buttons', 1);
+            if (buttonTexture) {
+                const button = new NonBackgroundImage(
+                    200,
+                    100,
+                    config.imagePath,
+                    1, 1,
+                    config.position
+                );
+                button.setTexture(buttonTexture);
+                button.draw(this.scene);
 
-            this.lobbyContainer.addEventListener('click', (event) => this.onButtonClick(event, button));
-        } else {
-            console.error("Button texture not found.");
-        }
+                this.buttons.push(button);
+                this.lobbyContainer.addEventListener('click', (event) => this.onButtonClick(event, button, config.type));
+            } else {
+                console.error("Button texture not found.");
+            }
+        });
     }
 
-    private onButtonClick(event: MouseEvent, button: NonBackgroundImage): void {
+    private onButtonClick(event: MouseEvent, button: NonBackgroundImage, type: LobbyButtonType): void {
         const mouse = new THREE.Vector2(
             (event.clientX / window.innerWidth) * 2 - 1,
             -(event.clientY / window.innerHeight) * 2 + 1
@@ -97,8 +123,11 @@ export class TCGMainLobbyView {
     }
 
     private onWindowResize(): void {
-        const aspect = window.innerWidth / window.innerHeight;
-        const viewSize = window.innerHeight;
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
+        const aspect = newWidth / newHeight;
+        const viewSize = newHeight;
+
         this.camera.left = -aspect * viewSize / 2;
         this.camera.right = aspect * viewSize / 2;
         this.camera.top = viewSize / 2;
@@ -108,11 +137,14 @@ export class TCGMainLobbyView {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
         if (this.background) {
-            this.background.setScale(window.innerWidth, window.innerHeight);
+            const scaleX = newWidth / this.background.getWidth();
+            const scaleY = newHeight / this.background.getHeight();
+            this.background.setScale(scaleX, scaleY);
         }
     }
 
     public animate(): void {
+        // console.log('TCGMainLobbyView -> scene:', this.scene)
         requestAnimationFrame(() => this.animate());
         this.renderer.render(this.scene, this.camera);
     }
