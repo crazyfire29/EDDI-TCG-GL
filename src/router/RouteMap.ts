@@ -24,8 +24,11 @@ export class RouteMap {
         const route = this.routes.find(route => route.path === currentPath);
 
         if (route) {
-            const component = new route.component();
-            this.rootElement.innerHTML = component.render();
+            // const component = new route.component();
+            // this.rootElement.innerHTML = component.render();
+            const component = new route.component(this.rootElement);
+            this.rootElement.innerHTML = '';
+            component.initialize();
         } else {
             this.rootElement.innerHTML = '<h1>404 - Page not found</h1>';
         }

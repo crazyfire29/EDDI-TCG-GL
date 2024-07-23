@@ -12,6 +12,8 @@ export class TextureManager {
     private battleFieldUnitHpTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitEnergyTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitRaceTextureList: { [id: number]: THREE.Texture } = {};
+    private mainLobbyBackgroundTextureList: { [id: number]: THREE.Texture } = {};
+    private mainLobbyButtonsTextureList: { [id: number]: THREE.Texture } = {};
 
     private constructor() {}
 
@@ -41,7 +43,9 @@ export class TextureManager {
                 this.loadTextures(imageData.weapon, this.battleFieldUnitWeaponTextureList),
                 this.loadTextures(imageData.hp, this.battleFieldUnitHpTextureList),
                 this.loadTextures(imageData.energy, this.battleFieldUnitEnergyTextureList),
-                this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList)
+                this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList),
+                this.loadTextures(imageData.main_lobby_background, this.mainLobbyBackgroundTextureList),
+                this.loadTextures(imageData.main_lobby_buttons, this.mainLobbyButtonsTextureList),
             ]);
 
             console.log('All textures preloaded from TextureManager.ts');
@@ -99,6 +103,10 @@ export class TextureManager {
                 return this.battleFieldUnitEnergyTextureList[id];
             case 'race':
                 return this.battleFieldUnitRaceTextureList[id];
+            case 'main_lobby_background':
+                return this.mainLobbyBackgroundTextureList[id];
+            case 'main_lobby_buttons':
+                return this.mainLobbyButtonsTextureList[id];
             default:
                 return undefined;
         }
