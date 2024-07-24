@@ -15,12 +15,16 @@ export class MouseController {
         this.camera = camera;
         this.scene = scene;
 
+        this.buttonClickHandlers = {};
+
         window.addEventListener('click', this.onMouseClick.bind(this));
     }
 
     public registerButton(button: THREE.Mesh, handler: () => void): void {
-        this.buttons.push(button);
+        console.log('registerButton -> button:', button, ', handler: ', handler)
         this.buttonClickHandlers[button.uuid] = handler;
+        console.log('registerButton -> buttonClickHandlers:', this.buttonClickHandlers)
+        console.log('registerButton -> buttonClickHandlers[button.uuid]:', this.buttonClickHandlers[button.uuid])
     }
 
     // private onMouseClick(event: MouseEvent): void {
@@ -56,13 +60,21 @@ export class MouseController {
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
         // 클릭된 버튼과의 교차 검사
-        const intersects = this.raycaster.intersectObjects(this.scene.children);
+        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+        console.log('this.scene.children:', this.scene.children);
 
         if (intersects.length > 0) {
             const intersectedButton = intersects[0].object as THREE.Mesh;
+            console.log('Intersected button:', intersectedButton);
+
             const handler = this.buttonClickHandlers[intersectedButton.uuid];
+            console.log('handler:', handler);
+
             if (handler) {
+                console.log('Handler found for button with UUID:', intersectedButton.uuid);
                 handler();
+            } else {
+                console.warn(`No handler found for button with UUID: ${intersectedButton.uuid}`);
             }
         }
     }
