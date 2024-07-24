@@ -1,4 +1,4 @@
-import { TCGMainLobbyView } from '../tcg/lobby/TCGMainLobbyView';
+import { TCGMainLobbyView } from '../lobby/TCGMainLobbyView';
 
 export interface Route {
     path: string;

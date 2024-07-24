@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import {TextureManager} from "../../texture_manager/TextureManager";
-import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
+import {TextureManager} from "../texture_manager/TextureManager";
+import {NonBackgroundImage} from "../shape/image/NonBackgroundImage";
 import {LobbyButtonConfigList} from "./LobbyButtonConfigList";
 import {LobbyButtonType} from "./LobbyButtonType";
-import {AudioController} from "../../audio/AudioController";
+import {AudioController} from "../audio/AudioController";
 
 import lobbyMusic from '@resource/music/lobby/lobby-menu.mp3'
 
