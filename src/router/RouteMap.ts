@@ -1,6 +1,8 @@
 import { Route } from './routes';
 
 export class RouteMap {
+    private static instance: RouteMap;
+
     private routes: Route[] = [];
     private rootElement: HTMLElement;
 
@@ -8,6 +10,13 @@ export class RouteMap {
         this.rootElement = rootElement;
         window.addEventListener('popstate', this.handleRouteChange.bind(this));
         // this.navigate(initialPath);
+    }
+
+    public static getInstance(rootElement: HTMLElement): RouteMap {
+        if (!RouteMap.instance) {
+            RouteMap.instance = new RouteMap(rootElement);
+        }
+        return RouteMap.instance;
     }
 
     public registerRoutes(routes: Route[]): void {
@@ -27,8 +36,13 @@ export class RouteMap {
         if (route) {
             // const component = new route.component();
             // this.rootElement.innerHTML = component.render();
+
+            // this.rootElement.innerHTML = '';
+            // const component = new route.component(this.rootElement);
+            // component.initialize();
+
             this.rootElement.innerHTML = '';
-            const component = new route.component(this.rootElement);
+            const component = route.getComponentInstance(this.rootElement, this);
             component.initialize();
         } else {
             this.rootElement.innerHTML = '<h1>404 - Page not found</h1>';

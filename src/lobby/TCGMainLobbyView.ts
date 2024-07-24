@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {TextureManager} from "../texture_manager/TextureManager";
+// import {LegacyNonBackgroundImage} from "../shape/image/LegacyNonBackgroundImage";
 import {NonBackgroundImage} from "../shape/image/NonBackgroundImage";
 import {LobbyButtonConfigList} from "./LobbyButtonConfigList";
 import {LobbyButtonType} from "./LobbyButtonType";
@@ -8,8 +9,11 @@ import {AudioController} from "../audio/AudioController";
 import lobbyMusic from '@resource/music/lobby/lobby-menu.mp3'
 import {MouseController} from "../mouse/MouseController";
 import {RouteMap} from "../router/RouteMap";
+import {Component} from "../router/Component";
 
-export class TCGMainLobbyView {
+export class TCGMainLobbyView implements Component {
+    private static instance: TCGMainLobbyView;
+
     private scene: THREE.Scene;
     private camera: THREE.OrthographicCamera;
     private renderer: THREE.WebGLRenderer;
@@ -20,6 +24,8 @@ export class TCGMainLobbyView {
     private audioController: AudioController;
     private mouseController: MouseController;
     private routeMap: RouteMap;
+
+    private initialized = false
 
     constructor(lobbyContainer: HTMLElement, routeMap: RouteMap) {
         this.lobbyContainer = lobbyContainer;
@@ -61,10 +67,17 @@ export class TCGMainLobbyView {
         window.addEventListener('resize', this.onWindowResize.bind(this));
 
         // this.initializeAudio();
-        this.mouseController = new MouseController(this.camera, this.scene);
+        this.mouseController = MouseController.getInstance(this.camera, this.scene);
         this.routeMap = routeMap;
 
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
+    }
+
+    public static getInstance(lobbyContainer: HTMLElement, routeMap: RouteMap): TCGMainLobbyView {
+        if (!TCGMainLobbyView.instance) {
+            TCGMainLobbyView.instance = new TCGMainLobbyView(lobbyContainer, routeMap);
+        }
+        return TCGMainLobbyView.instance;
     }
 
     private async initializeAudio(): Promise<void> {
@@ -76,6 +89,9 @@ export class TCGMainLobbyView {
     }
 
     public async initialize(): Promise<void> {
+        if (this.initialized) return;
+        this.initialized = true;
+
         console.log('TCGMainLobbyView initialize() operate!!!')
         await this.textureManager.preloadTextures("image-paths.json");
 
@@ -103,20 +119,15 @@ export class TCGMainLobbyView {
         const texture = this.textureManager.getTexture('main_lobby_background', 1);
         console.log('addBackground():', texture);
         if (texture) {
-            const background = new NonBackgroundImage(
-                // this.lobbyContainer.clientWidth,
-                // this.lobbyContainer.clientHeight,
-                window.innerWidth,
-                window.innerHeight,
-                'resource/main_lobby/background.png',
-                1, 1,
-                new THREE.Vector2(0, 0),
-            );
-
-            console.log('background:', background)
-            background.setTexture(texture);
-            background.draw(this.scene);
-            this.background = background
+            if (!this.background) {
+                this.background = new NonBackgroundImage(
+                    window.innerWidth,
+                    window.innerHeight,
+                    new THREE.Vector2(0, 0)
+                );
+            }
+            this.background.createNonBackgroundImageWithTexture(texture, 1, 1);
+            this.background.draw(this.scene);
         } else {
             console.error("Background texture not found.");
         }
@@ -126,26 +137,74 @@ export class TCGMainLobbyView {
         LobbyButtonConfigList.buttonConfigs.forEach((config) => {
             const buttonTexture = this.textureManager.getTexture('main_lobby_buttons', config.id);
             if (buttonTexture) {
-                const button = new NonBackgroundImage(
-                    800,
-                    100,
-                    config.imagePath,
-                    1, 1,
-                    config.position,
-                );
-                button.setTexture(buttonTexture);
-                button.draw(this.scene);
+                let button = this.buttons.find(btn => btn.getLocalTranslation().equals(config.position));
+                if (!button) {
+                    button = new NonBackgroundImage(
+                        800,
+                        100,
+                        config.position
+                    );
+                    this.buttons.push(button);
 
-                this.buttons.push(button);
-                // this.lobbyContainer.addEventListener('click', (event) => this.onButtonClick(event, button, config.type));
-                this.mouseController.registerButton(button.getMesh(), () => this.onButtonClick(config.type));
+                    button.createNonBackgroundImageWithTexture(buttonTexture, 1, 1);
+                }
+
+                button.draw(this.scene);
+                this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
             } else {
                 console.error("Button texture not found.");
             }
         });
     }
 
-    // private onButtonClick(event: MouseEvent, button: NonBackgroundImage, type: LobbyButtonType): void {
+    // private addBackground(): void {
+    //     const texture = this.textureManager.getTexture('main_lobby_background', 1);
+    //     console.log('addBackground():', texture);
+    //     if (texture) {
+    //         const background = new LegacyNonBackgroundImage(
+    //             // this.lobbyContainer.clientWidth,
+    //             // this.lobbyContainer.clientHeight,
+    //             window.innerWidth,
+    //             window.innerHeight,
+    //             'resource/main_lobby/background.png',
+    //             1, 1,
+    //             new THREE.Vector2(0, 0),
+    //         );
+    //
+    //         console.log('background:', background)
+    //         background.setTexture(texture);
+    //         background.draw(this.scene);
+    //         this.background = background
+    //     } else {
+    //         console.error("Background texture not found.");
+    //     }
+    // }
+    //
+    // private addButtons(): void {
+    //     LobbyButtonConfigList.buttonConfigs.forEach((config) => {
+    //         const buttonTexture = this.textureManager.getTexture('main_lobby_buttons', config.id);
+    //         if (buttonTexture) {
+    //             const button = new LegacyNonBackgroundImage(
+    //                 800,
+    //                 100,
+    //                 config.imagePath,
+    //                 1, 1,
+    //                 config.position,
+    //             );
+    //             button.setTexture(buttonTexture);
+    //             button.draw(this.scene);
+    //
+    //             this.buttons.push(button);
+    //             // this.lobbyContainer.addEventListener('click', (event) => this.onButtonClick(event, button, config.type));
+    //             // this.mouseController.registerButton(button.getMesh(), () => this.onButtonClick(config.type));
+    //             this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
+    //         } else {
+    //             console.error("Button texture not found.");
+    //         }
+    //     });
+    // }
+
+    // private onButtonClick(event: MouseEvent, button: LegacyNonBackgroundImage, type: LobbyButtonType): void {
     //     const mouse = new THREE.Vector2(
     //         (event.clientX / window.innerWidth) * 2 - 1,
     //         -(event.clientY / window.innerHeight) * 2 + 1

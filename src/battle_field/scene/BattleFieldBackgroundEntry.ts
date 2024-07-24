@@ -1,7 +1,7 @@
 import { BattleFieldBackground } from "../entity/BattleFieldBackground";
-import { NonBackgroundImage } from "../../shape/image/NonBackgroundImage";
+import { LegacyNonBackgroundImage } from "../../shape/image/LegacyNonBackgroundImage";
 
 export interface BattleFieldBackgroundEntry {
     background: BattleFieldBackground;
-    image: NonBackgroundImage | null;
+    image: LegacyNonBackgroundImage | null;
 }

@@ -3,7 +3,7 @@ import {BattleFieldUnitRepository} from "../repository/BattleFieldUnitRepository
 import {ResourceManager} from "../../resouce_manager/ResourceManager";
 import {BattleFieldUnitScene} from "../scene/BattleFieldUnitScene";
 import {BattleFieldUnit} from "../entity/BattleFieldUnit";
-import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
+import {LegacyNonBackgroundImage} from "../../shape/image/LegacyNonBackgroundImage";
 
 export class BattleFieldUnitRenderer {
     private unitScene: BattleFieldUnitScene
@@ -98,7 +98,7 @@ export class BattleFieldUnitRenderer {
     }
 
     private updateComponentScaleAndPosition(
-        component: NonBackgroundImage | null,
+        component: LegacyNonBackgroundImage | null,
         cardPosition: THREE.Vector2,
         cardWidth: number,
         cardHeight: number,

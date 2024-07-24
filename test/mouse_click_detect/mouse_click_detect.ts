@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ResourceManager } from "../../src/resouce_manager/ResourceManager";
-import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
+import {LegacyNonBackgroundImage} from "../../src/shape/image/LegacyNonBackgroundImage";
 import {BattleFieldUnitScene} from "../../src/battle_field_unit/scene/BattleFieldUnitScene";
 import {BattleFieldUnitRenderer} from "../../src/battle_field_unit/renderer/BattleFieldUnitRenderer";
 import {BattleFieldUnitRepository} from "../../src/battle_field_unit/repository/BattleFieldUnitRepository";
@@ -47,7 +47,7 @@ const unitRepository = BattleFieldUnitRepository.getInstance();
 const backgroundImagePath = 'resource/background/battle_field.png'
 const backgroundWidth = viewSize * aspect
 const backgroundHeight = viewSize
-const background = new NonBackgroundImage(backgroundWidth, backgroundHeight, backgroundImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
+const background = new LegacyNonBackgroundImage(backgroundWidth, backgroundHeight, backgroundImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
     background.draw(scene)
 
     ensureBackgroundIsBehind();
@@ -65,7 +65,7 @@ const battleFieldUnit = new BattleFieldUnit(cardId, weaponId, hpId, energyId, ra
 unitRepository.addBattleFieldUnit(battleFieldUnit);
 unitRenderer.render(renderer, camera);
 
-const mouseController = new MouseController(camera, scene);
+const mouseController = MouseController.getInstance(camera, scene);
 
 function ensureBackgroundIsBehind() {
     if (background.getMesh()) {

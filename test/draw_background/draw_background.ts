@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ResourceManager } from "../../src/resouce_manager/ResourceManager";
 import { LegacyBattleFieldUnit } from "../../src/battle_field_unit/entity/LegacyBattleFieldUnit";
-import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
+import {LegacyNonBackgroundImage} from "../../src/shape/image/LegacyNonBackgroundImage";
 
 const container = document.body;
 
@@ -28,7 +28,7 @@ scene.background = new THREE.Color(0xffffff);
 const backgroundImagePath = 'resource/background/battle_field.png'
 const backgroundWidth = viewSize * aspect
 const backgroundHeight = viewSize
-const background = new NonBackgroundImage(backgroundWidth, backgroundHeight, backgroundImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
+const background = new LegacyNonBackgroundImage(backgroundWidth, backgroundHeight, backgroundImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
     background.draw(scene)
 
     createBattleFieldUnit()

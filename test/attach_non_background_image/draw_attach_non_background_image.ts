@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { NonBackgroundImage } from "../../src/shape/image/NonBackgroundImage"; // 올바른 경로로 수정
+import { LegacyNonBackgroundImage } from "../../src/shape/image/LegacyNonBackgroundImage"; // 올바른 경로로 수정
 
 // HTML 파일의 body 요소에 Three.js 캔버스를 렌더링
 const container = document.body;
@@ -28,14 +28,14 @@ camera.lookAt(0, 0, 0); // 카메라가 원점(0, 0, 0)을 바라보도록 설�
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
 
-// NonBackgroundImage 생성
+// LegacyNonBackgroundImage 생성
 const cardId = 19;
 const imagePath = `resource/field_card/${cardId}.png`;
 
 const cardWidth = 150; // 카드의 너비 설정
 const cardHeight = cardWidth * 1.615; // 카드의 높이 설정
 const cardPosition = new THREE.Vector2(0, 0); // 카드를 원점에 배치
-const imageRectangle = new NonBackgroundImage(cardWidth, cardHeight, imagePath, 1, 1, cardPosition, undefined, undefined, undefined, undefined, undefined, () => {
+const imageRectangle = new LegacyNonBackgroundImage(cardWidth, cardHeight, imagePath, 1, 1, cardPosition, undefined, undefined, undefined, undefined, undefined, () => {
     // 콜백 함수: 텍스처 로딩이 완료되었을 때 실행됨
     // 씬에 이미지 렌더링
     imageRectangle.draw(scene);
@@ -49,7 +49,7 @@ const weaponHeight = weaponWidth * 1.651;
 
 // 무기를 카드의 우측 하단 모서리에 배치
 const weaponLocalPosition = new THREE.Vector2(cardWidth / 2 - 8, -cardHeight / 2 + 8);
-const imageWeapon = new NonBackgroundImage(weaponWidth, weaponHeight, imageWeaponPath, 1, 1, weaponLocalPosition, undefined, undefined, undefined, undefined, undefined, () => {
+const imageWeapon = new LegacyNonBackgroundImage(weaponWidth, weaponHeight, imageWeaponPath, 1, 1, weaponLocalPosition, undefined, undefined, undefined, undefined, undefined, () => {
     imageWeapon.draw(scene);
 });
 
