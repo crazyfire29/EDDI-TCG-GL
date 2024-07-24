@@ -30,6 +30,7 @@
     "preload-test": "webpack serve --config ./test/preload_test/config/webpack.dev.js",
     "pre-texture-load": "webpack serve --config ./test/pre_texture_load/config/webpack.dev.js",
     "button-click-route-test": "webpack serve --config ./test/button_click_route/config/webpack.dev.js",
-    "draw-main-lobby": "webpack serve --config ./test/draw_main_lobby/config/webpack.dev.js"
+    "draw-main-lobby": "webpack serve --config ./test/draw_main_lobby/config/webpack.dev.js",
+    "mouse-click-detect": "webpack serve --config ./test/mouse_click_detect/config/webpack.dev.js"
   }
 }

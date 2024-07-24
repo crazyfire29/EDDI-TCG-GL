@@ -6,6 +6,8 @@ import {LobbyButtonType} from "./LobbyButtonType";
 import {AudioController} from "../audio/AudioController";
 
 import lobbyMusic from '@resource/music/lobby/lobby-menu.mp3'
+import {MouseController} from "../mouse/MouseController";
+import {RouteMap} from "../router/RouteMap";
 
 export class TCGMainLobbyView {
     private scene: THREE.Scene;
@@ -16,8 +18,10 @@ export class TCGMainLobbyView {
     private background: NonBackgroundImage | null = null;
     private buttons: NonBackgroundImage[] = [];
     private audioController: AudioController;
+    private mouseController: MouseController;
+    private routeMap: RouteMap;
 
-    constructor(lobbyContainer: HTMLElement) {
+    constructor(lobbyContainer: HTMLElement, routeMap: RouteMap) {
         this.lobbyContainer = lobbyContainer;
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xffffff);
@@ -57,6 +61,8 @@ export class TCGMainLobbyView {
         window.addEventListener('resize', this.onWindowResize.bind(this));
 
         // this.initializeAudio();
+        this.mouseController = new MouseController(this.camera, this.scene);
+        this.routeMap = routeMap;
 
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
     }
@@ -131,26 +137,47 @@ export class TCGMainLobbyView {
                 button.draw(this.scene);
 
                 this.buttons.push(button);
-                this.lobbyContainer.addEventListener('click', (event) => this.onButtonClick(event, button, config.type));
+                // this.lobbyContainer.addEventListener('click', (event) => this.onButtonClick(event, button, config.type));
+                this.mouseController.registerButton(button.getMesh(), () => this.onButtonClick(config.type));
             } else {
                 console.error("Button texture not found.");
             }
         });
     }
 
-    private onButtonClick(event: MouseEvent, button: NonBackgroundImage, type: LobbyButtonType): void {
-        const mouse = new THREE.Vector2(
-            (event.clientX / window.innerWidth) * 2 - 1,
-            -(event.clientY / window.innerHeight) * 2 + 1
-        );
+    // private onButtonClick(event: MouseEvent, button: NonBackgroundImage, type: LobbyButtonType): void {
+    //     const mouse = new THREE.Vector2(
+    //         (event.clientX / window.innerWidth) * 2 - 1,
+    //         -(event.clientY / window.innerHeight) * 2 + 1
+    //     );
+    //
+    //     const raycaster = new THREE.Raycaster();
+    //     raycaster.setFromCamera(mouse, this.camera);
+    //     const intersects = raycaster.intersectObject(button.getMesh());
+    //
+    //     if (intersects.length > 0) {
+    //         console.log('Button clicked');
+    //         window.location.href = "/new-path";
+    //     }
+    // }
 
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(mouse, this.camera);
-        const intersects = raycaster.intersectObject(button.getMesh());
-
-        if (intersects.length > 0) {
-            console.log('Button clicked');
-            window.location.href = "/new-path";
+    private onButtonClick(type: LobbyButtonType): void {
+        console.log('Button clicked:', type);
+        switch (type) {
+            case LobbyButtonType.OneVsOne:
+                this.routeMap.navigate("/one-vs-one");
+                break;
+            case LobbyButtonType.MyCards:
+                this.routeMap.navigate("/my-cards");
+                break;
+            case LobbyButtonType.Shop:
+                this.routeMap.navigate("/shop");
+                break;
+            case LobbyButtonType.Test:
+                this.routeMap.navigate("/test");
+                break;
+            default:
+                console.error("Unknown button type:", type);
         }
     }
 
