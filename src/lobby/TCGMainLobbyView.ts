@@ -12,7 +12,7 @@ import {RouteMap} from "../router/RouteMap";
 import {Component} from "../router/Component";
 
 export class TCGMainLobbyView implements Component {
-    private static instance: TCGMainLobbyView;
+    private static instance: TCGMainLobbyView | null = null;
 
     private scene: THREE.Scene;
     private camera: THREE.OrthographicCamera;
@@ -89,8 +89,8 @@ export class TCGMainLobbyView implements Component {
     }
 
     public async initialize(): Promise<void> {
-        if (this.initialized) return;
-        this.initialized = true;
+        // if (this.initialized) return;
+        // this.initialized = true;
 
         console.log('TCGMainLobbyView initialize() operate!!!')
         await this.textureManager.preloadTextures("image-paths.json");
@@ -107,6 +107,21 @@ export class TCGMainLobbyView implements Component {
         //     this.addButtons();
         //     this.animate();
         // });
+    }
+
+    public dispose(): void {
+        console.log('Disposing TCGMainLobbyView...');
+        window.removeEventListener('resize', this.onWindowResize.bind(this));
+        window.removeEventListener('click', () => this.initializeAudio());
+
+        this.renderer.dispose();
+        if (this.renderer.domElement.parentNode === this.lobbyContainer) {
+            this.lobbyContainer.removeChild(this.renderer.domElement);
+        }
+
+        this.scene.clear();
+
+        TCGMainLobbyView.instance = null;
     }
 
     private setupAudio(): void {
