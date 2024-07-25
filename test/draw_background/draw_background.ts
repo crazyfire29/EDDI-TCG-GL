@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ResourceManager } from "../../src/resouce_manager/ResourceManager";
-import { BattleFieldUnit } from "../../src/battle_field_unit/BattleFieldUnit";
-import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
+import { LegacyBattleFieldUnit } from "../../src/battle_field_unit/entity/LegacyBattleFieldUnit";
+import {LegacyNonBackgroundImage} from "../../src/shape/image/LegacyNonBackgroundImage";
 
 const container = document.body;
 
@@ -28,7 +28,7 @@ scene.background = new THREE.Color(0xffffff);
 const backgroundImagePath = 'resource/background/battle_field.png'
 const backgroundWidth = viewSize * aspect
 const backgroundHeight = viewSize
-const background = new NonBackgroundImage(backgroundWidth, backgroundHeight, backgroundImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
+const background = new LegacyNonBackgroundImage(backgroundWidth, backgroundHeight, backgroundImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
     background.draw(scene)
 
     createBattleFieldUnit()
@@ -60,7 +60,7 @@ function createBattleFieldUnit () {
         race: new THREE.Vector2(cardWidth / 2, cardHeight / 2) // 상대 위치 조정
     };
 
-    const battleFieldUnit = new BattleFieldUnit(scene, resourceManager, cardId, weaponId, hpId, energyId, raceId, cardWidth, placedLocation);
+    const battleFieldUnit = new LegacyBattleFieldUnit(scene, resourceManager, cardId, weaponId, hpId, energyId, raceId, cardWidth, placedLocation);
 }
 
 // 윈도우 크기가 변경될 때 카메라 및 렌더러 크기 조정

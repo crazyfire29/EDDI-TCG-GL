@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { ResourceManager } from "../resouce_manager/ResourceManager";
-import { NonBackgroundImage } from "../shape/image/NonBackgroundImage";
+import { ResourceManager } from "../../resouce_manager/ResourceManager";
+import { LegacyNonBackgroundImage } from "../../shape/image/LegacyNonBackgroundImage";
 
 interface PlacedLocation {
     card: THREE.Vector2;
@@ -10,12 +10,12 @@ interface PlacedLocation {
     race: THREE.Vector2;
 }
 
-export class BattleFieldUnit {
-    private card: NonBackgroundImage | null = null;
-    private weapon: NonBackgroundImage | null = null;
-    private hp: NonBackgroundImage | null = null;
-    private energy: NonBackgroundImage | null = null;
-    private race: NonBackgroundImage | null = null;
+export class LegacyBattleFieldUnit {
+    private card: LegacyNonBackgroundImage | null = null;
+    private weapon: LegacyNonBackgroundImage | null = null;
+    private hp: LegacyNonBackgroundImage | null = null;
+    private energy: LegacyNonBackgroundImage | null = null;
+    private race: LegacyNonBackgroundImage | null = null;
 
     constructor(
         scene: THREE.Scene,
@@ -46,7 +46,7 @@ export class BattleFieldUnit {
 
         const location = placedLocation || defaultLocation;
 
-        this.card = new NonBackgroundImage(cardWidth, cardHeight, cardPath, 1, 1, location.card, undefined, undefined, undefined, undefined, undefined, () => {
+        this.card = new LegacyNonBackgroundImage(cardWidth, cardHeight, cardPath, 1, 1, location.card, undefined, undefined, undefined, undefined, undefined, () => {
             if (this.card) {
                 this.card.draw(scene);
                 // Draw other components after the card
@@ -66,7 +66,7 @@ export class BattleFieldUnit {
     ) {
         const weaponWidth = cardWidth * 0.63; // 기존 비율로 계산
         const weaponHeight = weaponWidth * 1.651;
-        this.weapon = new NonBackgroundImage(weaponWidth, weaponHeight, weaponPath, 1, 1, location.weapon, undefined, undefined, undefined, undefined, undefined, () => {
+        this.weapon = new LegacyNonBackgroundImage(weaponWidth, weaponHeight, weaponPath, 1, 1, location.weapon, undefined, undefined, undefined, undefined, undefined, () => {
             if (this.weapon) {
                 this.weapon.draw(scene);
             }
@@ -74,7 +74,7 @@ export class BattleFieldUnit {
 
         const hpWidth = cardWidth * 0.33; // 기존 비율로 계산
         const hpHeight = hpWidth * 1.651;
-        this.hp = new NonBackgroundImage(hpWidth, hpHeight, hpPath, 1, 1, location.hp, undefined, undefined, undefined, undefined, undefined, () => {
+        this.hp = new LegacyNonBackgroundImage(hpWidth, hpHeight, hpPath, 1, 1, location.hp, undefined, undefined, undefined, undefined, undefined, () => {
             if (this.hp) {
                 this.hp.draw(scene);
             }
@@ -82,7 +82,7 @@ export class BattleFieldUnit {
 
         const energyWidth = cardWidth * 0.39; // 기존 비율로 계산
         const energyHeight = energyWidth * 1.618;
-        this.energy = new NonBackgroundImage(energyWidth, energyHeight, energyPath, 1, 1, location.energy, undefined, undefined, undefined, undefined, undefined, () => {
+        this.energy = new LegacyNonBackgroundImage(energyWidth, energyHeight, energyPath, 1, 1, location.energy, undefined, undefined, undefined, undefined, undefined, () => {
             if (this.energy) {
                 this.energy.draw(scene);
             }
@@ -90,7 +90,7 @@ export class BattleFieldUnit {
 
         const raceWidth = cardWidth * 0.4; // 기존 비율로 계산
         const raceHeight = raceWidth;
-        this.race = new NonBackgroundImage(raceWidth, raceHeight, racePath, 1, 1, location.race, undefined, undefined, undefined, undefined, undefined, () => {
+        this.race = new LegacyNonBackgroundImage(raceWidth, raceHeight, racePath, 1, 1, location.race, undefined, undefined, undefined, undefined, undefined, () => {
             if (this.race) {
                 this.race.draw(scene);
             }

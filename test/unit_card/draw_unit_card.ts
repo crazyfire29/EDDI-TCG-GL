@@ -1,5 +1,5 @@
 // import * as THREE from 'three';
-// import { NonBackgroundImage } from "../../src/shape/image/NonBackgroundImage"; // 올바른 경로로 수정
+// import { LegacyNonBackgroundImage } from "../../src/shape/image/LegacyNonBackgroundImage"; // 올바른 경로로 수정
 //
 // // HTML 파일의 body 요소에 Three.js 캔버스를 렌더링
 // const container = document.body;
@@ -28,7 +28,7 @@
 // const scene = new THREE.Scene();
 // scene.background = new THREE.Color(0xffffff);
 //
-// // NonBackgroundImage 생성
+// // LegacyNonBackgroundImage 생성
 // const cardId = 19;
 // const imagePath = `resource/battle_field_unit/card/${cardId}.png`;
 //
@@ -36,7 +36,7 @@
 //
 // const cardWidth = 150; // 카드의 너비 설정
 // const cardHeight = cardWidth * 1.615; // 카드의 높이 설정
-// const imageRectangle = new NonBackgroundImage(cardWidth, cardHeight, imagePath, 1, 1, undefined, undefined, undefined, undefined, undefined, undefined, () => {
+// const imageRectangle = new LegacyNonBackgroundImage(cardWidth, cardHeight, imagePath, 1, 1, undefined, undefined, undefined, undefined, undefined, undefined, () => {
 //     // 콜백 함수: 텍스처 로딩이 완료되었을 때 실행됨
 //     // 씬에 이미지 렌더링
 //     imageRectangle.draw(scene);
@@ -49,7 +49,7 @@
 // const weaponHeight = weaponWidth * 1.651;
 //
 // const weaponLocalPosition = new THREE.Vector2(cardWidth / 2 - 8, -cardHeight / 2 + 8);
-// const imageWeapon = new NonBackgroundImage(weaponWidth, weaponHeight, imageWeaponPath, 1, 1, weaponLocalPosition, undefined, undefined, undefined, undefined, undefined, () => {
+// const imageWeapon = new LegacyNonBackgroundImage(weaponWidth, weaponHeight, imageWeaponPath, 1, 1, weaponLocalPosition, undefined, undefined, undefined, undefined, undefined, () => {
 //     imageWeapon.draw(scene);
 // });
 //
@@ -60,7 +60,7 @@
 // const hpHeight = hpWidth * 1.651;
 //
 // const hpLocalPosition = new THREE.Vector2(-cardWidth / 2, -cardHeight / 2 + 13);
-// const imageHp = new NonBackgroundImage(hpWidth, hpHeight, imageHpPath, 1, 1, hpLocalPosition, undefined, undefined, undefined, undefined, undefined, () => {
+// const imageHp = new LegacyNonBackgroundImage(hpWidth, hpHeight, imageHpPath, 1, 1, hpLocalPosition, undefined, undefined, undefined, undefined, undefined, () => {
 //     imageHp.draw(scene);
 // });
 //
@@ -71,7 +71,7 @@
 // const energyHeight = hpWidth * 1.618;
 //
 // const energyLocalPosition = new THREE.Vector2(-cardWidth / 2, cardHeight / 2);
-// const imageEnergy = new NonBackgroundImage(energyWidth, energyHeight, imageEnergyPath, 1, 1, energyLocalPosition, undefined, undefined, undefined, undefined, undefined, () => {
+// const imageEnergy = new LegacyNonBackgroundImage(energyWidth, energyHeight, imageEnergyPath, 1, 1, energyLocalPosition, undefined, undefined, undefined, undefined, undefined, () => {
 //     imageEnergy.draw(scene);
 // });
 //
@@ -82,7 +82,7 @@
 // const raceHeight = raceWidth;
 //
 // const raceLocalPosition = new THREE.Vector2(cardWidth / 2, cardHeight / 2);
-// const raceWeapon = new NonBackgroundImage(raceWidth, raceHeight, imageRacePath, 1, 1, raceLocalPosition, undefined, undefined, undefined, undefined, undefined, () => {
+// const raceWeapon = new LegacyNonBackgroundImage(raceWidth, raceHeight, imageRacePath, 1, 1, raceLocalPosition, undefined, undefined, undefined, undefined, undefined, () => {
 //     raceWeapon.draw(scene);
 // });
 //
@@ -111,7 +111,7 @@
 
 import * as THREE from 'three';
 import { ResourceManager } from "../../src/resouce_manager/ResourceManager";
-import { BattleFieldUnit } from "../../src/battle_field_unit/BattleFieldUnit";
+import { LegacyBattleFieldUnit } from "../../src/battle_field_unit/entity/LegacyBattleFieldUnit";
 
 // HTML 파일의 body 요소에 Three.js 캔버스를 렌더링
 const container = document.body;
@@ -150,7 +150,7 @@ resourceManager.registerBattleFieldUnitPath({
     racePath: 'resource/battle_field_unit/race/{id}.png'
 });
 
-// BattleFieldUnit 생성
+// LegacyBattleFieldUnit 생성
 const cardId = 19;
 const weaponId = 40;
 const hpId = 60;
@@ -167,7 +167,7 @@ const placedLocation = {
     race: new THREE.Vector2(cardWidth / 2, cardHeight / 2) // 상대 위치 조정
 };
 
-const battleFieldUnit = new BattleFieldUnit(scene, resourceManager, cardId, weaponId, hpId, energyId, raceId, cardWidth, placedLocation);
+const battleFieldUnit = new LegacyBattleFieldUnit(scene, resourceManager, cardId, weaponId, hpId, energyId, raceId, cardWidth, placedLocation);
 
 // 윈도우 크기가 변경될 때 카메라 및 렌더러 크기 조정
 window.addEventListener('resize', () => {
