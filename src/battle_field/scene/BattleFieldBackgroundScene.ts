@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { BattleFieldBackground } from '../entity/BattleFieldBackground';
-import { NonBackgroundImage } from '../../shape/image/NonBackgroundImage';
+import { LegacyNonBackgroundImage } from '../../shape/image/LegacyNonBackgroundImage';
 import { ResourceManager } from '../../resouce_manager/ResourceManager';
 
 export class BattleFieldBackgroundScene {
     private scene: THREE.Scene;
-    private background: NonBackgroundImage | null = null;
+    private background: LegacyNonBackgroundImage | null = null;
     private resourceManager: ResourceManager | null = null;
 
     constructor(resourceManager: ResourceManager) {
@@ -19,7 +19,7 @@ export class BattleFieldBackgroundScene {
         const backgroundHeight = background.getHeight();
         const position = background.getLocalTranslationPosition();
 
-        this.background = new NonBackgroundImage(
+        this.background = new LegacyNonBackgroundImage(
             backgroundWidth,
             backgroundHeight,
             backgroundImagePath,

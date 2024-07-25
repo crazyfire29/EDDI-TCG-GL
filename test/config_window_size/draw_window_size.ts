@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { NonBackgroundImage } from "../../src/shape/image/NonBackgroundImage"; // 올바른 경로로 수정
+import { LegacyNonBackgroundImage } from "../../src/shape/image/LegacyNonBackgroundImage"; // 올바른 경로로 수정
 
 // HTML 파일의 body 요소에 Three.js 캔버스를 렌더링
 const container = document.body;
@@ -28,7 +28,7 @@ camera.lookAt(0, 0, 0); // 카메라가 원점(0, 0, 0)을 바라보도록 설�
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
 
-// NonBackgroundImage 생성
+// LegacyNonBackgroundImage 생성
 const cardId = 19;
 const imagePath = `resource/field_card/${cardId}.png`;
 
@@ -36,7 +36,7 @@ console.log(imagePath);
 
 const cardWidth = 150; // 카드의 너비 설정
 const cardHeight = cardWidth * 1.615; // 카드의 높이 설정
-const imageRectangle = new NonBackgroundImage(cardWidth, cardHeight, imagePath, 1, 1, undefined, undefined, undefined, undefined, undefined, undefined, () => {
+const imageRectangle = new LegacyNonBackgroundImage(cardWidth, cardHeight, imagePath, 1, 1, undefined, undefined, undefined, undefined, undefined, undefined, () => {
     // 콜백 함수: 텍스처 로딩이 완료되었을 때 실행됨
     // 씬에 이미지 렌더링
     imageRectangle.draw(scene);

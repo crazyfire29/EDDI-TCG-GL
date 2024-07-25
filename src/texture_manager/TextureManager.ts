@@ -95,6 +95,10 @@ export class TextureManager {
                 textureLoader.load(
                     fullPath,
                     (texture) => {
+                        texture.colorSpace = THREE.SRGBColorSpace; // 색 공간 설정
+                        texture.magFilter = THREE.LinearFilter; // 확대 필터
+                        texture.minFilter = THREE.LinearFilter; // 축소 필터
+                        texture.generateMipmaps = false;
                         textureList[index + 1] = texture;
                         // console.log(`Loaded texture: ${fullPath} with id: ${index + 1}`);
                         resolve();

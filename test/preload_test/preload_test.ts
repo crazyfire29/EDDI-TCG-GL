@@ -63,7 +63,7 @@
 // export { ResourceManager };
 //
 // import * as THREE from 'three';
-// import { NonBackgroundImage } from '../../src/shape/image/NonBackgroundImage';
+// import { LegacyNonBackgroundImage } from '../../src/shape/image/LegacyNonBackgroundImage';
 //
 // (async () => {
 //     const container = document.body;
@@ -97,7 +97,7 @@
 //
 //     const cardTexture = resourceManager.getTexture('card', cardId);
 //     const cardImagePath = `resource/battle_field_unit/card/${cardId}.png`;
-//     const card = new NonBackgroundImage(cardWidth, cardHeight, cardImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
+//     const card = new LegacyNonBackgroundImage(cardWidth, cardHeight, cardImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
 //         card.draw(scene);
 //     });
 //     if (cardTexture) {
@@ -117,7 +117,7 @@
 
 import * as THREE from 'three';
 import {ResourceManagerTest} from "../../src/resouce_manager/ResourceManagerTest";
-import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
+import {LegacyNonBackgroundImage} from "../../src/shape/image/LegacyNonBackgroundImage";
 
 (async () => {
     const container = document.body;
@@ -151,7 +151,7 @@ import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
 
     const cardTexture = resourceManager.getTexture('card', cardId);
     const cardImagePath = `resource/battle_field_unit/card/${cardId}.png`;
-    const card = new NonBackgroundImage(cardWidth, cardHeight, cardImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
+    const card = new LegacyNonBackgroundImage(cardWidth, cardHeight, cardImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
         card.draw(scene);
     });
     if (cardTexture) {

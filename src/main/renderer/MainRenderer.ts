@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { BattleFieldUnitRenderer } from '../../battle_field_unit/renderer/BattleFieldUnitRenderer';
 import { BattleFieldUnitScene } from '../../battle_field_unit/scene/BattleFieldUnitScene';
 import { ResourceManager } from '../../resouce_manager/ResourceManager';
-import { NonBackgroundImage } from '../../shape/image/NonBackgroundImage';
+import { LegacyNonBackgroundImage } from '../../shape/image/LegacyNonBackgroundImage';
 import {BattleFieldUnitRepository} from "../../battle_field_unit/repository/BattleFieldUnitRepository";
 import {BattleFieldBackgroundService} from "../../battle_field/service/BattleFieldBackgroundService";
 import {BattleFieldBackgroundScene} from "../../battle_field/scene/BattleFieldBackgroundScene";
@@ -14,7 +14,7 @@ export class MainRenderer {
     private renderer: THREE.WebGLRenderer;
     private unitRenderer: BattleFieldUnitRenderer;
     private backgroundRenderer: BattleFieldBackgroundRenderer;
-    private background: NonBackgroundImage | null = null;
+    private background: LegacyNonBackgroundImage | null = null;
     private resourceManager: ResourceManager;
     private originalWidth: number;
     private originalHeight: number;
@@ -66,7 +66,7 @@ export class MainRenderer {
     //     const backgroundImagePath = 'resource/background/battle_field.png';
     //     const backgroundWidth = viewSize * aspect;
     //     const backgroundHeight = viewSize;
-    //     this.background = new NonBackgroundImage(backgroundWidth, backgroundHeight, backgroundImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
+    //     this.background = new LegacyNonBackgroundImage(backgroundWidth, backgroundHeight, backgroundImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
     //         if (this.background) {
     //             console.log('Background texture loaded');
     //             this.background.draw(this.scene);

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {BattleFieldUnit} from "../entity/BattleFieldUnit";
 import {ResourceManager} from "../../resouce_manager/ResourceManager";
-import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
+import {LegacyNonBackgroundImage} from "../../shape/image/LegacyNonBackgroundImage";
 import {BattleFieldUnitEntry} from "./BattleFieldUnitEntry";
 
 export class BattleFieldUnitScene {
@@ -39,7 +39,7 @@ export class BattleFieldUnitScene {
             race: null
         };
 
-        const card = new NonBackgroundImage(cardWidth, cardHeight, cardPath, 1, 1,
+        const card = new LegacyNonBackgroundImage(cardWidth, cardHeight, cardPath, 1, 1,
                                             new THREE.Vector2(
                                                 0, 0
                                             ), undefined, undefined, undefined, undefined, undefined, () => {
@@ -49,7 +49,7 @@ export class BattleFieldUnitScene {
 
         const weaponWidth = cardWidth * 0.63;
         const weaponHeight = weaponWidth * 1.651;
-        const weapon = new NonBackgroundImage(weaponWidth, weaponHeight, weaponPath, 1, 1,
+        const weapon = new LegacyNonBackgroundImage(weaponWidth, weaponHeight, weaponPath, 1, 1,
                                             new THREE.Vector2(
                                                 localTranslationPosition.getX() + cardWidth / 2 - 8,
                                                 localTranslationPosition.getY() - cardHeight / 2 + 8
@@ -60,7 +60,7 @@ export class BattleFieldUnitScene {
 
         const hpWidth = cardWidth * 0.33;
         const hpHeight = hpWidth * 1.651;
-        const hp = new NonBackgroundImage(hpWidth, hpHeight, hpPath, 1, 1,
+        const hp = new LegacyNonBackgroundImage(hpWidth, hpHeight, hpPath, 1, 1,
                                             new THREE.Vector2(
                                                 localTranslationPosition.getX() - cardWidth / 2, localTranslationPosition.getY() - cardHeight / 2 + 13
                                             ), undefined, undefined, undefined, undefined, undefined, () => {
@@ -70,7 +70,7 @@ export class BattleFieldUnitScene {
 
         const energyWidth = cardWidth * 0.39;
         const energyHeight = energyWidth * 1.618;
-        const energy = new NonBackgroundImage(energyWidth, energyHeight, energyPath, 1, 1,
+        const energy = new LegacyNonBackgroundImage(energyWidth, energyHeight, energyPath, 1, 1,
                                             new THREE.Vector2(
                                                 localTranslationPosition.getX() - cardWidth / 2,
                                                 localTranslationPosition.getY() + cardHeight / 2
@@ -81,7 +81,7 @@ export class BattleFieldUnitScene {
 
         const raceWidth = cardWidth * 0.4;
         const raceHeight = raceWidth;
-        const race = new NonBackgroundImage(raceWidth, raceHeight, racePath, 1, 1,
+        const race = new LegacyNonBackgroundImage(raceWidth, raceHeight, racePath, 1, 1,
                                             new THREE.Vector2(
                                                 localTranslationPosition.getX() + cardWidth / 2,
                                                 localTranslationPosition.getY() + cardHeight / 2
