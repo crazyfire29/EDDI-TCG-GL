@@ -11,3 +11,6 @@ node_modules
 
 # exclude *.json
 *.json
+
+# exclude *.mp3
+*.mp3
