@@ -154,10 +154,14 @@ export class TCGMainLobbyView implements Component {
             if (buttonTexture) {
                 let button = this.buttons.find(btn => btn.getLocalTranslation().equals(config.position));
                 if (!button) {
+                    const width = 800 * (window.innerWidth / 1920);  // 화면 크기에 따라 버튼 크기를 조정
+                    const height = 100 * (window.innerHeight / 1080);
+                    const position = this.calculateButtonPosition(config.position);
+
                     button = new NonBackgroundImage(
-                        800,
-                        100,
-                        config.position
+                        width,
+                        height,
+                        position
                     );
                     this.buttons.push(button);
 
@@ -171,6 +175,14 @@ export class TCGMainLobbyView implements Component {
             }
         });
     }
+
+    private calculateButtonPosition(position: THREE.Vector2): THREE.Vector2 {
+        const scaleX = window.innerWidth / 1920;  // 기준 화면 너비로 나누어 스케일 조정
+        const scaleY = window.innerHeight / 1080;  // 기준 화면 높이로 나누어 스케일 조정
+
+        return new THREE.Vector2(position.x * scaleX, position.y * scaleY);
+    }
+
 
     // private addBackground(): void {
     //     const texture = this.textureManager.getTexture('main_lobby_background', 1);
@@ -269,11 +281,18 @@ export class TCGMainLobbyView implements Component {
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
+        let scaleX = 1;
+        let scaleY = 1;
+
         if (this.background) {
-            const scaleX = newWidth / this.background.getWidth();
-            const scaleY = newHeight / this.background.getHeight();
+            scaleX = newWidth / this.background.getWidth();
+            scaleY = newHeight / this.background.getHeight();
             this.background.setScale(scaleX, scaleY);
         }
+
+        this.buttons.forEach(button => {
+            button.setScale(scaleX, scaleY);
+        });
     }
 
     public animate(): void {
