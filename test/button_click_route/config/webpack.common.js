@@ -19,6 +19,10 @@ module.exports = {
                 test: /\.json$/,
                 type: 'json'
             },
+            {
+                test: /\.mp3$/,
+                use: 'file-loader',
+            },
         ],
     },
     resolve: {
