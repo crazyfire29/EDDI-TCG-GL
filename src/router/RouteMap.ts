@@ -1,23 +1,18 @@
 import { Route } from './routes';
+import { Component } from './Component';
 
 export class RouteMap {
-    private static instance: RouteMap;
-
     private routes: Route[] = [];
     private rootElement: HTMLElement;
-    private currentComponent: any = null;
+    private activeComponent: Component | null = null;
 
-    constructor(rootElement: HTMLElement, initialPath: string = '/tcg-main-lobby') {
+    constructor(rootElement: HTMLElement, initialPath: string) {
         this.rootElement = rootElement;
         window.addEventListener('popstate', this.handleRouteChange.bind(this));
-        this.navigate(initialPath);
-    }
 
-    public static getInstance(rootElement: HTMLElement): RouteMap {
-        if (!RouteMap.instance) {
-            RouteMap.instance = new RouteMap(rootElement);
+        if (initialPath) {
+            this.navigate(initialPath);
         }
-        return RouteMap.instance;
     }
 
     public registerRoutes(routes: Route[]): void {
@@ -34,28 +29,18 @@ export class RouteMap {
         const currentPath = window.location.pathname;
         const route = this.routes.find(route => route.path === currentPath);
 
-        console.log('handleRouteChange() -> route:', route)
-
         if (route) {
-            if (this.currentComponent && typeof this.currentComponent.dispose === 'function') {
-                this.currentComponent.dispose();
+            if (this.activeComponent) {
+                this.activeComponent.hide();
             }
-            // const component = new route.component();
-            // this.rootElement.innerHTML = component.render();
-
-            // this.rootElement.innerHTML = '';
-            // const component = new route.component(this.rootElement);
-            // component.initialize();
-
-            // this.rootElement.innerHTML = '';
-            // const component = route.getComponentInstance(this.rootElement, this);
-            // component.initialize();
-
-            this.rootElement.innerHTML = '';
-            this.currentComponent = route.getComponentInstance(this.rootElement, this);
-            this.currentComponent.initialize();
+            this.activeComponent = route.getComponentInstance(this.rootElement, this);
+            this.activeComponent.initialize();
         } else {
-            this.rootElement.innerHTML = '<h1>404 - Page not found</h1>';
+            console.error(`No route found for ${currentPath}`);
+            // 기본 경로가 이미 `/tcg-main-lobby`로 설정된 경우 무한 리디렉션을 피하기 위해 추가
+            if (currentPath !== '/tcg-main-lobby') {
+                this.navigate('/tcg-main-lobby');  // 기본 경로로 리디렉션
+            }
         }
     }
 }

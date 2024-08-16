@@ -25,6 +25,7 @@ export class TCGMainLobbyView implements Component {
     private routeMap: RouteMap;
 
     private initialized = false;
+    private isAnimating = false;
 
     constructor(lobbyContainer: HTMLElement, routeMap: RouteMap) {
         this.lobbyContainer = lobbyContainer;
@@ -72,6 +73,12 @@ export class TCGMainLobbyView implements Component {
     }
 
     public async initialize(): Promise<void> {
+        if (this.initialized) {
+            console.log('Already initialized');
+            this.show();
+            return;
+        }
+
         console.log('TCGMainLobbyView initialize() operate!!!');
         await this.textureManager.preloadTextures("image-paths.json");
 
@@ -79,22 +86,24 @@ export class TCGMainLobbyView implements Component {
 
         this.addBackground();
         this.addButtons();
+        this.initialized = true;
+        this.isAnimating = true;
         this.animate();
     }
 
-    public dispose(): void {
-        console.log('Disposing TCGMainLobbyView...');
-        window.removeEventListener('resize', this.onWindowResize.bind(this));
-        window.removeEventListener('click', () => this.initializeAudio());
+    public show(): void {
+        console.log('Showing TCGMainLobbyView...');
+        this.renderer.domElement.style.display = 'block';
+        this.lobbyContainer.style.display = 'block';
+        this.isAnimating = true;
+        this.animate();
+    }
 
-        this.renderer.dispose();
-        if (this.renderer.domElement.parentNode === this.lobbyContainer) {
-            this.lobbyContainer.removeChild(this.renderer.domElement);
-        }
-
-        this.scene.clear();
-
-        TCGMainLobbyView.instance = null;
+    public hide(): void {
+        console.log('Hiding TCGMainLobbyView...');
+        this.isAnimating = false;
+        this.renderer.domElement.style.display = 'none';
+        this.lobbyContainer.style.display = 'none';
     }
 
     private addBackground(): void {
@@ -201,7 +210,13 @@ export class TCGMainLobbyView implements Component {
     }
 
     public animate(): void {
-        requestAnimationFrame(() => this.animate());
-        this.renderer.render(this.scene, this.camera);
+        if (this.isAnimating) {
+            // console.log('Animating frame...'); // 애니메이션 루프가 제대로 동작하는지 확인
+            requestAnimationFrame(() => this.animate());
+            this.renderer.render(this.scene, this.camera);
+        } else {
+            console.log('Animation stopped.'); // 애니메이션 루프가 멈추는지 확인
+        }
     }
 }
+

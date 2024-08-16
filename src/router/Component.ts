@@ -1,3 +1,7 @@
 export interface Component {
-    initialize(): Promise<void>;
+    initialize(): void;
+
+    hide(): void;
+
+    show(): void;
 }
