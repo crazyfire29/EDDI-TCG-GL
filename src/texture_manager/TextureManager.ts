@@ -15,6 +15,7 @@ export class TextureManager {
     private mainLobbyBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private mainLobbyButtonsTextureList: { [id: number]: THREE.Texture } = {};
     private shopBackgroundTextureList: { [id: number]: THREE.Texture } = {};
+    private shopButtonsTextureList: { [id: number]: THREE.Texture } = {};
 
     private constructor() {}
 
@@ -40,7 +41,8 @@ export class TextureManager {
                 this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList),
                 this.loadTextures(imageData.main_lobby_background, this.mainLobbyBackgroundTextureList),
                 this.loadTextures(imageData.main_lobby_buttons, this.mainLobbyButtonsTextureList),
-                this.loadTextures(imageData.shop_background, this.shopBackgroundTextureList)
+                this.loadTextures(imageData.shop_background, this.shopBackgroundTextureList),
+                this.loadTextures(imageData.shop_buttons, this.shopButtonsTextureList),
             ]);
 
             console.log('All textures preloaded from TextureManager.ts');
@@ -108,6 +110,8 @@ export class TextureManager {
                 return this.mainLobbyButtonsTextureList[id];
             case 'shop_background':
                 return this.shopBackgroundTextureList[id]
+            case 'shop_buttons':
+                return this.shopButtonsTextureList[id]
             default:
                 return undefined;
         }
