@@ -4,4 +4,6 @@ export interface Component {
     hide(): void;
 
     show(): void;
+
+    animate(): void;
 }
