@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { TextureManager } from "../texture_manager/TextureManager";
 import { NonBackgroundImage } from "../shape/image/NonBackgroundImage";
-// import { LobbyButtonConfigList } from "./LobbyButtonConfigList";
-// import { LobbyButtonType } from "./LobbyButtonType";
 import { AudioController } from "../audio/AudioController";
 import cardShopMusic from '@resource/music/shop/card-shop.mp3';
 import { MouseController } from "../mouse/MouseController";
 import { RouteMap } from "../router/RouteMap";
 import { Component } from "../router/Component";
+import { ShopButtonType } from "./ShopButtonType";
+import {ShopButtonConfigList} from "./ShopButtonConfigList";
 
 export class TCGCardShopView implements Component {
     private static instance: TCGCardShopView | null = null;
@@ -85,7 +85,7 @@ export class TCGCardShopView implements Component {
         console.log("Textures preloaded. Adding background and buttons...");
 
         this.addBackground();
-        // this.addButtons();
+        this.addButtons();
         this.initialized = true;
         this.isAnimating = true;
         this.animate();
@@ -125,6 +125,65 @@ export class TCGCardShopView implements Component {
             this.background.draw(this.scene);
         } else {
             console.error("Background texture not found.");
+        }
+    }
+
+    private addButtons(): void {
+        ShopButtonConfigList.buttonConfigs.forEach((config) => {
+            // console.log('Config ID:', config.id)
+
+            const buttonTexture = this.textureManager.getTexture('shop_buttons', config.id);
+            // console.log('Button Texture:', buttonTexture)
+
+            if (buttonTexture) {
+                const widthPercent = 300 / 1920;  // 기준 화면 크기의 퍼센트로 버튼 크기를 정의
+                const heightPercent = 300 / 1080;
+                const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
+
+                const button = new NonBackgroundImage(
+                    window.innerWidth * widthPercent,
+                    window.innerHeight * heightPercent,
+                    new THREE.Vector2(
+                        window.innerWidth * positionPercent.x,
+                        window.innerHeight * positionPercent.y
+                    )
+                );
+                button.createNonBackgroundImageWithTexture(buttonTexture, 1, 1);
+                button.draw(this.scene);
+
+                console.log(`Button ID: ${config.id}`);
+                console.log('Button Texture:', buttonTexture);
+                console.log('Button Position (Percent):', positionPercent);
+                console.log('Button Position (Pixels):', button.getLocalTranslation());
+                console.log('Button Size (Width, Height):', button.getWidth(), button.getHeight());
+
+                this.buttons.push(button);
+                this.buttonInitialInfo.set(button.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
+
+                this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
+            } else {
+                console.error("Button texture not found.");
+            }
+        });
+    }
+
+    private onButtonClick(type: ShopButtonType): void {
+        console.log('Button clicked:', type);
+        switch (type) {
+            case ShopButtonType.ALL:
+                this.routeMap.navigate("/draw/all");
+                break;
+            case ShopButtonType.UNDEAD:
+                this.routeMap.navigate("/draw/undead");
+                break;
+            case ShopButtonType.TRENT:
+                this.routeMap.navigate("/draw/trent");
+                break;
+            case ShopButtonType.HUMAN:
+                this.routeMap.navigate("/draw/human");
+                break;
+            default:
+                console.error("Unknown button type:", type);
         }
     }
 
