@@ -14,6 +14,7 @@ export class TextureManager {
     private battleFieldUnitRaceTextureList: { [id: number]: THREE.Texture } = {};
     private mainLobbyBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private mainLobbyButtonsTextureList: { [id: number]: THREE.Texture } = {};
+    private shopBackgroundTextureList: { [id: number]: THREE.Texture } = {};
 
     private constructor() {}
 
@@ -25,18 +26,11 @@ export class TextureManager {
     }
 
     public async preloadTextures(jsonUrl: string): Promise<void> {
-        // console.log(`Fetching image paths from: ${jsonUrl}`);
 
         try {
             const response = await fetch(jsonUrl);
             const imageData = await response.json();
             console.log('imageData:', imageData);
-
-            // if (imageData.card) this.loadTextures(imageData.card, this.battleFieldUnitCardTextureList);
-            // if (imageData.weapon) this.loadTextures(imageData.weapon, this.battleFieldUnitWeaponTextureList);
-            // if (imageData.hp) this.loadTextures(imageData.hp, this.battleFieldUnitHpTextureList);
-            // if (imageData.energy) this.loadTextures(imageData.energy, this.battleFieldUnitEnergyTextureList);
-            // if (imageData.race) this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList);
 
             await Promise.all([
                 this.loadTextures(imageData.card, this.battleFieldUnitCardTextureList),
@@ -46,6 +40,7 @@ export class TextureManager {
                 this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList),
                 this.loadTextures(imageData.main_lobby_background, this.mainLobbyBackgroundTextureList),
                 this.loadTextures(imageData.main_lobby_buttons, this.mainLobbyButtonsTextureList),
+                this.loadTextures(imageData.shop_background, this.shopBackgroundTextureList)
             ]);
 
             console.log('All textures preloaded from TextureManager.ts');
@@ -58,33 +53,6 @@ export class TextureManager {
     private getBasePath(): string {
         return window.location.origin; // 현재 작업 디렉토리 경로를 반환
     }
-
-    // private loadTextures(images: string[], textureList: { [id: number]: THREE.Texture }): Promise<void> {
-    //     const promises = images.map((imagePath) => {
-    //         return new Promise<void>((resolve, reject) => {
-    //             const textureLoader = new THREE.TextureLoader();
-    //             const fullPath = imagePath;
-    //             // console.log('Loading texture:', fullPath);
-    //             textureLoader.load(
-    //                 fullPath,
-    //                 (texture) => {
-    //                     const id = this.extractIdFromPath(imagePath);
-    //                     if (id !== null) {
-    //                         textureList[id] = texture;
-    //                         // console.log(`Loaded texture: ${fullPath} with id: ${id}`);
-    //                     }
-    //                     resolve();
-    //                 },
-    //                 undefined, // onProgress 콜백
-    //                 (error) => {
-    //                     console.error(`An error occurred loading the texture ${fullPath}:`, error);
-    //                     reject(error);
-    //                 }
-    //             );
-    //         });
-    //     });
-    //     return Promise.all(promises).then(() => {});
-    // }
 
     private loadTextures(images: string[], textureList: { [id: number]: THREE.Texture }): Promise<void> {
         const promises = images.map((imagePath, index) => {
@@ -138,6 +106,8 @@ export class TextureManager {
                 return this.mainLobbyBackgroundTextureList[id];
             case 'main_lobby_buttons':
                 return this.mainLobbyButtonsTextureList[id];
+            case 'shop_background':
+                return this.shopBackgroundTextureList[id]
             default:
                 return undefined;
         }

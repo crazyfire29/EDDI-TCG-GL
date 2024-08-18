@@ -5,7 +5,7 @@ import {routes} from "../../src/router/routes";
 const appElement = document.getElementById('app');
 
 if (appElement) {
-    const routeMap = new RouteMap(appElement);
+    const routeMap = new RouteMap(appElement, '/tcg-main-lobby');
     routeMap.registerRoutes(routes);
 
     // 네비게이션을 위한 버튼 추가
