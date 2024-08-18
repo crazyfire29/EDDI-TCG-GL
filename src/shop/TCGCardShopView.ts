@@ -8,6 +8,7 @@ import { RouteMap } from "../router/RouteMap";
 import { Component } from "../router/Component";
 import { ShopButtonType } from "./ShopButtonType";
 import {ShopButtonConfigList} from "./ShopButtonConfigList";
+import { TransparentRectangle } from "../shape/TransparentRectangle";
 
 export class TCGCardShopView implements Component {
     private static instance: TCGCardShopView | null = null;
@@ -26,6 +27,8 @@ export class TCGCardShopView implements Component {
 
     private initialized = false;
     private isAnimating = false;
+
+    private transparentRectangles: TransparentRectangle[] = []
 
     constructor(shopContainer: HTMLElement, routeMap: RouteMap) {
         this.shopContainer = shopContainer;
@@ -88,6 +91,8 @@ export class TCGCardShopView implements Component {
         this.addButtons();
         this.initialized = true;
         this.isAnimating = true;
+
+        this.addTransparentRectangle(new THREE.Vector2(0, 0), 300, 150);
         this.animate();
     }
 
@@ -130,10 +135,7 @@ export class TCGCardShopView implements Component {
 
     private addButtons(): void {
         ShopButtonConfigList.buttonConfigs.forEach((config) => {
-            // console.log('Config ID:', config.id)
-
             const buttonTexture = this.textureManager.getTexture('shop_buttons', config.id);
-            // console.log('Button Texture:', buttonTexture)
 
             if (buttonTexture) {
                 const widthPercent = 300 / 1920;  // 기준 화면 크기의 퍼센트로 버튼 크기를 정의
@@ -165,6 +167,13 @@ export class TCGCardShopView implements Component {
                 console.error("Button texture not found.");
             }
         });
+    }
+
+    private addTransparentRectangle(position: THREE.Vector2, width: number, height: number): void {
+        const transparentRectangle = new TransparentRectangle(position, width, height);
+        transparentRectangle.addToScene(this.scene);
+
+        this.transparentRectangles.push(transparentRectangle);
     }
 
     private onButtonClick(type: ShopButtonType): void {
@@ -224,7 +233,6 @@ export class TCGCardShopView implements Component {
     }
 
     public animate(): void {
-        console.log('animate() -> isAnimating:', this.isAnimating)
         if (this.isAnimating) {
             requestAnimationFrame(() => this.animate());
             this.renderer.render(this.scene, this.camera);
