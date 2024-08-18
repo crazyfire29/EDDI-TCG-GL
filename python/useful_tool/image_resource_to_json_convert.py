@@ -14,6 +14,7 @@ class WillBeReferenceImageLocation(Enum):
     BACKGROUND = "resource/background/"
     MAIN_LOBBY_BACKGROUND = "resource/main_lobby/"
     MAIN_LOBBY_BUTTONS = "resource/main_lobby/buttons/"
+    SHOP_BACKGROUND = "resource/shop/"
 
 class RelativeImageLocation(Enum):
     CARD = "../../resource/battle_field_unit/card/"
@@ -24,6 +25,7 @@ class RelativeImageLocation(Enum):
     BACKGROUND = "../../resource/background/"
     MAIN_LOBBY_BACKGROUND = "../../resource/main_lobby/"
     MAIN_LOBBY_BUTTONS = "../../resource/main_lobby/buttons/"
+    SHOP_BACKGROUND = "../../resource/shop/"
 
 # 디렉토리 경로 설정
 relative_paths = {
@@ -35,6 +37,7 @@ relative_paths = {
     RelativeImageLocation.BACKGROUND: RelativeImageLocation.BACKGROUND.value,
     RelativeImageLocation.MAIN_LOBBY_BACKGROUND: RelativeImageLocation.MAIN_LOBBY_BACKGROUND.value,
     RelativeImageLocation.MAIN_LOBBY_BUTTONS: RelativeImageLocation.MAIN_LOBBY_BUTTONS.value,
+    RelativeImageLocation.SHOP_BACKGROUND: RelativeImageLocation.SHOP_BACKGROUND.value,
 }
 
 reference_paths = {
@@ -46,6 +49,7 @@ reference_paths = {
     WillBeReferenceImageLocation.BACKGROUND: WillBeReferenceImageLocation.BACKGROUND.value,
     WillBeReferenceImageLocation.MAIN_LOBBY_BACKGROUND: WillBeReferenceImageLocation.MAIN_LOBBY_BACKGROUND.value,
     WillBeReferenceImageLocation.MAIN_LOBBY_BUTTONS: WillBeReferenceImageLocation.MAIN_LOBBY_BUTTONS.value,
+    WillBeReferenceImageLocation.SHOP_BACKGROUND: WillBeReferenceImageLocation.SHOP_BACKGROUND.value,
 }
 
 image_paths = {
@@ -56,7 +60,8 @@ image_paths = {
     "race": [],
     "background": [],
     "main_lobby_background": [],
-    "main_lobby_buttons": []
+    "main_lobby_buttons": [],
+    "shop_background": [],
 }
 
 for category, dir_path in relative_paths.items():

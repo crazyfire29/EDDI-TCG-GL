@@ -1,15 +1,7 @@
 import { TCGMainLobbyView } from '../lobby/TCGMainLobbyView';
 import {RouteMap} from "./RouteMap";
 import {Component} from "./Component";
-
-// export interface Route {
-//     path: string;
-//     component: any;
-// }
-
-// export const routes: Route[] = [
-//     { path: '/tcg-main-lobby', component: TCGMainLobbyView },
-// ];
+import {TCGCardShopView} from "../shop/TCGCardShopView";
 
 export interface Route {
     path: string;
@@ -21,6 +13,12 @@ export const routes: Route[] = [
         path: '/tcg-main-lobby',
         getComponentInstance: (rootElement: HTMLElement, routeMap: RouteMap) => {
             return TCGMainLobbyView.getInstance(rootElement, routeMap);
+        }
+    },
+    {
+        path: '/tcg-card-shop',
+        getComponentInstance: (rootElement: HTMLElement, routeMap: RouteMap) => {
+            return TCGCardShopView.getInstance(rootElement, routeMap);
         }
     },
 ];
