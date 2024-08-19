@@ -29,6 +29,8 @@ export class TCGCardShopView implements Component {
     private isAnimating = false;
 
     private transparentRectangles: TransparentRectangle[] = []
+    private rectInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
+
 
     constructor(shopContainer: HTMLElement, routeMap: RouteMap) {
         this.shopContainer = shopContainer;
@@ -92,7 +94,20 @@ export class TCGCardShopView implements Component {
         this.initialized = true;
         this.isAnimating = true;
 
-        this.addTransparentRectangle(new THREE.Vector2(0, 0), 300, 150);
+        const lobbyButtonX = -695;
+        const lobbyButtonY = 296;
+        const lobbyButtonWidth = 145;
+        const lobbyButtonHeight = 50;
+
+        const myCardButtonX = -695;
+        const myCardButtonY = 242;
+        const myCardButtonWidth = 145;
+        const myCardButtonHeight = 50;
+
+        // 버튼 추가 시 상대적인 위치로 변환하여 사용
+        this.addTransparentRectangle('lobbyButton', lobbyButtonX, lobbyButtonY, lobbyButtonWidth, lobbyButtonHeight);
+        this.addTransparentRectangle('myCardButton', myCardButtonX, myCardButtonY, myCardButtonWidth, myCardButtonHeight);
+
         this.animate();
     }
 
@@ -169,11 +184,50 @@ export class TCGCardShopView implements Component {
         });
     }
 
-    private addTransparentRectangle(position: THREE.Vector2, width: number, height: number): void {
-        const transparentRectangle = new TransparentRectangle(position, width, height);
+    // private addTransparentRectangle(position: THREE.Vector2, width: number, height: number): void {
+    //     const transparentRectangle = new TransparentRectangle(position, width, height);
+    //     transparentRectangle.addToScene(this.scene);
+    //
+    //     this.transparentRectangles.push(transparentRectangle);
+    // }
+
+    // private addTransparentRectangle(id: string, positionX: number, positionY: number, width: number, height: number): void {
+    //     // 절대 위치에 사각형 배치
+    //     const position = new THREE.Vector2(positionX, positionY);
+    //     const transparentRectangle = new TransparentRectangle(position, width, height, 0x888888, 0.5, id);  // 여기서 ID를 주어 구분 가능
+    //     transparentRectangle.addToScene(this.scene);
+    //
+    //     this.transparentRectangles.push(transparentRectangle);
+    // }
+
+    private __calculatePercentPosition(position: number, screenSize: number): number {
+        return position / screenSize;
+    }
+
+    private addTransparentRectangle(id: string, positionX: number, positionY: number, width: number, height: number): void {
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+
+        // 위치와 크기를 상대적 비율로 계산
+        const positionXPercent = this.__calculatePercentPosition(positionX, screenWidth);
+        const positionYPercent = this.__calculatePercentPosition(positionY, screenHeight);
+        const widthPercent = this.__calculatePercentPosition(width, screenWidth);
+        const heightPercent = this.__calculatePercentPosition(height, screenHeight);
+
+        // 비율 기반 절대 위치 및 크기 계산
+        const position = new THREE.Vector2(
+            positionXPercent * screenWidth,
+            positionYPercent * screenHeight
+        );
+
+        const transparentRectangle = new TransparentRectangle(position, width, height, 0x888888, 0.5, id);
         transparentRectangle.addToScene(this.scene);
 
+        this.mouseController.registerButton(transparentRectangle.getMesh(), this.onTransparentRectangleClick.bind(this, id));
+
+        // 위치 및 크기 정보를 저장하여 리사이즈 시 재계산할 수 있도록 합니다.
         this.transparentRectangles.push(transparentRectangle);
+        this.rectInitialInfo.set(id, { positionPercent: new THREE.Vector2(positionXPercent, positionYPercent), widthPercent, heightPercent });
     }
 
     private onButtonClick(type: ShopButtonType): void {
@@ -230,6 +284,35 @@ export class TCGCardShopView implements Component {
                 button.setScale(newWidth / button.getWidth(), newHeight / button.getHeight());
             }
         });
+
+        this.rectInitialInfo.forEach((info, id) => {
+            const rectangle = this.transparentRectangles.find(rect => rect.getId() === id);
+            if (rectangle) {
+                const newPosition = new THREE.Vector2(
+                    info.positionPercent.x * newWidth,
+                    info.positionPercent.y * newHeight
+                );
+                rectangle.setPosition(newPosition);
+                rectangle.setScale(
+                    info.widthPercent * newWidth / rectangle.getWidth(),
+                    info.heightPercent * newHeight / rectangle.getHeight()
+                );
+            }
+        });
+    }
+
+    private onTransparentRectangleClick(id: string): void {
+        console.log(`TransparentRectangle clicked: ${id}`);
+        switch (id) {
+            case 'lobbyButton':
+                this.routeMap.navigate("/tcg-main-lobby");
+                break;
+            case 'myCardButton':
+                console.log("My Card button clicked");
+                break;
+            default:
+                console.error("Unknown TransparentRectangle ID:", id);
+        }
     }
 
     public animate(): void {
