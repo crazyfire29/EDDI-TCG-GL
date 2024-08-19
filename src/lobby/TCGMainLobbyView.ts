@@ -51,7 +51,8 @@ export class TCGMainLobbyView implements Component {
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
 
-        this.mouseController = MouseController.getInstance(this.camera, this.scene);
+        // this.mouseController = MouseController.getInstance(this.camera, this.scene);
+        this.mouseController = new MouseController(this.camera, this.scene);
         this.routeMap = routeMap;
 
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
@@ -108,6 +109,8 @@ export class TCGMainLobbyView implements Component {
         this.isAnimating = false;
         this.renderer.domElement.style.display = 'none';
         this.lobbyContainer.style.display = 'none';
+
+        // this.mouseController.clearButtons();
     }
 
     private addBackground(): void {
