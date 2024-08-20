@@ -65,7 +65,8 @@ const battleFieldUnit = new BattleFieldUnit(cardId, weaponId, hpId, energyId, ra
 unitRepository.addBattleFieldUnit(battleFieldUnit);
 unitRenderer.render(renderer, camera);
 
-const mouseController = MouseController.getInstance(camera, scene);
+// const mouseController = MouseController.getInstance(camera, scene);
+const mouseController = new MouseController(camera!, scene!);
 
 function ensureBackgroundIsBehind() {
     if (background.getMesh()) {

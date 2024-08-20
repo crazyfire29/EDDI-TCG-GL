@@ -14,6 +14,8 @@ export class TransparentRectangle {
             opacity: opacity
         });
 
+        console.log('position:', position)
+
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.position.set(position.x, position.y, 0);
     }

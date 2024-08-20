@@ -56,7 +56,8 @@ export class TCGCardShopView implements Component {
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
 
-        this.mouseController = MouseController.getInstance(this.camera, this.scene);
+        // this.mouseController = MouseController.getInstance(this.camera, this.scene);
+        this.mouseController = new MouseController(this.camera, this.scene);
         this.routeMap = routeMap;
 
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
@@ -94,10 +95,10 @@ export class TCGCardShopView implements Component {
         this.initialized = true;
         this.isAnimating = true;
 
-        const lobbyButtonX = -695;
-        const lobbyButtonY = 296;
-        const lobbyButtonWidth = 145;
-        const lobbyButtonHeight = 50;
+        const lobbyButtonX = 0.04761;
+        const lobbyButtonY = 0.07534;
+        const lobbyButtonWidth = 0.09415;
+        const lobbyButtonHeight = 0.06458;
 
         const myCardButtonX = -695;
         const myCardButtonY = 242;
@@ -128,6 +129,8 @@ export class TCGCardShopView implements Component {
         this.isAnimating = false;
         this.renderer.domElement.style.display = 'none';
         this.shopContainer.style.display = 'none';
+
+        // this.mouseController.clearButtons();
     }
 
     private addBackground(): void {
@@ -204,30 +207,32 @@ export class TCGCardShopView implements Component {
         return position / screenSize;
     }
 
-    private addTransparentRectangle(id: string, positionX: number, positionY: number, width: number, height: number): void {
+    private addTransparentRectangle(id: string, positionXPercent: number, positionYPercent: number, widthPercent: number, heightPercent: number): void {
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
+        console.log('width:', screenWidth, ', height:', screenHeight)
+        console.log('positionXPercent:', positionXPercent, ', positionYPercent:', positionYPercent)
+        console.log('positionXPercent:', positionXPercent, ', positionY:', (0.5 - positionYPercent) * screenHeight)
 
-        // 위치와 크기를 상대적 비율로 계산
-        const positionXPercent = this.__calculatePercentPosition(positionX, screenWidth);
-        const positionYPercent = this.__calculatePercentPosition(positionY, screenHeight);
-        const widthPercent = this.__calculatePercentPosition(width, screenWidth);
-        const heightPercent = this.__calculatePercentPosition(height, screenHeight);
+        const positionX = (positionXPercent - 0.5) * screenWidth
+        const positionY = (0.5 - positionYPercent) * screenHeight
 
         // 비율 기반 절대 위치 및 크기 계산
         const position = new THREE.Vector2(
-            positionXPercent * screenWidth,
-            positionYPercent * screenHeight
+            positionX, positionY
         );
 
-        const transparentRectangle = new TransparentRectangle(position, width, height, 0x888888, 0.5, id);
+        const width = 0.09415 * screenWidth
+        const height = 0.06458 * screenHeight
+
+        const transparentRectangle = new TransparentRectangle(position, width, height, 0xffffff, 0.0, id);
         transparentRectangle.addToScene(this.scene);
 
         this.mouseController.registerButton(transparentRectangle.getMesh(), this.onTransparentRectangleClick.bind(this, id));
 
         // 위치 및 크기 정보를 저장하여 리사이즈 시 재계산할 수 있도록 합니다.
         this.transparentRectangles.push(transparentRectangle);
-        this.rectInitialInfo.set(id, { positionPercent: new THREE.Vector2(positionXPercent, positionYPercent), widthPercent, heightPercent });
+        this.rectInitialInfo.set(id, { positionPercent: new THREE.Vector2(positionXPercent - 0.5, 0.5 - positionYPercent), widthPercent, heightPercent });
     }
 
     private onButtonClick(type: ShopButtonType): void {
