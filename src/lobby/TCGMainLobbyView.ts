@@ -174,7 +174,7 @@ export class TCGMainLobbyView implements Component {
                 this.routeMap.navigate("/tcg-card-shop");
                 break;
             case LobbyButtonType.Test:
-                this.routeMap.navigate("/test");
+                this.routeMap.navigate("/tcg-simulation-battle-field");
                 break;
             default:
                 console.error("Unknown button type:", type);
