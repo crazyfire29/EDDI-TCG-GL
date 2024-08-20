@@ -97,6 +97,11 @@ export class TCGMainLobbyView implements Component {
         this.renderer.domElement.style.display = 'block';
         this.lobbyContainer.style.display = 'block';
         this.isAnimating = true;
+
+        this.scene.children.forEach(child => {
+            child.visible = true;
+        });
+
         if (!this.initialized) {
             this.initialize();
         } else {
@@ -119,6 +124,10 @@ export class TCGMainLobbyView implements Component {
         this.lobbyContainer.style.display = 'none';
 
         this.mouseController.clearButtons();
+
+        this.scene.children.forEach(child => {
+            child.visible = false;
+        });
     }
 
     private addBackground(): void {
