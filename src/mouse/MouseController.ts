@@ -8,7 +8,7 @@ export class MouseController {
     private scene: THREE.Scene;
     private buttonClickHandlers: { [uuid: string]: () => void } = {};
 
-    private constructor(camera: THREE.Camera, scene: THREE.Scene) {
+    constructor(camera: THREE.Camera, scene: THREE.Scene) {  // 생성자 변경
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
         this.camera = camera;
@@ -16,12 +16,20 @@ export class MouseController {
         window.addEventListener('click', this.onMouseClick.bind(this));
     }
 
-    public static getInstance(camera: THREE.Camera, scene: THREE.Scene): MouseController {
-        if (!MouseController.instance) {
-            MouseController.instance = new MouseController(camera, scene);
-        }
-        return MouseController.instance;
-    }
+    // private constructor(camera: THREE.Camera, scene: THREE.Scene) {
+    //     this.raycaster = new THREE.Raycaster();
+    //     this.mouse = new THREE.Vector2();
+    //     this.camera = camera;
+    //     this.scene = scene;
+    //     window.addEventListener('click', this.onMouseClick.bind(this));
+    // }
+    //
+    // public static getInstance(camera: THREE.Camera, scene: THREE.Scene): MouseController {
+    //     if (!MouseController.instance) {
+    //         MouseController.instance = new MouseController(camera, scene);
+    //     }
+    //     return MouseController.instance;
+    // }
 
     private onMouseClick(event: MouseEvent): void {
         // 마우스 좌표를 정규화된 장치 좌표로 변환
@@ -50,11 +58,18 @@ export class MouseController {
             } else {
                 console.warn(`No handler found for button with UUID: ${intersectedButton.uuid}`);
             }
+        } else {
+            console.log('No buttons intersected by the raycaster.');
         }
     }
 
     public registerButton(button: THREE.Mesh, handler: () => void): void {
         this.buttonClickHandlers[button.uuid] = handler;
         console.log(`Registered button: ${button.uuid}`);
+    }
+
+    public clearButtons(): void {
+        this.buttonClickHandlers = {};  // 버튼 핸들러 초기화
+        console.log('All button handlers cleared.');
     }
 }
