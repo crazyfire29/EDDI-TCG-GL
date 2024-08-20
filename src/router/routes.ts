@@ -3,6 +3,7 @@ import {RouteMap} from "./RouteMap";
 import {Component} from "./Component";
 import {TCGCardShopView} from "../shop/TCGCardShopView";
 import {TCGSimulationBattleFieldView} from "../simulation_battle_field/TCGSimulationBattleFieldView";
+import {TCGMyCardView} from "../my_card/TCGMyCardView";
 
 export interface Route {
     path: string;
@@ -26,6 +27,12 @@ export const routes: Route[] = [
         path: '/tcg-simulation-battle-field',
         getComponentInstance: (rootElement: HTMLElement, routeMap: RouteMap) => {
             return TCGSimulationBattleFieldView.getInstance(rootElement, routeMap);
+        }
+    },
+    {
+        path: '/tcg-my-card',
+        getComponentInstance: (rootElement: HTMLElement, routeMap: RouteMap) => {
+            return TCGMyCardView.getInstance(rootElement, routeMap);
         }
     },
 ];
