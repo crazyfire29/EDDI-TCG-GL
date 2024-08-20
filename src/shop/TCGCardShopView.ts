@@ -118,10 +118,24 @@ export class TCGCardShopView implements Component {
         this.shopContainer.style.display = 'block';
         this.isAnimating = true;
         if (!this.initialized) {
-            this.initialize(); // 초기화되지 않은 경우 초기화 호출
+            this.initialize();
         } else {
-            this.animate(); // 이미 초기화된 경우 애니메이션만 다시 시작
+            this.animate();
+            this.registerEventHandlers()
         }
+    }
+
+    private registerEventHandlers(): void {
+        // ShopButtonConfigList에서 가져온 버튼들에 대한 이벤트 핸들러 등록
+        this.buttons.forEach((button, index) => {
+            const config = ShopButtonConfigList.buttonConfigs[index];
+            this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
+        });
+
+        // addTransparentRectangle에서 추가된 사각형들에 대한 이벤트 핸들러 등록
+        this.transparentRectangles.forEach((rectangle) => {
+            this.mouseController.registerButton(rectangle.getMesh(), this.onTransparentRectangleClick.bind(this, rectangle.getId()));
+        });
     }
 
     public hide(): void {
@@ -130,7 +144,7 @@ export class TCGCardShopView implements Component {
         this.renderer.domElement.style.display = 'none';
         this.shopContainer.style.display = 'none';
 
-        // this.mouseController.clearButtons();
+        this.mouseController.clearButtons();
     }
 
     private addBackground(): void {
@@ -186,22 +200,6 @@ export class TCGCardShopView implements Component {
             }
         });
     }
-
-    // private addTransparentRectangle(position: THREE.Vector2, width: number, height: number): void {
-    //     const transparentRectangle = new TransparentRectangle(position, width, height);
-    //     transparentRectangle.addToScene(this.scene);
-    //
-    //     this.transparentRectangles.push(transparentRectangle);
-    // }
-
-    // private addTransparentRectangle(id: string, positionX: number, positionY: number, width: number, height: number): void {
-    //     // 절대 위치에 사각형 배치
-    //     const position = new THREE.Vector2(positionX, positionY);
-    //     const transparentRectangle = new TransparentRectangle(position, width, height, 0x888888, 0.5, id);  // 여기서 ID를 주어 구분 가능
-    //     transparentRectangle.addToScene(this.scene);
-    //
-    //     this.transparentRectangles.push(transparentRectangle);
-    // }
 
     private __calculatePercentPosition(position: number, screenSize: number): number {
         return position / screenSize;

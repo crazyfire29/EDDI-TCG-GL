@@ -6,6 +6,7 @@ import myCardMusic from '@resource/music/my_card/my-card.mp3';
 import { MouseController } from "../mouse/MouseController";
 import { RouteMap } from "../router/RouteMap";
 import { Component } from "../router/Component";
+import {TransparentRectangle} from "../shape/TransparentRectangle";
 
 export class TCGMyCardView implements Component {
     private static instance: TCGMyCardView | null = null;
@@ -24,6 +25,9 @@ export class TCGMyCardView implements Component {
 
     private initialized = false;
     private isAnimating = false;
+
+    private transparentRectangles: TransparentRectangle[] = []
+    private rectInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
 
     constructor(myCardContainer: HTMLElement, routeMap: RouteMap) {
         this.myCardContainer = myCardContainer;
@@ -46,6 +50,8 @@ export class TCGMyCardView implements Component {
         this.textureManager = TextureManager.getInstance();
         this.audioController = AudioController.getInstance();
         this.audioController.setMusic(myCardMusic);
+
+        window.addEventListener('resize', this.onWindowResize.bind(this));
 
         this.mouseController = new MouseController(this.camera, this.scene);
         this.routeMap = routeMap;
@@ -85,7 +91,25 @@ export class TCGMyCardView implements Component {
         this.initialized = true;
         this.isAnimating = true;
 
+        const lobbyButtonX = 0.15854;
+        const lobbyButtonY = 0.04728;
+        const lobbyButtonWidth = 0.09415;
+        const lobbyButtonHeight = 0.06458;
+
+        this.addTransparentRectangle('lobbyButton', lobbyButtonX, lobbyButtonY, lobbyButtonWidth, lobbyButtonHeight);
+
         this.animate();
+    }
+
+    private onTransparentRectangleClick(id: string): void {
+        console.log(`TransparentRectangle clicked: ${id}`);
+        switch (id) {
+            case 'lobbyButton':
+                this.routeMap.navigate("/tcg-main-lobby");
+                break;
+            default:
+                console.error("Unknown TransparentRectangle ID:", id);
+        }
     }
 
     public show(): void {
@@ -97,7 +121,14 @@ export class TCGMyCardView implements Component {
             this.initialize()
         } else {
             this.animate()
+            this.registerEventHandlers()
         }
+    }
+
+    private registerEventHandlers(): void {
+        this.transparentRectangles.forEach(rect => {
+            this.mouseController.registerButton(rect.getMesh(), this.onTransparentRectangleClick.bind(this, rect.getId()));
+        });
     }
 
     public hide(): void {
@@ -105,6 +136,8 @@ export class TCGMyCardView implements Component {
         this.isAnimating = false;
         this.renderer.domElement.style.display = 'none';
         this.myCardContainer.style.display = 'none';
+
+        this.mouseController.clearButtons();
     }
 
     private addBackground(): void {
@@ -123,6 +156,80 @@ export class TCGMyCardView implements Component {
         } else {
             console.error("Background texture not found.");
         }
+    }
+
+    private addTransparentRectangle(id: string, positionXPercent: number, positionYPercent: number, widthPercent: number, heightPercent: number): void {
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+
+        const positionX = (positionXPercent - 0.5) * screenWidth
+        const positionY = (0.5 - positionYPercent) * screenHeight
+
+        const position = new THREE.Vector2(
+            positionX, positionY
+        );
+
+        const width = 0.09415 * screenWidth
+        const height = 0.06458 * screenHeight
+
+        const transparentRectangle = new TransparentRectangle(position, width, height, 0xffffff, 0.0, id);
+        transparentRectangle.addToScene(this.scene);
+
+        this.mouseController.registerButton(transparentRectangle.getMesh(), this.onTransparentRectangleClick.bind(this, id));
+
+        this.transparentRectangles.push(transparentRectangle);
+        this.rectInitialInfo.set(id, { positionPercent: new THREE.Vector2(positionXPercent - 0.5, 0.5 - positionYPercent), widthPercent, heightPercent });
+    }
+
+    private onWindowResize(): void {
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
+        const aspect = newWidth / newHeight;
+        const viewSize = newHeight;
+
+        this.camera.left = -aspect * viewSize / 2;
+        this.camera.right = aspect * viewSize / 2;
+        this.camera.top = viewSize / 2;
+        this.camera.bottom = -viewSize / 2;
+        this.camera.updateProjectionMatrix();
+
+        this.renderer.setSize(newWidth, newHeight);
+
+        if (this.background) {
+            const scaleX = newWidth / this.background.getWidth();
+            const scaleY = newHeight / this.background.getHeight();
+            this.background.setScale(scaleX, scaleY);
+        }
+
+        this.buttons.forEach(button => {
+            const initialInfo = this.buttonInitialInfo.get(button.getMesh()?.uuid ?? '');
+            if (initialInfo) {
+                const newWidth = window.innerWidth * initialInfo.widthPercent;
+                const newHeight = window.innerHeight * initialInfo.heightPercent;
+                const newPosition = new THREE.Vector2(
+                    window.innerWidth * initialInfo.positionPercent.x,
+                    window.innerHeight * initialInfo.positionPercent.y
+                );
+
+                button.setPosition(newPosition.x, newPosition.y);
+                button.setScale(newWidth / button.getWidth(), newHeight / button.getHeight());
+            }
+        });
+
+        this.rectInitialInfo.forEach((info, id) => {
+            const rectangle = this.transparentRectangles.find(rect => rect.getId() === id);
+            if (rectangle) {
+                const newPosition = new THREE.Vector2(
+                    info.positionPercent.x * newWidth,
+                    info.positionPercent.y * newHeight
+                );
+                rectangle.setPosition(newPosition);
+                rectangle.setScale(
+                    info.widthPercent * newWidth / rectangle.getWidth(),
+                    info.heightPercent * newHeight / rectangle.getHeight()
+                );
+            }
+        });
     }
 
     animate(): void {

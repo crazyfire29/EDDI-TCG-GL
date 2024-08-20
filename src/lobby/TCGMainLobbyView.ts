@@ -98,10 +98,18 @@ export class TCGMainLobbyView implements Component {
         this.lobbyContainer.style.display = 'block';
         this.isAnimating = true;
         if (!this.initialized) {
-            this.initialize(); // 초기화되지 않은 경우 초기화 호출
+            this.initialize();
         } else {
-            this.animate(); // 이미 초기화된 경우 애니메이션만 다시 시작
+            this.animate();
+            this.registerEventHandlers()
         }
+    }
+
+    private registerEventHandlers(): void {
+        this.buttons.forEach((button, index) => {
+            const config = LobbyButtonConfigList.buttonConfigs[index];
+            this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
+        });
     }
 
     public hide(): void {
@@ -110,7 +118,7 @@ export class TCGMainLobbyView implements Component {
         this.renderer.domElement.style.display = 'none';
         this.lobbyContainer.style.display = 'none';
 
-        // this.mouseController.clearButtons();
+        this.mouseController.clearButtons();
     }
 
     private addBackground(): void {
@@ -167,7 +175,7 @@ export class TCGMainLobbyView implements Component {
                 this.routeMap.navigate("/one-vs-one");
                 break;
             case LobbyButtonType.MyCards:
-                this.routeMap.navigate("/my-cards");
+                this.routeMap.navigate("/tcg-my-card");
                 break;
             case LobbyButtonType.Shop:
                 console.log('Navigating to /tcg-card-shop')
