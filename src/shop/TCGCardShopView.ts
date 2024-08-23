@@ -125,6 +125,18 @@ export class TCGCardShopView implements Component {
         if (!this.initialized) {
             this.initialize();
         } else {
+            // 버튼을 다시 씬에 추가
+            this.buttons.forEach(button => {
+                this.scene.add(button.getMesh());
+                // this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, /* 해당 버튼의 타입 */));
+            });
+
+            // 투명 사각형들도 다시 씬에 추가
+            this.transparentRectangles.forEach(rectangle => {
+                this.scene.add(rectangle.getMesh());
+                this.mouseController.registerButton(rectangle.getMesh(), this.onTransparentRectangleClick.bind(this, rectangle.getId()));
+            });
+
             this.animate();
             this.registerEventHandlers()
         }
@@ -151,13 +163,23 @@ export class TCGCardShopView implements Component {
 
         this.mouseController.clearButtons();
 
+        // 모든 버튼들을 씬에서 제거
+        this.buttons.forEach(button => {
+            this.scene.remove(button.getMesh());
+        });
+
+        // 추가한 투명 사각형들도 씬에서 제거
+        this.transparentRectangles.forEach(rectangle => {
+            this.scene.remove(rectangle.getMesh());
+        });
+
         this.scene.children.forEach(child => {
             child.visible = false;
         });
     }
 
-    private addBackground(): void {
-        const texture = this.textureManager.getTexture('shop_background', 1);
+    private async addBackground(): Promise<void> {
+        const texture = await this.textureManager.getTexture('shop_background', 1);
         console.log('addBackground():', texture);
         if (texture) {
             if (!this.background) {
@@ -174,9 +196,9 @@ export class TCGCardShopView implements Component {
         }
     }
 
-    private addButtons(): void {
-        ShopButtonConfigList.buttonConfigs.forEach((config) => {
-            const buttonTexture = this.textureManager.getTexture('shop_buttons', config.id);
+    private async addButtons(): Promise<void> {
+        await Promise.all(ShopButtonConfigList.buttonConfigs.map(async (config) => {
+            const buttonTexture = await this.textureManager.getTexture('shop_buttons', config.id);
 
             if (buttonTexture) {
                 const widthPercent = 300 / 1920;  // 기준 화면 크기의 퍼센트로 버튼 크기를 정의
@@ -207,7 +229,7 @@ export class TCGCardShopView implements Component {
             } else {
                 console.error("Button texture not found.");
             }
-        });
+        }));
     }
 
     private __calculatePercentPosition(position: number, screenSize: number): number {

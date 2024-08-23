@@ -140,8 +140,8 @@ export class TCGMyCardView implements Component {
         this.mouseController.clearButtons();
     }
 
-    private addBackground(): void {
-        const texture = this.textureManager.getTexture('my_card_background', 1);
+    private async addBackground(): Promise<void> {
+        const texture = await this.textureManager.getTexture('my_card_background', 1);
         console.log('addBackground():', texture);
         if (texture) {
             if (!this.background) {

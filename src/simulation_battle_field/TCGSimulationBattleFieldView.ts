@@ -107,8 +107,8 @@ export class TCGSimulationBattleFieldView implements Component {
         this.simulationBattleFieldContainer.style.display = 'none';
     }
 
-    private addBackground(): void {
-        const texture = this.textureManager.getTexture('battle_field_background', 1);
+    private async addBackground(): Promise<void> {
+        const texture = await this.textureManager.getTexture('battle_field_background', 1);
         console.log('addBackground():', texture);
         if (texture) {
             if (!this.background) {

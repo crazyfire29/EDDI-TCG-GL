@@ -7,6 +7,8 @@ interface ImageInfo {
 
 export class TextureManager {
     private static instance: TextureManager;
+    private isTexturesPreloaded: boolean = false
+
     private battleFieldUnitCardTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitWeaponTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitHpTextureList: { [id: number]: THREE.Texture } = {};
@@ -29,6 +31,10 @@ export class TextureManager {
     }
 
     public async preloadTextures(jsonUrl: string): Promise<void> {
+        if (this.isTexturesPreloaded) {
+            console.log('Textures already preloaded.');
+            return;
+        }
 
         try {
             const response = await fetch(jsonUrl);
@@ -51,6 +57,7 @@ export class TextureManager {
 
             console.log('All textures preloaded from TextureManager.ts');
             console.log('mainLobbyBackgroundTextureList:', this.mainLobbyBackgroundTextureList);
+            this.isTexturesPreloaded = true
         } catch (error) {
             console.error(`Failed to fetch or parse JSON from: ${jsonUrl}`, error);
         }
@@ -95,7 +102,12 @@ export class TextureManager {
         return match ? parseInt(match[1], 10) : null;
     }
 
-    public getTexture(category: string, id: number): THREE.Texture | undefined {
+    public async getTexture(category: string, id: number): Promise<THREE.Texture | undefined> {
+        if (!this.isTexturesPreloaded) {
+            console.warn('Textures are not yet preloaded. Waiting for preload to complete...');
+            await this.preloadTextures("image-paths.json"); // 텍스처가 로드될 때까지 대기
+        }
+
         console.log('getTexture -> category:', category, ',id:', id)
         switch (category) {
             case 'card':

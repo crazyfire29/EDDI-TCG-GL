@@ -130,8 +130,8 @@ export class TCGMainLobbyView implements Component {
         });
     }
 
-    private addBackground(): void {
-        const texture = this.textureManager.getTexture('main_lobby_background', 1);
+    private async addBackground(): Promise<void> {
+        const texture = await this.textureManager.getTexture('main_lobby_background', 1);
         console.log('addBackground():', texture);
         if (texture) {
             if (!this.background) {
@@ -148,9 +148,9 @@ export class TCGMainLobbyView implements Component {
         }
     }
 
-    private addButtons(): void {
-        LobbyButtonConfigList.buttonConfigs.forEach((config) => {
-            const buttonTexture = this.textureManager.getTexture('main_lobby_buttons', config.id);
+    private async addButtons(): Promise<void> {
+        await Promise.all(LobbyButtonConfigList.buttonConfigs.map(async (config) => {
+            const buttonTexture = await this.textureManager.getTexture('main_lobby_buttons', config.id);
             if (buttonTexture) {
                 const widthPercent = 800 / 1920;  // 기준 화면 크기의 퍼센트로 버튼 크기를 정의
                 const heightPercent = 100 / 1080;
@@ -174,7 +174,7 @@ export class TCGMainLobbyView implements Component {
             } else {
                 console.error("Button texture not found.");
             }
-        });
+        }));
     }
 
     private onButtonClick(type: LobbyButtonType): void {
