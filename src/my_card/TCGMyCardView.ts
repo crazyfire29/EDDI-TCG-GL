@@ -2,22 +2,20 @@ import * as THREE from 'three';
 import { TextureManager } from "../texture_manager/TextureManager";
 import { NonBackgroundImage } from "../shape/image/NonBackgroundImage";
 import { AudioController } from "../audio/AudioController";
-import cardShopMusic from '@resource/music/shop/card-shop.mp3';
+import myCardMusic from '@resource/music/my_card/my-card.mp3';
 import { MouseController } from "../mouse/MouseController";
 import { RouteMap } from "../router/RouteMap";
 import { Component } from "../router/Component";
-import { ShopButtonType } from "./ShopButtonType";
-import {ShopButtonConfigList} from "./ShopButtonConfigList";
-import { TransparentRectangle } from "../shape/TransparentRectangle";
+import {TransparentRectangle} from "../shape/TransparentRectangle";
 
-export class TCGCardShopView implements Component {
-    private static instance: TCGCardShopView | null = null;
+export class TCGMyCardView implements Component {
+    private static instance: TCGMyCardView | null = null;
 
     private scene: THREE.Scene;
     private camera: THREE.OrthographicCamera;
     private renderer: THREE.WebGLRenderer;
     private textureManager: TextureManager;
-    private shopContainer: HTMLElement;
+    private myCardContainer: HTMLElement;
     private background: NonBackgroundImage | null = null;
     private buttons: NonBackgroundImage[] = [];
     private buttonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
@@ -31,14 +29,13 @@ export class TCGCardShopView implements Component {
     private transparentRectangles: TransparentRectangle[] = []
     private rectInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
 
-
-    constructor(shopContainer: HTMLElement, routeMap: RouteMap) {
-        this.shopContainer = shopContainer;
+    constructor(myCardContainer: HTMLElement, routeMap: RouteMap) {
+        this.myCardContainer = myCardContainer;
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xffffff);
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.shopContainer.appendChild(this.renderer.domElement);
+        this.myCardContainer.appendChild(this.renderer.domElement);
 
         const aspect = window.innerWidth / window.innerHeight;
         const viewSize = window.innerHeight;
@@ -52,22 +49,21 @@ export class TCGCardShopView implements Component {
 
         this.textureManager = TextureManager.getInstance();
         this.audioController = AudioController.getInstance();
-        this.audioController.setMusic(cardShopMusic);
+        this.audioController.setMusic(myCardMusic);
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
 
-        // this.mouseController = MouseController.getInstance(this.camera, this.scene);
         this.mouseController = new MouseController(this.camera, this.scene);
         this.routeMap = routeMap;
 
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
     }
 
-    public static getInstance(shopContainer: HTMLElement, routeMap: RouteMap): TCGCardShopView {
-        if (!TCGCardShopView.instance) {
-            TCGCardShopView.instance = new TCGCardShopView(shopContainer, routeMap);
+    public static getInstance(lobbyContainer: HTMLElement, routeMap: RouteMap): TCGMyCardView {
+        if (!TCGMyCardView.instance) {
+            TCGMyCardView.instance = new TCGMyCardView(lobbyContainer, routeMap);
         }
-        return TCGCardShopView.instance;
+        return TCGMyCardView.instance;
     }
 
     private async initializeAudio(): Promise<void> {
@@ -85,101 +81,67 @@ export class TCGCardShopView implements Component {
             return;
         }
 
-        console.log('TCGCardShopView initialize() operate!!!');
+        console.log('TCGBattleFieldView initialize() operate!!!');
         await this.textureManager.preloadTextures("image-paths.json");
 
         console.log("Textures preloaded. Adding background and buttons...");
 
         this.addBackground();
-        this.addButtons();
+
         this.initialized = true;
         this.isAnimating = true;
 
-        const lobbyButtonX = 0.04761;
-        const lobbyButtonY = 0.07534;
+        const lobbyButtonX = 0.15854;
+        const lobbyButtonY = 0.04728;
         const lobbyButtonWidth = 0.09415;
         const lobbyButtonHeight = 0.06458;
 
-        const myCardButtonX = -695;
-        const myCardButtonY = 242;
-        const myCardButtonWidth = 145;
-        const myCardButtonHeight = 50;
-
-        // 버튼 추가 시 상대적인 위치로 변환하여 사용
         this.addTransparentRectangle('lobbyButton', lobbyButtonX, lobbyButtonY, lobbyButtonWidth, lobbyButtonHeight);
-        this.addTransparentRectangle('myCardButton', myCardButtonX, myCardButtonY, myCardButtonWidth, myCardButtonHeight);
 
         this.animate();
     }
 
+    private onTransparentRectangleClick(id: string): void {
+        console.log(`TransparentRectangle clicked: ${id}`);
+        switch (id) {
+            case 'lobbyButton':
+                this.routeMap.navigate("/tcg-main-lobby");
+                break;
+            default:
+                console.error("Unknown TransparentRectangle ID:", id);
+        }
+    }
+
     public show(): void {
-        console.log('Showing TCGCardShopView...');
+        console.log('Showing TCGMainLobbyView...');
         this.renderer.domElement.style.display = 'block';
-        this.shopContainer.style.display = 'block';
+        this.myCardContainer.style.display = 'block';
         this.isAnimating = true;
-
-        this.scene.children.forEach(child => {
-            child.visible = true;
-        });
-
         if (!this.initialized) {
-            this.initialize();
+            this.initialize()
         } else {
-            // 버튼을 다시 씬에 추가
-            this.buttons.forEach(button => {
-                this.scene.add(button.getMesh());
-                // this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, /* 해당 버튼의 타입 */));
-            });
-
-            // 투명 사각형들도 다시 씬에 추가
-            this.transparentRectangles.forEach(rectangle => {
-                this.scene.add(rectangle.getMesh());
-                this.mouseController.registerButton(rectangle.getMesh(), this.onTransparentRectangleClick.bind(this, rectangle.getId()));
-            });
-
-            this.animate();
+            this.animate()
             this.registerEventHandlers()
         }
     }
 
     private registerEventHandlers(): void {
-        // ShopButtonConfigList에서 가져온 버튼들에 대한 이벤트 핸들러 등록
-        this.buttons.forEach((button, index) => {
-            const config = ShopButtonConfigList.buttonConfigs[index];
-            this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
-        });
-
-        // addTransparentRectangle에서 추가된 사각형들에 대한 이벤트 핸들러 등록
-        this.transparentRectangles.forEach((rectangle) => {
-            this.mouseController.registerButton(rectangle.getMesh(), this.onTransparentRectangleClick.bind(this, rectangle.getId()));
+        this.transparentRectangles.forEach(rect => {
+            this.mouseController.registerButton(rect.getMesh(), this.onTransparentRectangleClick.bind(this, rect.getId()));
         });
     }
 
     public hide(): void {
-        console.log('Hiding TCGCardShopView...');
+        console.log('Hiding TCGMainLobbyView...');
         this.isAnimating = false;
         this.renderer.domElement.style.display = 'none';
-        this.shopContainer.style.display = 'none';
+        this.myCardContainer.style.display = 'none';
 
         this.mouseController.clearButtons();
-
-        // 모든 버튼들을 씬에서 제거
-        this.buttons.forEach(button => {
-            this.scene.remove(button.getMesh());
-        });
-
-        // 추가한 투명 사각형들도 씬에서 제거
-        this.transparentRectangles.forEach(rectangle => {
-            this.scene.remove(rectangle.getMesh());
-        });
-
-        this.scene.children.forEach(child => {
-            child.visible = false;
-        });
     }
 
     private async addBackground(): Promise<void> {
-        const texture = await this.textureManager.getTexture('shop_background', 1);
+        const texture = await this.textureManager.getTexture('my_card_background', 1);
         console.log('addBackground():', texture);
         if (texture) {
             if (!this.background) {
@@ -196,57 +158,13 @@ export class TCGCardShopView implements Component {
         }
     }
 
-    private async addButtons(): Promise<void> {
-        await Promise.all(ShopButtonConfigList.buttonConfigs.map(async (config) => {
-            const buttonTexture = await this.textureManager.getTexture('shop_buttons', config.id);
-
-            if (buttonTexture) {
-                const widthPercent = 300 / 1920;  // 기준 화면 크기의 퍼센트로 버튼 크기를 정의
-                const heightPercent = 300 / 1080;
-                const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
-
-                const button = new NonBackgroundImage(
-                    window.innerWidth * widthPercent,
-                    window.innerHeight * heightPercent,
-                    new THREE.Vector2(
-                        window.innerWidth * positionPercent.x,
-                        window.innerHeight * positionPercent.y
-                    )
-                );
-                button.createNonBackgroundImageWithTexture(buttonTexture, 1, 1);
-                button.draw(this.scene);
-
-                console.log(`Button ID: ${config.id}`);
-                console.log('Button Texture:', buttonTexture);
-                console.log('Button Position (Percent):', positionPercent);
-                console.log('Button Position (Pixels):', button.getLocalTranslation());
-                console.log('Button Size (Width, Height):', button.getWidth(), button.getHeight());
-
-                this.buttons.push(button);
-                this.buttonInitialInfo.set(button.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
-
-                this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
-            } else {
-                console.error("Button texture not found.");
-            }
-        }));
-    }
-
-    private __calculatePercentPosition(position: number, screenSize: number): number {
-        return position / screenSize;
-    }
-
     private addTransparentRectangle(id: string, positionXPercent: number, positionYPercent: number, widthPercent: number, heightPercent: number): void {
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
-        console.log('width:', screenWidth, ', height:', screenHeight)
-        console.log('positionXPercent:', positionXPercent, ', positionYPercent:', positionYPercent)
-        console.log('positionXPercent:', positionXPercent, ', positionY:', (0.5 - positionYPercent) * screenHeight)
 
         const positionX = (positionXPercent - 0.5) * screenWidth
         const positionY = (0.5 - positionYPercent) * screenHeight
 
-        // 비율 기반 절대 위치 및 크기 계산
         const position = new THREE.Vector2(
             positionX, positionY
         );
@@ -259,29 +177,8 @@ export class TCGCardShopView implements Component {
 
         this.mouseController.registerButton(transparentRectangle.getMesh(), this.onTransparentRectangleClick.bind(this, id));
 
-        // 위치 및 크기 정보를 저장하여 리사이즈 시 재계산할 수 있도록 합니다.
         this.transparentRectangles.push(transparentRectangle);
         this.rectInitialInfo.set(id, { positionPercent: new THREE.Vector2(positionXPercent - 0.5, 0.5 - positionYPercent), widthPercent, heightPercent });
-    }
-
-    private onButtonClick(type: ShopButtonType): void {
-        console.log('Button clicked:', type);
-        switch (type) {
-            case ShopButtonType.ALL:
-                this.routeMap.navigate("/draw/all");
-                break;
-            case ShopButtonType.UNDEAD:
-                this.routeMap.navigate("/draw/undead");
-                break;
-            case ShopButtonType.TRENT:
-                this.routeMap.navigate("/draw/trent");
-                break;
-            case ShopButtonType.HUMAN:
-                this.routeMap.navigate("/draw/human");
-                break;
-            default:
-                console.error("Unknown button type:", type);
-        }
     }
 
     private onWindowResize(): void {
@@ -335,21 +232,7 @@ export class TCGCardShopView implements Component {
         });
     }
 
-    private onTransparentRectangleClick(id: string): void {
-        console.log(`TransparentRectangle clicked: ${id}`);
-        switch (id) {
-            case 'lobbyButton':
-                this.routeMap.navigate("/tcg-main-lobby");
-                break;
-            case 'myCardButton':
-                console.log("My Card button clicked");
-                break;
-            default:
-                console.error("Unknown TransparentRectangle ID:", id);
-        }
-    }
-
-    public animate(): void {
+    animate(): void {
         if (this.isAnimating) {
             requestAnimationFrame(() => this.animate());
             this.renderer.render(this.scene, this.camera);
