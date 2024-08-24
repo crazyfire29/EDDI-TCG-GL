@@ -97,11 +97,24 @@ export class TCGMainLobbyView implements Component {
         this.renderer.domElement.style.display = 'block';
         this.lobbyContainer.style.display = 'block';
         this.isAnimating = true;
+
+        this.scene.children.forEach(child => {
+            child.visible = true;
+        });
+
         if (!this.initialized) {
-            this.initialize(); // 초기화되지 않은 경우 초기화 호출
+            this.initialize();
         } else {
-            this.animate(); // 이미 초기화된 경우 애니메이션만 다시 시작
+            this.animate();
+            this.registerEventHandlers()
         }
+    }
+
+    private registerEventHandlers(): void {
+        this.buttons.forEach((button, index) => {
+            const config = LobbyButtonConfigList.buttonConfigs[index];
+            this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
+        });
     }
 
     public hide(): void {
@@ -110,11 +123,15 @@ export class TCGMainLobbyView implements Component {
         this.renderer.domElement.style.display = 'none';
         this.lobbyContainer.style.display = 'none';
 
-        // this.mouseController.clearButtons();
+        this.mouseController.clearButtons();
+
+        this.scene.children.forEach(child => {
+            child.visible = false;
+        });
     }
 
-    private addBackground(): void {
-        const texture = this.textureManager.getTexture('main_lobby_background', 1);
+    private async addBackground(): Promise<void> {
+        const texture = await this.textureManager.getTexture('main_lobby_background', 1);
         console.log('addBackground():', texture);
         if (texture) {
             if (!this.background) {
@@ -131,9 +148,9 @@ export class TCGMainLobbyView implements Component {
         }
     }
 
-    private addButtons(): void {
-        LobbyButtonConfigList.buttonConfigs.forEach((config) => {
-            const buttonTexture = this.textureManager.getTexture('main_lobby_buttons', config.id);
+    private async addButtons(): Promise<void> {
+        await Promise.all(LobbyButtonConfigList.buttonConfigs.map(async (config) => {
+            const buttonTexture = await this.textureManager.getTexture('main_lobby_buttons', config.id);
             if (buttonTexture) {
                 const widthPercent = 800 / 1920;  // 기준 화면 크기의 퍼센트로 버튼 크기를 정의
                 const heightPercent = 100 / 1080;
@@ -157,7 +174,7 @@ export class TCGMainLobbyView implements Component {
             } else {
                 console.error("Button texture not found.");
             }
-        });
+        }));
     }
 
     private onButtonClick(type: LobbyButtonType): void {
@@ -167,14 +184,14 @@ export class TCGMainLobbyView implements Component {
                 this.routeMap.navigate("/one-vs-one");
                 break;
             case LobbyButtonType.MyCards:
-                this.routeMap.navigate("/my-cards");
+                this.routeMap.navigate("/tcg-my-card");
                 break;
             case LobbyButtonType.Shop:
                 console.log('Navigating to /tcg-card-shop')
                 this.routeMap.navigate("/tcg-card-shop");
                 break;
             case LobbyButtonType.Test:
-                this.routeMap.navigate("/test");
+                this.routeMap.navigate("/tcg-simulation-battle-field");
                 break;
             default:
                 console.error("Unknown button type:", type);
