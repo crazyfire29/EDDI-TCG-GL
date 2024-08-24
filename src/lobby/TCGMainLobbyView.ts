@@ -98,6 +98,8 @@ export class TCGMainLobbyView implements Component {
         this.lobbyContainer.style.display = 'block';
         this.isAnimating = true;
 
+        this.mouseController.clearButtons();
+
         this.scene.children.forEach(child => {
             child.visible = true;
         });
@@ -105,6 +107,8 @@ export class TCGMainLobbyView implements Component {
         if (!this.initialized) {
             this.initialize();
         } else {
+            this.addButtons(); // 버튼을 다시 생성하는 메서드 호출
+
             this.animate();
             this.registerEventHandlers()
         }
@@ -123,7 +127,14 @@ export class TCGMainLobbyView implements Component {
         this.renderer.domElement.style.display = 'none';
         this.lobbyContainer.style.display = 'none';
 
+        this.buttons.forEach(button => {
+            this.mouseController.unregisterButton(button.getMesh());
+            button.getMesh().removeFromParent(); // 씬에서 버튼 완전 제거
+        });
+
         this.mouseController.clearButtons();
+
+        this.buttons = [];
 
         this.scene.children.forEach(child => {
             child.visible = false;
@@ -240,7 +251,7 @@ export class TCGMainLobbyView implements Component {
             requestAnimationFrame(() => this.animate());
             this.renderer.render(this.scene, this.camera);
         } else {
-            console.log('Animation stopped.'); // 애니메이션 루프가 멈추는지 확인
+            console.log('TCGMainLobby: Animation stopped.'); // 애니메이션 루프가 멈추는지 확인
         }
     }
 }

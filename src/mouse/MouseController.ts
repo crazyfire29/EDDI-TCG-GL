@@ -1,14 +1,13 @@
 import * as THREE from 'three';
 
 export class MouseController {
-    private static instance: MouseController;
     private raycaster: THREE.Raycaster;
     private mouse: THREE.Vector2;
     private camera: THREE.Camera;
     private scene: THREE.Scene;
     private buttonClickHandlers: { [uuid: string]: () => void } = {};
 
-    constructor(camera: THREE.Camera, scene: THREE.Scene) {  // 생성자 변경
+    constructor(camera: THREE.Camera, scene: THREE.Scene) {
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
         this.camera = camera;
@@ -16,23 +15,7 @@ export class MouseController {
         window.addEventListener('click', this.onMouseClick.bind(this));
     }
 
-    // private constructor(camera: THREE.Camera, scene: THREE.Scene) {
-    //     this.raycaster = new THREE.Raycaster();
-    //     this.mouse = new THREE.Vector2();
-    //     this.camera = camera;
-    //     this.scene = scene;
-    //     window.addEventListener('click', this.onMouseClick.bind(this));
-    // }
-    //
-    // public static getInstance(camera: THREE.Camera, scene: THREE.Scene): MouseController {
-    //     if (!MouseController.instance) {
-    //         MouseController.instance = new MouseController(camera, scene);
-    //     }
-    //     return MouseController.instance;
-    // }
-
     private onMouseClick(event: MouseEvent): void {
-        // 마우스 좌표를 정규화된 장치 좌표로 변환
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -41,9 +24,12 @@ export class MouseController {
 
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
-        // const intersects = this.raycaster.intersectObjects(this.scene.children, true);
-        const buttons = this.scene.children.filter(obj => this.buttonClickHandlers[obj.uuid] !== undefined);
-        const intersects = this.raycaster.intersectObjects(buttons, true);
+        // Raycaster가 현재 등록된 버튼들만 검사하도록 설정
+        const buttons = Object.keys(this.buttonClickHandlers).map(uuid => this.scene.getObjectByProperty('uuid', uuid)).filter(obj => obj instanceof THREE.Mesh);
+        const intersects = this.raycaster.intersectObjects(buttons as THREE.Object3D[], true);
+
+        // const buttons = this.scene.children.filter(obj => this.buttonClickHandlers[obj.uuid] !== undefined);
+        // const intersects = this.raycaster.intersectObjects(buttons, true);
 
         console.log('every button handler list:', this.buttonClickHandlers);
 
@@ -63,13 +49,33 @@ export class MouseController {
         }
     }
 
+    public getRegisteredButtons(): string[] {
+        return Object.keys(this.buttonClickHandlers);
+    }
+
+    // 등록 및 제거 메서드들에 로그를 추가하여 정확히 동작하는지 확인
     public registerButton(button: THREE.Mesh, handler: () => void): void {
-        this.buttonClickHandlers[button.uuid] = handler;
-        console.log(`Registered button: ${button.uuid}`);
+        if (!this.buttonClickHandlers[button.uuid]) {  // 중복 확인
+            this.buttonClickHandlers[button.uuid] = handler;
+            console.log(`Registered button: ${button.uuid}`);
+        } else {
+            console.log(`Button with UUID ${button.uuid} is already registered.`);
+        }
+        console.log('Current registered buttons:', this.getRegisteredButtons());
+    }
+
+    public unregisterButton(button: THREE.Mesh): void {
+        if (this.buttonClickHandlers[button.uuid]) {
+            delete this.buttonClickHandlers[button.uuid];
+            console.log(`Unregistered button: ${button.uuid}`);
+        } else {
+            console.log(`Button with UUID ${button.uuid} is not registered.`);
+        }
+        console.log('Current registered buttons after unregister:', this.getRegisteredButtons());
     }
 
     public clearButtons(): void {
-        this.buttonClickHandlers = {};  // 버튼 핸들러 초기화
+        this.buttonClickHandlers = {};
         console.log('All button handlers cleared.');
     }
 }
