@@ -118,6 +118,8 @@ export class TCGCardShopView implements Component {
         this.shopContainer.style.display = 'block';
         this.isAnimating = true;
 
+        this.mouseController.clearButtons();
+
         this.scene.children.forEach(child => {
             child.visible = true;
         });
@@ -125,21 +127,30 @@ export class TCGCardShopView implements Component {
         if (!this.initialized) {
             this.initialize();
         } else {
-            // 버튼을 다시 씬에 추가
-            this.buttons.forEach(button => {
-                this.scene.add(button.getMesh());
-                // this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, /* 해당 버튼의 타입 */));
-            });
+            this.addButtons(); // 버튼을 다시 생성하는 메서드 호출
 
-            // 투명 사각형들도 다시 씬에 추가
-            this.transparentRectangles.forEach(rectangle => {
-                this.scene.add(rectangle.getMesh());
-                this.mouseController.registerButton(rectangle.getMesh(), this.onTransparentRectangleClick.bind(this, rectangle.getId()));
-            });
+            // 투명 사각형을 다시 생성하고 씬에 추가
+            this.addTransparentRectangles();
 
             this.animate();
             this.registerEventHandlers()
         }
+    }
+
+    private addTransparentRectangles(): void {
+        // 로비 버튼
+        const lobbyButtonX = 0.04761;
+        const lobbyButtonY = 0.07534;
+        const lobbyButtonWidth = 0.09415;
+        const lobbyButtonHeight = 0.06458;
+        this.addTransparentRectangle('lobbyButton', lobbyButtonX, lobbyButtonY, lobbyButtonWidth, lobbyButtonHeight);
+
+        // 카드 버튼
+        const myCardButtonX = -695;
+        const myCardButtonY = 242;
+        const myCardButtonWidth = 145;
+        const myCardButtonHeight = 50;
+        this.addTransparentRectangle('myCardButton', myCardButtonX, myCardButtonY, myCardButtonWidth, myCardButtonHeight);
     }
 
     private registerEventHandlers(): void {
@@ -161,21 +172,41 @@ export class TCGCardShopView implements Component {
         this.renderer.domElement.style.display = 'none';
         this.shopContainer.style.display = 'none';
 
-        this.mouseController.clearButtons();
-
-        // 모든 버튼들을 씬에서 제거
         this.buttons.forEach(button => {
+            this.mouseController.unregisterButton(button.getMesh());
+            this.disposeMesh(button.getMesh());
             this.scene.remove(button.getMesh());
         });
 
-        // 추가한 투명 사각형들도 씬에서 제거
         this.transparentRectangles.forEach(rectangle => {
+            this.mouseController.unregisterButton(rectangle.getMesh());
+            this.disposeMesh(rectangle.getMesh());
             this.scene.remove(rectangle.getMesh());
         });
 
-        this.scene.children.forEach(child => {
-            child.visible = false;
-        });
+        this.mouseController.clearButtons();
+
+        this.buttons = [];
+        this.transparentRectangles = [];
+
+        // this.scene.children.forEach(child => {
+        //     child.visible = false;
+        // });
+
+        console.log('Scene children after hide:', this.scene.children);
+    }
+
+    private disposeMesh(mesh: THREE.Mesh): void {
+        if (mesh.geometry) {
+            mesh.geometry.dispose();
+        }
+        if (mesh.material) {
+            if (Array.isArray(mesh.material)) {
+                mesh.material.forEach(material => material.dispose());
+            } else {
+                mesh.material.dispose();
+            }
+        }
     }
 
     private async addBackground(): Promise<void> {
@@ -354,7 +385,7 @@ export class TCGCardShopView implements Component {
             requestAnimationFrame(() => this.animate());
             this.renderer.render(this.scene, this.camera);
         } else {
-            console.log('Animation stopped.');
+            console.log('TCGCardShop: Animation stopped.');
         }
     }
 }
