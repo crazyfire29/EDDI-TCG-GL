@@ -16,7 +16,7 @@ import {BattleFieldUnitScene} from "../../src/battle_field_unit/scene/BattleFiel
 import {ResourceManager} from "../../src/resouce_manager/ResourceManager";
 import {BattleFieldUnitRenderer} from "../../src/battle_field_unit/renderer/BattleFieldUnitRenderer";
 
-export class TCGJustTestBattleFieldView implements Component {
+export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
 
     private scene: THREE.Scene;
@@ -29,7 +29,6 @@ export class TCGJustTestBattleFieldView implements Component {
     private buttonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
     private audioController: AudioController;
     private mouseController: MouseController;
-    private routeMap: RouteMap;
 
     private battleFieldUnitRepository = BattleFieldUnitRepository.getInstance();
     private battleFieldUnitScene = new BattleFieldUnitScene();
@@ -39,7 +38,7 @@ export class TCGJustTestBattleFieldView implements Component {
     private initialized = false;
     private isAnimating = false;
 
-    constructor(simulationBattleFieldContainer: HTMLElement, routeMap: RouteMap) {
+    constructor(simulationBattleFieldContainer: HTMLElement) {
         this.simulationBattleFieldContainer = simulationBattleFieldContainer;
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xffffff);
@@ -62,14 +61,13 @@ export class TCGJustTestBattleFieldView implements Component {
         this.audioController.setMusic(battleFieldMusic);
 
         this.mouseController = new MouseController(this.camera, this.scene);
-        this.routeMap = routeMap;
 
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
     }
 
-    public static getInstance(lobbyContainer: HTMLElement, routeMap: RouteMap): TCGJustTestBattleFieldView {
+    public static getInstance(lobbyContainer: HTMLElement): TCGJustTestBattleFieldView {
         if (!TCGJustTestBattleFieldView.instance) {
-            TCGJustTestBattleFieldView.instance = new TCGJustTestBattleFieldView(lobbyContainer, routeMap);
+            TCGJustTestBattleFieldView.instance = new TCGJustTestBattleFieldView(lobbyContainer);
         }
         return TCGJustTestBattleFieldView.instance;
     }
@@ -94,7 +92,7 @@ export class TCGJustTestBattleFieldView implements Component {
 
         console.log("Textures preloaded. Adding background and buttons...");
 
-        // this.addBackground();
+        this.addBackground();
         this.addYourHandUnitList()
 
         this.initialized = true;
@@ -148,8 +146,7 @@ export class TCGJustTestBattleFieldView implements Component {
         const raceId = 2;
         const position = new Vector2d(0, 0);
 
-        const battleFieldUnit = new BattleFieldUnit(cardId, weaponId, hpId, energyId, raceId, position);
-        this.battleFieldUnitRepository.addBattleFieldUnit(battleFieldUnit);
+        console.log("Creating BattleFieldUnit with the following parameters:", { cardId, weaponId, hpId, energyId, raceId, position });
 
         this.battleFieldResourceManager = new ResourceManager();
         this.battleFieldResourceManager.registerBattleFieldUnitPath({
@@ -159,9 +156,17 @@ export class TCGJustTestBattleFieldView implements Component {
             energyPath: 'resource/battle_field_unit/energy/{id}.png',
             racePath: 'resource/card_race/{id}.png'
         });
+        console.log("ResourceManager paths registered.");
 
         this.battleFieldUnitRenderer = new BattleFieldUnitRenderer(this.battleFieldUnitScene, this.battleFieldResourceManager);
+        console.log("BattleFieldUnitRenderer initialized:", this.battleFieldUnitRenderer);
+
+        const battleFieldUnit = new BattleFieldUnit(cardId, weaponId, hpId, energyId, raceId, position);
+        this.battleFieldUnitRepository.addBattleFieldUnit(battleFieldUnit);
+        console.log("BattleFieldUnit created and added to the repository:", battleFieldUnit);
+
         this.scene.add(this.battleFieldUnitScene.getScene());
+        console.log("BattleFieldUnitScene added to the main scene:", this.battleFieldUnitScene.getScene());
     }
 
     animate(): void {
@@ -181,7 +186,5 @@ if (!rootElement) {
     throw new Error("Cannot find element with id 'app'.");
 }
 
-const routeMap = new RouteMap(rootElement, '/tcg-battle-field');
-
-const fieldView = TCGJustTestBattleFieldView.getInstance(rootElement, routeMap);
+const fieldView = TCGJustTestBattleFieldView.getInstance(rootElement);
 fieldView.initialize();
