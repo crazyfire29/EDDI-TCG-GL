@@ -6,18 +6,25 @@ import { TextureManager } from "../../src/texture_manager/TextureManager";
 import { Vector2d } from "../../src/common/math/Vector2d";
 import * as THREE from "three";
 import {LegacyNonBackgroundImage} from "../../src/shape/image/LegacyNonBackgroundImage";
+import {MeshGenerator} from "../../src/mesh/generator";
+import {SupportCardGenerator} from "../../src/card/support/generate";
 
-const container = document.body;
+const rootElement = document.getElementById('app');  // 렌더링할 요소를 가져옴
 
-const width = window.innerWidth;
-const height = window.innerHeight;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
 
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(width, height);
-container.appendChild(renderer.domElement);
+renderer.setSize(window.innerWidth, window.innerHeight);
 
-const aspect = width / height;
-const viewSize = height;
+if (rootElement) {
+    rootElement.appendChild(renderer.domElement);  // DOM에 렌더러 추가
+} else {
+    console.error('Root element not found!');
+}
+
+const aspect = window.innerWidth / window.innerHeight;
+const viewSize = 10;  // 카메라의 시야 크기를 조정
 const camera = new THREE.OrthographicCamera(
     -aspect * viewSize / 2, aspect * viewSize / 2,
     viewSize / 2, -viewSize / 2,
@@ -26,86 +33,13 @@ const camera = new THREE.OrthographicCamera(
 camera.position.set(0, 0, 5);
 camera.lookAt(0, 0, 0);
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xffffff);
-
-const backgroundImagePath = 'resource/background/battle_field.png'
-const backgroundWidth = viewSize * aspect
-const backgroundHeight = viewSize
-const background = new LegacyNonBackgroundImage(backgroundWidth, backgroundHeight, backgroundImagePath, 1, 1, new THREE.Vector2(0, 0), undefined, undefined, undefined, undefined, undefined, () => {
-    background.draw(scene)
-})
-
-function renderCardTextures(
-    cardTexture: THREE.Texture | null,
-    cardKindsTexture: THREE.Texture | null,
-    cardRaceTexture: THREE.Texture | null
-) {
-    // 기존 씬에서 카드 메쉬 제거
-    scene.children.forEach(child => {
-        if (child instanceof THREE.Mesh) {
-            scene.remove(child);
-        }
-    });
-
-    // 카드 텍스처가 없으면 종료
-    if (!cardTexture) {
-        console.error('No card texture provided.');
-        return;
-    }
-
-    // 카드 텍스처 재질 생성
-    const cardMaterial = new THREE.MeshBasicMaterial({ map: cardTexture });
-    const cardGeometry = new THREE.PlaneGeometry(2, 3); // 카드 크기에 맞게 조정
-    const cardMesh = new THREE.Mesh(cardGeometry, cardMaterial);
-    scene.add(cardMesh);
-
-    // 카드 종류 및 카드 종족 텍스처를 사용할 경우 추가 메쉬 생성
-    if (cardKindsTexture) {
-        const kindsMaterial = new THREE.MeshBasicMaterial({ map: cardKindsTexture });
-        const kindsGeometry = new THREE.PlaneGeometry(1, 1); // 크기 조정 필요
-        const kindsMesh = new THREE.Mesh(kindsGeometry, kindsMaterial);
-        kindsMesh.position.set(0, 1.5, 0); // 카드 위에 배치
-        scene.add(kindsMesh);
-    }
-
-    if (cardRaceTexture) {
-        const raceMaterial = new THREE.MeshBasicMaterial({ map: cardRaceTexture });
-        const raceGeometry = new THREE.PlaneGeometry(1, 1); // 크기 조정 필요
-        const raceMesh = new THREE.Mesh(raceGeometry, raceMaterial);
-        raceMesh.position.set(0, -1.5, 0); // 카드 아래에 배치
-        scene.add(raceMesh);
-    }
-
-    // 애니메이션 루프
-    function animate() {
-        requestAnimationFrame(animate);
-        scene.traverse((object) => {
-            if (object instanceof THREE.Mesh) {
-                object.rotation.y += 0.01; // 카드 회전 애니메이션
-            }
-        });
-        renderer.render(scene, camera);
-    }
-    animate();
-}
+// TextureManager 및 카드 생성 함수들은 기존과 동일하게 유지
+const textureManager = TextureManager.getInstance();
 
 async function createSupportCard(card: any) {
     console.log("Creating support card with data:", card);
-    const cardId = card.카드번호;
-    const cardKinds = card.종류;
-    const cardRace = card.종족;
-
-    const textureManager = TextureManager.getInstance();
-    const cardTexture = await textureManager.getTexture('card', cardId);
-    const cardKindsTexture = await textureManager.getTexture('card_kinds', cardKinds);
-    const cardRaceTexture = await textureManager.getTexture('race', cardRace);
-
-    console.log('Card texture:', cardTexture);
-    console.log('Card kinds texture:', cardKindsTexture);
-    console.log('Card race texture:', cardRaceTexture);
-
-    // renderCardTextures(cardTexture || null, cardKindsTexture || null, cardRaceTexture || null);
+    const supportCard = await SupportCardGenerator.createSupportCard(card);
+    scene.add(supportCard);
 }
 
 function createUnitCard(card: any) {
@@ -153,6 +87,41 @@ const cardKindHandlers: { [key in CardKind]?: (card: any) => void } = {
     [CardKind.ENVIRONMENT]: createEnvironmentCard,
     [CardKind.TOKEN]: createTokenCard,
 };
+
+function renderCardTextures(
+    cardTexture: THREE.Texture | null,
+    cardKindsTexture: THREE.Texture | null,
+    cardRaceTexture: THREE.Texture | null
+) {
+    // 기존 씬에서 카드 메쉬 제거
+    scene.children.forEach(child => {
+        if (child instanceof THREE.Mesh) {
+            scene.remove(child);
+        }
+    });
+
+    if (!cardTexture) {
+        console.error('No card texture provided.');
+        return;
+    }
+
+    const cardPosition = new Vector2d(-2, 0);
+    const cardMesh = MeshGenerator.createMesh(cardTexture, 2, 3, cardPosition);
+    scene.add(cardMesh);
+
+    // 카드 종류 및 카드 종족 텍스처를 사용할 경우 추가 메쉬 생성
+    if (cardKindsTexture) {
+        const kindsPosition = new Vector2d(cardPosition.getX() + 1.0, cardPosition.getY() - 1.5);
+        const kindsMesh = MeshGenerator.createMesh(cardKindsTexture, 1, 1, kindsPosition);
+        scene.add(kindsMesh);
+    }
+
+    if (cardRaceTexture) {
+        const racePosition = new Vector2d(cardPosition.getX() + 1.0, cardPosition.getY() + 1.5);
+        const raceMesh = MeshGenerator.createMesh(cardRaceTexture, 1, 1, racePosition);
+        scene.add(raceMesh);
+    }
+}
 
 async function main() {
     try {
