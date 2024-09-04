@@ -10,7 +10,7 @@ export class TextureManager {
     private isTexturesPreloaded: boolean = false
 
     private battleFieldUnitCardTextureList: { [id: number]: THREE.Texture } = {};
-    private battleFieldUnitWeaponTextureList: { [id: number]: THREE.Texture } = {};
+    private battleFieldUnitSwordPowerTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitHpTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitEnergyTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitRaceTextureList: { [id: number]: THREE.Texture } = {};
@@ -44,7 +44,7 @@ export class TextureManager {
 
             await Promise.all([
                 this.loadTextures(imageData.card, this.battleFieldUnitCardTextureList),
-                this.loadTextures(imageData.weapon, this.battleFieldUnitWeaponTextureList),
+                this.loadTextures(imageData.sword_power, this.battleFieldUnitSwordPowerTextureList),
                 this.loadTextures(imageData.hp, this.battleFieldUnitHpTextureList),
                 this.loadTextures(imageData.energy, this.battleFieldUnitEnergyTextureList),
                 this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList),
@@ -136,8 +136,8 @@ export class TextureManager {
         switch (category) {
             case 'card':
                 return this.battleFieldUnitCardTextureList[id];
-            case 'weapon':
-                return this.battleFieldUnitWeaponTextureList[id];
+            case 'sword_power':
+                return this.battleFieldUnitSwordPowerTextureList[id];
             case 'hp':
                 return this.battleFieldUnitHpTextureList[id];
             case 'energy':

@@ -4,7 +4,7 @@ import { TextureManager } from "../../texture_manager/TextureManager";
 import { MeshGenerator } from "../../mesh/generator";
 
 export class SupportCardGenerator {
-    static async createSupportCard(card: any): Promise<THREE.Group> {
+    static async createSupportCard(card: any, position: Vector2d = new Vector2d(0, 0)): Promise<THREE.Group> {
         const textureManager = TextureManager.getInstance();
 
         // 카드 ID와 관련된 텍스처를 로드
@@ -23,28 +23,32 @@ export class SupportCardGenerator {
             console.warn('Card race texture not found');
         }
 
-        const cardPosition = new Vector2d(-2, 0);
-        const cardWidth = 2;
-        const cardHeight = 3;
+        const cardWidth = 120;
+        const cardHeight = cardWidth * 1.615;
 
         // 메인 카드 메쉬 생성
-        const mainCardMesh = MeshGenerator.createMesh(cardTexture, cardWidth, cardHeight, cardPosition);
+        const mainCardMesh = MeshGenerator.createMesh(cardTexture, cardWidth, cardHeight, position);
 
         // 그룹을 생성하고 메인 카드 메쉬를 추가
         const group = new THREE.Group();
         group.add(mainCardMesh);
 
+        const kindsWidth = cardWidth * 0.4;
+        const kindsHeight = kindsWidth
+
         // 카드 종류 메쉬가 있는 경우 추가
         if (cardKindsTexture) {
-            const kindsPosition = new Vector2d(cardPosition.getX() + 1.0, cardPosition.getY() - 1.5);
-            const kindsMesh = MeshGenerator.createMesh(cardKindsTexture, 1, 1, kindsPosition);
+            const kindsPosition = new Vector2d(position.getX() + cardWidth * 0.5, position.getY() - cardHeight * 0.5);
+            const kindsMesh = MeshGenerator.createMesh(cardKindsTexture, kindsWidth, kindsHeight, kindsPosition);
             group.add(kindsMesh);
         }
 
-        // 카드 종족 메쉬가 있는 경우 추가
+        const raceWidth = cardWidth * 0.4;
+        const raceHeight = raceWidth;
+
         if (cardRaceTexture) {
-            const racePosition = new Vector2d(cardPosition.getX() + 1.0, cardPosition.getY() + 1.5);
-            const raceMesh = MeshGenerator.createMesh(cardRaceTexture, 1, 1, racePosition);
+            const racePosition = new Vector2d(position.getX() + cardWidth * 0.5, position.getY() + cardHeight * 0.5);
+            const raceMesh = MeshGenerator.createMesh(cardRaceTexture, raceWidth, raceHeight, racePosition);
             group.add(raceMesh);
         }
 

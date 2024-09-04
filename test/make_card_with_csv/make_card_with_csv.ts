@@ -8,6 +8,7 @@ import * as THREE from "three";
 import {LegacyNonBackgroundImage} from "../../src/shape/image/LegacyNonBackgroundImage";
 import {MeshGenerator} from "../../src/mesh/generator";
 import {SupportCardGenerator} from "../../src/card/support/generate";
+import {UnitCardGenerator} from "../../src/card/unit/generate";
 
 const rootElement = document.getElementById('app');  // 렌더링할 요소를 가져옴
 
@@ -24,7 +25,7 @@ if (rootElement) {
 }
 
 const aspect = window.innerWidth / window.innerHeight;
-const viewSize = 10;  // 카메라의 시야 크기를 조정
+const viewSize = window.innerHeight
 const camera = new THREE.OrthographicCamera(
     -aspect * viewSize / 2, aspect * viewSize / 2,
     viewSize / 2, -viewSize / 2,
@@ -38,13 +39,17 @@ const textureManager = TextureManager.getInstance();
 
 async function createSupportCard(card: any) {
     console.log("Creating support card with data:", card);
-    const supportCard = await SupportCardGenerator.createSupportCard(card);
+    const positionVector = new Vector2d(-400, 0)
+    const supportCard = await SupportCardGenerator.createSupportCard(card, positionVector);
     scene.add(supportCard);
 }
 
-function createUnitCard(card: any) {
+async function createUnitCard(card: any) {
     console.log("Creating a UNIT card:", card);
-    // 카드 생성 코드 추가
+
+    const positionVector = new Vector2d(-135, 0)
+    const unitCard = await UnitCardGenerator.createUnitCard(card, positionVector)
+    scene.add(unitCard)
 }
 
 function createItemCard(card: any) {
