@@ -153,12 +153,24 @@ async function main() {
 
             const handler = cardKindHandlers[kindInt];
             if (handler) {
-                await handler(card); // 핸들러 함수가 비동기적일 수 있으므로 await
+                await handler(card);
             } else {
                 console.log('No handler for CardKind:', CardKind[kindInt]);
             }
         } else {
             console.log('Card not found');
+        }
+
+        const netherBladeCardId = 19
+        const netherBlade = getCardById(netherBladeCardId)
+
+        if (netherBlade) {
+            const kindInt = parseInt(netherBlade.종류, 10) as CardKind;
+
+            const unitHandler = cardKindHandlers[kindInt]
+            if (unitHandler) {
+                await unitHandler(netherBlade);
+            }
         }
     } catch (error) {
         console.error('Error in main function:', error);
