@@ -9,6 +9,8 @@ import {LegacyNonBackgroundImage} from "../../src/shape/image/LegacyNonBackgroun
 import {MeshGenerator} from "../../src/mesh/generator";
 import {SupportCardGenerator} from "../../src/card/support/generate";
 import {UnitCardGenerator} from "../../src/card/unit/generate";
+import {EnergyCardGenerator} from "../../src/card/energy/generate";
+import {ItemCardGenerator} from "../../src/card/item/generate";
 
 const rootElement = document.getElementById('app');  // 렌더링할 요소를 가져옴
 
@@ -52,9 +54,12 @@ async function createUnitCard(card: any) {
     scene.add(unitCard)
 }
 
-function createItemCard(card: any) {
+async function createItemCard(card: any) {
     console.log("Creating an ITEM card:", card);
-    // 카드 생성 코드 추가
+
+    const positionVector = new Vector2d(395, 0)
+    const itemCard = await ItemCardGenerator.createItemCard(card, positionVector)
+    scene.add(itemCard)
 }
 
 function createTrapCard(card: any) {
@@ -67,9 +72,12 @@ function createToolCard(card: any) {
     // 카드 생성 코드 추가
 }
 
-function createEnergyCard(card: any) {
+async function createEnergyCard(card: any) {
     console.log("Creating a ENERGY card:", card);
-    // 카드 생성 코드 추가
+
+    const positionVector = new Vector2d(130, 0)
+    const energyCard = await EnergyCardGenerator.createEnergyCard(card, positionVector)
+    scene.add(energyCard)
 }
 
 function createEnvironmentCard(card: any) {
@@ -175,6 +183,30 @@ async function main() {
             const unitHandler = cardKindHandlers[kindInt]
             if (unitHandler) {
                 await unitHandler(netherBlade);
+            }
+        }
+
+        const undeadBasicEnergyCardId = 93
+        const undeadBasicEnergy = getCardById(undeadBasicEnergyCardId)
+
+        if (undeadBasicEnergy) {
+            const kindInt = parseInt(undeadBasicEnergy.종류, 10) as CardKind;
+
+            const unitHandler = cardKindHandlers[kindInt]
+            if (unitHandler) {
+                await unitHandler(undeadBasicEnergy);
+            }
+        }
+
+        const deathScytheItemCardId = 8
+        const deathScytheItem = getCardById(deathScytheItemCardId)
+
+        if (deathScytheItem) {
+            const kindInt = parseInt(deathScytheItem.종류, 10) as CardKind;
+
+            const unitHandler = cardKindHandlers[kindInt]
+            if (unitHandler) {
+                await unitHandler(deathScytheItem);
             }
         }
     } catch (error) {
