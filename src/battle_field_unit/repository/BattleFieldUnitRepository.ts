@@ -3,7 +3,6 @@ import {BattleFieldUnit} from "../entity/BattleFieldUnit";
 export class BattleFieldUnitRepository {
     private static instance: BattleFieldUnitRepository;
 
-    
     private currentFieldUnitList: BattleFieldUnit[] = []
     private gapOfEachUnit: number = 200
 

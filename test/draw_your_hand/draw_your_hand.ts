@@ -15,6 +15,10 @@ import {BattleFieldUnit} from "../../src/battle_field_unit/entity/BattleFieldUni
 import {BattleFieldUnitScene} from "../../src/battle_field_unit/scene/BattleFieldUnitScene";
 import {ResourceManager} from "../../src/resouce_manager/ResourceManager";
 import {BattleFieldUnitRenderer} from "../../src/battle_field_unit/renderer/BattleFieldUnitRenderer";
+import {BattleFieldHandRepository} from "../../src/battle_field_hand/repository/BattleFieldHandRepository";
+import {CardGenerationHandler} from "../../src/card/handler";
+import {BattleFieldHandSceneRepository} from "../../src/battle_field_hand/repository/BattleFieldHandSceneRepository";
+import {BattleFieldHandPositionRepository} from "../../src/battle_field_hand/repository/BattleFieldHandPositionRepository";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -34,6 +38,10 @@ export class TCGJustTestBattleFieldView {
     private battleFieldUnitScene = new BattleFieldUnitScene();
     private battleFieldResourceManager = new ResourceManager()
     private battleFieldUnitRenderer?: BattleFieldUnitRenderer;
+
+    private battleFieldHandRepository = BattleFieldHandRepository.getInstance()
+    private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
+    private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
     private initialized = false;
     private isAnimating = false;
@@ -141,36 +149,47 @@ export class TCGJustTestBattleFieldView {
     }
 
     private async addYourHandUnitList(): Promise<void> {
+        const battleFieldHandList = this.battleFieldHandRepository.getBattleFieldHandList()
+        console.log('battleFieldHandList:', battleFieldHandList)
 
+        for (const listNumber of battleFieldHandList) {
+            const positionVector = this.battleFieldHandPositionRepository.addBattleFieldHandPosition()
+            const createdHand = await CardGenerationHandler.createCardById(listNumber, positionVector)
 
-        const cardId = 19;
-        const weaponId = 40;
-        const hpId = 60;
-        const energyId = 3;
-        const raceId = 2;
-        const position = new Vector2d(0, 0);
+            if (createdHand) {
+                this.battleFieldHandSceneRepository.addBattleFieldHandScene(createdHand);
+                this.scene.add(createdHand);
+            }
+        }
 
-        console.log("Creating BattleFieldUnit with the following parameters:", { cardId, weaponId, hpId, energyId, raceId, position });
-
-        this.battleFieldResourceManager = new ResourceManager();
-        this.battleFieldResourceManager.registerBattleFieldUnitPath({
-            cardPath: 'resource/battle_field_unit/card/{id}.png',
-            weaponPath: 'resource/battle_field_unit/sword_power/{id}.png',
-            hpPath: 'resource/battle_field_unit/hp/{id}.png',
-            energyPath: 'resource/battle_field_unit/energy/{id}.png',
-            racePath: 'resource/card_race/{id}.png'
-        });
-        console.log("ResourceManager paths registered.");
-
-        this.battleFieldUnitRenderer = new BattleFieldUnitRenderer(this.battleFieldUnitScene, this.battleFieldResourceManager);
-        console.log("BattleFieldUnitRenderer initialized:", this.battleFieldUnitRenderer);
-
-        const battleFieldUnit = new BattleFieldUnit(cardId, weaponId, hpId, energyId, raceId, position);
-        this.battleFieldUnitRepository.addBattleFieldUnit(battleFieldUnit);
-        console.log("BattleFieldUnit created and added to the repository:", battleFieldUnit);
-
-        this.scene.add(this.battleFieldUnitScene.getScene());
-        console.log("BattleFieldUnitScene added to the main scene:", this.battleFieldUnitScene.getScene());
+        // const cardId = 19;
+        // const weaponId = 40;
+        // const hpId = 60;
+        // const energyId = 3;
+        // const raceId = 2;
+        // const position = new Vector2d(0, 0);
+        //
+        // console.log("Creating BattleFieldUnit with the following parameters:", { cardId, weaponId, hpId, energyId, raceId, position });
+        //
+        // this.battleFieldResourceManager = new ResourceManager();
+        // this.battleFieldResourceManager.registerBattleFieldUnitPath({
+        //     cardPath: 'resource/battle_field_unit/card/{id}.png',
+        //     weaponPath: 'resource/battle_field_unit/sword_power/{id}.png',
+        //     hpPath: 'resource/battle_field_unit/hp/{id}.png',
+        //     energyPath: 'resource/battle_field_unit/energy/{id}.png',
+        //     racePath: 'resource/card_race/{id}.png'
+        // });
+        // console.log("ResourceManager paths registered.");
+        //
+        // this.battleFieldUnitRenderer = new BattleFieldUnitRenderer(this.battleFieldUnitScene, this.battleFieldResourceManager);
+        // console.log("BattleFieldUnitRenderer initialized:", this.battleFieldUnitRenderer);
+        //
+        // const battleFieldUnit = new BattleFieldUnit(cardId, weaponId, hpId, energyId, raceId, position);
+        // this.battleFieldUnitRepository.addBattleFieldUnit(battleFieldUnit);
+        // console.log("BattleFieldUnit created and added to the repository:", battleFieldUnit);
+        //
+        // this.scene.add(this.battleFieldUnitScene.getScene());
+        // console.log("BattleFieldUnitScene added to the main scene:", this.battleFieldUnitScene.getScene());
     }
 
     private onWindowResize(): void {
@@ -212,7 +231,7 @@ export class TCGJustTestBattleFieldView {
     animate(): void {
         if (this.isAnimating) {
             requestAnimationFrame(() => this.animate());
-            this.battleFieldUnitRenderer?.render(this.renderer, this.camera);
+            // this.battleFieldHandRenderer?.render(this.renderer, this.camera);
             this.renderer.render(this.scene, this.camera);
         } else {
             console.log('Animation stopped.');
