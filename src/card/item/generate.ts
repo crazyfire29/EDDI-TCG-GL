@@ -21,7 +21,9 @@ export class ItemCardGenerator {
             console.warn('Card race texture not found');
         }
 
-        const cardWidth = 120;
+        // const cardWidth = 120;
+        const currentWidth = window.innerWidth
+        const cardWidth = 0.06493506493 * currentWidth
         const cardHeight = cardWidth * 1.615;
 
         const mainCardMesh = MeshGenerator.createMesh(cardTexture, cardWidth, cardHeight, position);

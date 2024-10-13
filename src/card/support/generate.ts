@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { Vector2d } from "../../common/math/Vector2d";
 import { TextureManager } from "../../texture_manager/TextureManager";
 import { MeshGenerator } from "../../mesh/generator";
+import {UserWindowSize} from "../../window_size/WindowSize";
 
 export class SupportCardGenerator {
     static async createSupportCard(card: any, position: Vector2d = new Vector2d(0, 0)): Promise<THREE.Group> {
@@ -23,7 +24,8 @@ export class SupportCardGenerator {
             console.warn('Card race texture not found');
         }
 
-        const cardWidth = 120;
+        const currentWidth = window.innerWidth
+        const cardWidth = 0.06493506493 * currentWidth
         const cardHeight = cardWidth * 1.615;
 
         // 메인 카드 메쉬 생성
