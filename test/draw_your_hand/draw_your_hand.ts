@@ -22,6 +22,7 @@ import {BattleFieldHandPositionRepository} from "../../src/battle_field_hand/rep
 
 import {UserWindowSize} from "../../src/window_size/WindowSize"
 import {UnitCardGenerator} from "../../src/card/unit/generate";
+import {BattleFieldHandMapRepository} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepository";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -42,7 +43,8 @@ export class TCGJustTestBattleFieldView {
     private battleFieldResourceManager = new ResourceManager()
     private battleFieldUnitRenderer?: BattleFieldUnitRenderer;
 
-    private battleFieldHandRepository = BattleFieldHandRepository.getInstance()
+    // private battleFieldHandRepository = BattleFieldHandRepository.getInstance()
+    private battleFieldHandMapRepository = BattleFieldHandMapRepository.getInstance()
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
     private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
@@ -157,17 +159,22 @@ export class TCGJustTestBattleFieldView {
     }
 
     private async addYourHandUnitList(): Promise<void> {
-        const battleFieldHandList = this.battleFieldHandRepository.getBattleFieldHandList()
+        // const battleFieldHandList = this.battleFieldHandRepository.getBattleFieldHandList()
+        const battleFieldHandList = this.battleFieldHandMapRepository.getBattleFieldHandList()
         console.log('battleFieldHandList:', battleFieldHandList)
 
+        let indexCount = 0
+
         for (const listNumber of battleFieldHandList) {
-            const positionVector = this.battleFieldHandPositionRepository.addBattleFieldHandPosition()
-            const createdHand = await CardGenerationHandler.createCardById(listNumber, positionVector)
+            const positionVector = this.battleFieldHandPositionRepository.addBattleFieldHandPosition(indexCount)
+            const createdHand = await CardGenerationHandler.createCardById(listNumber, positionVector, indexCount)
 
             if (createdHand) {
                 this.battleFieldHandSceneRepository.addBattleFieldHandScene(createdHand);
                 this.scene.add(createdHand);
             }
+
+            indexCount++
         }
 
         // const cardId = 19;

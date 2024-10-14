@@ -26,7 +26,7 @@ export class BattleFieldHandPositionRepository {
         return BattleFieldHandPositionRepository.instance
     }
 
-    public addBattleFieldHandPosition(): Vector2d {
+    public addBattleFieldHandPosition(indexCount: number): Vector2d {
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
 
@@ -94,11 +94,16 @@ export class BattleFieldHandPositionRepository {
         // const scaledX = ((this.initialX * scaleX) + (this.count * this.gapOfEachHand * scaleX)) * screenWidth;
         // const scaledY = 0.5 - (0.972107 - 0.06493506493 * 1.615 * scaleY) * screenHeight
 
-        const scaledX = (this.initialX + this.count * this.gapOfEachHand) * screenWidth;
-        const scaledY = (0.5 - (0.972107 - 0.06493506493 * 1.615 * scaleY)) * screenHeight;
+        // const scaledX = (this.initialX + this.count * this.gapOfEachHand) * screenWidth;
+        // const positionX = (this.initialX + this.count * this.gapOfEachHand) * window.innerWidth;
+        const positionX = (this.initialX + indexCount * this.gapOfEachHand) * window.innerWidth;
+        // const scaledY = (0.5 - (0.972107 - 0.06493506493 * 1.615 * scaleY)) * screenHeight;
+        // const positionY = (0.5 - (0.972107 - 0.06493506493 * 1.615)) * screenHeight;
+        const positionY = (0.5 - 0.972107) * window.innerHeight + (0.06493506493 * 1.615 * 0.5 * window.innerWidth)
 
-        console.log('addBattleFieldHandPosition -> scaledX, scaledY:', scaledX, scaledY)
-        const position = new Vector2d(scaledX, scaledY);
+        // console.log('addBattleFieldHandPosition -> scaledX, scaledY:', scaledX, scaledY)
+        // const position = new Vector2d(scaledX, scaledY);
+        const position = new Vector2d(positionX, positionY);
         // const position = new Vector2d(x, y);
         this.currentHandPositionList.push(position);
 
