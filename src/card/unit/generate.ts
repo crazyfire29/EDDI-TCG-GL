@@ -168,47 +168,50 @@ export class UnitCardGenerator {
                 // const weaponPositionX = initialPosition.getX() + cardWidth * 0.44;
                 const weaponPositionX = mainCardPositionX + cardWidth * 0.44;
                 // const weaponPositionY = initialPosition.getY() - cardWidth * 0.45666;
-                const weaponPositionY = mainCardPositionY - cardWidth * 0.45666;
+                const weaponPositionY = mainCardPositionY - cardHeight * 0.45666;
 
                 cardMesh.geometry.dispose();
                 cardMesh.geometry = new THREE.PlaneGeometry(weaponWidth, weaponHeight);
-                cardMesh.position.set(weaponPositionX * newScaleX, weaponPositionY * newScaleY, 0);
+                cardMesh.position.set(weaponPositionX, weaponPositionY, 0);
 
             } else if (textureId === "raceTextureId") {
                 // 종족 텍스처 크기 및 위치 조정
-                const cardWidth = 0.064935 * window.innerWidth;
                 const raceWidth = cardWidth * 0.4;
                 const raceHeight = raceWidth;
-                const racePositionX = initialPosition.getX() + cardWidth * 0.5;
-                const racePositionY = initialPosition.getY() + cardWidth * 0.5;
+
+                // position.getX() + cardWidth * 0.5, position.getY() + cardHeight * 0.5
+                const racePositionX = mainCardPositionX + cardWidth * 0.5;
+                const racePositionY = mainCardPositionY + cardHeight * 0.5;
 
                 cardMesh.geometry.dispose();
                 cardMesh.geometry = new THREE.PlaneGeometry(raceWidth, raceHeight);
-                cardMesh.position.set(racePositionX * newScaleX, racePositionY * newScaleY, 0);
+                cardMesh.position.set(racePositionX, racePositionY, 0);
 
             } else if (textureId === "hpTextureId") {
                 // 체력 텍스처 크기 및 위치 조정
-                const cardWidth = 0.064935 * window.innerWidth;
                 const hpWidth = cardWidth * 0.31;
                 const hpHeight = hpWidth * 1.65454;
-                const hpPositionX = initialPosition.getX() - cardWidth * 0.5;
-                const hpPositionY = initialPosition.getY() - cardWidth * 0.43438;
+
+                // position.getX() - cardWidth * 0.5, position.getY() - cardHeight * 0.43438
+                const hpPositionX = mainCardPositionX - cardWidth * 0.5;
+                const hpPositionY = mainCardPositionY - cardHeight * 0.43438;
 
                 cardMesh.geometry.dispose();
                 cardMesh.geometry = new THREE.PlaneGeometry(hpWidth, hpHeight);
-                cardMesh.position.set(hpPositionX * newScaleX, hpPositionY * newScaleY, 0);
+                cardMesh.position.set(hpPositionX, hpPositionY, 0);
 
             } else if (textureId === "energyTextureId") {
                 // 에너지 텍스처 크기 및 위치 조정
-                const cardWidth = 0.064935 * window.innerWidth;
                 const energyWidth = cardWidth * 0.39;
                 const energyHeight = energyWidth * 1.344907;
-                const energyPositionX = initialPosition.getX() - cardWidth * 0.5;
-                const energyPositionY = initialPosition.getY() + cardWidth * 0.5;
+
+                // position.getX() - cardWidth * 0.5, position.getY() + cardHeight * 0.5
+                const energyPositionX = mainCardPositionX - cardWidth * 0.5;
+                const energyPositionY = mainCardPositionY + cardHeight * 0.5;
 
                 cardMesh.geometry.dispose();
                 cardMesh.geometry = new THREE.PlaneGeometry(energyWidth, energyHeight);
-                cardMesh.position.set(energyPositionX * newScaleX, energyPositionY * newScaleY, 0);
+                cardMesh.position.set(energyPositionX, energyPositionY, 0);
             }
         });
     }
