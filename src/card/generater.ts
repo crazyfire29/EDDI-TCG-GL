@@ -37,7 +37,7 @@ export class CardGenerator {
     static async createEnergyCard(card: any, positionVector: Vector2d, indexCount: number = 0) {
         console.log("Creating a ENERGY card:", card);
 
-        const energyCard = await EnergyCardGenerator.createEnergyCard(card, positionVector)
+        const energyCard = await EnergyCardGenerator.createEnergyCard(card, positionVector, indexCount)
         return energyCard
     }
 
