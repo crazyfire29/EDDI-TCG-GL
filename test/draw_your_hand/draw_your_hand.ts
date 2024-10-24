@@ -20,6 +20,13 @@ import {CardGenerationHandler} from "../../src/card/handler";
 import {BattleFieldHandSceneRepository} from "../../src/battle_field_hand/repository/BattleFieldHandSceneRepository";
 import {BattleFieldHandPositionRepository} from "../../src/battle_field_hand/repository/BattleFieldHandPositionRepository";
 
+import {UserWindowSize} from "../../src/window_size/WindowSize"
+import {UnitCardGenerator} from "../../src/card/unit/generate";
+import {BattleFieldHandMapRepository} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepository";
+import {SupportCardGenerator} from "../../src/card/support/generate";
+import {ItemCardGenerator} from "../../src/card/item/generate";
+import {EnergyCardGenerator} from "../../src/card/energy/generate";
+
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
 
@@ -39,12 +46,15 @@ export class TCGJustTestBattleFieldView {
     private battleFieldResourceManager = new ResourceManager()
     private battleFieldUnitRenderer?: BattleFieldUnitRenderer;
 
-    private battleFieldHandRepository = BattleFieldHandRepository.getInstance()
+    // private battleFieldHandRepository = BattleFieldHandRepository.getInstance()
+    private battleFieldHandMapRepository = BattleFieldHandMapRepository.getInstance()
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
     private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
     private initialized = false;
     private isAnimating = false;
+
+    private userWindowSize: UserWindowSize;
 
     constructor(simulationBattleFieldContainer: HTMLElement) {
         this.simulationBattleFieldContainer = simulationBattleFieldContainer;
@@ -53,6 +63,9 @@ export class TCGJustTestBattleFieldView {
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.simulationBattleFieldContainer.appendChild(this.renderer.domElement);
+
+        // this.userWindowSize = new UserWindowSize(window.innerWidth, window.innerHeight);
+        this.userWindowSize = UserWindowSize.getInstance()
 
         const aspect = window.innerWidth / window.innerHeight;
         const viewSize = window.innerHeight;
@@ -149,17 +162,23 @@ export class TCGJustTestBattleFieldView {
     }
 
     private async addYourHandUnitList(): Promise<void> {
-        const battleFieldHandList = this.battleFieldHandRepository.getBattleFieldHandList()
+        // const battleFieldHandList = this.battleFieldHandRepository.getBattleFieldHandList()
+        const battleFieldHandList = this.battleFieldHandMapRepository.getBattleFieldHandList()
         console.log('battleFieldHandList:', battleFieldHandList)
 
+        let indexCount = 0
+
         for (const listNumber of battleFieldHandList) {
-            const positionVector = this.battleFieldHandPositionRepository.addBattleFieldHandPosition()
-            const createdHand = await CardGenerationHandler.createCardById(listNumber, positionVector)
+            console.log('addYourHandUnitList() indexCount:', indexCount)
+            const positionVector = this.battleFieldHandPositionRepository.addBattleFieldHandPosition(indexCount)
+            const createdHand = await CardGenerationHandler.createCardById(listNumber, positionVector, indexCount)
 
             if (createdHand) {
                 this.battleFieldHandSceneRepository.addBattleFieldHandScene(createdHand);
                 this.scene.add(createdHand);
             }
+
+            indexCount++
         }
 
         // const cardId = 19;
@@ -195,38 +214,103 @@ export class TCGJustTestBattleFieldView {
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
-        const aspect = newWidth / newHeight;
-        const viewSize = newHeight;
 
-        this.camera.left = -aspect * viewSize / 2;
-        this.camera.right = aspect * viewSize / 2;
-        this.camera.top = viewSize / 2;
-        this.camera.bottom = -viewSize / 2;
-        this.camera.updateProjectionMatrix();
+        // 기존 크기와 비교해서 변경된 경우만 처리
+        if (newWidth !== this.userWindowSize.getWidth() || newHeight !== this.userWindowSize.getHeight()) {
+            const aspect = newWidth / newHeight;
+            const viewSize = newHeight;
 
-        this.renderer.setSize(newWidth, newHeight);
+            this.camera.left = -aspect * viewSize / 2;
+            this.camera.right = aspect * viewSize / 2;
+            this.camera.top = viewSize / 2;
+            this.camera.bottom = -viewSize / 2;
+            this.camera.updateProjectionMatrix();
 
-        if (this.background) {
-            const scaleX = newWidth / this.background.getWidth();
-            const scaleY = newHeight / this.background.getHeight();
-            this.background.setScale(scaleX, scaleY);
-        }
+            this.renderer.setSize(newWidth, newHeight);
 
-        this.buttons.forEach(button => {
-            const initialInfo = this.buttonInitialInfo.get(button.getMesh()?.uuid ?? '');
-            if (initialInfo) {
-                const newWidth = window.innerWidth * initialInfo.widthPercent;
-                const newHeight = window.innerHeight * initialInfo.heightPercent;
-                const newPosition = new THREE.Vector2(
-                    window.innerWidth * initialInfo.positionPercent.x,
-                    window.innerHeight * initialInfo.positionPercent.y
-                );
-
-                button.setPosition(newPosition.x, newPosition.y);
-                button.setScale(newWidth / button.getWidth(), newHeight / button.getHeight());
+            if (this.background) {
+                const scaleX = newWidth / this.background.getWidth();
+                const scaleY = newHeight / this.background.getHeight();
+                this.background.setScale(scaleX, scaleY);
             }
-        });
+
+            this.buttons.forEach(button => {
+                const initialInfo = this.buttonInitialInfo.get(button.getMesh()?.uuid ?? '');
+                if (initialInfo) {
+                    const buttonWidth = window.innerWidth * initialInfo.widthPercent;
+                    const buttonHeight = window.innerHeight * initialInfo.heightPercent;
+                    const newPosition = new THREE.Vector2(
+                        window.innerWidth * initialInfo.positionPercent.x,
+                        window.innerHeight * initialInfo.positionPercent.y
+                    );
+
+                    button.setPosition(newPosition.x, newPosition.y);
+                    button.setScale(buttonWidth / button.getWidth(), buttonHeight / button.getHeight());
+                }
+            });
+
+            // 창 크기 변경에 따라 배틀 필드도 리사이징
+            this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
+            const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
+            // this.battleFieldHandSceneRepository.resizeHandSceneList(scaleX, scaleY);
+            UnitCardGenerator.adjustCardPositions(scaleX, scaleY);
+            SupportCardGenerator.adjustCardPositions()
+            ItemCardGenerator.adjustCardPositions()
+            EnergyCardGenerator.adjustCardPositions()
+        }
     }
+
+    // public debounce(func: Function, timeout = 100) {
+    //     let timer: NodeJS.Timeout;
+    //     return (...args: any[]) => {
+    //         clearTimeout(timer);
+    //         timer = setTimeout(() => { func.apply(this, args); }, timeout);
+    //     };
+    // }
+    //
+    // private onWindowResize(): void {
+    //     const debouncedResize = this.debounce(() => {
+    //         const newWidth = window.innerWidth;
+    //         const newHeight = window.innerHeight;
+    //         const aspect = newWidth / newHeight;
+    //         const viewSize = newHeight;
+    //
+    //         this.camera.left = -aspect * viewSize / 2;
+    //         this.camera.right = aspect * viewSize / 2;
+    //         this.camera.top = viewSize / 2;
+    //         this.camera.bottom = -viewSize / 2;
+    //         this.camera.updateProjectionMatrix();
+    //
+    //         this.renderer.setSize(newWidth, newHeight);
+    //
+    //         if (this.background) {
+    //             const scaleX = newWidth / this.background.getWidth();
+    //             const scaleY = newHeight / this.background.getHeight();
+    //             this.background.setScale(scaleX, scaleY);
+    //         }
+    //
+    //         this.buttons.forEach(button => {
+    //             const initialInfo = this.buttonInitialInfo.get(button.getMesh()?.uuid ?? '');
+    //             if (initialInfo) {
+    //                 const newWidth = window.innerWidth * initialInfo.widthPercent;
+    //                 const newHeight = window.innerHeight * initialInfo.heightPercent;
+    //                 const newPosition = new THREE.Vector2(
+    //                     window.innerWidth * initialInfo.positionPercent.x,
+    //                     window.innerHeight * initialInfo.positionPercent.y
+    //                 );
+    //
+    //                 button.setPosition(newPosition.x, newPosition.y);
+    //                 button.setScale(newWidth / button.getWidth(), newHeight / button.getHeight());
+    //             }
+    //         });
+    //
+    //         this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
+    //         const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
+    //         this.battleFieldHandSceneRepository.resizeHandSceneList(scaleX, scaleY);
+    //     }, 100);  // 300ms 후에 실행
+    //
+    //     window.addEventListener('resize', debouncedResize);
+    // }
 
     animate(): void {
         if (this.isAnimating) {
@@ -245,5 +329,6 @@ if (!rootElement) {
     throw new Error("Cannot find element with id 'app'.");
 }
 
+const userWindowSize = UserWindowSize.getInstance();
 const fieldView = TCGJustTestBattleFieldView.getInstance(rootElement);
 fieldView.initialize();

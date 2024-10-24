@@ -2,83 +2,217 @@ import * as THREE from "three";
 import { Vector2d } from "../../common/math/Vector2d";
 import { TextureManager } from "../../texture_manager/TextureManager";
 import { MeshGenerator } from "../../mesh/generator";
-import {CardRace} from "../race";
-import {CardJob} from "../job";
+import { CardJob } from "../job";
+import { UserWindowSize } from "../../window_size/WindowSize";
+
+interface CardInitialInfo {
+    cardMesh: THREE.Mesh;
+    initialPosition: Vector2d;
+    textureId: string;
+    width: number;
+    height: number;
+    cardIndex: number;
+}
 
 export class UnitCardGenerator {
-    static async createUnitCard(card: any, position: Vector2d = new Vector2d(0, 0)): Promise<THREE.Group> {
+    private static cardInitialInfoMap: Map<string, CardInitialInfo> = new Map();
+    private static resizeHandler: (() => void) | null = null;
+
+    static async createUnitCard(card: any, position: Vector2d = new Vector2d(0, 0), indexCount: number = 0): Promise<THREE.Group> {
         const textureManager = TextureManager.getInstance();
+        const userWindowSize = UserWindowSize.getInstance();
+        const { scaleX, scaleY } = userWindowSize.getScaleFactors();
 
         const cardTexture = await textureManager.getTexture('card', card.카드번호);
-        const unitJob = parseInt(card.병종, 10)
-        let weaponTexture: THREE.Texture | null = null;
+        const unitJob = parseInt(card.병종, 10);
+        const cardGroup = new THREE.Group();
 
-        if (unitJob === CardJob.WARRIOR) {
-            weaponTexture = await textureManager.getTexture('sword_power', card.공격력) || null;
-        }
-        const cardRaceTexture = await textureManager.getTexture('race', card.종족);
-        const cardHpTexture = await textureManager.getTexture('hp', card.체력)
-        const cardEnergyTexture = await textureManager.getTexture('energy', 0)
-
-       if (!cardTexture) {
+        if (!cardTexture) {
             throw new Error('Card texture not found');
         }
-        if (!weaponTexture) {
-            console.warn('Card weapon texture not found');
-        }
-        if (!cardRaceTexture) {
-            console.warn('Card race texture not found');
-        }
-        if (!cardHpTexture) {
-            console.warn('Card hp texture not found');
-        }
-        if (!cardEnergyTexture) {
-            console.warn('Card energy texture not found');
-        }
 
-        const cardWidth = 120;
+        console.log('card:', card)
+
+        const cardWidth = 0.064935 * window.innerWidth;
         const cardHeight = cardWidth * 1.615;
 
+        // 메인 카드 Mesh 생성
         const mainCardMesh = MeshGenerator.createMesh(cardTexture, cardWidth, cardHeight, position);
-        const group = new THREE.Group();
-        group.add(mainCardMesh);
+        cardGroup.add(mainCardMesh);
 
-        const weaponWidth = cardWidth * 0.63;
-        const weaponHeight = weaponWidth * 1.651;
+        this.saveInitialPosition(mainCardMesh, position, cardWidth, cardHeight, 'mainCardTextureId', indexCount);
+
+        // 무기, 종족, 체력, 에너지 추가
+        await this.addOptionalTextures(card, cardGroup, cardWidth, cardHeight, position, unitJob, indexCount);
+
+        // Resize 이벤트 핸들러 등록
+        this.registerResizeHandler();
+
+        return cardGroup;
+    }
+
+    private static async addOptionalTextures(
+        card: any,
+        group: THREE.Group,
+        cardWidth: number,
+        cardHeight: number,
+        position: Vector2d,
+        unitJob: number,
+        indexCount: number
+    ) {
+        const textureManager = TextureManager.getInstance();
+
+        const textures = await Promise.all([
+            unitJob === CardJob.WARRIOR ? textureManager.getTexture('sword_power', card.공격력) : null,
+            textureManager.getTexture('race', card.종족),
+            textureManager.getTexture('hp', card.체력),
+            textureManager.getTexture('energy', 0),
+        ]);
+
+        const [weaponTexture, raceTexture, hpTexture, energyTexture] = textures;
 
         if (weaponTexture) {
             const weaponPosition = new Vector2d(position.getX() + cardWidth * 0.44, position.getY() - cardHeight * 0.45666);
-            const weaponMesh = MeshGenerator.createMesh(weaponTexture, weaponWidth, weaponHeight, weaponPosition);
-            group.add(weaponMesh);
+            this.addTextureToGroup(group, weaponTexture, cardWidth * 0.63, cardWidth * 0.63 * 1.651, weaponPosition, 'weaponTextureId', indexCount);
         }
 
-        const raceWidth = cardWidth * 0.4;
-        const raceHeight = raceWidth;
-
-        if (cardRaceTexture) {
+        if (raceTexture) {
             const racePosition = new Vector2d(position.getX() + cardWidth * 0.5, position.getY() + cardHeight * 0.5);
-            const raceMesh = MeshGenerator.createMesh(cardRaceTexture, raceWidth, raceHeight, racePosition);
-            group.add(raceMesh);
+            this.addTextureToGroup(group, raceTexture, cardWidth * 0.4, cardWidth * 0.4, racePosition, 'raceTextureId', indexCount);
         }
 
-        const hpWidth = cardWidth * 0.31;
-        const hpHeight = hpWidth * 1.65454;
-
-        if (cardHpTexture) {
+        if (hpTexture) {
             const hpPosition = new Vector2d(position.getX() - cardWidth * 0.5, position.getY() - cardHeight * 0.43438);
-            const hpMesh = MeshGenerator.createMesh(cardHpTexture, hpWidth, hpHeight, hpPosition);
-            group.add(hpMesh);
+            this.addTextureToGroup(group, hpTexture, cardWidth * 0.31, cardWidth * 0.31 * 1.65454, hpPosition, 'hpTextureId', indexCount);
         }
 
-        const energyWidth = cardWidth * 0.39;
-        const energyHeight = energyWidth * 1.344907;
-
-        if (cardEnergyTexture) {
+        if (energyTexture) {
             const energyPosition = new Vector2d(position.getX() - cardWidth * 0.5, position.getY() + cardHeight * 0.5);
-            const energyMesh = MeshGenerator.createMesh(cardEnergyTexture, energyWidth, energyHeight, energyPosition);
-            group.add(energyMesh);
+            this.addTextureToGroup(group, energyTexture, cardWidth * 0.39, cardWidth * 0.39 * 1.344907, energyPosition, 'energyTextureId', indexCount);
         }
+    }
 
-        return group;
+    private static addTextureToGroup(group: THREE.Group, texture: THREE.Texture, width: number, height: number, position: Vector2d, textureId: string, indexCount: number) {
+        const mesh = MeshGenerator.createMesh(texture, width, height, position);
+        mesh.userData.textureId = textureId;  // userData로 textureId 저장
+        group.add(mesh);
+        this.saveInitialPosition(mesh, position, width, height, textureId, indexCount); // 각 텍스처의 정보를 저장합니다.
+    }
+
+    private static saveInitialPosition(mesh: THREE.Mesh, position: Vector2d, width: number, height: number, textureId: string, indexCount: number) {
+        this.cardInitialInfoMap.set(mesh.uuid, {
+            cardMesh: mesh,
+            initialPosition: position.clone(),
+            width,
+            height,
+            textureId,
+            cardIndex: indexCount
+        });
+    }
+
+    private static registerResizeHandler(): void {
+        if (!this.resizeHandler) {
+            this.resizeHandler = () => {
+                const { scaleX, scaleY } = UserWindowSize.getInstance().getScaleFactors();
+                this.adjustCardPositions(scaleX, scaleY);
+            };
+            window.addEventListener("resize", this.resizeHandler);
+        }
+    }
+
+    // static adjustCardPositions(newScaleX: number, newScaleY: number): void {
+    //     this.cardInitialInfoMap.forEach(({ cardMesh, initialPosition, width, height }) => {
+    //         if (initialPosition) {
+    //             const adjustedX = initialPosition.getX() * newScaleX;
+    //             const adjustedY = initialPosition.getY() * newScaleY;
+    //
+    //             // 각 텍스처의 크기를 다시 계산하여 적용
+    //             const newWidth = width * newScaleX;
+    //             const newHeight = height * newScaleY;
+    //
+    //             // 메인 카드만 geometry를 새로 적용
+    //             cardMesh.geometry = new THREE.PlaneGeometry(newWidth, newHeight);
+    //
+    //             // 위치 설정
+    //             cardMesh.position.set(adjustedX, adjustedY, cardMesh.position.z);
+    //         }
+    //     });
+    // }
+
+    static adjustCardPositions(newScaleX: number, newScaleY: number): void {
+        this.cardInitialInfoMap.forEach(({ cardMesh, initialPosition, textureId, cardIndex }) => {
+
+            const cardWidth = 0.06493506493 * window.innerWidth
+            const cardHeight = cardWidth * 1.615
+
+            const mainCardPositionX = (0.311904 - 0.5 + cardIndex * 0.094696) * window.innerWidth;
+            const mainCardPositionY = (0.5 - 0.972107) * window.innerHeight + (cardHeight * 0.5)
+
+            if (textureId === "mainCardTextureId") {
+                // mainCardTextureId인 경우에만 카드 크기 조정
+                // const cardWidth = 0.064935 * window.innerWidth;
+                // const cardHeight = cardWidth * 1.615;
+
+                // 메인 카드 geometry 재생성
+                cardMesh.geometry.dispose(); // 기존 geometry 삭제
+                cardMesh.geometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
+                // cardMesh.position.set(initialPosition.getX() * newScaleX, initialPosition.getY() * newScaleY, 0);
+                // cardMesh.position.set(initialPosition.getX(), (0.5 - 0.972107) * window.innerHeight + (0.06493506493 * 1.615 * 0.5 * window.innerWidth), 0);
+                cardMesh.position.set(mainCardPositionX, mainCardPositionY, 0);
+            } else if (textureId === "weaponTextureId") {
+                // 무기 텍스처 크기 및 위치 조정
+                const weaponWidth = cardWidth * 0.63;
+                const weaponHeight = weaponWidth * 1.651;
+
+                // position.getX() + cardWidth * 0.44, position.getY() - cardHeight * 0.45666
+                // const weaponPositionX = initialPosition.getX() + cardWidth * 0.44;
+                const weaponPositionX = mainCardPositionX + cardWidth * 0.44;
+                // const weaponPositionY = initialPosition.getY() - cardWidth * 0.45666;
+                const weaponPositionY = mainCardPositionY - cardHeight * 0.45666;
+
+                cardMesh.geometry.dispose();
+                cardMesh.geometry = new THREE.PlaneGeometry(weaponWidth, weaponHeight);
+                cardMesh.position.set(weaponPositionX, weaponPositionY, 0);
+
+            } else if (textureId === "raceTextureId") {
+                // 종족 텍스처 크기 및 위치 조정
+                const raceWidth = cardWidth * 0.4;
+                const raceHeight = raceWidth;
+
+                // position.getX() + cardWidth * 0.5, position.getY() + cardHeight * 0.5
+                const racePositionX = mainCardPositionX + cardWidth * 0.5;
+                const racePositionY = mainCardPositionY + cardHeight * 0.5;
+
+                cardMesh.geometry.dispose();
+                cardMesh.geometry = new THREE.PlaneGeometry(raceWidth, raceHeight);
+                cardMesh.position.set(racePositionX, racePositionY, 0);
+
+            } else if (textureId === "hpTextureId") {
+                // 체력 텍스처 크기 및 위치 조정
+                const hpWidth = cardWidth * 0.31;
+                const hpHeight = hpWidth * 1.65454;
+
+                // position.getX() - cardWidth * 0.5, position.getY() - cardHeight * 0.43438
+                const hpPositionX = mainCardPositionX - cardWidth * 0.5;
+                const hpPositionY = mainCardPositionY - cardHeight * 0.43438;
+
+                cardMesh.geometry.dispose();
+                cardMesh.geometry = new THREE.PlaneGeometry(hpWidth, hpHeight);
+                cardMesh.position.set(hpPositionX, hpPositionY, 0);
+
+            } else if (textureId === "energyTextureId") {
+                // 에너지 텍스처 크기 및 위치 조정
+                const energyWidth = cardWidth * 0.39;
+                const energyHeight = energyWidth * 1.344907;
+
+                // position.getX() - cardWidth * 0.5, position.getY() + cardHeight * 0.5
+                const energyPositionX = mainCardPositionX - cardWidth * 0.5;
+                const energyPositionY = mainCardPositionY + cardHeight * 0.5;
+
+                cardMesh.geometry.dispose();
+                cardMesh.geometry = new THREE.PlaneGeometry(energyWidth, energyHeight);
+                cardMesh.position.set(energyPositionX, energyPositionY, 0);
+            }
+        });
     }
 }

@@ -7,6 +7,7 @@ export class MeshGenerator {
         const geometry = new THREE.PlaneGeometry(width, height);
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(position.getX(), position.getY(), 0);
+        // console.log('MeshGenerator created with position:', mesh.position);
         return mesh;
     }
 }

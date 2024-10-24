@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "lodash": "^4.17.21",
     "three": "^0.164.1",
     "ts-node": "^10.9.2"
   },
