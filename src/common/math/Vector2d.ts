@@ -37,4 +37,8 @@ export class Vector2d {
     public getY(): number {
         return this.y
     }
+
+    clone(): Vector2d {
+        return new Vector2d(this.x, this.y);
+    }
 }

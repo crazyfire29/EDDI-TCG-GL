@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "lodash": "^4.17.21",
     "three": "^0.164.1",
     "ts-node": "^10.9.2"
   },
@@ -31,6 +32,10 @@
     "pre-texture-load": "webpack serve --config ./test/pre_texture_load/config/webpack.dev.js",
     "button-click-route-test": "webpack serve --config ./test/button_click_route/config/webpack.dev.js",
     "draw-main-lobby": "webpack serve --config ./test/draw_main_lobby/config/webpack.dev.js",
-    "mouse-click-detect": "webpack serve --config ./test/mouse_click_detect/config/webpack.dev.js"
+    "mouse-click-detect": "webpack serve --config ./test/mouse_click_detect/config/webpack.dev.js",
+    "draw-battle-field": "webpack serve --config ./test/draw_battle_field/config/webpack.dev.js",
+    "read-csv-to-find-card": "webpack serve --config ./test/read_csv_to_find_card/config/webpack.dev.js",
+    "make-card-with-csv": "webpack serve --config ./test/make_card_with_csv/config/webpack.dev.js",
+    "draw-your-hand": "webpack serve --config ./test/draw_your_hand/config/webpack.dev.js"
   }
 }
