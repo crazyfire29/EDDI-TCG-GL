@@ -22,7 +22,7 @@ export class CardGenerator {
     static async createItemCard(card: any, positionVector: Vector2d, indexCount: number = 0) {
         console.log("Creating an ITEM card:", card);
 
-        const itemCard = await ItemCardGenerator.createItemCard(card, positionVector)
+        const itemCard = await ItemCardGenerator.createItemCard(card, positionVector, indexCount)
         return itemCard
     }
 

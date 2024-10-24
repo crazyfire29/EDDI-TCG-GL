@@ -24,6 +24,7 @@ import {UserWindowSize} from "../../src/window_size/WindowSize"
 import {UnitCardGenerator} from "../../src/card/unit/generate";
 import {BattleFieldHandMapRepository} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepository";
 import {SupportCardGenerator} from "../../src/card/support/generate";
+import {ItemCardGenerator} from "../../src/card/item/generate";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -253,6 +254,7 @@ export class TCGJustTestBattleFieldView {
             // this.battleFieldHandSceneRepository.resizeHandSceneList(scaleX, scaleY);
             UnitCardGenerator.adjustCardPositions(scaleX, scaleY);
             SupportCardGenerator.adjustCardPositions()
+            // ItemCardGenerator.
         }
     }
 
