@@ -23,6 +23,7 @@ import {BattleFieldHandPositionRepository} from "../../src/battle_field_hand/rep
 import {UserWindowSize} from "../../src/window_size/WindowSize"
 import {UnitCardGenerator} from "../../src/card/unit/generate";
 import {BattleFieldHandMapRepository} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepository";
+import {SupportCardGenerator} from "../../src/card/support/generate";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -166,6 +167,7 @@ export class TCGJustTestBattleFieldView {
         let indexCount = 0
 
         for (const listNumber of battleFieldHandList) {
+            console.log('addYourHandUnitList() indexCount:', indexCount)
             const positionVector = this.battleFieldHandPositionRepository.addBattleFieldHandPosition(indexCount)
             const createdHand = await CardGenerationHandler.createCardById(listNumber, positionVector, indexCount)
 
@@ -250,6 +252,7 @@ export class TCGJustTestBattleFieldView {
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
             // this.battleFieldHandSceneRepository.resizeHandSceneList(scaleX, scaleY);
             UnitCardGenerator.adjustCardPositions(scaleX, scaleY);
+            SupportCardGenerator.adjustCardPositions()
         }
     }
 

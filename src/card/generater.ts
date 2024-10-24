@@ -6,14 +6,14 @@ import {EnergyCardGenerator} from "./energy/generate";
 
 export class CardGenerator {
     static async createSupportCard(card: any, positionVector: Vector2d, indexCount: number = 0) {
-        console.log("Creating support card with data:", card);
+        console.log("Creating support card with data:", card, ", indexCount", indexCount);
 
-        const supportCard = await SupportCardGenerator.createSupportCard(card, positionVector);
+        const supportCard = await SupportCardGenerator.createSupportCard(card, positionVector, indexCount);
         return supportCard
     }
 
     static async createUnitCard(card: any, positionVector: Vector2d, indexCount: number = 0) {
-        console.log("Creating a UNIT card:", card);
+        console.log("Creating a UNIT card:", card, ", indexCount", indexCount);
 
         const unitCard = await UnitCardGenerator.createUnitCard(card, positionVector, indexCount)
         return unitCard

@@ -25,6 +25,7 @@ export class CardGenerationHandler {
             const handler = CardGenerationHandler.cardKindHandlers[cardKindInt];
 
             if (handler) {
+                console.log('createCardById() indexCount:', indexCount)
                 return handler(card, positionVector, indexCount);
             } else {
                 console.error(`No handler found for card kind: ${cardKindInt}`);
