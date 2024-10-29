@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
     entry: {
-        rectangle_image: "./test/draw_your_hand/draw_your_hand.ts"
+        rectangle_image: "./test/drag_and_drop/drag_and_drop.ts"
     },
     module: {
         rules: [
@@ -37,6 +37,6 @@ module.exports = {
     },
     output: {
         filename: "bundle.js",
-        path: path.resolve(__dirname, "../../dist/draw_your_hand"),
+        path: path.resolve(__dirname, "../../dist/drag_and_drop"),
     },
 };
