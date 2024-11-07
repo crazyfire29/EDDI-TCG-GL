@@ -26,9 +26,10 @@ import { BattleFieldHandMapRepository } from "../../src/battle_field_hand/reposi
 import { SupportCardGenerator } from "../../src/card/support/generate";
 import { ItemCardGenerator } from "../../src/card/item/generate";
 import { EnergyCardGenerator } from "../../src/card/energy/generate";
+import {DragAndDropManager} from "../../src/drag_and_drop/DragAndDropManager";
 
 let selectedGroup: THREE.Object3D[] = [];
-let selectedObject: THREE.Object3D | null = null;
+let selectedObject: NonBackgroundImage | null = null;
 let offset = new THREE.Vector3();
 let isDragging = false;
 
@@ -48,6 +49,7 @@ export class TCGJustTestBattleFieldDragAndDropView {
     private buttonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
     private audioController: AudioController;
     private mouseController: MouseController;
+    private dragAndDropManager: DragAndDropManager;
 
     private battleFieldUnitRepository = BattleFieldUnitRepository.getInstance();
     private battleFieldUnitScene = new BattleFieldUnitScene();
@@ -83,6 +85,8 @@ export class TCGJustTestBattleFieldDragAndDropView {
         this.camera.position.set(0, 0, 5);
         this.camera.lookAt(0, 0, 0);
 
+        this.dragAndDropManager = DragAndDropManager.getInstance(this.camera, this.scene);
+
         this.textureManager = TextureManager.getInstance();
         this.audioController = AudioController.getInstance();
         this.audioController.setMusic(battleFieldMusic);
@@ -90,9 +94,12 @@ export class TCGJustTestBattleFieldDragAndDropView {
         window.addEventListener('resize', this.onWindowResize.bind(this));
         this.mouseController = new MouseController(this.camera, this.scene);
 
-        this.renderer.domElement.addEventListener('mousedown', this.onMouseDown.bind(this), false);
-        this.renderer.domElement.addEventListener('mousemove', this.onMouseMove.bind(this), false);
-        this.renderer.domElement.addEventListener('mouseup', this.onMouseUp.bind(this), false);
+        // this.renderer.domElement.addEventListener('mousedown', this.onMouseDown.bind(this), false);
+        // this.renderer.domElement.addEventListener('mousemove', this.onMouseMove.bind(this), false);
+        // this.renderer.domElement.addEventListener('mouseup', this.onMouseUp.bind(this), false);
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.dragAndDropManager.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousemove', (e) => this.dragAndDropManager.onMouseMove(e), false);
+        this.renderer.domElement.addEventListener('mouseup', () => this.dragAndDropManager.onMouseUp(), false);
 
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
     }
@@ -104,81 +111,81 @@ export class TCGJustTestBattleFieldDragAndDropView {
         return TCGJustTestBattleFieldDragAndDropView.instance;
     }
 
-    public onMouseDown(event: MouseEvent): void {
-        const mouse = new THREE.Vector2(
-            (event.clientX / window.innerWidth) * 2 - 1,
-            -(event.clientY / window.innerHeight) * 2 + 1
-        );
-
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(mouse, this.camera);
-
-        const intersects = raycaster.intersectObjects(
-            this.scene.children.filter(child => child !== this.background?.getMesh())
-        );
-
-        if (intersects.length > 0) {
-            selectedObject = intersects[0].object;
-            lastPosition.copy(selectedObject.position); // 카드의 초기 위치 저장
-            selectedGroup = this.getAssociatedObjects(selectedObject);
-
-            offset.copy(intersects[0].point).sub(lastPosition); // 초기 위치를 기준으로 오프셋 설정
-            isDragging = true;
-        }
-    }
-
-    public onMouseMove(event: MouseEvent): void {
-        if (isDragging && selectedObject) {
-            const mouse = new THREE.Vector2(
-                (event.clientX / window.innerWidth) * 2 - 1,
-                -(event.clientY / window.innerHeight) * 2 + 1
-            );
-
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(mouse, this.camera);
-
-            const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-            const intersection = new THREE.Vector3();
-            raycaster.ray.intersectPlane(plane, intersection);
-
-            // 드래그 중인 카드의 새로운 위치
-            const newPosition = intersection.sub(offset);
-
-            // 선택된 카드의 위치를 이동
-            selectedObject.position.copy(newPosition);
-
-            // 주변 객체들의 위치를 조정 (이동량 계산)
-            const movement = newPosition.clone().sub(lastPosition); // 이동량 계산
-            selectedGroup.forEach((obj: THREE.Object3D) => {
-                obj.position.add(movement.clone());
-            });
-
-            // 마지막 위치 업데이트
-            lastPosition.copy(newPosition);
-        }
-    }
-
-    public onMouseUp(): void {
-        isDragging = false;
-        selectedObject = null;
-        selectedGroup = [];
-        lastPosition.set(0, 0, 0); // 초기 위치 초기화
-    }
-
-    // 선택된 객체와 관련된 모든 객체를 가져오는 메서드
-    private getAssociatedObjects(object: THREE.Object3D): THREE.Object3D[] {
-        const associatedObjects: THREE.Object3D[] = [];
-
-        if (object.parent) {
-            object.parent.children.forEach(child => {
-                if (child !== object) { // 선택된 객체는 제외
-                    associatedObjects.push(child);
-                }
-            });
-        }
-
-        return associatedObjects;
-    }
+    // public onMouseDown(event: MouseEvent): void {
+    //     const mouse = new THREE.Vector2(
+    //         (event.clientX / window.innerWidth) * 2 - 1,
+    //         -(event.clientY / window.innerHeight) * 2 + 1
+    //     );
+    //
+    //     const raycaster = new THREE.Raycaster();
+    //     raycaster.setFromCamera(mouse, this.camera);
+    //
+    //     const intersects = raycaster.intersectObjects(
+    //         this.scene.children.filter(child => child !== this.background?.getMesh())
+    //     );
+    //
+    //     if (intersects.length > 0) {
+    //         selectedObject = intersects[0].object;
+    //         lastPosition.copy(selectedObject.position); // 카드의 초기 위치 저장
+    //         selectedGroup = this.getAssociatedObjects(selectedObject);
+    //
+    //         offset.copy(intersects[0].point).sub(lastPosition); // 초기 위치를 기준으로 오프셋 설정
+    //         isDragging = true;
+    //     }
+    // }
+    //
+    // public onMouseMove(event: MouseEvent): void {
+    //     if (isDragging && selectedObject) {
+    //         const mouse = new THREE.Vector2(
+    //             (event.clientX / window.innerWidth) * 2 - 1,
+    //             -(event.clientY / window.innerHeight) * 2 + 1
+    //         );
+    //
+    //         const raycaster = new THREE.Raycaster();
+    //         raycaster.setFromCamera(mouse, this.camera);
+    //
+    //         const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    //         const intersection = new THREE.Vector3();
+    //         raycaster.ray.intersectPlane(plane, intersection);
+    //
+    //         // 드래그 중인 카드의 새로운 위치
+    //         const newPosition = intersection.sub(offset);
+    //
+    //         // 선택된 카드의 위치를 이동
+    //         selectedObject.position.copy(newPosition);
+    //
+    //         // 주변 객체들의 위치를 조정 (이동량 계산)
+    //         const movement = newPosition.clone().sub(lastPosition); // 이동량 계산
+    //         selectedGroup.forEach((obj: THREE.Object3D) => {
+    //             obj.position.add(movement.clone());
+    //         });
+    //
+    //         // 마지막 위치 업데이트
+    //         lastPosition.copy(newPosition);
+    //     }
+    // }
+    //
+    // public onMouseUp(): void {
+    //     isDragging = false;
+    //     selectedObject = null;
+    //     selectedGroup = [];
+    //     lastPosition.set(0, 0, 0); // 초기 위치 초기화
+    // }
+    //
+    // // 선택된 객체와 관련된 모든 객체를 가져오는 메서드
+    // private getAssociatedObjects(object: THREE.Object3D): THREE.Object3D[] {
+    //     const associatedObjects: THREE.Object3D[] = [];
+    //
+    //     if (object.parent) {
+    //         object.parent.children.forEach(child => {
+    //             if (child !== object) { // 선택된 객체는 제외
+    //                 associatedObjects.push(child);
+    //             }
+    //         });
+    //     }
+    //
+    //     return associatedObjects;
+    // }
 
     private async initializeAudio(): Promise<void> {
         try {
@@ -196,7 +203,7 @@ export class TCGJustTestBattleFieldDragAndDropView {
 
         await this.textureManager.preloadTextures("image-paths.json");
         this.addBackground();
-        this.addTransparentRectangle();
+        // this.addTransparentRectangle();
         this.addYourHandUnitList();
 
         this.initialized = true;
@@ -232,6 +239,7 @@ export class TCGJustTestBattleFieldDragAndDropView {
             );
             this.background.createNonBackgroundImageWithTexture(texture, 1, 1);
             this.background.draw(this.scene);
+            this.dragAndDropManager.setBackground(this.background)
         } else if (!texture) {
             console.error("Background texture not found.");
         }
