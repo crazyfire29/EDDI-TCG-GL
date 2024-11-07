@@ -9,6 +9,7 @@ export class NonBackgroundImage extends Shape {
     private renderOrder: number;
     private widthRatio: number;
     private heightRatio: number;
+    private isDraggable: boolean;
 
     constructor(
         width: number,
@@ -25,6 +26,8 @@ export class NonBackgroundImage extends Shape {
         this.renderOrder = renderOrder;
         this.widthRatio = 1;
         this.heightRatio = 1;
+
+        this.isDraggable = true
     }
 
     public createNonBackgroundImage(
@@ -48,6 +51,8 @@ export class NonBackgroundImage extends Shape {
         this.heightRatio = heightRatio;
         this.textureId = texture;
         this.textureInitialized = true;
+
+        this.isDraggable = false
     }
 
     public loadTexture(callback?: () => void): void {

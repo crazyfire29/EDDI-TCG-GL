@@ -12,14 +12,14 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 camera.position.set(0, 0, 15); // 카메라 위치 설정
 
 // 카드가 들어갈 고정된 영역 설정 (fixedRectangle)
-const viewportWidth = 12; // 카드 3장을 담을 수 있는 너비
-const viewportHeight = 7; // 영역 높이
-const viewport = new THREE.Mesh(
-    new THREE.PlaneGeometry(viewportWidth, viewportHeight), // 카드가 배치될 영역
+const fixedRectangleWidth = 12; // 카드 3장을 담을 수 있는 너비
+const fixedRectangleHeight = 7; // 영역 높이
+const fixedRectangle = new THREE.Mesh(
+    new THREE.PlaneGeometry(fixedRectangleWidth, fixedRectangleHeight), // 카드가 배치될 영역
     new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide, opacity: 0.3, transparent: true })
 );
-viewport.position.z = -0.1; // 카드보다 조금 뒤에 배치
-scene.add(viewport);
+fixedRectangle.position.z = -0.1; // 카드보다 조금 뒤에 배치
+scene.add(fixedRectangle);
 
 // 카드 생성 함수
 function createCard(color: number, positionX: number): THREE.Mesh {
@@ -78,10 +78,10 @@ container.addEventListener('mouseleave', () => {
 
 // 클리핑을 위한 설정
 const clippingPlanes = [
-  new THREE.Plane(new THREE.Vector3(-1, 0, 0), viewportWidth / 2), // 왼쪽
-  new THREE.Plane(new THREE.Vector3(1, 0, 0), viewportWidth / 2),  // 오른쪽
-  new THREE.Plane(new THREE.Vector3(0, -1, 0), viewportHeight / 2), // 아래쪽
-  new THREE.Plane(new THREE.Vector3(0, 1, 0), viewportHeight / 2),  // 위쪽
+  new THREE.Plane(new THREE.Vector3(-1, 0, 0), fixedRectangleWidth / 2), // 왼쪽
+  new THREE.Plane(new THREE.Vector3(1, 0, 0), fixedRectangleWidth / 2),  // 오른쪽
+  new THREE.Plane(new THREE.Vector3(0, -1, 0), fixedRectangleHeight / 2), // 아래쪽
+  new THREE.Plane(new THREE.Vector3(0, 1, 0), fixedRectangleHeight / 2),  // 위쪽
 ];
 
 // 카메라의 클리핑 플레인 설정
