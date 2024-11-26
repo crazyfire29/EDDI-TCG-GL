@@ -120,6 +120,10 @@ export class UnitCardGenerator {
         }
     }
 
+    static getCardInitialInfoMap(): Map<string, any> {
+        return this.cardInitialInfoMap;
+    }
+
     // static adjustCardPositions(newScaleX: number, newScaleY: number): void {
     //     this.cardInitialInfoMap.forEach(({ cardMesh, initialPosition, width, height }) => {
     //         if (initialPosition) {

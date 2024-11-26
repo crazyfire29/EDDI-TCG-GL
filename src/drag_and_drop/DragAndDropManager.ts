@@ -12,6 +12,8 @@ export class DragAndDropManager {
     private plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
     private background: NonBackgroundImage | null = null; // 배경 객체를 설정할 변수
 
+    private targetShape: THREE.Object3D | null = null;
+
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {}
 
     public static getInstance(camera: THREE.Camera, scene: THREE.Scene): DragAndDropManager {
@@ -24,6 +26,10 @@ export class DragAndDropManager {
     // 배경을 설정하는 메소드
     public setBackground(backgroundObject: NonBackgroundImage | null): void {
         this.background = backgroundObject;
+    }
+
+    public setTargetShape(targetShape: THREE.Object3D | null): void {
+        this.targetShape = targetShape;
     }
 
     public onMouseDown(event: MouseEvent): void {
@@ -71,6 +77,19 @@ export class DragAndDropManager {
 
     public onMouseUp(): void {
         this.isDragging = false;
+
+        // 드래그된 객체가 타겟 객체 안에 있는지 체크
+        if (this.selectedObject && this.targetShape) {
+            const intersects = this.raycaster.intersectObject(this.targetShape);
+
+            if (intersects.length > 0) {
+                console.log("Dropped inside the target shape");
+            } else {
+                console.log("Dropped outside the target shape");
+            }
+        }
+
+        // 선택된 객체와 그룹 초기화
         this.selectedObject = null;
         this.selectedGroup = [];
         this.lastPosition.set(0, 0, 0);
