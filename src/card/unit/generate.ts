@@ -124,25 +124,6 @@ export class UnitCardGenerator {
         return this.cardInitialInfoMap;
     }
 
-    // static adjustCardPositions(newScaleX: number, newScaleY: number): void {
-    //     this.cardInitialInfoMap.forEach(({ cardMesh, initialPosition, width, height }) => {
-    //         if (initialPosition) {
-    //             const adjustedX = initialPosition.getX() * newScaleX;
-    //             const adjustedY = initialPosition.getY() * newScaleY;
-    //
-    //             // 각 텍스처의 크기를 다시 계산하여 적용
-    //             const newWidth = width * newScaleX;
-    //             const newHeight = height * newScaleY;
-    //
-    //             // 메인 카드만 geometry를 새로 적용
-    //             cardMesh.geometry = new THREE.PlaneGeometry(newWidth, newHeight);
-    //
-    //             // 위치 설정
-    //             cardMesh.position.set(adjustedX, adjustedY, cardMesh.position.z);
-    //         }
-    //     });
-    // }
-
     static adjustCardPositions(newScaleX: number, newScaleY: number): void {
         this.cardInitialInfoMap.forEach(({ cardMesh, initialPosition, textureId, cardIndex }) => {
 
