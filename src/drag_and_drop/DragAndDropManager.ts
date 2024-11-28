@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import {NonBackgroundImage} from "../shape/image/NonBackgroundImage";
+import {CardState} from "../card/state";
 
 export class DragAndDropManager {
     private static instance: DragAndDropManager;
@@ -13,6 +14,7 @@ export class DragAndDropManager {
     private background: NonBackgroundImage | null = null; // 배경 객체를 설정할 변수
 
     private targetShape: THREE.Object3D | null = null;
+    private targetInsideState: CardState | null = null;
 
     private originalPositionMap: Map<THREE.Object3D, THREE.Vector3> = new Map();
 
@@ -30,8 +32,9 @@ export class DragAndDropManager {
         this.background = backgroundObject;
     }
 
-    public setTargetShape(targetShape: THREE.Object3D | null): void {
+    public setTargetShape(targetShape: THREE.Object3D | null, cardState: CardState | null): void {
         this.targetShape = targetShape;
+        this.targetInsideState = cardState;
     }
 
     public onMouseDown(event: MouseEvent): void {
@@ -48,6 +51,10 @@ export class DragAndDropManager {
         if (intersects.length > 0) {
             this.selectedObject = intersects[0].object;
             console.log('Selected Object:', this.selectedObject);
+
+            if (this.selectedObject.userData.cardNumber !== undefined) {
+                console.log("Selected Card Number:", this.selectedObject.userData.cardNumber);
+            }
 
             // 저장: 선택된 객체와 관련된 모든 객체의 위치 저장
             this.lastPosition.copy(this.selectedObject.position);
@@ -107,6 +114,13 @@ export class DragAndDropManager {
 
             if (intersects.length > 0) {
                 console.log("Dropped inside the target shape");
+
+                if (this.targetInsideState !== null) {
+                    this.selectedObject.userData.state = this.targetInsideState;
+                    console.log(
+                        `Updated selectedObject state to: ${this.targetInsideState}`
+                    );
+                }
             } else {
                 console.log("Dropped outside the target shape");
 

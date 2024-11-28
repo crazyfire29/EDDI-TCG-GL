@@ -27,6 +27,7 @@ import { SupportCardGenerator } from "../../src/card/support/generate";
 import { ItemCardGenerator } from "../../src/card/item/generate";
 import { EnergyCardGenerator } from "../../src/card/energy/generate";
 import {DragAndDropManager} from "../../src/drag_and_drop/DragAndDropManager";
+import {CardState} from "../../src/card/state";
 
 let selectedGroup: THREE.Object3D[] = [];
 let selectedObject: NonBackgroundImage | null = null;
@@ -36,8 +37,8 @@ let isDragging = false;
 let initialPosition = new THREE.Vector3();
 let lastPosition = new THREE.Vector3();
 
-export class TCGJustTestBattleFieldYourHandToYourFieldView {
-    private static instance: TCGJustTestBattleFieldYourHandToYourFieldView | null = null;
+export class TCGJustTestBattleFieldReturnToInitialPositionView {
+    private static instance: TCGJustTestBattleFieldReturnToInitialPositionView | null = null;
 
     private scene: THREE.Scene;
     private camera: THREE.OrthographicCamera;
@@ -101,11 +102,11 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
     }
 
-    public static getInstance(simulationBattleFieldContainer: HTMLElement): TCGJustTestBattleFieldYourHandToYourFieldView {
-        if (!TCGJustTestBattleFieldYourHandToYourFieldView.instance) {
-            TCGJustTestBattleFieldYourHandToYourFieldView.instance = new TCGJustTestBattleFieldYourHandToYourFieldView(simulationBattleFieldContainer);
+    public static getInstance(simulationBattleFieldContainer: HTMLElement): TCGJustTestBattleFieldReturnToInitialPositionView {
+        if (!TCGJustTestBattleFieldReturnToInitialPositionView.instance) {
+            TCGJustTestBattleFieldReturnToInitialPositionView.instance = new TCGJustTestBattleFieldReturnToInitialPositionView(simulationBattleFieldContainer);
         }
-        return TCGJustTestBattleFieldYourHandToYourFieldView.instance;
+        return TCGJustTestBattleFieldReturnToInitialPositionView.instance;
     }
 
     private async initializeAudio(): Promise<void> {
@@ -208,7 +209,7 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
 
         this.scene.add(rectangle);
 
-        this.dragAndDropManager.setTargetShape(rectangle)
+        this.dragAndDropManager.setTargetShape(rectangle, CardState.FIELD)
     }
 
     private onWindowResize(): void {
@@ -272,5 +273,5 @@ if (!rootElement) {
     throw new Error("Cannot find element with id 'app'.");
 }
 
-const fieldView = TCGJustTestBattleFieldYourHandToYourFieldView.getInstance(rootElement);
+const fieldView = TCGJustTestBattleFieldReturnToInitialPositionView.getInstance(rootElement);
 fieldView.initialize();

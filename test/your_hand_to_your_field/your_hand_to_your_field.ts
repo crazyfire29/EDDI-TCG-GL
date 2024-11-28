@@ -27,6 +27,7 @@ import { SupportCardGenerator } from "../../src/card/support/generate";
 import { ItemCardGenerator } from "../../src/card/item/generate";
 import { EnergyCardGenerator } from "../../src/card/energy/generate";
 import {DragAndDropManager} from "../../src/drag_and_drop/DragAndDropManager";
+import {CardState} from "../../src/card/state";
 
 let selectedGroup: THREE.Object3D[] = [];
 let selectedObject: NonBackgroundImage | null = null;
@@ -187,28 +188,24 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
         const rectWidth = window.innerWidth * 0.7; // 사각형 너비
         const rectHeight = window.innerHeight * 0.23; // 사각형 높이
 
-        // PlaneGeometry 생성
         const geometry = new THREE.PlaneGeometry(rectWidth, rectHeight);
 
-        // 빨간색 재질 적용
         const material = new THREE.MeshBasicMaterial({
             color: 0xff0000,
             opacity: 0.1,
             transparent: true,
         });
 
-        // Mesh 생성
-        const rectangle = new THREE.Mesh(geometry, material);
+        const yourBattleFieldRectangle = new THREE.Mesh(geometry, material);
         const xPos = 0;
         const yPos = -(window.innerHeight / 2) + (0.024 * 3 + 0.11 * 2.5) * window.innerHeight;
-        rectangle.position.set(xPos, yPos, 0);
+        yourBattleFieldRectangle.position.set(xPos, yPos, 0);
 
-        // renderOrder 속성 설정
-        rectangle.renderOrder = 1; // Background보다 높게 설정하여 먼저 렌더링
+        yourBattleFieldRectangle.renderOrder = 1;
 
-        this.scene.add(rectangle);
+        this.scene.add(yourBattleFieldRectangle);
 
-        this.dragAndDropManager.setTargetShape(rectangle)
+        this.dragAndDropManager.setTargetShape(yourBattleFieldRectangle, CardState.FIELD)
     }
 
     private onWindowResize(): void {
