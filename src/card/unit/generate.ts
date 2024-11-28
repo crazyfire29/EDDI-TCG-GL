@@ -4,6 +4,7 @@ import { TextureManager } from "../../texture_manager/TextureManager";
 import { MeshGenerator } from "../../mesh/generator";
 import { CardJob } from "../job";
 import { UserWindowSize } from "../../window_size/WindowSize";
+import {CardState} from "../state";
 
 interface CardInitialInfo {
     cardMesh: THREE.Mesh;
@@ -21,7 +22,6 @@ export class UnitCardGenerator {
     static async createUnitCard(card: any, position: Vector2d = new Vector2d(0, 0), indexCount: number = 0): Promise<THREE.Group> {
         const textureManager = TextureManager.getInstance();
         const userWindowSize = UserWindowSize.getInstance();
-        const { scaleX, scaleY } = userWindowSize.getScaleFactors();
 
         const cardTexture = await textureManager.getTexture('card', card.카드번호);
         const unitJob = parseInt(card.병종, 10);
@@ -38,6 +38,8 @@ export class UnitCardGenerator {
 
         // 메인 카드 Mesh 생성
         const mainCardMesh = MeshGenerator.createMesh(cardTexture, cardWidth, cardHeight, position);
+        mainCardMesh.userData.cardNumber = card.카드번호
+        mainCardMesh.userData.state = CardState.HAND
         cardGroup.add(mainCardMesh);
 
         this.saveInitialPosition(mainCardMesh, position, cardWidth, cardHeight, 'mainCardTextureId', indexCount);
