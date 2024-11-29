@@ -39,6 +39,8 @@
     "draw-your-hand": "webpack serve --config ./test/draw_your_hand/config/webpack.dev.js",
     "side-scroll": "webpack serve --config ./test/side_scroll/config/webpack.dev.js",
     "place-each-field": "webpack serve --config ./test/place_each_field/config/webpack.dev.js",
-    "drag-and-drop": "webpack serve --config ./test/drag_and_drop/config/webpack.dev.js"
+    "drag-and-drop": "webpack serve --config ./test/drag_and_drop/config/webpack.dev.js",
+    "return-to-initial-position": "webpack serve --config ./test/return_to_initial_position/config/webpack.dev.js",
+    "your-hand-to-your-field": "webpack serve --config ./test/your_hand_to_your_field/config/webpack.dev.js"
   }
 }
