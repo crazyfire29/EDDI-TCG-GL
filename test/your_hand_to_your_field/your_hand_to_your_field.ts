@@ -202,6 +202,12 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
         yourBattleFieldRectangle.position.set(xPos, yPos, 0);
 
         yourBattleFieldRectangle.renderOrder = 1;
+        yourBattleFieldRectangle.userData = {
+            xPos: xPos,
+            yPos: yPos,
+            width: rectWidth,
+            height: rectHeight
+        };
 
         this.scene.add(yourBattleFieldRectangle);
 
