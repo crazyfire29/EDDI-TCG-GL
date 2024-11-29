@@ -11,6 +11,7 @@ export class BattleFieldHandMapRepository {
         this.currentHandMap.set(2, 19);
         this.currentHandMap.set(3, 20);
         this.currentHandMap.set(4, 93);
+        this.currentHandMap.set(5, 26);
     }
 
     public static getInstance(): BattleFieldHandMapRepository {
