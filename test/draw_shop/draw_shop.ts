@@ -8,6 +8,8 @@ import {RouteMap} from "../../src/router/RouteMap";
 import {routes} from "../../src/router/routes";
 import { Component } from "../../src/router/Component";
 import { TransparentRectangle } from "../../src/shape/TransparentRectangle";
+import { ShopButtonConfigList } from "../../src/shop/ShopButtonConfigList";
+import { ShopButtonType } from "../../src/shop/ShopButtonType";
 
 export class TCGJustTestShopView implements Component{
     private static instance: TCGJustTestShopView | null = null;
@@ -83,6 +85,7 @@ export class TCGJustTestShopView implements Component{
                console.log("Textures preloaded. Adding background and buttons...");
 
                this.addBackground();
+               this.addButtons();
                this.initialized = true;
                this.isAnimating = true;
                this.animate();
@@ -131,6 +134,37 @@ export class TCGJustTestShopView implements Component{
                    console.error("Background texture not found.");
                }
            }
+
+
+       private async addButtons(): Promise<void> {
+               await Promise.all(ShopButtonConfigList.buttonConfigs.map(async (config) => {
+                   const buttonTexture = await this.textureManager.getTexture('shop_buttons', config.id);
+                   if (buttonTexture) {
+                       const widthPercent = 300 / 1920;  // 기준 화면 크기의 퍼센트로 버튼 크기를 정의
+                       const heightPercent = 300 / 1080;
+                       const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
+
+                       const button = new NonBackgroundImage(
+                           window.innerWidth * widthPercent,
+                           window.innerHeight * heightPercent,
+                           new THREE.Vector2(
+                               window.innerWidth * positionPercent.x,
+                               window.innerHeight * positionPercent.y
+                           )
+                       );
+                       button.createNonBackgroundImageWithTexture(buttonTexture, 1, 1);
+                       button.draw(this.scene);
+
+                       this.buttons.push(button);
+                       this.buttonInitialInfo.set(button.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
+
+                       //this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
+                   } else {
+                       console.error("Button texture not found.");
+                   }
+               }));
+           }
+
 
        public animate(): void {
                if (this.isAnimating) {
