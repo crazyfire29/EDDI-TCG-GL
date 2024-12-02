@@ -66,6 +66,8 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
 
     private userWindowSize: UserWindowSize;
 
+    private yourBattleFieldRectangle: THREE.Mesh | null = null;
+
     private constructor(simulationBattleFieldContainer: HTMLElement) {
         this.simulationBattleFieldContainer = simulationBattleFieldContainer;
         this.scene = new THREE.Scene();
@@ -212,6 +214,8 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
         this.scene.add(yourBattleFieldRectangle);
 
         this.dragAndDropManager.setTargetShape(yourBattleFieldRectangle, CardState.FIELD)
+
+        this.yourBattleFieldRectangle = yourBattleFieldRectangle;
     }
 
     private onWindowResize(): void {
@@ -234,6 +238,25 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
                 const scaleX = newWidth / this.background.getWidth();
                 const scaleY = newHeight / this.background.getHeight();
                 this.background.setScale(scaleX, scaleY);
+            }
+
+            if (this.yourBattleFieldRectangle) {
+                const rectWidth = window.innerWidth * 0.7;
+                const rectHeight = window.innerHeight * 0.23;
+
+                const geometry = this.yourBattleFieldRectangle.geometry as THREE.PlaneGeometry;
+                if (geometry) {
+                    // PlaneGeometry의 크기 (width, height)를 새로 설정
+                    geometry.dispose(); // 기존 geometry를 삭제하여 메모리 누수 방지
+                    this.yourBattleFieldRectangle.geometry = new THREE.PlaneGeometry(rectWidth, rectHeight);
+
+                    // 새로 생성된 geometry에 대해서 위치 업데이트
+                    this.yourBattleFieldRectangle.position.set(
+                        0,
+                        -(window.innerHeight / 2) + (0.024 * 3 + 0.11 * 2.5) * window.innerHeight,
+                        0
+                    );
+                }
             }
 
             this.buttons.forEach(button => {
