@@ -84,10 +84,14 @@ export class TCGJustTestShopView implements Component{
 
                console.log("Textures preloaded. Adding background and buttons...");
 
-               this.addBackground();
-               this.addButtons();
+               await this.addBackground();
+               await this.addButtons();
+
                this.initialized = true;
                this.isAnimating = true;
+
+               this.addTransparentRectangles();
+
                this.animate();
            }
 
@@ -157,6 +161,7 @@ export class TCGJustTestShopView implements Component{
 
                        this.buttons.push(button);
                        this.buttonInitialInfo.set(button.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
+                       console.log('addButtons()')
 
                        //this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
                    } else {
@@ -164,6 +169,50 @@ export class TCGJustTestShopView implements Component{
                    }
                }));
            }
+
+       private async addTransparentRectangles(): Promise<void> {
+               // 로비 버튼
+               const lobbyButtonX = 0.04761;
+               const lobbyButtonY = 0.07534;
+               console.log('addLobbyButtonRectangle');
+               this.addTransparentRectangle('lobbyButton', lobbyButtonX, lobbyButtonY);
+
+               // 카드 버튼
+               const myCardButtonX = 0.04761;
+               const myCardButtonY = 0.14734;
+               this.addTransparentRectangle('myCardButton', myCardButtonX, myCardButtonY);
+               console.log('addMyCardButtonRectangle');
+
+               console.log('addTransparentRectangles()!');
+
+       }
+
+       private async addTransparentRectangle(id: string, positionXPercent: number, positionYPercent: number): Promise<void> {
+           const screenWidth = window.innerWidth;
+           const screenHeight = window.innerHeight;
+           console.log('Window screenWidth, screenHeight:', screenHeight, screenHeight);
+
+           const positionX = (positionXPercent - 0.5) * screenWidth
+           const positionY = (0.5 - positionYPercent) * screenHeight
+
+
+           console.log('TransparentRectangle Position:', positionX, positionY);
+
+           const position = new THREE.Vector2(
+               positionX, positionY
+
+           );
+
+           const width = 0.09415 * screenWidth
+           const height = 0.06458 * screenHeight
+           console.log('Calculated position:', position, 'Width:', width, 'Height:', height);
+
+           const transparentRectangle = new TransparentRectangle(position, width, height, 0xffffff, 0.8, id);
+           transparentRectangle.addToScene(this.scene);
+
+           this.transparentRectangles.push(transparentRectangle);
+
+       }
 
 
        public animate(): void {
@@ -173,7 +222,7 @@ export class TCGJustTestShopView implements Component{
                } else {
                    console.log('TCGCardShop: Animation stopped.');
                }
-           }
+       }
 
     }
 
