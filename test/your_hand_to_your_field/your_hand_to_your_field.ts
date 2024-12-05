@@ -276,10 +276,12 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
 
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
-            UnitCardGenerator.adjustCardPositions(scaleX, scaleY);
+            UnitCardGenerator.adjustHandCardPositions();
             SupportCardGenerator.adjustCardPositions();
             ItemCardGenerator.adjustCardPositions();
             EnergyCardGenerator.adjustCardPositions();
+
+            UnitCardGenerator.adjustFieldCardPositions()
         }
     }
 

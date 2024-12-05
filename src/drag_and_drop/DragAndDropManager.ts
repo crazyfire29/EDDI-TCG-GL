@@ -5,6 +5,9 @@ import {BattleFieldUnit} from "../battle_field_unit/entity/BattleFieldUnit";
 import {BattleFieldUnitRepository} from "../battle_field_unit/repository/BattleFieldUnitRepository";
 import {getCardById} from "../card/utility";
 import {Vector2d} from "../common/math/Vector2d";
+import {UnitCardGenerator} from "../card/unit/generate";
+import {BufferGeometry, Material, Mesh} from "three";
+import {CardStateManager} from "../card/CardStateManager";
 
 export class DragAndDropManager {
     private static instance: DragAndDropManager;
@@ -31,6 +34,10 @@ export class DragAndDropManager {
         return DragAndDropManager.instance;
     }
 
+    public static getExistingInstance(): DragAndDropManager | null {
+        return DragAndDropManager.instance || null; // 존재하지 않으면 null 반환
+    }
+
     // 배경을 설정하는 메소드
     public setBackground(backgroundObject: NonBackgroundImage | null): void {
         this.background = backgroundObject;
@@ -39,6 +46,10 @@ export class DragAndDropManager {
     public setTargetShape(targetShape: THREE.Object3D | null, cardState: CardState | null): void {
         this.targetShape = targetShape;
         this.targetInsideState = cardState;
+    }
+
+    public getTargetShape(): THREE.Object3D | null {
+        return this.targetShape;
     }
 
     public onMouseDown(event: MouseEvent): void {
@@ -119,12 +130,13 @@ export class DragAndDropManager {
             if (intersects.length > 0) {
                 console.log("Dropped inside the target shape");
 
+                const cardMesh = this.selectedObject;
                 const cardNumber = this.selectedObject.userData.cardNumber;
                 if (cardNumber !== undefined) {
                     const repository = BattleFieldUnitRepository.getInstance();
                     const currentUnitCount = repository.getBattleFieldUnitList().length
 
-                    console.log(`Valid card detected with number: ${cardNumber}`);
+                    console.log(`Valid card detected with number: ${cardNumber}, currentUnitCount: ${currentUnitCount}`);
 
                     const card = getCardById(cardNumber);
                     const weaponId = card?.공격력 ?? 0;  // 기본값 0
@@ -135,7 +147,7 @@ export class DragAndDropManager {
                     console.log('종족 타입: ', typeof card?.종족)
 
                     const targetData = this.targetShape.userData;
-                    const targetLeft = -targetData.width / 2 + 0.044056 * window.innerWidth + 200 * currentUnitCount;  // 사각형의 왼쪽 끝 X 좌표
+                    const targetLeft = -targetData.width / 2 + 0.044056 * window.innerWidth + 0.094696 * window.innerWidth * currentUnitCount;  // 사각형의 왼쪽 끝 X 좌표
                     const targetCenterY = targetData.yPos;  // 사각형의 세로 중앙 위치
 
                     // 드래그된 객체 크기 (예: 카드 크기)
@@ -149,6 +161,7 @@ export class DragAndDropManager {
                     // 이동된 거리 계산
                     const deltaX = xPosition - this.selectedObject.position.x;
                     const deltaY = yPosition - this.selectedObject.position.y;
+                    console.log('deltaX:', deltaX, ', deltaY:', deltaY)
 
                     // selectedObject를 Vector2d로 계산된 위치에 배치
                     this.selectedObject.position.set(xPosition, yPosition, 0);
@@ -167,13 +180,29 @@ export class DragAndDropManager {
 
                     console.log("BattleFieldUnit added to repository:", unit);
 
+                    // const cardInitialInfoMap = UnitCardGenerator.getCardInitialInfoMap()
+                    const handCardInitialInfoMap = CardStateManager.getAllHandCards()
+                    const cardIndex = CardStateManager.getNextFieldIndex()
+
+                    handCardInitialInfoMap.forEach((value, key) => {
+                        if (value.cardMesh === cardMesh) {
+                            CardStateManager.removeCardFromHand(value.cardMesh as Mesh<BufferGeometry, Material>, cardIndex);
+                            console.log(`Card with mesh ${cardMesh} removed from cardInitialInfoMap.`);
+                        }
+                    });
+
                     if (this.selectedGroup && this.selectedGroup.length > 0) {
                         this.selectedGroup.forEach((obj) => {
-                            if (obj.position) {
-                                obj.position.x += deltaX;
-                                obj.position.y += deltaY;
+                            const meshObj = obj as Mesh<BufferGeometry, Material>;
+
+                            if (meshObj.position) {
+                                meshObj.position.x += deltaX;
+                                meshObj.position.y += deltaY;
                                 console.log(`Object in group moved by delta: { x: ${deltaX}, y: ${deltaY} }`);
                             }
+
+                            CardStateManager.removeCardFromHand(meshObj, cardIndex);
+                            console.log(`Object in group removed from hand.`);
                         });
                     } else {
                         console.log("No objects in selectedGroup to move.");
