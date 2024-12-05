@@ -5,11 +5,14 @@ import { AudioController } from "../../src/audio/AudioController";
 import cardShopMusic from '@resource/music/shop/card-shop.mp3';
 import { MouseController } from "../../src/mouse/MouseController";
 import {RouteMap} from "../../src/router/RouteMap";
-import {routes} from "../../src/router/routes";
 import { Component } from "../../src/router/Component";
 import { TransparentRectangle } from "../../src/shape/TransparentRectangle";
 import { ShopButtonConfigList } from "../../src/shop/ShopButtonConfigList";
 import { ShopButtonType } from "../../src/shop/ShopButtonType";
+import { ShopSelectScreenConfigList } from "./ShopSelectScreenConfigList";
+import { ShopSelectScreenType} from "./ShopSelectScreenType";
+import {routes} from "../../src/router/routes";
+import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView"
 
 export class TCGJustTestShopView implements Component{
     private static instance: TCGJustTestShopView | null = null;
@@ -22,7 +25,11 @@ export class TCGJustTestShopView implements Component{
         private background: NonBackgroundImage | null = null;
         private buttons: NonBackgroundImage[] = [];
         private buttonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
+        private selectScreens: NonBackgroundImage[] = [];
+        private selectScreenInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
         private audioController: AudioController;
+        private mouseController: MouseController;
+
 
         private initialized = false;
         private isAnimating = false;
@@ -52,6 +59,12 @@ export class TCGJustTestShopView implements Component{
                 this.textureManager = TextureManager.getInstance();
                 this.audioController = AudioController.getInstance();
                 this.audioController.setMusic(cardShopMusic);
+
+//                 window.addEventListener('resize', this.onWindowResize.bind(this));
+
+                this.mouseController = new MouseController(this.camera, this.scene);
+
+                window.addEventListener('click', () => this.initializeAudio(), { once: true });
 
             }
 
@@ -84,10 +97,15 @@ export class TCGJustTestShopView implements Component{
 
                console.log("Textures preloaded. Adding background and buttons...");
 
-               this.addBackground();
-               this.addButtons();
+               await this.addBackground();
+               await this.addButtons();
+
                this.initialized = true;
                this.isAnimating = true;
+
+               this.addTransparentRectangles();
+               this.addSelectScreen();
+
                this.animate();
            }
 
@@ -114,7 +132,37 @@ export class TCGJustTestShopView implements Component{
                this.renderer.domElement.style.display = 'none';
                this.shopContainer.style.display = 'none';
 
+               this.buttons.forEach(button => {
+                   this.mouseController.unregisterButton(button.getMesh());
+//                    this.disposeMesh(button.getMesh());
+                   this.scene.remove(button.getMesh());
+               });
+
+               this.transparentRectangles.forEach(rectangle => {
+                   this.mouseController.unregisterButton(rectangle.getMesh());
+//                    this.disposeMesh(rectangle.getMesh());
+                   this.scene.remove(rectangle.getMesh());
+               });
+
+               this.mouseController.clearButtons();
+
+               this.buttons = [];
+               this.transparentRectangles = [];
+
            }
+
+//        private disposeMesh(mesh: THREE.Mesh): void {
+//                if (mesh.geometry) {
+//                    mesh.geometry.dispose();
+//                }
+//                if (mesh.material) {
+//                    if (Array.isArray(mesh.material)) {
+//                        mesh.material.forEach(material => material.dispose());
+//                    } else {
+//                        mesh.material.dispose();
+//                    }
+//                }
+//            }
 
 
        private async addBackground(): Promise<void> {
@@ -157,12 +205,132 @@ export class TCGJustTestShopView implements Component{
 
                        this.buttons.push(button);
                        this.buttonInitialInfo.set(button.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
+                       console.log('addButtons()')
 
-                       //this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
+                       this.mouseController.registerButton(button.getMesh(), this.onButtonClick.bind(this, config.type));
                    } else {
                        console.error("Button texture not found.");
                    }
                }));
+           }
+
+       private onButtonClick(type: ShopButtonType): void {
+               console.log('Button clicked:', type);
+               switch (type) {
+                   case ShopButtonType.ALL:
+                       this.selectScreens[0].draw(this.scene);
+                       break;
+                   case ShopButtonType.UNDEAD:
+                       this.selectScreens[1].draw(this.scene);
+                       break;
+                   case ShopButtonType.TRENT:
+                       this.selectScreens[2].draw(this.scene);
+                       break;
+                   case ShopButtonType.HUMAN:
+                       this.selectScreens[3].draw(this.scene);
+                       break;
+                   default:
+                       console.error("Unknown button type:", type);
+               }
+           }
+
+       private async addSelectScreen(): Promise<void> {
+           await Promise.all(ShopSelectScreenConfigList.screenConfigs.map(async (config) => {
+               const selectScreenTexture = await this.textureManager.getTexture('shop_select_screens', config.id);
+               if (selectScreenTexture) {
+                   const widthPercent = 400 / 1920;
+                   const heightPercent = 600 / 1080;
+                   const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
+
+                   const selectScreen = new NonBackgroundImage(
+                       window.innerWidth * widthPercent,
+                       window.innerHeight * heightPercent,
+                       new THREE.Vector2(
+                           window.innerWidth * positionPercent.x,
+                           window.innerHeight * positionPercent.y
+                           )
+                       );
+
+                   selectScreen.createNonBackgroundImageWithTexture(selectScreenTexture, 1, 1);
+                   this.selectScreens.push(selectScreen);
+                   this.selectScreenInitialInfo.set(selectScreen.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
+                   } else {
+                       console.error("Select Screen Texture not found.");
+                       }
+               }));
+           }
+
+       private addTransparentRectangles(): void {
+               // 로비 버튼
+               const lobbyButtonX = 0.04761;
+               const lobbyButtonY = 0.07534;
+               console.log('addLobbyButtonRectangle');
+               this.addTransparentRectangle('lobbyButton', lobbyButtonX, lobbyButtonY);
+
+               // 카드 버튼
+               const myCardButtonX = 0.04761;
+               const myCardButtonY = 0.14734;
+               this.addTransparentRectangle('myCardButton', myCardButtonX, myCardButtonY);
+               console.log('addMyCardButtonRectangle');
+
+               console.log('addTransparentRectangles()!');
+
+       }
+
+       private addTransparentRectangle(id: string, positionXPercent: number, positionYPercent: number): void {
+           const screenWidth = window.innerWidth;
+           const screenHeight = window.innerHeight;
+           console.log('Window screenWidth, screenHeight:', screenHeight, screenHeight);
+
+           const positionX = (positionXPercent - 0.5) * screenWidth
+           const positionY = (0.5 - positionYPercent) * screenHeight
+
+
+           console.log('TransparentRectangle Position:', positionX, positionY);
+
+           const position = new THREE.Vector2(
+               positionX, positionY
+
+           );
+
+           const width = 0.09415 * screenWidth
+           const height = 0.06458 * screenHeight
+           console.log('Calculated position:', position, 'Width:', width, 'Height:', height);
+
+           const transparentRectangle = new TransparentRectangle(position, width, height, 0xffffff, 0.8, id);
+           transparentRectangle.addToScene(this.scene);
+           this.mouseController.registerButton(transparentRectangle.getMesh(), this.onTransparentRectangleClick.bind(this, id));
+
+           this.transparentRectangles.push(transparentRectangle);
+
+       }
+
+       private onTransparentRectangleClick(id: string): void {
+           console.log("TransparentRectangle Button Click !");
+           switch(id) {
+               case 'lobbyButton':
+                   console.log("Shop Lobby Button Click!");
+                   this.hide();
+                   console.log("Buttons clear?:", this.buttons);
+                   const rootElement = document.getElementById('app');
+                   if (rootElement) {
+                       const routeMap = new RouteMap(rootElement, '/tcg-main-lobby');
+                       routeMap.registerRoutes(routes);
+
+                       const lobbyView = TCGMainLobbyView.getInstance(rootElement, routeMap);
+                       lobbyView.initialize();
+                       lobbyView.show();
+
+                   } else {
+                       console.error('Root element not found');
+                   }
+                   break;
+               case 'myCardButton':
+                   console.log("wait! not yet prepare..")
+                   break;
+               default:
+                   console.error("Unknown TransparentRectangle ID:", id);
+               }
            }
 
 
@@ -173,12 +341,11 @@ export class TCGJustTestShopView implements Component{
                } else {
                    console.log('TCGCardShop: Animation stopped.');
                }
-           }
+       }
 
     }
 
 const rootElement = document.getElementById('app');
-
 
 if (!rootElement) {
     throw new Error("Cannot find element with id 'app'.");
