@@ -10,9 +10,11 @@ import { TransparentRectangle } from "../../src/shape/TransparentRectangle";
 import { ShopButtonConfigList } from "../../src/shop/ShopButtonConfigList";
 import { ShopButtonType } from "../../src/shop/ShopButtonType";
 import { ShopSelectScreenConfigList } from "./ShopSelectScreenConfigList";
-import { ShopSelectScreenType} from "./ShopSelectScreenType";
-import {routes} from "../../src/router/routes";
-import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView"
+import { ShopSelectScreenType } from "./ShopSelectScreenType";
+import { routes } from "../../src/router/routes";
+import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView";
+import { ShopYesOrNoButtonConfigList } from "./ShopYesOrNoButtonConfigList";
+import { ShopYesOrNoButtonType } from "./ShopYesOrNoButtonType";
 
 export class TCGJustTestShopView implements Component{
     private static instance: TCGJustTestShopView | null = null;
@@ -27,6 +29,8 @@ export class TCGJustTestShopView implements Component{
         private buttonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
         private selectScreens: NonBackgroundImage[] = [];
         private selectScreenInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
+        private yesOrNoButtons: NonBackgroundImage[] = [];
+        private yesOrNoButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
         private audioController: AudioController;
         private mouseController: MouseController;
 
@@ -105,6 +109,7 @@ export class TCGJustTestShopView implements Component{
 
                this.addTransparentRectangles();
                this.addSelectScreen();
+               this.addYesOrNoButton();
 
                this.animate();
            }
@@ -219,15 +224,23 @@ export class TCGJustTestShopView implements Component{
                switch (type) {
                    case ShopButtonType.ALL:
                        this.selectScreens[0].draw(this.scene);
+                       this.yesOrNoButtons[0].draw(this.scene);
+                       this.yesOrNoButtons[1].draw(this.scene);
                        break;
                    case ShopButtonType.UNDEAD:
-                       this.selectScreens[1].draw(this.scene);
+                       this.selectScreens[3].draw(this.scene);
+                       this.yesOrNoButtons[0].draw(this.scene);
+                       this.yesOrNoButtons[1].draw(this.scene);
                        break;
                    case ShopButtonType.TRENT:
-                       this.selectScreens[2].draw(this.scene);
+                       this.selectScreens[1].draw(this.scene);
+                       this.yesOrNoButtons[0].draw(this.scene);
+                       this.yesOrNoButtons[1].draw(this.scene);
                        break;
                    case ShopButtonType.HUMAN:
-                       this.selectScreens[3].draw(this.scene);
+                       this.selectScreens[2].draw(this.scene);
+                       this.yesOrNoButtons[0].draw(this.scene);
+                       this.yesOrNoButtons[1].draw(this.scene);
                        break;
                    default:
                        console.error("Unknown button type:", type);
@@ -237,9 +250,10 @@ export class TCGJustTestShopView implements Component{
        private async addSelectScreen(): Promise<void> {
            await Promise.all(ShopSelectScreenConfigList.screenConfigs.map(async (config) => {
                const selectScreenTexture = await this.textureManager.getTexture('shop_select_screens', config.id);
+               console.log("what config id?: ", config.id);
                if (selectScreenTexture) {
-                   const widthPercent = 400 / 1920;
-                   const heightPercent = 600 / 1080;
+                   const widthPercent = 500 / 1920;
+                   const heightPercent = 700 / 1080;
                    const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
 
                    const selectScreen = new NonBackgroundImage(
@@ -257,6 +271,34 @@ export class TCGJustTestShopView implements Component{
                    } else {
                        console.error("Select Screen Texture not found.");
                        }
+               }));
+           }
+
+
+       private async addYesOrNoButton(): Promise<void> {
+           await Promise.all(ShopYesOrNoButtonConfigList.yesNoButtonConfigs.map(async (config) => {
+               const yesOrNoButtonTexture = await this.textureManager.getTexture('shop_yes_or_no_button', config.id);
+               if (yesOrNoButtonTexture) {
+                   const widthPercent = 135 / 1920;
+                   const heightPercent = 43 / 1080;
+                   const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
+
+                   const yesOrNoButton = new NonBackgroundImage(
+                       window.innerWidth * widthPercent,
+                       window.innerHeight * heightPercent,
+                       new THREE.Vector2(
+                           window.innerWidth * positionPercent.x,
+                           window.innerHeight * positionPercent.y
+                           )
+                       );
+
+                   yesOrNoButton.createNonBackgroundImageWithTexture(yesOrNoButtonTexture, 1, 1);
+                   this.yesOrNoButtons.push(yesOrNoButton);
+                   this.yesOrNoButtonInitialInfo.set(yesOrNoButton.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
+                   } else {
+                       console.error("Yes Or No Button Texture Not Found.");
+                       }
+
                }));
            }
 
