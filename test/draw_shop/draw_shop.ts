@@ -38,7 +38,8 @@ export class TCGJustTestShopView implements Component{
         private initialized = false;
         private isAnimating = false;
 
-        private transparentRectangles: TransparentRectangle[] = []
+
+        private transparentRectangles: TransparentRectangle[] = [];
         private rectInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
 
 
@@ -165,12 +166,12 @@ export class TCGJustTestShopView implements Component{
 
            this.yesOrNoButtons.forEach(button => {
                button.getMesh().visible = false;
+               this.scene.remove(button.getMesh());
                this.mouseController.unregisterButton(button.getMesh());
                });
 
            this.yesOrNoButtons = [];
 
-           console.log("Hide Select Screens?: ", this.selectScreens);
            console.log("Hide Select Buttons?: ", this.yesOrNoButtons);
 
            }
@@ -247,7 +248,6 @@ export class TCGJustTestShopView implements Component{
                }));
            }
 
-
        // 각 버튼 이벤트(뽑기 화면 나오는 거)
        private onButtonClick(type: ShopButtonType): void {
                console.log('Button clicked:', type);
@@ -255,6 +255,7 @@ export class TCGJustTestShopView implements Component{
                switch (type) {
                    case ShopButtonType.ALL:
                        this.selectScreens[0].draw(this.scene);
+                       console.log(`Number of objects in scene: ${this.scene.children.length}`);
                        this.showYesOrNoButtons();
                        break;
                    case ShopButtonType.UNDEAD:

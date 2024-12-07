@@ -155,7 +155,6 @@ export class TextureManager {
             case 'shop_background':
                 return this.shopBackgroundTextureList[id]
             case 'shop_buttons':
-                console.log("shop button sibal?: ", this.shopButtonsTextureList);
                 return this.shopButtonsTextureList[id]
             case 'shop_select_screens':
                 return this.shopSelectScreenTextureList[id]
