@@ -38,8 +38,6 @@ export class TCGJustTestShopView implements Component{
         private initialized = false;
         private isAnimating = false;
 
-        private isDrawSelectButton = false;
-
         private transparentRectangles: TransparentRectangle[] = []
         private rectInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
 
@@ -170,6 +168,8 @@ export class TCGJustTestShopView implements Component{
                this.mouseController.unregisterButton(button.getMesh());
                });
 
+           this.yesOrNoButtons = [];
+
            console.log("Hide Select Screens?: ", this.selectScreens);
            console.log("Hide Select Buttons?: ", this.yesOrNoButtons);
 
@@ -251,26 +251,23 @@ export class TCGJustTestShopView implements Component{
        // 각 버튼 이벤트(뽑기 화면 나오는 거)
        private onButtonClick(type: ShopButtonType): void {
                console.log('Button clicked:', type);
+               this.addYesOrNoButton();
                switch (type) {
                    case ShopButtonType.ALL:
                        this.selectScreens[0].draw(this.scene);
-                       this.isDrawSelectButton = true;
-                       this.addYesOrNoButton();
+                       this.showYesOrNoButtons();
                        break;
                    case ShopButtonType.UNDEAD:
                        this.selectScreens[3].draw(this.scene);
-                       this.isDrawSelectButton = true;
-                       this.addYesOrNoButton();
+                       this.showYesOrNoButtons();
                        break;
                    case ShopButtonType.TRENT:
                        this.selectScreens[1].draw(this.scene);
-                       this.isDrawSelectButton = true;
-                       this.addYesOrNoButton();
+                       this.showYesOrNoButtons();
                        break;
                    case ShopButtonType.HUMAN:
                        this.selectScreens[2].draw(this.scene);
-                       this.isDrawSelectButton = true;
-                       this.addYesOrNoButton();
+                       this.showYesOrNoButtons();
                        break;
                    default:
                        console.error("Unknown button type:", type);
@@ -326,10 +323,8 @@ export class TCGJustTestShopView implements Component{
                        );
 
                    yesOrNoButton.createNonBackgroundImageWithTexture(yesOrNoButtonTexture, 1, 1);
-                   if (this.isDrawSelectButton){
-                       yesOrNoButton.draw(this.scene);
-                       this.mouseController.registerButton(yesOrNoButton.getMesh(), this.onSelectButtonClick.bind(this, config.type));
-                       }
+                   yesOrNoButton.draw(this.scene);
+                   this.mouseController.registerButton(yesOrNoButton.getMesh(), this.onSelectButtonClick.bind(this, config.type));
                    this.yesOrNoButtons.push(yesOrNoButton);
                    this.yesOrNoButtonInitialInfo.set(yesOrNoButton.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
 
@@ -417,13 +412,13 @@ export class TCGJustTestShopView implements Component{
 
        // 뽑기 화면의 수락, 취소 버튼 클릭 이벤트
        private onSelectButtonClick(type: ShopYesOrNoButtonType): void {
-           console.log("Select Button Click !");
+           console.log("Select/Cancel Button Click !");
            switch(type) {
                case ShopYesOrNoButtonType.YES:
                    console.log('Wait! Not yet prepare select!');
                    break;
                case ShopYesOrNoButtonType.NO:
-                   console.log('Wait! Not yet prepare cancel!');
+                   console.log('Cancel! Return TO Shop.');
                    this.selectScreenAndButtonHide();
                    break;
                default:
