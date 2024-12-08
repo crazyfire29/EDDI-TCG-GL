@@ -17,7 +17,8 @@ class WillBeReferenceImageLocation(Enum):
     SHOP_BACKGROUND = "resource/shop/"
     SHOP_BUTTONS = "resource/shop/buttons/"
     SHOP_SELECT_SCREENS = "resource/shop/select_screen/"
-    SHOP_YES_OR_NO_BUTTON = "resource/shop/yes_or_no"
+    SHOP_YES_OR_NO_BUTTON = "resource/shop/yes_or_no/"
+    SELECT_CARD_SCREEN = "resource/shop/background"
     BATTLE_FIELD_BACKGROUND = "resource/battle_field/background/"
     MY_CARD_BACKGROUND = "resource/my_card/background/"
     CARD_KINDS = "resource/card_kinds/"
@@ -33,8 +34,9 @@ class RelativeImageLocation(Enum):
     MAIN_LOBBY_BUTTONS = "../../resource/main_lobby/buttons/"
     SHOP_BACKGROUND = "../../resource/shop/"
     SHOP_BUTTONS = "../../resource/shop/buttons/"
-    SHOP_SELECT_SCREENS = "../../resource/shop/select_screen"
-    SHOP_YES_OR_NO_BUTTON = "../../resource/shop/yes_or_no"
+    SHOP_SELECT_SCREENS = "../../resource/shop/select_screen/"
+    SHOP_YES_OR_NO_BUTTON = "../../resource/shop/yes_or_no/"
+    SELECT_CARD_SCREEN = "../../resource/shop/background"
     BATTLE_FIELD_BACKGROUND = "../../resource/battle_field/background/"
     MY_CARD_BACKGROUND = "../../resource/my_card/background/"
     CARD_KINDS = "../../resource/card_kinds/"
@@ -53,6 +55,7 @@ relative_paths = {
     RelativeImageLocation.SHOP_BUTTONS: RelativeImageLocation.SHOP_BUTTONS.value,
     RelativeImageLocation.SHOP_SELECT_SCREENS: RelativeImageLocation.SHOP_SELECT_SCREENS.value,
     RelativeImageLocation.SHOP_YES_OR_NO_BUTTON: RelativeImageLocation.SHOP_YES_OR_NO_BUTTON.value,
+    RelativeImageLocation.SELECT_CARD_SCREEN: RelativeImageLocation.SELECT_CARD_SCREEN.value,
     RelativeImageLocation.BATTLE_FIELD_BACKGROUND: RelativeImageLocation.BATTLE_FIELD_BACKGROUND.value,
     RelativeImageLocation.MY_CARD_BACKGROUND: RelativeImageLocation.MY_CARD_BACKGROUND.value,
     RelativeImageLocation.CARD_KINDS: RelativeImageLocation.CARD_KINDS.value,
@@ -71,6 +74,7 @@ reference_paths = {
     WillBeReferenceImageLocation.SHOP_BUTTONS: WillBeReferenceImageLocation.SHOP_BUTTONS.value,
     WillBeReferenceImageLocation.SHOP_SELECT_SCREENS: WillBeReferenceImageLocation.SHOP_SELECT_SCREENS.value,
     WillBeReferenceImageLocation.SHOP_YES_OR_NO_BUTTON: WillBeReferenceImageLocation.SHOP_YES_OR_NO_BUTTON.value,
+    WillBeReferenceImageLocation.SELECT_CARD_SCREEN: WillBeReferenceImageLocation.SELECT_CARD_SCREEN.value,
     WillBeReferenceImageLocation.BATTLE_FIELD_BACKGROUND: WillBeReferenceImageLocation.BATTLE_FIELD_BACKGROUND.value,
     WillBeReferenceImageLocation.MY_CARD_BACKGROUND: WillBeReferenceImageLocation.MY_CARD_BACKGROUND.value,
     WillBeReferenceImageLocation.CARD_KINDS: WillBeReferenceImageLocation.CARD_KINDS.value,
@@ -89,6 +93,7 @@ image_paths = {
     "shop_buttons": [],
     "shop_select_screens": [],
     "shop_yes_or_no_button": [],
+    "select_card_screen": [],
     "battle_field_background": [],
     "my_card_background": [],
     "card_kinds": [],
