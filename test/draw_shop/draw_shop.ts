@@ -42,6 +42,8 @@ export class TCGJustTestShopView implements Component{
         private transparentRectangles: TransparentRectangle[] = [];
         private rectInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
 
+        private transparentBackground: TransparentRectangle | null = null;
+
 
         constructor(shopContainer: HTMLElement) {
                 this.shopContainer = shopContainer; //캔버스
@@ -160,6 +162,8 @@ export class TCGJustTestShopView implements Component{
        public selectScreenAndButtonHide(): void {
            console.log('Hiding yes and no button...');
 
+           this.removeTransparentBackground();
+
            this.selectScreens.forEach(screen => {
                this.scene.remove(screen.getMesh());
                });
@@ -248,22 +252,28 @@ export class TCGJustTestShopView implements Component{
                }));
            }
 
+
        // 각 버튼 이벤트(뽑기 화면 나오는 거)
        private onButtonClick(type: ShopButtonType): void {
                console.log('Button clicked:', type);
+               this.addTransparentBackground('transparentBackground');
                this.addYesOrNoButton();
                switch (type) {
                    case ShopButtonType.ALL:
                        this.selectScreens[0].draw(this.scene);
-                       console.log(`Number of objects in scene: ${this.scene.children.length}`);
+                       console.log('selectScreens Info: ', this.selectScreenInitialInfo);
+                       console.log(`1Number of objects in scene: ${this.scene.children.length}`);
                        this.showYesOrNoButtons();
                        break;
                    case ShopButtonType.UNDEAD:
                        this.selectScreens[3].draw(this.scene);
+                       console.log('2selectScreens Info: ', this.selectScreenInitialInfo);
+                       console.log(`2Number of objects in scene: ${this.scene.children.length}`);
                        this.showYesOrNoButtons();
                        break;
                    case ShopButtonType.TRENT:
                        this.selectScreens[1].draw(this.scene);
+                       console.log(`3Number of objects in scene: ${this.scene.children.length}`);
                        this.showYesOrNoButtons();
                        break;
                    case ShopButtonType.HUMAN:
@@ -335,6 +345,30 @@ export class TCGJustTestShopView implements Component{
 
                }));
            }
+
+
+       private addTransparentBackground(id:string): void {
+           const screenWidth = window.innerWidth;
+           const screenHeight = window.innerHeight;
+
+           const position = new THREE.Vector2(0,0);
+
+           const width = screenWidth;
+           const height = screenHeight;
+
+           this.transparentBackground = new TransparentRectangle(position, width, height, 0x000000, 0.6, id);
+           this.transparentBackground.addToScene(this.scene);
+
+           }
+
+
+       private removeTransparentBackground(): void {
+           if (this.transparentBackground) {
+               this.transparentBackground.removeFromScene(this.scene);
+               this.transparentBackground = null;
+           }
+       }
+
 
        private addTransparentRectangles(): void {
                // 로비 버튼
@@ -419,7 +453,7 @@ export class TCGJustTestShopView implements Component{
                    console.log('Wait! Not yet prepare select!');
                    break;
                case ShopYesOrNoButtonType.NO:
-                   console.log('Cancel! Return TO Shop.');
+                   console.log('Cancel! Return To Shop.');
                    this.selectScreenAndButtonHide();
                    break;
                default:
