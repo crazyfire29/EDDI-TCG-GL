@@ -10,9 +10,11 @@ import { TransparentRectangle } from "../../src/shape/TransparentRectangle";
 import { ShopButtonConfigList } from "../../src/shop/ShopButtonConfigList";
 import { ShopButtonType } from "../../src/shop/ShopButtonType";
 import { ShopSelectScreenConfigList } from "./ShopSelectScreenConfigList";
-import { ShopSelectScreenType} from "./ShopSelectScreenType";
-import {routes} from "../../src/router/routes";
-import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView"
+import { ShopSelectScreenType } from "./ShopSelectScreenType";
+import { routes } from "../../src/router/routes";
+import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView";
+import { ShopYesOrNoButtonConfigList } from "./ShopYesOrNoButtonConfigList";
+import { ShopYesOrNoButtonType } from "./ShopYesOrNoButtonType";
 
 export class TCGJustTestShopView implements Component{
     private static instance: TCGJustTestShopView | null = null;
@@ -27,6 +29,8 @@ export class TCGJustTestShopView implements Component{
         private buttonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
         private selectScreens: NonBackgroundImage[] = [];
         private selectScreenInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
+        private yesOrNoButtons: NonBackgroundImage[] = [];
+        private yesOrNoButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
         private audioController: AudioController;
         private mouseController: MouseController;
 
@@ -34,8 +38,11 @@ export class TCGJustTestShopView implements Component{
         private initialized = false;
         private isAnimating = false;
 
-        private transparentRectangles: TransparentRectangle[] = []
+
+        private transparentRectangles: TransparentRectangle[] = [];
         private rectInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
+
+        private transparentBackground: TransparentRectangle | null = null;
 
 
         constructor(shopContainer: HTMLElement) {
@@ -100,11 +107,11 @@ export class TCGJustTestShopView implements Component{
                await this.addBackground();
                await this.addButtons();
 
-               this.initialized = true;
-               this.isAnimating = true;
-
                this.addTransparentRectangles();
                this.addSelectScreen();
+
+               this.initialized = true;
+               this.isAnimating = true;
 
                this.animate();
            }
@@ -150,6 +157,37 @@ export class TCGJustTestShopView implements Component{
                this.transparentRectangles = [];
 
            }
+
+
+       public selectScreenAndButtonHide(): void {
+           console.log('Hiding yes and no button...');
+
+           this.removeTransparentBackground();
+
+           this.selectScreens.forEach(screen => {
+               this.scene.remove(screen.getMesh());
+               });
+
+           this.yesOrNoButtons.forEach(button => {
+               button.getMesh().visible = false;
+               this.scene.remove(button.getMesh());
+               this.mouseController.unregisterButton(button.getMesh());
+               });
+
+           this.yesOrNoButtons = [];
+
+           console.log("Hide Select Buttons?: ", this.yesOrNoButtons);
+
+           }
+
+
+       private showYesOrNoButtons(): void {
+           this.yesOrNoButtons.forEach(button => {
+               button.getMesh().visible = true;
+           });
+           console.log("Yes No buttons are now visible.");
+       }
+
 
 //        private disposeMesh(mesh: THREE.Mesh): void {
 //                if (mesh.geometry) {
@@ -214,32 +252,48 @@ export class TCGJustTestShopView implements Component{
                }));
            }
 
+
+       // 각 버튼 이벤트(뽑기 화면 나오는 거)
        private onButtonClick(type: ShopButtonType): void {
                console.log('Button clicked:', type);
+               this.addTransparentBackground('transparentBackground');
+               this.addYesOrNoButton();
                switch (type) {
                    case ShopButtonType.ALL:
                        this.selectScreens[0].draw(this.scene);
+                       console.log('selectScreens Info: ', this.selectScreenInitialInfo);
+                       console.log(`1Number of objects in scene: ${this.scene.children.length}`);
+                       this.showYesOrNoButtons();
                        break;
                    case ShopButtonType.UNDEAD:
-                       this.selectScreens[1].draw(this.scene);
+                       this.selectScreens[3].draw(this.scene);
+                       console.log('2selectScreens Info: ', this.selectScreenInitialInfo);
+                       console.log(`2Number of objects in scene: ${this.scene.children.length}`);
+                       this.showYesOrNoButtons();
                        break;
                    case ShopButtonType.TRENT:
-                       this.selectScreens[2].draw(this.scene);
+                       this.selectScreens[1].draw(this.scene);
+                       console.log(`3Number of objects in scene: ${this.scene.children.length}`);
+                       this.showYesOrNoButtons();
                        break;
                    case ShopButtonType.HUMAN:
-                       this.selectScreens[3].draw(this.scene);
+                       this.selectScreens[2].draw(this.scene);
+                       this.showYesOrNoButtons();
                        break;
                    default:
                        console.error("Unknown button type:", type);
                }
            }
 
+
+       // 뽑기 화면
        private async addSelectScreen(): Promise<void> {
            await Promise.all(ShopSelectScreenConfigList.screenConfigs.map(async (config) => {
                const selectScreenTexture = await this.textureManager.getTexture('shop_select_screens', config.id);
+               console.log("what config id?: ", config.id);
                if (selectScreenTexture) {
-                   const widthPercent = 400 / 1920;
-                   const heightPercent = 600 / 1080;
+                   const widthPercent = 500 / 1920;
+                   const heightPercent = 700 / 1080;
                    const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
 
                    const selectScreen = new NonBackgroundImage(
@@ -259,6 +313,62 @@ export class TCGJustTestShopView implements Component{
                        }
                }));
            }
+
+
+       // 뽑기 수락, 취소 버튼(나중에 src에서 구현할 땐 이름 변경해야 할 듯)
+       private async addYesOrNoButton(): Promise<void> {
+           await Promise.all(ShopYesOrNoButtonConfigList.yesNoButtonConfigs.map(async (config) => {
+               const yesOrNoButtonTexture = await this.textureManager.getTexture('shop_yes_or_no_button', config.id);
+               if (yesOrNoButtonTexture) {
+                   const widthPercent = 135 / 1920;
+                   const heightPercent = 43 / 1080;
+                   const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
+
+                   const yesOrNoButton = new NonBackgroundImage(
+                       window.innerWidth * widthPercent,
+                       window.innerHeight * heightPercent,
+                       new THREE.Vector2(
+                           window.innerWidth * positionPercent.x,
+                           window.innerHeight * positionPercent.y
+                           )
+                       );
+
+                   yesOrNoButton.createNonBackgroundImageWithTexture(yesOrNoButtonTexture, 1, 1);
+                   yesOrNoButton.draw(this.scene);
+                   this.mouseController.registerButton(yesOrNoButton.getMesh(), this.onSelectButtonClick.bind(this, config.type));
+                   this.yesOrNoButtons.push(yesOrNoButton);
+                   this.yesOrNoButtonInitialInfo.set(yesOrNoButton.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
+
+                   } else {
+                       console.error("Yes Or No Button Texture Not Found.");
+                       }
+
+               }));
+           }
+
+
+       private addTransparentBackground(id:string): void {
+           const screenWidth = window.innerWidth;
+           const screenHeight = window.innerHeight;
+
+           const position = new THREE.Vector2(0,0);
+
+           const width = screenWidth;
+           const height = screenHeight;
+
+           this.transparentBackground = new TransparentRectangle(position, width, height, 0x000000, 0.6, id);
+           this.transparentBackground.addToScene(this.scene);
+
+           }
+
+
+       private removeTransparentBackground(): void {
+           if (this.transparentBackground) {
+               this.transparentBackground.removeFromScene(this.scene);
+               this.transparentBackground = null;
+           }
+       }
+
 
        private addTransparentRectangles(): void {
                // 로비 버튼
@@ -305,6 +415,7 @@ export class TCGJustTestShopView implements Component{
 
        }
 
+       // 로비 버튼, myCard 버튼 클릭 이벤트
        private onTransparentRectangleClick(id: string): void {
            console.log("TransparentRectangle Button Click !");
            switch(id) {
@@ -330,6 +441,23 @@ export class TCGJustTestShopView implements Component{
                    break;
                default:
                    console.error("Unknown TransparentRectangle ID:", id);
+               }
+           }
+
+
+       // 뽑기 화면의 수락, 취소 버튼 클릭 이벤트
+       private onSelectButtonClick(type: ShopYesOrNoButtonType): void {
+           console.log("Select/Cancel Button Click !");
+           switch(type) {
+               case ShopYesOrNoButtonType.YES:
+                   console.log('Wait! Not yet prepare select!');
+                   break;
+               case ShopYesOrNoButtonType.NO:
+                   console.log('Cancel! Return To Shop.');
+                   this.selectScreenAndButtonHide();
+                   break;
+               default:
+                   console.error("Unknown Select Button Type:", type);
                }
            }
 

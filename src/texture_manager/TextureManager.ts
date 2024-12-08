@@ -19,6 +19,7 @@ export class TextureManager {
     private shopBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private shopButtonsTextureList: { [id: number]: THREE.Texture } = {};
     private shopSelectScreenTextureList: { [id: number]: THREE.Texture } = {};
+    private shopYesOrNoButtonTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private myCardBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private cardKindsTextureList: { [id: number]: THREE.Texture } = {};
@@ -54,6 +55,7 @@ export class TextureManager {
                 this.loadTextures(imageData.shop_background, this.shopBackgroundTextureList),
                 this.loadTextures(imageData.shop_buttons, this.shopButtonsTextureList),
                 this.loadTextures(imageData.shop_select_screens, this.shopSelectScreenTextureList),
+                this.loadTextures(imageData.shop_yes_or_no_button, this.shopYesOrNoButtonTextureList),
                 this.loadTextures(imageData.battle_field_background, this.battleFieldBackgroundTextureList),
                 this.loadTextures(imageData.my_card_background, this.myCardBackgroundTextureList),
                 this.loadTextures(imageData.card_kinds, this.cardKindsTextureList),
@@ -156,6 +158,8 @@ export class TextureManager {
                 return this.shopButtonsTextureList[id]
             case 'shop_select_screens':
                 return this.shopSelectScreenTextureList[id]
+            case 'shop_yes_or_no_button':
+                return this.shopYesOrNoButtonTextureList[id]
             case 'battle_field_background':
                 return this.battleFieldBackgroundTextureList[id]
             case 'my_card_background':
