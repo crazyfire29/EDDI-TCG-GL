@@ -6,6 +6,9 @@ import cardShopMusic from '@resource/music/shop/card-shop.mp3';
 import { MouseController } from "../../src/mouse/MouseController";
 import { Component } from "../../src/router/Component";
 import { TransparentRectangle } from "../../src/shape/TransparentRectangle";
+import { RouteMap } from "../../src/router/RouteMap";
+import { routes } from "../../src/router/routes";
+import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView";
 
 
 export class TCGJustTestSelectCardScreenView implements Component{
@@ -88,7 +91,6 @@ export class TCGJustTestSelectCardScreenView implements Component{
                await this.addBackground();
                this.addTransparentRectangles();
 
-
                this.initialized = true;
                this.isAnimating = true;
 
@@ -118,7 +120,13 @@ export class TCGJustTestSelectCardScreenView implements Component{
                this.renderer.domElement.style.display = 'none';
                this.shopContainer.style.display = 'none';
 
+               this.transparentRectangles.forEach(rectangle => {
+                   this.mouseController.unregisterButton(rectangle.getMesh());
+                   this.scene.remove(rectangle.getMesh());
+                   });
+
                this.mouseController.clearButtons();
+               this.transparentRectangles = [];
            }
 
        private async addBackground(): Promise<void> {
@@ -167,7 +175,6 @@ export class TCGJustTestSelectCardScreenView implements Component{
 
            const position = new THREE.Vector2(
                positionX, positionY
-
            );
 
            const width = 0.07415 * screenWidth
@@ -176,11 +183,37 @@ export class TCGJustTestSelectCardScreenView implements Component{
 
            const transparentRectangle = new TransparentRectangle(position, width, height, 0xffffff, 0.5, id);
            transparentRectangle.addToScene(this.scene);
-//         this.mouseController.registerButton(transparentRectangle.getMesh(), this.onTransparentRectangleClick.bind(this, id));
-
+           this.mouseController.registerButton(transparentRectangle.getMesh(), this.onTransparentRectangleClick.bind(this, id));
            this.transparentRectangles.push(transparentRectangle);
 
            }
+
+       private onTransparentRectangleClick(id: string): void {
+           console.log("TransparentRectangle Button Click !");
+           switch(id) {
+               case 'lobbyButton':
+                   console.log("Select Result Lobby Button Click!");
+                   this.hide();
+                   const rootElement = document.getElementById('lobby');
+                   if (rootElement) {
+                       const routeMap = new RouteMap(rootElement, '/tcg-main-lobby');
+                       routeMap.registerRoutes(routes);
+
+                       rootElement.style.display = 'block';
+                       const lobbyView = TCGMainLobbyView.getInstance(rootElement, routeMap);
+                       lobbyView.initialize();
+
+                   } else {
+                       console.error('Root element not found');
+                   }
+                   break;
+                   case 'returnSelectButton':
+                       console.log("Wait! not yet prepare..")
+                       break;
+                   default:
+                       console.error("Unknown TransparentRectangle ID:", id);
+                   }
+               }
 
 
        public animate(): void {
@@ -194,12 +227,12 @@ export class TCGJustTestSelectCardScreenView implements Component{
    }
 
 
-const rootElement = document.getElementById('app');
+const rootElement = document.getElementById('select_result');
 
 if (!rootElement) {
     throw new Error("Cannot find element with id 'app'.");
 }
 
-const fieldView = TCGJustTestSelectCardScreenView.getInstance(rootElement);
-fieldView.initialize();
+const resultView = TCGJustTestSelectCardScreenView.getInstance(rootElement);
+resultView.initialize();
 
