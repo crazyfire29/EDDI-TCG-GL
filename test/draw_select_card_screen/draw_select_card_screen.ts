@@ -17,6 +17,7 @@ export class TCGJustTestSelectCardScreenView implements Component{
         private textureManager: TextureManager;
         private shopContainer: HTMLElement;
         private background: NonBackgroundImage | null = null;
+        private transparentRectangles: TransparentRectangle[] = [];
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -85,6 +86,8 @@ export class TCGJustTestSelectCardScreenView implements Component{
                console.log("Textures preloaded. Adding background and buttons...");
 
                await this.addBackground();
+               this.addTransparentRectangles();
+
 
                this.initialized = true;
                this.isAnimating = true;
@@ -135,6 +138,50 @@ export class TCGJustTestSelectCardScreenView implements Component{
                    console.error("Background texture not found.");
                }
            }
+
+
+       private addTransparentRectangles(): void {
+           // 다시 뽑기 버튼
+           const returnSelectButtonX = 0.93394;
+           const returnSelectButtonY = 0.14834;
+           this.addTransparentRectangle('returnSelectButton', returnSelectButtonX, returnSelectButtonY);
+
+           // 로비 버튼
+           const lobbyButtonX = 0.93794;
+           const lobbyButtonY = 0.23234;
+           this.addTransparentRectangle('lobbyButton', lobbyButtonX, lobbyButtonY);
+
+           console.log('Add Transparent Button !');
+
+           }
+
+
+       private addTransparentRectangle(id: string, positionXPercent: number, positionYPercent: number): void {
+           const screenWidth = window.innerWidth;
+           const screenHeight = window.innerHeight;
+
+           const positionX = (positionXPercent - 0.5) * screenWidth
+           const positionY = (0.5 - positionYPercent) * screenHeight
+
+           console.log('TransparentRectangle Position:', positionX, positionY);
+
+           const position = new THREE.Vector2(
+               positionX, positionY
+
+           );
+
+           const width = 0.07415 * screenWidth
+           const height = 0.05658 * screenHeight
+           console.log('Calculated position:', position, 'Width:', width, 'Height:', height);
+
+           const transparentRectangle = new TransparentRectangle(position, width, height, 0xffffff, 0.5, id);
+           transparentRectangle.addToScene(this.scene);
+//         this.mouseController.registerButton(transparentRectangle.getMesh(), this.onTransparentRectangleClick.bind(this, id));
+
+           this.transparentRectangles.push(transparentRectangle);
+
+           }
+
 
        public animate(): void {
            if (this.isAnimating) {
