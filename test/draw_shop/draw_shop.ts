@@ -15,6 +15,7 @@ import { routes } from "../../src/router/routes";
 import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView";
 import { ShopYesOrNoButtonConfigList } from "./ShopYesOrNoButtonConfigList";
 import { ShopYesOrNoButtonType } from "./ShopYesOrNoButtonType";
+import { TCGJustTestSelectCardScreenView } from "../draw_select_card_screen/draw_select_card_screen"
 
 export class TCGJustTestShopView implements Component{
     private static instance: TCGJustTestShopView | null = null;
@@ -40,7 +41,6 @@ export class TCGJustTestShopView implements Component{
 
 
         private transparentRectangles: TransparentRectangle[] = [];
-        private rectInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
 
         private transparentBackground: TransparentRectangle | null = null;
 
@@ -141,13 +141,11 @@ export class TCGJustTestShopView implements Component{
 
                this.buttons.forEach(button => {
                    this.mouseController.unregisterButton(button.getMesh());
-//                    this.disposeMesh(button.getMesh());
                    this.scene.remove(button.getMesh());
                });
 
                this.transparentRectangles.forEach(rectangle => {
                    this.mouseController.unregisterButton(rectangle.getMesh());
-//                    this.disposeMesh(rectangle.getMesh());
                    this.scene.remove(rectangle.getMesh());
                });
 
@@ -448,9 +446,22 @@ export class TCGJustTestShopView implements Component{
        // 뽑기 화면의 수락, 취소 버튼 클릭 이벤트
        private onSelectButtonClick(type: ShopYesOrNoButtonType): void {
            console.log("Select/Cancel Button Click !");
+
            switch(type) {
                case ShopYesOrNoButtonType.YES:
                    console.log('Wait! Not yet prepare select!');
+                   this.selectScreenAndButtonHide();
+                   this.hide();
+
+                   const rootElement = document.getElementById('select_result');
+                   if (!rootElement) {
+                       console.error('Element not found!');
+                       return;
+                   }
+                   rootElement.style.display = 'block';
+
+                   const resultView = TCGJustTestSelectCardScreenView.getInstance(rootElement);
+                   resultView.initialize();
                    break;
                case ShopYesOrNoButtonType.NO:
                    console.log('Cancel! Return To Shop.');
@@ -460,6 +471,7 @@ export class TCGJustTestShopView implements Component{
                    console.error("Unknown Select Button Type:", type);
                }
            }
+
 
 
        public animate(): void {
@@ -473,11 +485,11 @@ export class TCGJustTestShopView implements Component{
 
     }
 
-const rootElement = document.getElementById('app');
+const rootElement = document.getElementById('shop');
 
 if (!rootElement) {
     throw new Error("Cannot find element with id 'app'.");
 }
 
-const fieldView = TCGJustTestShopView.getInstance(rootElement);
-fieldView.initialize();
+const shopView = TCGJustTestShopView.getInstance(rootElement);
+shopView.initialize();
