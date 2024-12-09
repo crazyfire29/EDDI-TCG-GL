@@ -421,11 +421,12 @@ export class TCGJustTestShopView implements Component{
                    console.log("Shop Lobby Button Click!");
                    this.hide();
                    console.log("Buttons clear?:", this.buttons);
-                   const rootElement = document.getElementById('app');
+                   const rootElement = document.getElementById('lobby');
                    if (rootElement) {
                        const routeMap = new RouteMap(rootElement, '/tcg-main-lobby');
                        routeMap.registerRoutes(routes);
 
+                       rootElement.style.display = 'block';
                        const lobbyView = TCGMainLobbyView.getInstance(rootElement, routeMap);
                        lobbyView.initialize();
                        lobbyView.show();
