@@ -17,6 +17,7 @@ export class TCGJustTestMyCardScreenView implements Component{
         private textureManager: TextureManager;
         private myCardContainer: HTMLElement;
         private background: NonBackgroundImage | null = null;
+        private transparentRectangles: TransparentRectangle[] = [];
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -83,6 +84,7 @@ export class TCGJustTestMyCardScreenView implements Component{
                console.log("Textures preloaded. Adding background and buttons...");
 
                await this.addBackground();
+               this.addTransparentRectangles();
 
                this.initialized = true;
                this.isAnimating = true;
@@ -130,6 +132,47 @@ export class TCGJustTestMyCardScreenView implements Component{
                } else {
                    console.error("My Card Background texture not found.");
                }
+           }
+
+       private addTransparentRectangles(): void {
+           // 나의 덱 버튼
+           const myDeckButtonX = 0.05761;
+           const myDeckButtonY = 0.04834;
+           const myDeckWidth = 0.09415;
+           const myDeckHeight = 0.05658;
+           this.addTransparentRectangle('myDeckButton', myDeckButtonX, myDeckButtonY, myDeckWidth, myDeckHeight);
+
+           // 로비 버튼
+           const lobbyButtonX = 0.15761;
+           const lobbyButtonY = 0.04834;
+           const lobbyWidth = 0.08415;
+           const lobbyHeight = 0.05658;
+           this.addTransparentRectangle('lobbyButton', lobbyButtonX, lobbyButtonY, lobbyWidth, lobbyHeight);
+
+           console.log('Add Transparent Button!');
+
+           }
+
+       private addTransparentRectangle(id: string, positionXPercent: number, positionYPercent: number, buttonWidth:number, buttonHeight:number): void {
+           const screenWidth = window.innerWidth;
+           const screenHeight = window.innerHeight;
+
+           const positionX = (positionXPercent - 0.5) * screenWidth
+           const positionY = (0.5 - positionYPercent) * screenHeight
+
+           console.log('TransparentRectangle Position:', positionX, positionY);
+
+           const position = new THREE.Vector2(
+               positionX, positionY
+           );
+
+           const width = buttonWidth * screenWidth
+           const height = buttonHeight * screenHeight
+           console.log('Calculated position:', position, 'Width:', width, 'Height:', height);
+
+           const transparentRectangle = new TransparentRectangle(position, width, height, 0xffffff, 0.5, id);
+           transparentRectangle.addToScene(this.scene);
+           this.transparentRectangles.push(transparentRectangle);
            }
 
 
