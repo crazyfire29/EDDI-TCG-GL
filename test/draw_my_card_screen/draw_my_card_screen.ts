@@ -139,9 +139,14 @@ export class TCGJustTestMyCardScreenView implements Component{
                    this.scene.remove(button.getMesh());
                    });
 
+               this.testCardRectangles.forEach(card => {
+                   this.scene.remove(card.getMesh());
+                   })
+
                    this.mouseController.clearButtons();
                    this.transparentRectangles = [];
                    this.pageMovementButtons = [];
+                   this.testCardRectangles = [];
            }
 
        private async addBackground(): Promise<void> {
