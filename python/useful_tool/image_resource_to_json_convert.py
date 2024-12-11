@@ -18,9 +18,10 @@ class WillBeReferenceImageLocation(Enum):
     SHOP_BUTTONS = "resource/shop/buttons/"
     SHOP_SELECT_SCREENS = "resource/shop/select_screen/"
     SHOP_YES_OR_NO_BUTTON = "resource/shop/yes_or_no/"
-    SELECT_CARD_SCREEN = "resource/shop/background"
+    SELECT_CARD_SCREEN = "resource/shop/background/"
     BATTLE_FIELD_BACKGROUND = "resource/battle_field/background/"
     MY_CARD_BACKGROUND = "resource/my_card/background/"
+    MY_CARD_PAGE_MOVEMENT_BUTTON = "resource/my_card/page_movement_button"
     CARD_KINDS = "resource/card_kinds/"
 
 class RelativeImageLocation(Enum):
@@ -36,9 +37,10 @@ class RelativeImageLocation(Enum):
     SHOP_BUTTONS = "../../resource/shop/buttons/"
     SHOP_SELECT_SCREENS = "../../resource/shop/select_screen/"
     SHOP_YES_OR_NO_BUTTON = "../../resource/shop/yes_or_no/"
-    SELECT_CARD_SCREEN = "../../resource/shop/background"
+    SELECT_CARD_SCREEN = "../../resource/shop/background/"
     BATTLE_FIELD_BACKGROUND = "../../resource/battle_field/background/"
     MY_CARD_BACKGROUND = "../../resource/my_card/background/"
+    MY_CARD_PAGE_MOVEMENT_BUTTON = "../../resource/my_card/page_movement_button"
     CARD_KINDS = "../../resource/card_kinds/"
 
 # 디렉토리 경로 설정
@@ -58,6 +60,7 @@ relative_paths = {
     RelativeImageLocation.SELECT_CARD_SCREEN: RelativeImageLocation.SELECT_CARD_SCREEN.value,
     RelativeImageLocation.BATTLE_FIELD_BACKGROUND: RelativeImageLocation.BATTLE_FIELD_BACKGROUND.value,
     RelativeImageLocation.MY_CARD_BACKGROUND: RelativeImageLocation.MY_CARD_BACKGROUND.value,
+    RelativeImageLocation.MY_CARD_PAGE_MOVEMENT_BUTTON: RelativeImageLocation.MY_CARD_PAGE_MOVEMENT_BUTTON.value,
     RelativeImageLocation.CARD_KINDS: RelativeImageLocation.CARD_KINDS.value,
 }
 
@@ -77,6 +80,7 @@ reference_paths = {
     WillBeReferenceImageLocation.SELECT_CARD_SCREEN: WillBeReferenceImageLocation.SELECT_CARD_SCREEN.value,
     WillBeReferenceImageLocation.BATTLE_FIELD_BACKGROUND: WillBeReferenceImageLocation.BATTLE_FIELD_BACKGROUND.value,
     WillBeReferenceImageLocation.MY_CARD_BACKGROUND: WillBeReferenceImageLocation.MY_CARD_BACKGROUND.value,
+    WillBeReferenceImageLocation.MY_CARD_PAGE_MOVEMENT_BUTTON: WillBeReferenceImageLocation.MY_CARD_PAGE_MOVEMENT_BUTTON.value,
     WillBeReferenceImageLocation.CARD_KINDS: WillBeReferenceImageLocation.CARD_KINDS.value,
 }
 
@@ -96,6 +100,7 @@ image_paths = {
     "select_card_screen": [],
     "battle_field_background": [],
     "my_card_background": [],
+    "my_card_page_movement_button": [],
     "card_kinds": [],
 }
 
