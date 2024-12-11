@@ -26,6 +26,10 @@ export class TCGJustTestMyCardScreenView implements Component{
         private transparentRectangles: TransparentRectangle[] = [];
         private pageMovementButtons: NonBackgroundImage[] = [];
         private pageMovementButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
+        private testCardRectangles: TransparentRectangle[] = [];
+        private currentCardList: TransparentRectangle[] = [];
+        private pageCount: number = 1;
+        private cardsPerPage: number = 4;
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -79,7 +83,7 @@ export class TCGJustTestMyCardScreenView implements Component{
                 }
             }
 
-       public async initialize(): Promise<void> {
+        public async initialize(): Promise<void> {
                if (this.initialized) {
                    console.log('Already initialized');
                    this.show();
@@ -94,6 +98,8 @@ export class TCGJustTestMyCardScreenView implements Component{
                await this.addBackground();
                this.addTransparentRectangles();
                this.addPageMovementButton();
+               this.addTestCardRectangles();
+               this.renderCurrentPage();
 
                this.initialized = true;
                this.isAnimating = true;
@@ -247,6 +253,8 @@ export class TCGJustTestMyCardScreenView implements Component{
                        pageMovementButton.draw(this.scene);
                        this.pageMovementButtons.push(pageMovementButton);
                        this.pageMovementButtonInitialInfo.set(pageMovementButton.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
+                       this.mouseController.registerButton(pageMovementButton.getMesh(), this.onPageMovementButtonClick.bind(this, config.type));
+                       console.log("pageMovementButtonInitialInfo: ", this.pageMovementButtonInitialInfo);
 
                        } else {
                            console.error("Page Movement Button Texture Not Found.");
@@ -255,6 +263,114 @@ export class TCGJustTestMyCardScreenView implements Component{
            }));
        }
 
+       private onPageMovementButtonClick(type: PageMovementButtonType): void {
+           console.log("PageMovement Button Click !");
+           switch(type) {
+           case PageMovementButtonType.PREV:
+               console.log("Prev Button Click!");
+               if(this.pageCount > 1){
+                   this.pageCount--;
+                   console.log(`Current Page: ${this.pageCount}`);
+                   this.renderCurrentPage();
+                   console.log("Current Card List: ", this.currentCardList);
+                   } else{
+                       console.log('First Page');
+                       this.renderCurrentPage();
+                       console.log("Current Card List: ", this.currentCardList);
+                       }
+               break;
+
+           case PageMovementButtonType.NEXT:
+               console.log("Next Button Click!")
+               if (this.pageCount < Math.ceil(this.testCardRectangles.length / this.cardsPerPage)){
+                   this.pageCount++;
+                   console.log(`Current Page: ${this.pageCount}`);
+                   this.renderCurrentPage();
+                   console.log("Current Card List: ", this.currentCardList);
+                   } else {
+                       console.log("Last Page");
+                       this.renderCurrentPage();
+                       console.log("Current Card List: ", this.currentCardList);
+                       }
+               break;
+           default:
+               console.error("Unknown Page Movement Button Type:", type);
+           }
+       }
+
+
+        private addTestCardRectangles(): void {
+            const initialX = 0.11761; // 초기 X 좌표
+            const incrementX = 0.21000; // X 증가 간격
+            const maxCardsPerRow = 4; // 한 줄당 최대 카드 개수
+            const initialY = 0.47834; // Y 좌표
+
+            for (let i = 1; i <= 40; i++) {
+                // 카드 이름 생성 ('testCard1', 'testCard2', ...)
+                const cardName = `testCard${i}`;
+
+                // 현재 X 좌표 계산
+                const cardX = initialX + ((i - 1) % maxCardsPerRow) * incrementX;
+
+                // Y 좌표
+                const cardY = initialY;
+
+                // 카드 생성
+                this.testCardRectangle(cardName, cardX, cardY);
+
+                // X 좌표가 한 줄(4개)을 넘어가면 다시 초기화 (5번째 카드부터 새로운 줄)
+                if (i % maxCardsPerRow === 0) {
+                    console.log(`Row ${i / maxCardsPerRow} completed. Resetting X.`);
+                }
+            }
+
+        console.log('Add Test Card!');
+
+        }
+
+
+        private testCardRectangle(id: string, positionXPercent: number, positionYPercent: number): void {
+               const screenWidth = window.innerWidth;
+               const screenHeight = window.innerHeight;
+
+               const positionX = (positionXPercent - 0.5) * screenWidth
+               const positionY = (0.5 - positionYPercent) * screenHeight
+
+               console.log('Test Card Rectangle Position:', positionX, positionY);
+
+               const position = new THREE.Vector2(
+                   positionX, positionY
+               );
+
+               const width = 0.20 * screenWidth
+               const height = 0.55 * screenHeight
+               console.log('Calculated position:', position, 'Width:', width, 'Height:', height);
+
+               const testCardRectangle = new TransparentRectangle(position, width, height, 0x0000ff, 1.0, id);
+               this.testCardRectangles.push(testCardRectangle);
+               console.log("Test Card Rectangle List: ", this.testCardRectangles);
+               }
+
+
+        private renderCurrentPage(): void {
+            // 현재 씬에 그려져 있는 카드 제거
+            this.currentCardList.forEach((rectangle) => rectangle.removeFromScene(this.scene));
+            this.currentCardList = [];
+
+            // 현재 페이지의 카드 인덱스 범위 계산
+            const startIndex = (this.pageCount - 1) * this.cardsPerPage;
+            const endIndex = startIndex + this.cardsPerPage;
+
+            // 현재 페이지에 해당하는 카드만 씬에 추가
+            for (let i = startIndex; i < endIndex; i++) {
+                const rectangle = this.testCardRectangles[i];
+                rectangle.addToScene(this.scene);
+                this.currentCardList.push(rectangle);
+            }
+
+            console.log(`Rendering Page ${this.pageCount}: Showing cards ${startIndex + 1} to ${endIndex}`);
+//             console.log("Current Card List: ", this.currentCardList);
+        }
 
 
        public animate(): void {
