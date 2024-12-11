@@ -139,6 +139,7 @@ export class UnitCardGenerator {
     static adjustHandCardPositions(): void {
         const handCardList = CardStateManager.getAllHandCards();
         handCardList.forEach(({ cardMesh, initialPosition, textureId, cardIndex }) => {
+            console.log('adjustHandCardPositions() handCardList cardIndex:', cardIndex)
 
             const cardWidth = 0.06493506493 * window.innerWidth
             const cardHeight = cardWidth * 1.615
@@ -238,7 +239,7 @@ export class UnitCardGenerator {
             // targetData.width = window.innerWidth * 0.7
             // -targetData.width / 2 + 0.044056 * window.innerWidth + 200 * currentUnitCount
             const mainCardPositionX = -(window.innerWidth * 0.7) / 2 + 0.044056 * window.innerWidth + 0.094696 * window.innerWidth * cardIndex;
-            const mainCardPositionY = targetData.yPos;
+            const mainCardPositionY = -(window.innerHeight / 2) + (0.024 * 3 + 0.11 * 2.5) * window.innerHeight;
 
             if (textureId === "mainCardTextureId") {
                 cardMesh.geometry.dispose(); // 기존 geometry 삭제

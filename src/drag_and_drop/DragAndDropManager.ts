@@ -201,7 +201,7 @@ export class DragAndDropManager {
                                 console.log(`Object in group moved by delta: { x: ${deltaX}, y: ${deltaY} }`);
                             }
 
-                            CardStateManager.removeCardFromHand(meshObj, cardIndex);
+                            // CardStateManager.removeCardFromHand(meshObj, cardIndex);
                             console.log(`Object in group removed from hand.`);
                         });
                     } else {

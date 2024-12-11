@@ -44,23 +44,37 @@ export class CardStateManager {
 
         // 그룹 내 모든 카드를 가져오기 위해 cardIndex를 기반으로 그룹을 찾아냄
         for (const [key, value] of this.handCardInitialInfoMap) {
+            // console.log(`removeCardFromHand() -> value.cardMesh: ${JSON.stringify(value.cardMesh)}`)
             if (value.cardMesh === cardMesh) {
+                // console.log(`removeCardFromHand() -> value: ${JSON.stringify(value)}, key: ${key}`)
                 targetCardId = key;
                 // cardIndex를 바로 전달받아서 그룹의 카드들을 관리
                 const groupIndex = value.cardIndex;
-                this.handCardInitialInfoMap.forEach((card, cardKey) => {
+                console.log(`removeCardFromHand() -> groupIndex: ${groupIndex}`)
+
+                let isWithinRange = false;
+                for (const [cardKey, card] of this.handCardInitialInfoMap) {
                     if (card.cardIndex === groupIndex) {
-                        cardsToMove.set(cardKey, card);
+                        isWithinRange = true;
                     }
-                });
-                break;
+                    if (isWithinRange) {
+                        cardsToMove.set(cardKey, card);
+                        console.log(`removeCardFromHand() -> Added to cardsToMove: ${cardKey}`);
+                    }
+                    if (card.cardIndex === groupIndex + 1) {
+                        break;
+                    }
+                }
+                break
             }
         }
 
-        if (targetCardId === undefined) {
-            console.error(`Card with mesh ${cardMesh} not found in hand.`);
-            return;
-        }
+        // this.updateHandCardIndex();
+
+        // if (targetCardId === undefined) {
+        //     console.error(`Card with mesh ${cardMesh} not found in hand.`);
+        //     return;
+        // }
 
         // 그룹 내 모든 카드를 필드로 이동
         cardsToMove.forEach((card, key) => {
@@ -76,12 +90,39 @@ export class CardStateManager {
         const updatedHandMap = new Map<string, CardInitialInfo>();
         for (const [key, value] of this.handCardInitialInfoMap) {
             const updatedHandCardInfo = { ...value, cardIndex: handIndex };
+            console.log(`handIndex: ${handIndex}`)
             updatedHandMap.set(key, updatedHandCardInfo);
             handIndex++;
         }
         this.handCardInitialInfoMap = updatedHandMap;
 
         console.log("Hand card indices updated after moving a group to the field.");
+    }
+
+    static updateHandCardIndex() {
+        let handIndex = 0;
+        const updatedHandMap = new Map<string, CardInitialInfo>();
+
+        // handCardInitialInfoMap의 모든 카드를 순차적으로 확인하여 mainCardMesh인 경우에만 인덱스를 갱신
+        for (const [key, value] of this.handCardInitialInfoMap) {
+            if (value.cardMesh.userData.cardNumber) {
+                const updatedHandCardInfo = { ...value, cardIndex: handIndex };
+                updatedHandMap.set(key, updatedHandCardInfo);
+                handIndex++;  // mainCardMesh인 카드만 인덱스를 증가시킴
+            } else {
+                // mainCardMesh가 아닌 경우는 인덱스를 그대로 유지
+                updatedHandMap.set(key, value);
+            }
+        }
+
+        // 갱신된 handCardInitialInfoMap으로 교체
+        this.handCardInitialInfoMap = updatedHandMap;
+        console.log("Hand card initial info map: ");
+        this.handCardInitialInfoMap.forEach((value, key) => {
+            console.log(`Key: ${key}, Value:`, value);
+        });
+
+        console.log(`updateHandCardIndex() handCardInitialInfoMap: ${this.handCardInitialInfoMap}`)
     }
 
     static updateHandCardInfo(cardMesh: Mesh<BufferGeometry, Material>, newPosition: Vector2d) {
