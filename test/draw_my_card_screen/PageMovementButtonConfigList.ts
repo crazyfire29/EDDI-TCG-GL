@@ -7,13 +7,13 @@ export class PageMovementButtonConfigList {
             id: 1,
             type: PageMovementButtonType.PREV,
             imagePath: 'resource/my_card/page_movement_button/prev_gold_button.png',
-            position: new THREE.Vector2(-70, -270)
+            position: new THREE.Vector2(-140, -400)
         },
         {
             id: 2,
             type: PageMovementButtonType.NEXT,
             imagePath: 'resource/my_card/page_movement_button/next_gold_button.png',
-            position: new THREE.Vector2(120, -270)
+            position: new THREE.Vector2(110, -400)
         }
     ];
 }

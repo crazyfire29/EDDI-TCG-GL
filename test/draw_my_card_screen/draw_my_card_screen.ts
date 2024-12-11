@@ -9,6 +9,8 @@ import { TransparentRectangle } from "../../src/shape/TransparentRectangle";
 import { RouteMap } from "../../src/router/RouteMap";
 import { routes } from "../../src/router/routes";
 import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView";
+import { PageMovementButtonConfigList } from "./PageMovementButtonConfigList";
+import { PageMovementButtonType } from "./PageMovementButtonType";
 
 
 
@@ -22,6 +24,8 @@ export class TCGJustTestMyCardScreenView implements Component{
         private myCardContainer: HTMLElement;
         private background: NonBackgroundImage | null = null;
         private transparentRectangles: TransparentRectangle[] = [];
+        private pageMovementButtons: NonBackgroundImage[] = [];
+        private pageMovementButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -89,6 +93,7 @@ export class TCGJustTestMyCardScreenView implements Component{
 
                await this.addBackground();
                this.addTransparentRectangles();
+               this.addPageMovementButton();
 
                this.initialized = true;
                this.isAnimating = true;
@@ -214,6 +219,37 @@ export class TCGJustTestMyCardScreenView implements Component{
                        console.error("Unknown TransparentRectangle ID:", id);
                    }
                }
+
+
+       private async addPageMovementButton(): Promise<void> {
+           await Promise.all(PageMovementButtonConfigList.PageMovementButtonConfigs.map(async (config) => {
+               const pageMovementButtonTexture = await this.textureManager.getTexture('my_card_page_movement_button', config.id);
+               if (pageMovementButtonTexture) {
+                   const widthPercent = 125 / 1920;
+                   const heightPercent = 60 / 1080;
+                   const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
+
+                   const pageMovementButton = new NonBackgroundImage(
+                       window.innerWidth * widthPercent,
+                       window.innerHeight * heightPercent,
+                       new THREE.Vector2(
+                           window.innerWidth * positionPercent.x,
+                           window.innerHeight * positionPercent.y
+                           )
+                       );
+
+                       pageMovementButton.createNonBackgroundImageWithTexture(pageMovementButtonTexture, 1, 1);
+                       pageMovementButton.draw(this.scene);
+                       this.pageMovementButtons.push(pageMovementButton);
+                       this.pageMovementButtonInitialInfo.set(pageMovementButton.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
+
+                       } else {
+                           console.error("Page Movement Button Texture Not Found.");
+                           }
+
+           }));
+       }
+
 
 
        public animate(): void {
