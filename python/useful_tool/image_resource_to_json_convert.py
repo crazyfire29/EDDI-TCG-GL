@@ -20,6 +20,7 @@ class WillBeReferenceImageLocation(Enum):
     SHOP_YES_OR_NO_BUTTON = "resource/shop/yes_or_no/"
     SELECT_CARD_SCREEN = "resource/shop/background/"
     TRY_AGAIN_SCREEN = "resource/select_card_result_screen/try_again_screen/"
+    TRY_AGAIN_BUTTONS = "resource/select_card_result_screen/try_again_buttons"
     BATTLE_FIELD_BACKGROUND = "resource/battle_field/background/"
     MY_CARD_BACKGROUND = "resource/my_card/background/"
     MY_CARD_PAGE_MOVEMENT_BUTTON = "resource/my_card/page_movement_button"
@@ -40,6 +41,7 @@ class RelativeImageLocation(Enum):
     SHOP_YES_OR_NO_BUTTON = "../../resource/shop/yes_or_no/"
     SELECT_CARD_SCREEN = "../../resource/shop/background/"
     TRY_AGAIN_SCREEN = "../../resource/select_card_result_screen/try_again_screen"
+    TRY_AGAIN_BUTTONS = "../../resource/select_card_result_screen/try_again_buttons"
     BATTLE_FIELD_BACKGROUND = "../../resource/battle_field/background/"
     MY_CARD_BACKGROUND = "../../resource/my_card/background/"
     MY_CARD_PAGE_MOVEMENT_BUTTON = "../../resource/my_card/page_movement_button"
@@ -61,6 +63,7 @@ relative_paths = {
     RelativeImageLocation.SHOP_YES_OR_NO_BUTTON: RelativeImageLocation.SHOP_YES_OR_NO_BUTTON.value,
     RelativeImageLocation.SELECT_CARD_SCREEN: RelativeImageLocation.SELECT_CARD_SCREEN.value,
     RelativeImageLocation.TRY_AGAIN_SCREEN: RelativeImageLocation.TRY_AGAIN_SCREEN.value,
+    RelativeImageLocation.TRY_AGAIN_BUTTONS: RelativeImageLocation.TRY_AGAIN_BUTTONS.value,
     RelativeImageLocation.BATTLE_FIELD_BACKGROUND: RelativeImageLocation.BATTLE_FIELD_BACKGROUND.value,
     RelativeImageLocation.MY_CARD_BACKGROUND: RelativeImageLocation.MY_CARD_BACKGROUND.value,
     RelativeImageLocation.MY_CARD_PAGE_MOVEMENT_BUTTON: RelativeImageLocation.MY_CARD_PAGE_MOVEMENT_BUTTON.value,
@@ -82,6 +85,7 @@ reference_paths = {
     WillBeReferenceImageLocation.SHOP_YES_OR_NO_BUTTON: WillBeReferenceImageLocation.SHOP_YES_OR_NO_BUTTON.value,
     WillBeReferenceImageLocation.SELECT_CARD_SCREEN: WillBeReferenceImageLocation.SELECT_CARD_SCREEN.value,
     WillBeReferenceImageLocation.TRY_AGAIN_SCREEN: WillBeReferenceImageLocation.TRY_AGAIN_SCREEN.value,
+    WillBeReferenceImageLocation.TRY_AGAIN_BUTTONS: WillBeReferenceImageLocation.TRY_AGAIN_BUTTONS.value,
     WillBeReferenceImageLocation.BATTLE_FIELD_BACKGROUND: WillBeReferenceImageLocation.BATTLE_FIELD_BACKGROUND.value,
     WillBeReferenceImageLocation.MY_CARD_BACKGROUND: WillBeReferenceImageLocation.MY_CARD_BACKGROUND.value,
     WillBeReferenceImageLocation.MY_CARD_PAGE_MOVEMENT_BUTTON: WillBeReferenceImageLocation.MY_CARD_PAGE_MOVEMENT_BUTTON.value,
@@ -103,6 +107,7 @@ image_paths = {
     "shop_yes_or_no_button": [],
     "select_card_screen": [],
     "try_again_screen": [],
+    "try_again_buttons": [],
     "battle_field_background": [],
     "my_card_background": [],
     "my_card_page_movement_button": [],
