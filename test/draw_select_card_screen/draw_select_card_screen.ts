@@ -135,6 +135,27 @@ export class TCGJustTestSelectCardScreenView implements Component{
                this.transparentRectangles = [];
            }
 
+       public tryAgainScreenAndButtonsHide(): void {
+           console.log('Hiding Accept/Cancel button...');
+           this.removeTransparentBackground();
+           if (this.tryAgainScreen && this.tryAgainScreen.getMesh()) {
+                   this.scene.remove(this.tryAgainScreen.getMesh());
+               } else {
+                   console.warn('tryAgainScreen or its mesh is null.');
+               }
+
+           this.acceptOrCancelButtons.forEach(button => {
+               this.scene.remove(button.getMesh());
+               this.mouseController.unregisterButton(button.getMesh());
+               });
+
+           this.tryAgainScreen = null;
+           this.acceptOrCancelButtons = [];
+
+           console.log("Hide Select Buttons?: ", this.acceptOrCancelButtons);
+
+           }
+
        private async addBackground(): Promise<void> {
            const texture = await this.textureManager.getTexture('select_card_screen', 1);
            console.log('addBackground():', texture);
@@ -187,7 +208,9 @@ export class TCGJustTestSelectCardScreenView implements Component{
            const height = screenHeight;
 
            this.transparentBackground = new TransparentRectangle(position, width, height, 0x000000, 0.7, id);
+           this.transparentBackground.getMesh().renderOrder = 0;
            this.transparentBackground.addToScene(this.scene);
+           console.log("Draw Transparent Background");
 
            }
 
@@ -224,6 +247,7 @@ export class TCGJustTestSelectCardScreenView implements Component{
 
                        acceptOrCancelButton.createNonBackgroundImageWithTexture(acceptOrCancelButtonTexture, 1, 1);
                        acceptOrCancelButton.draw(this.scene);
+                       this.mouseController.registerButton(acceptOrCancelButton.getMesh(), this.onAcceptOrCancelButtonClick.bind(this, config.type));
                        this.acceptOrCancelButtons.push(acceptOrCancelButton);
                        this.acceptOrCancelButtonInitialInfo.set(acceptOrCancelButton.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
 
@@ -234,7 +258,22 @@ export class TCGJustTestSelectCardScreenView implements Component{
                }));
            }
 
+       private onAcceptOrCancelButtonClick(type: TryAgainButtonType): void {
+           console.log("Accept/Cancel Button Click!");
 
+           switch(type) {
+               case TryAgainButtonType.ACCEPT:
+                   console.log('Wait! Not yet prepare select!');
+                   this.tryAgainScreenAndButtonsHide();
+                   break;
+               case TryAgainButtonType.CANCEL:
+                   console.log('Cancel! Return To First Select Result Screen.');
+                   this.tryAgainScreenAndButtonsHide();
+                   break;
+               default:
+                   console.error("Unknown Accept/Cancel Button Type:", type);
+               }
+           }
 
        private addTransparentRectangles(): void {
            // 다시 뽑기 버튼
@@ -295,16 +334,16 @@ export class TCGJustTestSelectCardScreenView implements Component{
                        console.error('Root element not found');
                    }
                    break;
-                   case 'againButton':
-                       console.log("Again Button Click!")
-                       this.addTransparentBackground('transparentBackground');
-                       this.addTryAgainScreen();
-                       this.addAcceptOrCancelButton();
-                       break;
-                   default:
-                       console.error("Unknown TransparentRectangle ID:", id);
-                   }
-               }
+               case 'againButton':
+                   console.log("Again Button Click!")
+                   this.addTransparentBackground('transparentBackground');
+                   this.addTryAgainScreen();
+                   this.addAcceptOrCancelButton();
+                   break;
+               default:
+                   console.error("Unknown TransparentRectangle ID:", id);
+           }
+       }
 
 
        public animate(): void {
