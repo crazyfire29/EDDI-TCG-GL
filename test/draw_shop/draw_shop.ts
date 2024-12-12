@@ -429,7 +429,6 @@ export class TCGJustTestShopView implements Component{
                        rootElement.style.display = 'block';
                        const lobbyView = TCGMainLobbyView.getInstance(rootElement, routeMap);
                        lobbyView.initialize();
-                       lobbyView.show();
 
                    } else {
                        console.error('Root element not found');

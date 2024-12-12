@@ -21,6 +21,8 @@ export class TCGJustTestSelectCardScreenView implements Component{
         private shopContainer: HTMLElement;
         private background: NonBackgroundImage | null = null;
         private transparentRectangles: TransparentRectangle[] = [];
+        private transparentBackground: TransparentRectangle | null = null;
+        private tryAgainScreen: NonBackgroundImage | null = null;
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -147,6 +149,51 @@ export class TCGJustTestSelectCardScreenView implements Component{
                }
            }
 
+       private async addTryAgainScreen(): Promise<void> {
+           const texture = await this.textureManager.getTexture('try_again_screen', 1);
+           console.log('addTryAgainScreen():', texture);
+           if (texture) {
+               if (!this.tryAgainScreen) {
+                   const widthPercent = 900 / 1920;
+                   const heightPercent = 500 / 1080;
+                   const positionPercent = new THREE.Vector2(0, 0);
+
+                    this.tryAgainScreen = new NonBackgroundImage(
+                        window.innerWidth * widthPercent,
+                        window.innerHeight * heightPercent,
+                        new THREE.Vector2(
+                            window.innerWidth * positionPercent.x,
+                            window.innerHeight * positionPercent.y)
+                        );
+               }
+               this.tryAgainScreen.createNonBackgroundImageWithTexture(texture, 1, 1);
+               this.tryAgainScreen.draw(this.scene);
+               } else {
+                   console.error("Background texture not found.");
+                   }
+           }
+
+       private addTransparentBackground(id:string): void {
+           const screenWidth = window.innerWidth;
+           const screenHeight = window.innerHeight;
+
+           const position = new THREE.Vector2(0,0);
+
+           const width = screenWidth;
+           const height = screenHeight;
+
+           this.transparentBackground = new TransparentRectangle(position, width, height, 0x000000, 0.7, id);
+           this.transparentBackground.addToScene(this.scene);
+
+           }
+
+       private removeTransparentBackground(): void {
+           if (this.transparentBackground) {
+               this.transparentBackground.removeFromScene(this.scene);
+               this.transparentBackground = null;
+               }
+           }
+
 
        private addTransparentRectangles(): void {
            // 다시 뽑기 버튼
@@ -209,6 +256,8 @@ export class TCGJustTestSelectCardScreenView implements Component{
                    break;
                    case 'returnSelectButton':
                        console.log("Wait! not yet prepare..")
+                       this.addTransparentBackground('transparentBackground');
+                       this.addTryAgainScreen();
                        break;
                    default:
                        console.error("Unknown TransparentRectangle ID:", id);
