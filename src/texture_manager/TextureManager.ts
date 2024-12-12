@@ -62,7 +62,7 @@ export class TextureManager {
                 this.loadTextures(imageData.shop_yes_or_no_button, this.shopYesOrNoButtonTextureList),
                 this.loadTextures(imageData.select_card_screen, this.selectCardScreenTextureList),
                 this.loadTextures(imageData.try_again_screen, this.tryAgainScreenTextureList),
-                this.loadTextures(imageData.try_agai_buttons, this.tryAgainButtonsTextureList),
+                this.loadTextures(imageData.try_again_buttons, this.tryAgainButtonsTextureList),
                 this.loadTextures(imageData.battle_field_background, this.battleFieldBackgroundTextureList),
                 this.loadTextures(imageData.my_card_background, this.myCardBackgroundTextureList),
                 this.loadTextures(imageData.my_card_page_movement_button, this.myCardPageMovementTextureList),

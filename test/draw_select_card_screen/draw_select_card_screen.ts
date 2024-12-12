@@ -9,6 +9,8 @@ import { TransparentRectangle } from "../../src/shape/TransparentRectangle";
 import { RouteMap } from "../../src/router/RouteMap";
 import { routes } from "../../src/router/routes";
 import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView";
+import { TryAgainButtonConfigList } from "./TryAgainButtonConfigList";
+import { TryAgainButtonType } from "./TryAgainButtonType";
 
 
 export class TCGJustTestSelectCardScreenView implements Component{
@@ -23,6 +25,8 @@ export class TCGJustTestSelectCardScreenView implements Component{
         private transparentRectangles: TransparentRectangle[] = [];
         private transparentBackground: TransparentRectangle | null = null;
         private tryAgainScreen: NonBackgroundImage | null = null;
+        private acceptOrCancelButtons: NonBackgroundImage[] = [];
+        private acceptOrCancelButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -194,12 +198,49 @@ export class TCGJustTestSelectCardScreenView implements Component{
                }
            }
 
+       private async addAcceptOrCancelButton(): Promise<void> {
+           await Promise.all(TryAgainButtonConfigList.tryAgainButtonConfigs.map(async (config) => {
+               const acceptOrCancelButtonTexture = await this.textureManager.getTexture('try_again_buttons', config.id);
+               if (acceptOrCancelButtonTexture) {
+                   const imageWidth = 2805;
+                   const imageHeight = 957;
+                   const aspectRatio = imageWidth / imageHeight;
+
+                   const buttonWidth = window.innerWidth * 0.07; // 전체 화면의 8%
+                   const buttonHeight = buttonWidth / aspectRatio;
+
+                   const widthPercent = buttonWidth / window.innerWidth;
+                   const heightPercent = buttonHeight / window.innerHeight;
+                   const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
+
+                   const acceptOrCancelButton = new NonBackgroundImage(
+                       window.innerWidth * widthPercent,
+                       window.innerHeight * heightPercent,
+                       new THREE.Vector2(
+                           window.innerWidth * positionPercent.x,
+                           window.innerHeight * positionPercent.y
+                           )
+                       );
+
+                       acceptOrCancelButton.createNonBackgroundImageWithTexture(acceptOrCancelButtonTexture, 1, 1);
+                       acceptOrCancelButton.draw(this.scene);
+                       this.acceptOrCancelButtons.push(acceptOrCancelButton);
+                       this.acceptOrCancelButtonInitialInfo.set(acceptOrCancelButton.getMesh()?.uuid ?? '', { positionPercent, widthPercent, heightPercent });
+
+                   } else {
+                       console.error("Accept Or Cancel Button Texture Not Found.");
+                       }
+
+               }));
+           }
+
+
 
        private addTransparentRectangles(): void {
            // 다시 뽑기 버튼
            const returnSelectButtonX = 0.93394;
            const returnSelectButtonY = 0.14834;
-           this.addTransparentRectangle('returnSelectButton', returnSelectButtonX, returnSelectButtonY);
+           this.addTransparentRectangle('againButton', returnSelectButtonX, returnSelectButtonY);
 
            // 로비 버튼
            const lobbyButtonX = 0.93794;
@@ -239,7 +280,7 @@ export class TCGJustTestSelectCardScreenView implements Component{
            console.log("TransparentRectangle Button Click !");
            switch(id) {
                case 'lobbyButton':
-                   console.log("Select Result Lobby Button Click!");
+                   console.log("Lobby Button Click!");
                    this.hide();
                    const rootElement = document.getElementById('lobby');
                    if (rootElement) {
@@ -254,10 +295,11 @@ export class TCGJustTestSelectCardScreenView implements Component{
                        console.error('Root element not found');
                    }
                    break;
-                   case 'returnSelectButton':
-                       console.log("Wait! not yet prepare..")
+                   case 'againButton':
+                       console.log("Again Button Click!")
                        this.addTransparentBackground('transparentBackground');
                        this.addTryAgainScreen();
+                       this.addAcceptOrCancelButton();
                        break;
                    default:
                        console.error("Unknown TransparentRectangle ID:", id);

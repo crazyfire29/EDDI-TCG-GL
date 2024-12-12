@@ -7,13 +7,13 @@ export class TryAgainButtonConfigList {
             id: 1,
             type: TryAgainButtonType.CANCEL,
             imagePath: 'resource/select_card_result_screen/try_again_buttons/cancel_button.png',
-            position: new THREE.Vector2(120, -270)
+            position: new THREE.Vector2(160, -140)
         },
         {
             id: 2,
             type: TryAgainButtonType.ACCEPT,
             imagePath: 'resource/select_card_result_screen/try_again_buttons/accept_button.png',
-            position: new THREE.Vector2(-70, -270)
+            position: new THREE.Vector2(-160, -140)
         }
     ];
 }
