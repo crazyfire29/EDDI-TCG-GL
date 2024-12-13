@@ -22,6 +22,8 @@ export class TCGJustTestMyDeckView implements Component{
         private notClickMyDeckButtons: NonBackgroundImage[] = [];
         private clickMyDeckButtons: NonBackgroundImage[] = [];
         private deckButtonCount: number = 6; // 사용자가 현재 만든 덱 버튼 갯수 임의로 지정
+        private notClickMyDeckButtonsDict: { [id: string]: NonBackgroundImage } = {};
+        private clickMyDeckButtonDict: { [id: string]: NonBackgroundImage } = {};
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -90,7 +92,8 @@ export class TCGJustTestMyDeckView implements Component{
            console.log("Textures preloaded. Adding background and buttons...");
 
            await this.addBackground();
-           this.addNotClickMyDeckButton(this.deckButtonCount);
+//            this.addNotClickMyDeckButton(this.deckButtonCount);
+           this.addClickMyDeckButton(this.deckButtonCount);
 
            this.initialized = true;
            this.isAnimating = true;
@@ -162,6 +165,24 @@ export class TCGJustTestMyDeckView implements Component{
                }
            }
 
+       private addClickMyDeckButton(deckButtonCount: number): void {
+           const initialX = 0.3268;
+           const initialY = 0.22242;
+           const incrementY = - 0.103;
+           const maxButtonsPerPage = 6;
+
+           for (let i = 1; i<= deckButtonCount; i++){
+               const deckButtonName = `testDeckButton${i}`;
+               const deckButtonX = initialX;
+               const deckButtonY = initialY + ((i - 1) % maxButtonsPerPage) * incrementY;
+
+               this.clickMyDeckButton(deckButtonName, deckButtonX, deckButtonY);
+               if (i % maxButtonsPerPage === 0) {
+                   console.log(`Row ${i / maxButtonsPerPage} completed. Resetting X.`);
+                   }
+               }
+           }
+
 
        private async notClickMyDeckButton(id: string, positionXPercent: number, positionYPercent: number): Promise<void> {
            const targetConfig = MyDeckButtonConfigList.myDeckButtonConfigs.find(config => config.id === 2);
@@ -187,23 +208,55 @@ export class TCGJustTestMyDeckView implements Component{
 
                notClickMyDeckButton.createNonBackgroundImageWithTexture(notClickMyDeckButtonTexture, 1, 1);
                notClickMyDeckButton.draw(this.scene);
+               this.notClickMyDeckButtonsDict[id] = notClickMyDeckButton;
                this.notClickMyDeckButtons.push(notClickMyDeckButton);
-               console.log("Not Click My Deck Button List: ", this.notClickMyDeckButtons);
+//                console.log("Not Click My Deck Button List: ", this.notClickMyDeckButtons);
+               console.log("Not Click My Deck Button List:", this.notClickMyDeckButtonsDict);
 
                } else {
                    console.error("Not Click My Deck Button Texture Not Found.");
                }
            }
 
+       private async clickMyDeckButton(id: string, positionXPercent: number, positionYPercent: number): Promise<void>{
+           const targetConfig = MyDeckButtonConfigList.myDeckButtonConfigs.find(config => config.id === 1);
+           if (!targetConfig){
+               console.error('No config with id = 1 found in MyDeckButtonConfigList.');
+               return;
+               }
+           const clickMyDeckButtonTexture = await this.textureManager.getTexture('my_deck_buttons', targetConfig.id);
+           if(clickMyDeckButtonTexture){
+               const widthPercent = 350 / 1920;
+               const heightPercent = 90 / 1080;
+               const positionPercent = new THREE.Vector2(positionXPercent, positionYPercent);
+
+               const clickMyDeckButton = new NonBackgroundImage(
+                   window.innerWidth * widthPercent,
+                   window.innerHeight * heightPercent,
+                   new THREE.Vector2(
+                       window.innerWidth * positionPercent.x,
+                       window.innerHeight * positionPercent.y
+                       )
+                   );
+               clickMyDeckButton.createNonBackgroundImageWithTexture(clickMyDeckButtonTexture, 1, 1);
+               clickMyDeckButton.draw(this.scene);
+               this.clickMyDeckButtonDict[id] = clickMyDeckButton;
+               this.notClickMyDeckButtons.push(clickMyDeckButton);
+               console.log("Click My Deck Button List: ", this.clickMyDeckButtonDict);
+               } else {
+                   console.error("Click My Deck Button Texture Not Found.");
+                   }
+           }
+
 
        public animate(): void {
-                      if (this.isAnimating) {
-                          requestAnimationFrame(() => this.animate());
-                          this.renderer.render(this.scene, this.camera);
-                      } else {
-                          console.log('TCGCardShop: Animation stopped.');
-                      }
-              }
+           if (this.isAnimating) {
+               requestAnimationFrame(() => this.animate());
+               this.renderer.render(this.scene, this.camera);
+               } else {
+                   console.log('TCGCardShop: Animation stopped.');
+                   }
+           }
 
    }
 
