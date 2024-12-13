@@ -21,9 +21,14 @@ export class TextureManager {
     private shopSelectScreenTextureList: { [id: number]: THREE.Texture } = {};
     private shopYesOrNoButtonTextureList: { [id: number]: THREE.Texture } = {};
     private selectCardScreenTextureList: { [id: number]: THREE.Texture } = {};
+    private tryAgainScreenTextureList: { [id: number]: THREE.Texture } = {};
+    private tryAgainButtonsTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private myCardBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private myCardPageMovementTextureList: { [id: number]: THREE.Texture } = {};
+    private myDeckBackgroundTextureList: { [id: number]: THREE.Texture } = {};
+    private myDeckButtonsTextureList: { [id: number]: THREE.Texture } = {};
+    private deckPageMovementButtonsTextureList : { [id: number]: THREE.Texture } = {};
     private cardKindsTextureList: { [id: number]: THREE.Texture } = {};
 
     private constructor() {}
@@ -59,9 +64,14 @@ export class TextureManager {
                 this.loadTextures(imageData.shop_select_screens, this.shopSelectScreenTextureList),
                 this.loadTextures(imageData.shop_yes_or_no_button, this.shopYesOrNoButtonTextureList),
                 this.loadTextures(imageData.select_card_screen, this.selectCardScreenTextureList),
+                this.loadTextures(imageData.try_again_screen, this.tryAgainScreenTextureList),
+                this.loadTextures(imageData.try_again_buttons, this.tryAgainButtonsTextureList),
                 this.loadTextures(imageData.battle_field_background, this.battleFieldBackgroundTextureList),
                 this.loadTextures(imageData.my_card_background, this.myCardBackgroundTextureList),
                 this.loadTextures(imageData.my_card_page_movement_button, this.myCardPageMovementTextureList),
+                this.loadTextures(imageData.my_deck_background, this.myDeckBackgroundTextureList),
+                this.loadTextures(imageData.my_deck_buttons, this.myDeckButtonsTextureList),
+                this.loadTextures(imageData.deck_page_movement_buttons, this.deckPageMovementButtonsTextureList),
                 this.loadTextures(imageData.card_kinds, this.cardKindsTextureList),
             ]);
 
@@ -166,12 +176,22 @@ export class TextureManager {
                 return this.shopYesOrNoButtonTextureList[id]
             case 'select_card_screen':
                 return this.selectCardScreenTextureList[id]
+            case 'try_again_screen':
+                return this.tryAgainScreenTextureList[id]
+            case 'try_again_buttons':
+                return this.tryAgainButtonsTextureList[id]
             case 'battle_field_background':
                 return this.battleFieldBackgroundTextureList[id]
             case 'my_card_background':
                 return this.myCardBackgroundTextureList[id]
             case 'my_card_page_movement_button':
                 return this.myCardPageMovementTextureList[id]
+            case 'my_deck_background':
+                return this.myDeckBackgroundTextureList[id]
+            case 'my_deck_buttons':
+                return this.myDeckButtonsTextureList[id]
+            case 'deck_page_movement_buttons':
+                return this.deckPageMovementButtonsTextureList[id]
             case 'card_kinds':
                 return this.cardKindsTextureList[id]
             default:
