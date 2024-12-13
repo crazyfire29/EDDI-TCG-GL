@@ -9,5 +9,5 @@ export interface MyDeckButtonConfig {
     id: number;
     type: MyDeckButtonType;
     imagePath: string;
-    position: THREE.Vector2;
+//     position: THREE.Vector2;
 }

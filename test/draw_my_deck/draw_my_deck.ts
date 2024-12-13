@@ -6,6 +6,8 @@ import { AudioController } from "../../src/audio/AudioController";
 import myCardMusic from '@resource/music/my_card/my-card.mp3';
 import { Component } from "../../src/router/Component";
 import { TransparentRectangle } from "../../src/shape/TransparentRectangle";
+import { MyDeckButtonConfigList } from "./MyDeckButtonConfigList";
+import { MyDeckButtonType } from "./MyDeckButtonType";
 
 
 export class TCGJustTestMyDeckView implements Component{
@@ -17,6 +19,9 @@ export class TCGJustTestMyDeckView implements Component{
         private textureManager: TextureManager;
         private myDeckContainer: HTMLElement;
         private background: NonBackgroundImage | null = null;
+        private notClickMyDeckButtons: NonBackgroundImage[] = [];
+        private clickMyDeckButtons: NonBackgroundImage[] = [];
+        private deckButtonCount: number = 6; // 사용자가 현재 만든 덱 버튼 갯수 임의로 지정
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -85,6 +90,7 @@ export class TCGJustTestMyDeckView implements Component{
            console.log("Textures preloaded. Adding background and buttons...");
 
            await this.addBackground();
+           this.addNotClickMyDeckButton(this.deckButtonCount);
 
            this.initialized = true;
            this.isAnimating = true;
@@ -136,6 +142,58 @@ export class TCGJustTestMyDeckView implements Component{
                    console.error("Background texture not found.");
                }
        }
+
+       private addNotClickMyDeckButton(deckButtonCount: number): void {
+           const initialX = 0.3268; // 초기 X 좌표
+           const initialY = 0.2243; // Y 좌표
+           const incrementY = - 0.103; // X 증가 간격(화면으로 확인 필요)
+           const maxButtonsPerPage = 6; // 한 페이지 당 최대 보여지는 덱 버튼 갯수
+
+           for (let i = 1; i <= deckButtonCount; i++){
+               const deckButtonName = `testDeckButton${i}`;
+               const deckButtonX = initialX;
+               const deckButtonY = initialY + ((i - 1) % maxButtonsPerPage) * incrementY;
+
+               this.notClickMyDeckButton(deckButtonName, deckButtonX, deckButtonY);
+
+               if (i % maxButtonsPerPage === 0) {
+                   console.log(`Row ${i / maxButtonsPerPage} completed. Resetting X.`);
+                   }
+               }
+           }
+
+
+       private async notClickMyDeckButton(id: string, positionXPercent: number, positionYPercent: number): Promise<void> {
+           const targetConfig = MyDeckButtonConfigList.myDeckButtonConfigs.find(config => config.id === 2);
+           if (!targetConfig) {
+               console.error('No config with id = 2 found in MyDeckButtonConfigList.');
+               return;
+               }
+
+           const notClickMyDeckButtonTexture = await this.textureManager.getTexture('my_deck_buttons', targetConfig.id);
+           if (notClickMyDeckButtonTexture) {
+               const widthPercent = 350 / 1920;
+               const heightPercent = 90 / 1080;
+               const positionPercent = new THREE.Vector2(positionXPercent, positionYPercent);
+
+               const notClickMyDeckButton = new NonBackgroundImage(
+                   window.innerWidth * widthPercent,
+                   window.innerHeight * heightPercent,
+                   new THREE.Vector2(
+                       window.innerWidth * positionPercent.x,
+                       window.innerHeight * positionPercent.y
+                       )
+                   );
+
+               notClickMyDeckButton.createNonBackgroundImageWithTexture(notClickMyDeckButtonTexture, 1, 1);
+               notClickMyDeckButton.draw(this.scene);
+               this.notClickMyDeckButtons.push(notClickMyDeckButton);
+               console.log("Not Click My Deck Button List: ", this.notClickMyDeckButtons);
+
+               } else {
+                   console.error("Not Click My Deck Button Texture Not Found.");
+               }
+           }
 
 
        public animate(): void {
