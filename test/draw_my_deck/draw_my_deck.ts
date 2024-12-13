@@ -21,12 +21,15 @@ export class TCGJustTestMyDeckView implements Component{
         private textureManager: TextureManager;
         private myDeckContainer: HTMLElement;
         private background: NonBackgroundImage | null = null;
-        private notClickMyDeckButtons: NonBackgroundImage[] = [];
-        private clickMyDeckButtons: NonBackgroundImage[] = [];
-        private deckButtonCount: number = 6; // 사용자가 현재 만든 덱 버튼 갯수 임의로 지정
+        private notClickMyDeckButtons: NonBackgroundImage[] = []; //클릭하지 않았을 때의 덱 버튼
+        private clickMyDeckButtons: NonBackgroundImage[] = []; //클릭했을 때의 덱 버튼
+        private deckButtonCount: number = 10; // 사용자가 현재 만든 덱 버튼 갯수 임의로 지정
         private notClickMyDeckButtonsDict: { [id: string]: NonBackgroundImage } = {};
         private clickMyDeckButtonDict: { [id: string]: NonBackgroundImage } = {};
-        private deckPageMovementButtons : NonBackgroundImage[] = [];
+        private deckPageMovementButtons : NonBackgroundImage[] = []; //덱 버튼 페이지 이동 버튼
+        private deckButtonPageCount: number = 1; // 페이지 count
+        private deckButtonsPerPage: number = 6; // 페이지 당 덱 버튼 갯수
+        private currentDeckButtonList: NonBackgroundImage[] = [];
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -95,9 +98,10 @@ export class TCGJustTestMyDeckView implements Component{
            console.log("Textures preloaded. Adding background and buttons...");
 
            await this.addBackground();
-//            this.addNotClickMyDeckButton(this.deckButtonCount);
-           this.addClickMyDeckButton(this.deckButtonCount);
-           this.addDeckPageMovementButton();
+           await this.addNotClickMyDeckButton(this.deckButtonCount);
+//            this.addClickMyDeckButton(this.deckButtonCount);
+           await this.addDeckPageMovementButton();
+           this.renderCurrentDeckButtonPage();
 
            this.initialized = true;
            this.isAnimating = true;
@@ -211,7 +215,7 @@ export class TCGJustTestMyDeckView implements Component{
                    );
 
                notClickMyDeckButton.createNonBackgroundImageWithTexture(notClickMyDeckButtonTexture, 1, 1);
-               notClickMyDeckButton.draw(this.scene);
+//                notClickMyDeckButton.draw(this.scene);
                this.notClickMyDeckButtonsDict[id] = notClickMyDeckButton;
                this.notClickMyDeckButtons.push(notClickMyDeckButton);
 //                console.log("Not Click My Deck Button List: ", this.notClickMyDeckButtons);
@@ -243,7 +247,7 @@ export class TCGJustTestMyDeckView implements Component{
                        )
                    );
                clickMyDeckButton.createNonBackgroundImageWithTexture(clickMyDeckButtonTexture, 1, 1);
-               clickMyDeckButton.draw(this.scene);
+//                clickMyDeckButton.draw(this.scene);
                this.clickMyDeckButtonDict[id] = clickMyDeckButton;
                this.notClickMyDeckButtons.push(clickMyDeckButton);
                console.log("Click My Deck Button List: ", this.clickMyDeckButtonDict);
@@ -270,10 +274,11 @@ export class TCGJustTestMyDeckView implements Component{
                        );
 
                    deckPageMovementButton.createNonBackgroundImageWithTexture(deckPageMovementButtonTexture, 1, 1);
-                   // 덱 버튼이 6개 이상인 경우 그려지게 함
-                   if (this.deckButtonCount >= 6){
+                   // 덱 버튼이 7개 이상인 경우 그려지게 함
+                   if (this.deckButtonCount >= 7){
                        deckPageMovementButton.draw(this.scene);
                        this.deckPageMovementButtons.push(deckPageMovementButton);
+                       this.mouseController.registerButton(deckPageMovementButton.getMesh(), this.onDeckPageMovementButtonClick.bind(this, config.type));
                        }
 
                } else {
@@ -282,6 +287,72 @@ export class TCGJustTestMyDeckView implements Component{
 
            }));
        }
+
+       private onDeckPageMovementButtonClick(type: DeckPageMovementButtonType): void {
+           console.log("DeckPageMovement Button Click !");
+           switch(type) {
+               case DeckPageMovementButtonType.PREV:
+                   console.log("Prev Button Click!");
+                   if(this.deckButtonPageCount > 1){
+                       this.deckButtonPageCount--;
+                       console.log(`Current Page: ${this.deckButtonPageCount}`);
+                       this.renderCurrentDeckButtonPage();
+                       console.log("Current Deck Button List: ", this.currentDeckButtonList);
+                       } else{
+                           console.log('First Page');
+                           this.renderCurrentDeckButtonPage();
+                           console.log("Current Deck Button List: ", this.currentDeckButtonList);
+                           }
+                   break;
+
+               case DeckPageMovementButtonType.NEXT:
+                   console.log("Next Button Click!")
+                   if (this.deckButtonPageCount < Math.ceil(this.notClickMyDeckButtons.length / this.deckButtonsPerPage)) {
+                       this.deckButtonPageCount++;
+                       console.log(`Current Page: ${this.deckButtonPageCount}`);
+                       this.renderCurrentDeckButtonPage();
+                       console.log("Current Deck Button List: ", this.currentDeckButtonList);
+                       } else {
+                           console.log("Last Page");
+                           this.renderCurrentDeckButtonPage();
+                           console.log("Current Deck Button List: ", this.currentDeckButtonList);
+                           }
+                   break;
+               default:
+                   console.error("Unknown Page Movement Button Type:", type);
+               }
+           }
+
+       private renderCurrentDeckButtonPage(): void {
+           console.log("Not Click Deck Buttons List: ", this.notClickMyDeckButtons);
+           // 현재 씬에 그려져 있는 덱 버튼 제거
+           this.currentDeckButtonList.forEach(deckButton => {
+//                this.mouseController.unregisterButton(deckButton.getMesh());
+               this.scene.remove(deckButton.getMesh());
+               });
+
+           this.currentDeckButtonList = [];
+
+           // 현재 페이지의 카드 인덱스 범위 계산
+           const startIndex = (this.deckButtonPageCount - 1) * this.deckButtonsPerPage;
+           const endIndex = Math.min(startIndex + this.deckButtonsPerPage, this.notClickMyDeckButtons.length);
+
+           // 현재 페이지에 해당하는 카드만 씬에 추가
+           for (let i = startIndex; i < endIndex; i++) {
+               const deckButton = this.notClickMyDeckButtons[i];
+               if (!deckButton) {
+                   console.warn(`Deck button at index ${i} is undefined.`);
+                   continue;
+                   }
+               deckButton.draw(this.scene);
+               this.currentDeckButtonList.push(deckButton);
+               }
+           console.log(`Current Deck Buttons: ${this.currentDeckButtonList.length}`);
+           console.log("Current Deck Button?: ", this.currentDeckButtonList);
+           console.log(`Rendering Page ${this.deckButtonPageCount}: Showing cards ${startIndex + 1} to ${endIndex}`);
+
+           }
+
 
 
        public animate(): void {
