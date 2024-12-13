@@ -7,7 +7,7 @@ export enum DeckPageMovementButtonType {
 
 export interface DeckPageMovementButtonConfig {
     id: number;
-    type: MyDeckButtonType;
+    type: DeckPageMovementButtonType;
     imagePath: string;
     position: THREE.Vector2;
 }

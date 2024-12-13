@@ -8,6 +8,8 @@ import { Component } from "../../src/router/Component";
 import { TransparentRectangle } from "../../src/shape/TransparentRectangle";
 import { MyDeckButtonConfigList } from "./MyDeckButtonConfigList";
 import { MyDeckButtonType } from "./MyDeckButtonType";
+import { DeckPageMovementButtonConfigList } from "./DeckPageMovementButtonConfigList";
+import { DeckPageMovementButtonType} from "./DeckPageMovementButtonType";
 
 
 export class TCGJustTestMyDeckView implements Component{
@@ -24,6 +26,7 @@ export class TCGJustTestMyDeckView implements Component{
         private deckButtonCount: number = 6; // 사용자가 현재 만든 덱 버튼 갯수 임의로 지정
         private notClickMyDeckButtonsDict: { [id: string]: NonBackgroundImage } = {};
         private clickMyDeckButtonDict: { [id: string]: NonBackgroundImage } = {};
+        private deckPageMovementButtons : NonBackgroundImage[] = [];
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -94,6 +97,7 @@ export class TCGJustTestMyDeckView implements Component{
            await this.addBackground();
 //            this.addNotClickMyDeckButton(this.deckButtonCount);
            this.addClickMyDeckButton(this.deckButtonCount);
+           this.addDeckPageMovementButton();
 
            this.initialized = true;
            this.isAnimating = true;
@@ -247,6 +251,37 @@ export class TCGJustTestMyDeckView implements Component{
                    console.error("Click My Deck Button Texture Not Found.");
                    }
            }
+
+       private async addDeckPageMovementButton(): Promise<void> {
+           await Promise.all(DeckPageMovementButtonConfigList.deckPageMovementButtonConfigs.map(async (config) => {
+               const deckPageMovementButtonTexture = await this.textureManager.getTexture('deck_page_movement_buttons', config.id);
+               if (deckPageMovementButtonTexture) {
+                   const widthPercent = 60 / 1920;
+                   const heightPercent = 50 / 1080;
+                   const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
+
+                   const deckPageMovementButton = new NonBackgroundImage(
+                       window.innerWidth * widthPercent,
+                       window.innerHeight * heightPercent,
+                       new THREE.Vector2(
+                           window.innerWidth * positionPercent.x,
+                           window.innerHeight * positionPercent.y
+                           )
+                       );
+
+                   deckPageMovementButton.createNonBackgroundImageWithTexture(deckPageMovementButtonTexture, 1, 1);
+                   // 덱 버튼이 6개 이상인 경우 그려지게 함
+                   if (this.deckButtonCount >= 6){
+                       deckPageMovementButton.draw(this.scene);
+                       this.deckPageMovementButtons.push(deckPageMovementButton);
+                       }
+
+               } else {
+                   console.error("Deck Page Movement Button Texture Not Found.");
+                   }
+
+           }));
+       }
 
 
        public animate(): void {

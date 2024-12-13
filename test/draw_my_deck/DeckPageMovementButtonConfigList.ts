@@ -7,13 +7,13 @@ export class DeckPageMovementButtonConfigList {
             id: 1,
             type: DeckPageMovementButtonType.PREV,
             imagePath: 'resource/my_deck/deck_page_movement_button/prev_button.png',
-            position: new THREE.Vector2(160, -140)
+            position: new THREE.Vector2(520, -430)
         },
         {
             id: 2,
             type: DeckPageMovementButtonType.NEXT,
             imagePath: 'resource/my_deck/deck_page_movement_button/next_button.png',
-            position: new THREE.Vector2(-160, -140)
+            position: new THREE.Vector2(746, -430)
         }
     ];
 }
