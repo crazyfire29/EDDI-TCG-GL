@@ -28,6 +28,7 @@ export class TextureManager {
     private myCardPageMovementTextureList: { [id: number]: THREE.Texture } = {};
     private myDeckBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private myDeckButtonsTextureList: { [id: number]: THREE.Texture } = {};
+    private deckPageMovementButtonsTextureList : { [id: number]: THREE.Texture } = {};
     private cardKindsTextureList: { [id: number]: THREE.Texture } = {};
 
     private constructor() {}
@@ -70,6 +71,7 @@ export class TextureManager {
                 this.loadTextures(imageData.my_card_page_movement_button, this.myCardPageMovementTextureList),
                 this.loadTextures(imageData.my_deck_background, this.myDeckBackgroundTextureList),
                 this.loadTextures(imageData.my_deck_buttons, this.myDeckButtonsTextureList),
+                this.loadTextures(imageData.deck_page_movement_buttons, this.deckPageMovementButtonsTextureList),
                 this.loadTextures(imageData.card_kinds, this.cardKindsTextureList),
             ]);
 
@@ -188,6 +190,8 @@ export class TextureManager {
                 return this.myDeckBackgroundTextureList[id]
             case 'my_deck_buttons':
                 return this.myDeckButtonsTextureList[id]
+            case 'deck_page_movement_buttons':
+                return this.deckPageMovementButtonsTextureList[id]
             case 'card_kinds':
                 return this.cardKindsTextureList[id]
             default:
