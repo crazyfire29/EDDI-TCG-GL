@@ -99,7 +99,7 @@ export class TCGJustTestMyDeckView implements Component{
 
            await this.addBackground();
            await this.addNotClickMyDeckButton(this.deckButtonCount);
-//            this.addClickMyDeckButton(this.deckButtonCount);
+           await this.addClickMyDeckButton(this.deckButtonCount);
            await this.addDeckPageMovementButton();
            this.renderCurrentDeckButtonPage();
 
@@ -135,6 +135,55 @@ export class TCGJustTestMyDeckView implements Component{
            this.mouseController.clearButtons();
 
        }
+
+       private hideDeckButton(id: string): void {
+           const button = this.notClickMyDeckButtonsDict[id];
+           if (!button) {
+               console.warn(`No button found with ID: ${id}`);
+               return;
+               }
+
+           // 씬에서 버튼 제거
+           this.scene.remove(button.getMesh());
+
+           // MouseController 버튼 등록 해제
+//            this.mouseController.unregisterButton(button.getMesh());
+
+           }
+
+       private showDeckButton(id: string): void {
+           const button = this.notClickMyDeckButtonsDict[id];
+           if (!button) {
+               console.warn(`No button found with ID: ${id}`);
+               return;
+               }
+           button.draw(this.scene);
+
+           }
+
+       private showNeonDeckButton(id: string): void {
+           const button = this.clickMyDeckButtonDict[id];
+           if (!button) {
+               console.warn(`No Button found with ID: ${id}`);
+               return;
+               }
+
+           button.draw(this.scene);
+
+           this.mouseController.registerButton(button.getMesh(),this.onNeonDeckButtonClick.bind(this, id));
+
+           }
+
+       private hideNeonDeckButton(id: string): void{
+           const button = this.clickMyDeckButtonDict[id];
+           if (!button) {
+               console.warn(`No Button found with ID: ${id}`);
+               return;
+               }
+           this.scene.remove(button.getMesh());
+//            this.mouseController.unregisterButton(button.getMesh());
+           }
+
 
        private async addBackground(): Promise<void> {
            const texture = await this.textureManager.getTexture('my_deck_background', 1);
@@ -218,6 +267,7 @@ export class TCGJustTestMyDeckView implements Component{
 //                notClickMyDeckButton.draw(this.scene);
                this.notClickMyDeckButtonsDict[id] = notClickMyDeckButton;
                this.notClickMyDeckButtons.push(notClickMyDeckButton);
+
 //                console.log("Not Click My Deck Button List: ", this.notClickMyDeckButtons);
                console.log("Not Click My Deck Button List:", this.notClickMyDeckButtonsDict);
 
@@ -247,9 +297,8 @@ export class TCGJustTestMyDeckView implements Component{
                        )
                    );
                clickMyDeckButton.createNonBackgroundImageWithTexture(clickMyDeckButtonTexture, 1, 1);
-//                clickMyDeckButton.draw(this.scene);
                this.clickMyDeckButtonDict[id] = clickMyDeckButton;
-               this.notClickMyDeckButtons.push(clickMyDeckButton);
+               this.clickMyDeckButtons.push(clickMyDeckButton);
                console.log("Click My Deck Button List: ", this.clickMyDeckButtonDict);
                } else {
                    console.error("Click My Deck Button Texture Not Found.");
@@ -339,13 +388,20 @@ export class TCGJustTestMyDeckView implements Component{
 
            // 현재 페이지에 해당하는 카드만 씬에 추가
            for (let i = startIndex; i < endIndex; i++) {
-               const deckButton = this.notClickMyDeckButtons[i];
+               const keys = Object.keys(this.notClickMyDeckButtonsDict);
+               const deckButtons = Object.values(this.notClickMyDeckButtonsDict);
+               const deckButton = deckButtons[i];
+//                const deckButton = this.notClickMyDeckButtons[i];
                if (!deckButton) {
                    console.warn(`Deck button at index ${i} is undefined.`);
                    continue;
                    }
+
+               const key = keys[i];
                deckButton.draw(this.scene);
                this.currentDeckButtonList.push(deckButton);
+               this.mouseController.registerButton(deckButton.getMesh(),this.onDeckButtonClick.bind(this, key));
+
                }
            console.log(`Current Deck Buttons: ${this.currentDeckButtonList.length}`);
            console.log("Current Deck Button?: ", this.currentDeckButtonList);
@@ -353,6 +409,19 @@ export class TCGJustTestMyDeckView implements Component{
 
            }
 
+
+       // 만들어진 덱 버튼 클릭 이벤트(네온 효과 버튼으로 교체)
+       private onDeckButtonClick(id: string): void {
+           this.hideDeckButton(id);
+           this.showNeonDeckButton(id);
+           console.log("Updated Not Click My Deck Button List:", this.notClickMyDeckButtonsDict);
+       }
+
+       // 네온 버튼을 다시 누르면 다시 안 눌렀을 때의 버튼이 나타남.
+       private onNeonDeckButtonClick(id: string): void {
+           this.hideNeonDeckButton(id);
+           this.showDeckButton(id);
+           }
 
 
        public animate(): void {
