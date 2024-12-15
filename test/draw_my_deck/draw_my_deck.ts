@@ -101,8 +101,8 @@ export class TCGJustTestMyDeckView implements Component{
            console.log("Textures preloaded. Adding background and buttons...");
 
            await this.addBackground();
-           await this.addNotClickMyDeckButton(this.deckButtonCount);
-           await this.addClickMyDeckButton(this.deckButtonCount);
+           await this.addMyDeckButton(this.deckButtonCount);
+           await this.addNeonMyDeckButton(this.deckButtonCount);
            await this.addDeckPageMovementButton();
            this.renderCurrentDeckButtonPage();
 
@@ -205,7 +205,7 @@ export class TCGJustTestMyDeckView implements Component{
                }
        }
 
-       private addNotClickMyDeckButton(deckButtonCount: number): void {
+       private addMyDeckButton(deckButtonCount: number): void {
            const initialX = 0.3268; // 초기 X 좌표
            const initialY = 0.2243; // Y 좌표
            const incrementY = - 0.103; // X 증가 간격(화면으로 확인 필요)
@@ -216,7 +216,7 @@ export class TCGJustTestMyDeckView implements Component{
                const deckButtonX = initialX;
                const deckButtonY = initialY + ((i - 1) % maxButtonsPerPage) * incrementY;
 
-               this.notClickMyDeckButton(deckButtonName, deckButtonX, deckButtonY);
+               this.MyDeckButton(deckButtonName, deckButtonX, deckButtonY);
 
                if (i % maxButtonsPerPage === 0) {
                    console.log(`Row ${i / maxButtonsPerPage} completed. Resetting X.`);
@@ -224,7 +224,7 @@ export class TCGJustTestMyDeckView implements Component{
                }
            }
 
-       private addClickMyDeckButton(deckButtonCount: number): void {
+       private addNeonMyDeckButton(deckButtonCount: number): void {
            const initialX = 0.3268;
            const initialY = 0.22242;
            const incrementY = - 0.103;
@@ -235,7 +235,7 @@ export class TCGJustTestMyDeckView implements Component{
                const deckButtonX = initialX;
                const deckButtonY = initialY + ((i - 1) % maxButtonsPerPage) * incrementY;
 
-               this.clickMyDeckButton(deckButtonName, deckButtonX, deckButtonY);
+               this.NeonMyDeckButton(deckButtonName, deckButtonX, deckButtonY);
                if (i % maxButtonsPerPage === 0) {
                    console.log(`Row ${i / maxButtonsPerPage} completed. Resetting X.`);
                    }
@@ -243,7 +243,7 @@ export class TCGJustTestMyDeckView implements Component{
            }
 
 
-       private async notClickMyDeckButton(id: string, positionXPercent: number, positionYPercent: number): Promise<void> {
+       private async MyDeckButton(id: string, positionXPercent: number, positionYPercent: number): Promise<void> {
            const targetConfig = MyDeckButtonConfigList.myDeckButtonConfigs.find(config => config.id === 2);
            if (!targetConfig) {
                console.error('No config with id = 2 found in MyDeckButtonConfigList.');
@@ -278,7 +278,7 @@ export class TCGJustTestMyDeckView implements Component{
                }
            }
 
-       private async clickMyDeckButton(id: string, positionXPercent: number, positionYPercent: number): Promise<void>{
+       private async NeonMyDeckButton(id: string, positionXPercent: number, positionYPercent: number): Promise<void>{
            const targetConfig = MyDeckButtonConfigList.myDeckButtonConfigs.find(config => config.id === 1);
            if (!targetConfig){
                console.error('No config with id = 1 found in MyDeckButtonConfigList.');
@@ -396,7 +396,7 @@ export class TCGJustTestMyDeckView implements Component{
            const startIndex = (this.deckButtonPageCount - 1) * this.deckButtonsPerPage;
            const endIndex = Math.min(startIndex + this.deckButtonsPerPage, this.notClickMyDeckButtons.length);
 
-           // 현재 페이지에 해당하는 카드만 씬에 추가
+           // 현재 페이지에 해당하는 덱 버튼만 씬에 추가
            for (let i = startIndex; i < endIndex; i++) {
                const keys = Object.keys(this.notClickMyDeckButtonsDict);
                const deckButtons = Object.values(this.notClickMyDeckButtonsDict);
@@ -451,7 +451,7 @@ export class TCGJustTestMyDeckView implements Component{
 
        }
 
-       // 네온 버튼을 다시 누르면 다시 안 눌렀을 때의 버튼이 나타남.
+       // 네온 버튼 클릭(다시 누르면 다시 안 눌렀을 때의 버튼이 나타남.)
        private onNeonDeckButtonClick(id: string): void {
            console.log(`Neon Deck Button Clicked: ${id}`);
            this.hideNeonDeckButton(id);
