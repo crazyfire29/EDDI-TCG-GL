@@ -1,23 +1,9 @@
-export class BattleFieldHandRepository {
-    private static instance: BattleFieldHandRepository;
+import {BattleFieldHand} from "../entity/BattleFieldHand";
 
-    private currentHandList: number[] = [2, 8, 19, 20, 93]
-
-    private constructor() { }
-
-    public static getInstance(): BattleFieldHandRepository {
-        if (!BattleFieldHandRepository.instance) {
-            BattleFieldHandRepository.instance = new BattleFieldHandRepository();
-        }
-
-        return BattleFieldHandRepository.instance
-    }
-
-    public addBattleFieldHand(hand: number): void {
-        this.currentHandList.push(hand)
-    }
-
-    public getBattleFieldHandList(): number[] {
-        return this.currentHandList
-    }
+export interface BattleFieldHandRepository {
+    save(cardSceneId: number, positionId: number, attributeMarkIdList: number[]): BattleFieldHand;
+    findById(id: number): BattleFieldHand | undefined;
+    findAll(): BattleFieldHand[];
+    deleteById(id: number): boolean;
+    deleteAll(): void;
 }
