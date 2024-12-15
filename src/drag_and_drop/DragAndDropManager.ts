@@ -178,7 +178,7 @@ export class DragAndDropManager {
 
                     repository.addBattleFieldUnit(unit);
 
-                    console.log("BattleFieldUnit added to repository:", unit);
+                    console.log("BattleFieldUnit added to deprecated_repository:", unit);
 
                     // const cardInitialInfoMap = UnitCardGenerator.getCardInitialInfoMap()
                     const handCardInitialInfoMap = CardStateManager.getAllHandCards()
