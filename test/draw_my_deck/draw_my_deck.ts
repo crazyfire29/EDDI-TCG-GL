@@ -183,7 +183,6 @@ export class TCGJustTestMyDeckView implements Component{
                return;
                }
            this.scene.remove(button.getMesh());
-           this.mouseController.unregisterButton(button.getMesh());
            }
 
 
