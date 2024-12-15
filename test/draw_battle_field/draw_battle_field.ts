@@ -163,7 +163,7 @@ export class TCGJustTestBattleFieldView {
 
         const battleFieldUnit = new BattleFieldUnit(cardId, weaponId, hpId, energyId, raceId, position);
         this.battleFieldUnitRepository.addBattleFieldUnit(battleFieldUnit);
-        console.log("BattleFieldUnit created and added to the repository:", battleFieldUnit);
+        console.log("BattleFieldUnit created and added to the deprecated_repository:", battleFieldUnit);
 
         this.scene.add(this.battleFieldUnitScene.getScene());
         console.log("BattleFieldUnitScene added to the main scene:", this.battleFieldUnitScene.getScene());
