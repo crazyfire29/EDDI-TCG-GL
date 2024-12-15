@@ -218,6 +218,13 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
         this.yourBattleFieldRectangle = yourBattleFieldRectangle;
     }
 
+    private checkBattleFieldHandSceneRepository(): void {
+        const handSceneList = this.battleFieldHandSceneRepository.getBattleFieldHandSceneList();
+        handSceneList.forEach((item, index) => {
+            console.log(`handSceneList[${index}]:`, item);
+        });
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -282,6 +289,8 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
             EnergyCardGenerator.adjustCardPositions();
 
             UnitCardGenerator.adjustFieldCardPositions()
+
+            this.checkBattleFieldHandSceneRepository()
         }
     }
 
