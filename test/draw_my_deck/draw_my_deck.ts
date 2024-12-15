@@ -183,6 +183,7 @@ export class TCGJustTestMyDeckView implements Component{
                return;
                }
            this.scene.remove(button.getMesh());
+           this.mouseController.unregisterButton(button.getMesh());
            }
 
 
@@ -420,27 +421,39 @@ export class TCGJustTestMyDeckView implements Component{
 
        // 만들어진 덱 버튼 클릭 이벤트(네온 효과 버튼으로 교체)
        private onDeckButtonClick(id: string): void {
-           this.currentClickDeckButtonId = id;
-           this.currentClickDeckButtonIdList.push(id)
-           console.log(`Current Click Button: ${this.currentClickDeckButtonId}`);
-           console.log(`Current Click Button List: ${this.currentClickDeckButtonIdList}`);
 
            if (this.currentClickDeckButtonId !== null) {
-               this.hideDeckButton(this.currentClickDeckButtonId);
-               this.showNeonDeckButton(this.currentClickDeckButtonId);
-               if (this.currentClickDeckButtonIdList.length > 1) {
-                   this.hideNeonDeckButton(this.currentClickDeckButtonIdList[0]);
-                   this.showDeckButton(this.currentClickDeckButtonIdList[0]);
-                   this.currentClickDeckButtonIdList.shift() // 첫 번째로 클릭한 요소 삭제
-                   }
+                   this.hideNeonDeckButton(this.currentClickDeckButtonId);
+                   this.showDeckButton(this.currentClickDeckButtonId);
                }
 
-           console.log("Updated Not Click My Deck Button List:", this.notClickMyDeckButtonsDict);
+           // 현재 클릭된 버튼을 네온 버튼으로 전환
+           this.currentClickDeckButtonId = id;
+           this.hideDeckButton(id);
+           this.showNeonDeckButton(id);
+           console.log(`Current Click Button: ${this.currentClickDeckButtonId}`)
+//            this.currentClickDeckButtonId = id;
+//            this.currentClickDeckButtonIdList.push(id)
+//            console.log(`Current Click Button: ${this.currentClickDeckButtonId}`);
+//            console.log(`Current Click Button List: ${this.currentClickDeckButtonIdList}`);
+//
+//            if (this.currentClickDeckButtonId !== null) {
+//                this.hideDeckButton(this.currentClickDeckButtonId);
+//                this.showNeonDeckButton(this.currentClickDeckButtonId);
+//                if (this.currentClickDeckButtonIdList.length > 1) {
+//                    this.hideNeonDeckButton(this.currentClickDeckButtonIdList[0]);
+//                    this.showDeckButton(this.currentClickDeckButtonIdList[0]);
+//                    this.currentClickDeckButtonIdList.shift() // 첫 번째로 클릭한 요소 삭제
+//                    }
+//                }
+//
+//            console.log("Updated Not Click My Deck Button List:", this.notClickMyDeckButtonsDict);
 
        }
 
        // 네온 버튼을 다시 누르면 다시 안 눌렀을 때의 버튼이 나타남.
        private onNeonDeckButtonClick(id: string): void {
+           console.log(`Neon Deck Button Clicked: ${id}`);
            this.hideNeonDeckButton(id);
            this.showDeckButton(id);
            this.currentClickDeckButtonId == null;
