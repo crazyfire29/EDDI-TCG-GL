@@ -15,14 +15,14 @@ import { BattleFieldUnit } from "../../src/battle_field_unit/entity/BattleFieldU
 import { BattleFieldUnitScene } from "../../src/battle_field_unit/scene/BattleFieldUnitScene";
 import { ResourceManager } from "../../src/resouce_manager/ResourceManager";
 import { BattleFieldUnitRenderer } from "../../src/battle_field_unit/renderer/BattleFieldUnitRenderer";
-import { BattleFieldHandRepository } from "../../src/battle_field_hand/repository/BattleFieldHandRepository";
+import { BattleFieldHandRepository } from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandRepository";
 import { CardGenerationHandler } from "../../src/card/handler";
-import { BattleFieldHandSceneRepository } from "../../src/battle_field_hand/repository/BattleFieldHandSceneRepository";
-import { BattleFieldHandPositionRepository } from "../../src/battle_field_hand/repository/BattleFieldHandPositionRepository";
+import { BattleFieldHandSceneRepository } from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandSceneRepository";
+import { BattleFieldHandPositionRepository } from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandPositionRepository";
 
 import { UserWindowSize } from "../../src/window_size/WindowSize";
 import { UnitCardGenerator } from "../../src/card/unit/generate";
-import { BattleFieldHandMapRepository } from "../../src/battle_field_hand/repository/BattleFieldHandMapRepository";
+import { BattleFieldHandMapRepository } from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandMapRepository";
 import { SupportCardGenerator } from "../../src/card/support/generate";
 import { ItemCardGenerator } from "../../src/card/item/generate";
 import { EnergyCardGenerator } from "../../src/card/energy/generate";
@@ -65,6 +65,8 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
     private isAnimating = false;
 
     private userWindowSize: UserWindowSize;
+
+    private yourBattleFieldRectangle: THREE.Mesh | null = null;
 
     private constructor(simulationBattleFieldContainer: HTMLElement) {
         this.simulationBattleFieldContainer = simulationBattleFieldContainer;
@@ -212,6 +214,15 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
         this.scene.add(yourBattleFieldRectangle);
 
         this.dragAndDropManager.setTargetShape(yourBattleFieldRectangle, CardState.FIELD)
+
+        this.yourBattleFieldRectangle = yourBattleFieldRectangle;
+    }
+
+    private checkBattleFieldHandSceneRepository(): void {
+        const handSceneList = this.battleFieldHandSceneRepository.getBattleFieldHandSceneList();
+        handSceneList.forEach((item, index) => {
+            console.log(`handSceneList[${index}]:`, item);
+        });
     }
 
     private onWindowResize(): void {
@@ -236,6 +247,25 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
                 this.background.setScale(scaleX, scaleY);
             }
 
+            if (this.yourBattleFieldRectangle) {
+                const rectWidth = window.innerWidth * 0.7;
+                const rectHeight = window.innerHeight * 0.23;
+
+                const geometry = this.yourBattleFieldRectangle.geometry as THREE.PlaneGeometry;
+                if (geometry) {
+                    // PlaneGeometry의 크기 (width, height)를 새로 설정
+                    geometry.dispose(); // 기존 geometry를 삭제하여 메모리 누수 방지
+                    this.yourBattleFieldRectangle.geometry = new THREE.PlaneGeometry(rectWidth, rectHeight);
+
+                    // 새로 생성된 geometry에 대해서 위치 업데이트
+                    this.yourBattleFieldRectangle.position.set(
+                        0,
+                        -(window.innerHeight / 2) + (0.024 * 3 + 0.11 * 2.5) * window.innerHeight,
+                        0
+                    );
+                }
+            }
+
             this.buttons.forEach(button => {
                 const initialInfo = this.buttonInitialInfo.get(button.getMesh()?.uuid ?? '');
                 if (initialInfo) {
@@ -253,10 +283,14 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
 
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
-            UnitCardGenerator.adjustCardPositions(scaleX, scaleY);
+            UnitCardGenerator.adjustHandCardPositions();
             SupportCardGenerator.adjustCardPositions();
             ItemCardGenerator.adjustCardPositions();
             EnergyCardGenerator.adjustCardPositions();
+
+            UnitCardGenerator.adjustFieldCardPositions()
+
+            this.checkBattleFieldHandSceneRepository()
         }
     }
 

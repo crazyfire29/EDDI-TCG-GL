@@ -15,14 +15,14 @@ import { BattleFieldUnit } from "../../src/battle_field_unit/entity/BattleFieldU
 import { BattleFieldUnitScene } from "../../src/battle_field_unit/scene/BattleFieldUnitScene";
 import { ResourceManager } from "../../src/resouce_manager/ResourceManager";
 import { BattleFieldUnitRenderer } from "../../src/battle_field_unit/renderer/BattleFieldUnitRenderer";
-import { BattleFieldHandRepository } from "../../src/battle_field_hand/repository/BattleFieldHandRepository";
+import { BattleFieldHandRepository } from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandRepository";
 import { CardGenerationHandler } from "../../src/card/handler";
-import { BattleFieldHandSceneRepository } from "../../src/battle_field_hand/repository/BattleFieldHandSceneRepository";
-import { BattleFieldHandPositionRepository } from "../../src/battle_field_hand/repository/BattleFieldHandPositionRepository";
+import { BattleFieldHandSceneRepository } from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandSceneRepository";
+import { BattleFieldHandPositionRepository } from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandPositionRepository";
 
 import { UserWindowSize } from "../../src/window_size/WindowSize";
 import { UnitCardGenerator } from "../../src/card/unit/generate";
-import { BattleFieldHandMapRepository } from "../../src/battle_field_hand/repository/BattleFieldHandMapRepository";
+import { BattleFieldHandMapRepository } from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandMapRepository";
 import { SupportCardGenerator } from "../../src/card/support/generate";
 import { ItemCardGenerator } from "../../src/card/item/generate";
 import { EnergyCardGenerator } from "../../src/card/energy/generate";
@@ -251,7 +251,7 @@ export class TCGJustTestBattleFieldReturnToInitialPositionView {
 
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
-            UnitCardGenerator.adjustCardPositions(scaleX, scaleY);
+            UnitCardGenerator.adjustHandCardPositions();
             SupportCardGenerator.adjustCardPositions();
             ItemCardGenerator.adjustCardPositions();
             EnergyCardGenerator.adjustCardPositions();
