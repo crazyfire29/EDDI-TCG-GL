@@ -21,6 +21,8 @@ import {BattleFieldHandMapRepository} from "../../src/battle_field_hand/deprecat
 import {SupportCardGenerator} from "../../src/card/support/generate";
 import {ItemCardGenerator} from "../../src/card/item/generate";
 import {EnergyCardGenerator} from "../../src/card/energy/generate";
+import {WindowSceneServiceImpl} from "../../src/window_scene/service/WindowSceneServiceImpl";
+import {WindowSceneRepositoryImpl} from "../../src/window_scene/repository/WindowSceneRepositoryImpl";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -46,6 +48,9 @@ export class TCGJustTestBattleFieldView {
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
     private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
+    private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
+    private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
+
     private initialized = false;
     private isAnimating = false;
 
@@ -53,8 +58,7 @@ export class TCGJustTestBattleFieldView {
 
     constructor(simulationBattleFieldContainer: HTMLElement) {
         this.simulationBattleFieldContainer = simulationBattleFieldContainer;
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0xffffff);
+        this.scene = this.windowSceneService.createScene('battle-field')
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.simulationBattleFieldContainer.appendChild(this.renderer.domElement);

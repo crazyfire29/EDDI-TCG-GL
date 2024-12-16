@@ -1,14 +1,24 @@
 import * as THREE from 'three';
+import {IdGenerator} from "../../common/id_generator/IdGenerator";
+
 
 export class WindowScene {
-    id: string;
+    id: number;
     name: string;
     scene: THREE.Scene;
 
-    constructor(id: string, name: string) {
-        this.id = id;
+    constructor(name: string) {
+        this.id = IdGenerator.generateId();
         this.name = name;
         this.scene = new THREE.Scene();
+    }
+
+    getScene(): THREE.Scene {
+        return this.scene
+    }
+
+    getId(): number {
+        return this.id
     }
 
     addObject(object: THREE.Object3D): void {
