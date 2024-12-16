@@ -10,6 +10,8 @@ import { MyDeckButtonConfigList } from "./MyDeckButtonConfigList";
 import { MyDeckButtonType } from "./MyDeckButtonType";
 import { DeckPageMovementButtonConfigList } from "./DeckPageMovementButtonConfigList";
 import { DeckPageMovementButtonType} from "./DeckPageMovementButtonType";
+import { DeckCardPageMovementButtonConfigList } from "./DeckCardPageMovementButtonConfigList";
+import { DeckCardPageMovementButtonType } from "./DeckCardPageMovementButtonType";
 
 
 export class TCGJustTestMyDeckView implements Component{
@@ -27,6 +29,7 @@ export class TCGJustTestMyDeckView implements Component{
         private notClickMyDeckButtonsDict: { [id: string]: NonBackgroundImage } = {};
         private clickMyDeckButtonDict: { [id: string]: NonBackgroundImage } = {};
         private deckPageMovementButtons : NonBackgroundImage[] = []; //덱 버튼 페이지 이동 버튼
+        private deckCardPageMovementButtons : NonBackgroundImage[] = []; // 덱 카드 페이지 이동 버튼
         private deckButtonPageCount: number = 1; // 페이지 count
         private deckButtonsPerPage: number = 6; // 페이지 당 덱 버튼 갯수
         private currentDeckButtonList: NonBackgroundImage[] = [];
@@ -111,6 +114,7 @@ export class TCGJustTestMyDeckView implements Component{
            await this.addNeonMyDeckButton(this.deckButtonCount);
            await this.addDeckPageMovementButton();
            this.renderCurrentDeckButtonPage();
+           this.addDeckCardPageMovementButton();
            this.addTestCardRectangles('testDeckButton1', 'test1Card', 0x0000ff);
            this.addTestCardRectangles('testDeckButton2', 'test2Card', 0x00ff00);
 
@@ -360,6 +364,36 @@ export class TCGJustTestMyDeckView implements Component{
 
            }));
        }
+
+       private async addDeckCardPageMovementButton(): Promise<void>{
+           await Promise.all(DeckCardPageMovementButtonConfigList.deckCardPageMovementButtonConfigs.map(async (config) => {
+               const deckCardPageMovementButtonTexture = await this.textureManager.getTexture('deck_card_page_movement_buttons', config.id);
+               if (deckCardPageMovementButtonTexture) {
+                   const widthPercent = 70 / 1920;
+                   const heightPercent = 50 / 1080;
+                   const positionPercent = new THREE.Vector2(config.position.x / 1920, config.position.y / 1080);
+
+                   const deckCardPageMovementButton = new NonBackgroundImage(
+                       window.innerWidth * widthPercent,
+                       window.innerHeight * heightPercent,
+                       new THREE.Vector2(
+                           window.innerWidth * positionPercent.x,
+                           window.innerHeight * positionPercent.y
+                           )
+                       );
+
+                   deckCardPageMovementButton.createNonBackgroundImageWithTexture(deckCardPageMovementButtonTexture, 1, 1);
+                   deckCardPageMovementButton.draw(this.scene);
+                   this.deckCardPageMovementButtons.push(deckCardPageMovementButton);
+
+               } else {
+                   console.error("Deck Card Page Movement Button Texture Not Found.");
+                   }
+
+           }));
+
+       }
+
 
       // 테스트용 카드 제작
        private addTestCardRectangles(deckId: string, testCardName: string, color: number): void {
