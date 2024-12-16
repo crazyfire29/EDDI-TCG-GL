@@ -38,7 +38,7 @@ export class TCGJustTestMyDeckView implements Component{
         private currentClickDeckButtonIdList: string[] = [];
         private cardPageCount: number = 1;
         private cardsPerPage: number = 8;
-        private cardNumber: number = 8; //사용자가 가진 카드 갯수
+        private cardNumber: number = 20; //사용자가 가진 카드 갯수
         private currentCardList: TransparentRectangle[] = [];
         private deckCardMap: Map<string, TransparentRectangle[]> = new Map();
 
@@ -385,6 +385,7 @@ export class TCGJustTestMyDeckView implements Component{
                    deckCardPageMovementButton.createNonBackgroundImageWithTexture(deckCardPageMovementButtonTexture, 1, 1);
                    deckCardPageMovementButton.draw(this.scene);
                    this.deckCardPageMovementButtons.push(deckCardPageMovementButton);
+                   this.mouseController.registerButton(deckCardPageMovementButton.getMesh(), this.onCardPageMovementButtonClick.bind(this, config.type));
 
                } else {
                    console.error("Deck Card Page Movement Button Texture Not Found.");
@@ -402,12 +403,15 @@ export class TCGJustTestMyDeckView implements Component{
            const maxCardsPerRow = 4;
            const initialY = 0.28244;
            const incrementY = 0.411;
+           const cardsPerPage = this.cardsPerPage;
 
            const cardList: TransparentRectangle[] = [];
 
            for (let i = 1; i <= this.cardNumber; i++) {
                const cardName = `${testCardName}${i}`;
-               const row = Math.floor((i - 1) / maxCardsPerRow);
+
+               const positionInPage = (i - 1) % cardsPerPage
+               const row = Math.floor(positionInPage / maxCardsPerRow);
                const col = (i - 1) % maxCardsPerRow;
 
                const cardX = initialX + col * incrementX;
@@ -415,6 +419,7 @@ export class TCGJustTestMyDeckView implements Component{
 
                const testCardRectangle = this.createTestCardRectangle(cardName, cardX, cardY, color);
                cardList.push(testCardRectangle);
+
            }
 
            this.deckCardMap.set(deckId, cardList);
@@ -451,7 +456,7 @@ export class TCGJustTestMyDeckView implements Component{
 
            // 현재 페이지의 카드 인덱스 범위 계산
            const startIndex = (this.cardPageCount - 1) * this.cardsPerPage;
-           const endIndex = startIndex + this.cardsPerPage;
+           const endIndex = Math.min(startIndex + this.cardsPerPage, testCardRectangles.length);
 
            // 현재 페이지에 해당하는 카드만 씬에 추가
            for (let i = startIndex; i < endIndex; i++) {
@@ -545,6 +550,53 @@ export class TCGJustTestMyDeckView implements Component{
 
            }
 
+       private onCardPageMovementButtonClick(type: DeckCardPageMovementButtonType): void {
+           console.log("CardPageMovement Button Click !");
+
+           if (!this.currentClickDeckButtonId) {
+                   console.error("No deck is currently selected.");
+                   return;
+           }
+
+           const testCardRectangles = this.deckCardMap.get(this.currentClickDeckButtonId);
+
+           if (!testCardRectangles) {
+               console.error(`No cards found for deckId: ${this.currentClickDeckButtonId}`);
+               return;
+           }
+
+           switch(type) {
+               case DeckCardPageMovementButtonType.PREV:
+                   console.log("Prev Button Click!");
+                   if(this.cardPageCount > 1){
+                       this.cardPageCount--;
+                       console.log(`Current Page: ${this.cardPageCount}`);
+                       this.renderCardCurrentPage(this.currentClickDeckButtonId);
+                       console.log("Current Card List: ", this.currentCardList);
+                       } else{
+                           console.log('First Page');
+                           this.renderCardCurrentPage(this.currentClickDeckButtonId);
+                           console.log("Current Card List: ", this.currentCardList);
+                           }
+                   break;
+               case DeckCardPageMovementButtonType.NEXT:
+                   console.log("Next Button Click!")
+                   if (this.cardPageCount < Math.ceil(testCardRectangles.length / this.cardsPerPage)){
+                       this.cardPageCount++;
+                       console.log(`Current Page: ${this.cardPageCount}`);
+                       this.renderCardCurrentPage(this.currentClickDeckButtonId);
+                       console.log("Current Card List: ", this.currentCardList);
+                       } else {
+                           console.log("Last Page");
+                           this.renderCardCurrentPage(this.currentClickDeckButtonId);
+                           console.log("Current Card List: ", this.currentCardList);
+                           }
+                   break;
+               default:
+                   console.error("Unknown Page Movement Button Type:", type);
+               }
+           }
+
 
        // 만들어진 덱 버튼 클릭 이벤트(네온 효과 버튼으로 교체)
        private onDeckButtonClick(id: string): void {
@@ -553,6 +605,7 @@ export class TCGJustTestMyDeckView implements Component{
                    this.hideNeonDeckButton(this.currentClickDeckButtonId);
                    this.showDeckButton(this.currentClickDeckButtonId);
                    this.hideTestCard(this.currentClickDeckButtonId);
+                   this.cardPageCount = 1;
                }
 
            // 현재 클릭된 버튼을 네온 버튼으로 전환
