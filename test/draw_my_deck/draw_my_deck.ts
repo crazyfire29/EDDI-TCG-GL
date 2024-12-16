@@ -33,6 +33,12 @@ export class TCGJustTestMyDeckView implements Component{
         private currentNeonDeckButtonList: NonBackgroundImage[] = [];
         private currentClickDeckButtonId: string| null = null;; // 현재 클릭된 버튼
         private currentClickDeckButtonIdList: string[] = [];
+        private cardPageCount: number = 1;
+        private cardsPerPage: number = 8;
+        private cardNumber: number = 8; //사용자가 가진 카드 갯수
+        private currentCardList: TransparentRectangle[] = [];
+        private deckCardMap: Map<string, TransparentRectangle[]> = new Map();
+
 
         private audioController: AudioController;
         private mouseController: MouseController;
@@ -105,6 +111,8 @@ export class TCGJustTestMyDeckView implements Component{
            await this.addNeonMyDeckButton(this.deckButtonCount);
            await this.addDeckPageMovementButton();
            this.renderCurrentDeckButtonPage();
+           this.addTestCardRectangles('testDeckButton1', 'test1Card', 0x0000ff);
+           this.addTestCardRectangles('testDeckButton2', 'test2Card', 0x00ff00);
 
            this.initialized = true;
            this.isAnimating = true;
@@ -184,6 +192,20 @@ export class TCGJustTestMyDeckView implements Component{
                }
            this.scene.remove(button.getMesh());
            this.mouseController.unregisterButton(button.getMesh());
+           }
+
+       private hideTestCard(deckId: string): void {
+           const testCardRectangles = this.deckCardMap.get(deckId);
+           if (!testCardRectangles) {
+                   console.error(`No cards found for deckId: ${deckId}`);
+                   return;
+               }
+
+           testCardRectangles.forEach(card => {
+               this.scene.remove(card.getMesh());
+               })
+
+           console.log(`All cards from deck ${deckId} have been removed.`);
            }
 
 
@@ -339,6 +361,77 @@ export class TCGJustTestMyDeckView implements Component{
            }));
        }
 
+      // 테스트용 카드 제작
+       private addTestCardRectangles(deckId: string, testCardName: string, color: number): void {
+           const initialX = 0.101;
+           const incrementX = 0.167;
+           const maxCardsPerRow = 4;
+           const initialY = 0.28244;
+           const incrementY = 0.411;
+
+           const cardList: TransparentRectangle[] = [];
+
+           for (let i = 1; i <= this.cardNumber; i++) {
+               const cardName = `${testCardName}${i}`;
+               const row = Math.floor((i - 1) / maxCardsPerRow);
+               const col = (i - 1) % maxCardsPerRow;
+
+               const cardX = initialX + col * incrementX;
+               const cardY = initialY + row * incrementY;
+
+               const testCardRectangle = this.createTestCardRectangle(cardName, cardX, cardY, color);
+               cardList.push(testCardRectangle);
+           }
+
+           this.deckCardMap.set(deckId, cardList);
+           console.log(`Deck ${deckId} contains:`, this.deckCardMap.get(deckId));
+       }
+
+
+       private createTestCardRectangle(id: string, positionXPercent: number, positionYPercent: number, color: number): TransparentRectangle {
+           const screenWidth = window.innerWidth;
+           const screenHeight = window.innerHeight;
+
+           const positionX = (positionXPercent - 0.5) * screenWidth;
+           const positionY = (0.5 - positionYPercent) * screenHeight;
+
+           const position = new THREE.Vector2(positionX, positionY);
+
+           const width = 0.126 * screenWidth;
+           const height = 0.365 * screenHeight;
+
+           return new TransparentRectangle(position, width, height, color, 0.7, id);
+       }
+
+
+       private renderCardCurrentPage(deckId: string): void {
+           const testCardRectangles = this.deckCardMap.get(deckId);
+
+           if (!testCardRectangles) {
+                   console.error(`No cards found for deck: ${deckId}`);
+                   return;
+               }
+
+           this.currentCardList.forEach((rectangle) => rectangle.removeFromScene(this.scene));
+           this.currentCardList = [];
+
+           // 현재 페이지의 카드 인덱스 범위 계산
+           const startIndex = (this.cardPageCount - 1) * this.cardsPerPage;
+           const endIndex = startIndex + this.cardsPerPage;
+
+           // 현재 페이지에 해당하는 카드만 씬에 추가
+           for (let i = startIndex; i < endIndex; i++) {
+               const rectangle = testCardRectangles[i];
+               rectangle.addToScene(this.scene);
+               this.currentCardList.push(rectangle);
+               }
+
+           console.log(`Rendering Page ${this.cardPageCount}: Showing cards ${startIndex + 1} to ${endIndex}`);
+           console.log("Current Card List: ", this.currentCardList);
+           }
+
+
+
        private onDeckPageMovementButtonClick(type: DeckPageMovementButtonType): void {
            console.log("DeckPageMovement Button Click !");
 
@@ -425,12 +518,14 @@ export class TCGJustTestMyDeckView implements Component{
            if (this.currentClickDeckButtonId !== null) {
                    this.hideNeonDeckButton(this.currentClickDeckButtonId);
                    this.showDeckButton(this.currentClickDeckButtonId);
+                   this.hideTestCard(this.currentClickDeckButtonId);
                }
 
            // 현재 클릭된 버튼을 네온 버튼으로 전환
            this.currentClickDeckButtonId = id;
            this.hideDeckButton(id);
            this.showNeonDeckButton(id);
+           this.renderCardCurrentPage(id);
            console.log(`Current Click Button: ${this.currentClickDeckButtonId}`)
 //            this.currentClickDeckButtonId = id;
 //            this.currentClickDeckButtonIdList.push(id)
