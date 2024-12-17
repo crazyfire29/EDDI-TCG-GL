@@ -11,6 +11,7 @@ import { routes } from "../../src/router/routes";
 import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView";
 import { PageMovementButtonConfigList } from "./PageMovementButtonConfigList";
 import { PageMovementButtonType } from "./PageMovementButtonType";
+import { TCGJustTestMyDeckView } from "../draw_my_deck/draw_my_deck"
 
 
 
@@ -228,13 +229,24 @@ export class TCGJustTestMyCardScreenView implements Component{
                            console.error('Root element not found');
                    }
                    break;
-                   case 'myDeckButton':
-                       console.log("Wait! not yet prepare..")
-                          break;
-                   default:
-                       console.error("Unknown TransparentRectangle ID:", id);
-                   }
+
+               case 'myDeckButton':
+                   console.log("My Deck Button Click!")
+                   this.hide();
+                   const myDeckRootElement = document.getElementById('my_deck');
+                   if (!myDeckRootElement) {
+                       console.error('Element not found!');
+                       return;
+                       }
+                   myDeckRootElement.style.display = 'block';
+                   const myDeckView = TCGJustTestMyDeckView.getInstance(myDeckRootElement);
+                   myDeckView.initialize();
+                   break;
+
+               default:
+                   console.error("Unknown TransparentRectangle ID:", id);
                }
+           }
 
 
        private async addPageMovementButton(): Promise<void> {
