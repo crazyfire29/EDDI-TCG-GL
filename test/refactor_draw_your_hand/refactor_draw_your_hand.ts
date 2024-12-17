@@ -23,11 +23,14 @@ import {ItemCardGenerator} from "../../src/card/item/generate";
 import {EnergyCardGenerator} from "../../src/card/energy/generate";
 import {WindowSceneServiceImpl} from "../../src/window_scene/service/WindowSceneServiceImpl";
 import {WindowSceneRepositoryImpl} from "../../src/window_scene/repository/WindowSceneRepositoryImpl";
+import {CameraServiceImpl} from "../../src/camera/service/CameraServiceImpl";
+import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepositoryImpl";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
 
     private scene: THREE.Scene;
+    private cameraId: number;
     private camera: THREE.OrthographicCamera;
     private renderer: THREE.WebGLRenderer;
     private textureManager: TextureManager;
@@ -51,6 +54,9 @@ export class TCGJustTestBattleFieldView {
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
 
+    private readonly cameraRepository = CameraRepositoryImpl.getInstance()
+    private readonly cameraService = CameraServiceImpl.getInstance(this.cameraRepository)
+
     private initialized = false;
     private isAnimating = false;
 
@@ -68,13 +74,14 @@ export class TCGJustTestBattleFieldView {
 
         const aspect = window.innerWidth / window.innerHeight;
         const viewSize = window.innerHeight;
-        this.camera = new THREE.OrthographicCamera(
-            -aspect * viewSize / 2, aspect * viewSize / 2,
-            viewSize / 2, -viewSize / 2,
-            0.1, 1000
-        );
-        this.camera.position.set(0, 0, 5);
-        this.camera.lookAt(0, 0, 0);
+        const cameraObject = this.cameraService.createCamera(aspect, viewSize)
+        this.cameraId = cameraObject.getId()
+        this.camera = cameraObject.getCamera()
+
+        this.cameraService.setCameraPosition(this.cameraId, 0, 0, 5)
+        this.cameraService.setCameraLookAt(this.cameraId, 0, 0, 0)
+        // this.camera.position.set(0, 0, 5);
+        // this.camera.lookAt(0, 0, 0);
 
         this.textureManager = TextureManager.getInstance();
         this.audioController = AudioController.getInstance();
@@ -188,12 +195,7 @@ export class TCGJustTestBattleFieldView {
         if (newWidth !== this.userWindowSize.getWidth() || newHeight !== this.userWindowSize.getHeight()) {
             const aspect = newWidth / newHeight;
             const viewSize = newHeight;
-
-            this.camera.left = -aspect * viewSize / 2;
-            this.camera.right = aspect * viewSize / 2;
-            this.camera.top = viewSize / 2;
-            this.camera.bottom = -viewSize / 2;
-            this.camera.updateProjectionMatrix();
+            this.cameraService.updateCamera(this.cameraId, aspect, viewSize)
 
             this.renderer.setSize(newWidth, newHeight);
 
