@@ -23,6 +23,7 @@ export class TCGJustTestMyDeckView implements Component{
         private textureManager: TextureManager;
         private myDeckContainer: HTMLElement;
         private background: NonBackgroundImage | null = null;
+        private transparentRectangles: TransparentRectangle[] = [];
         private notClickMyDeckButtons: NonBackgroundImage[] = []; //클릭하지 않았을 때의 덱 버튼
         private clickMyDeckButtons: NonBackgroundImage[] = []; //클릭했을 때의 덱 버튼
         private deckButtonCount: number = 10; // 사용자가 현재 만든 덱 버튼 갯수 임의로 지정
@@ -113,6 +114,7 @@ export class TCGJustTestMyDeckView implements Component{
            await this.addMyDeckButton(this.deckButtonCount);
            await this.addNeonMyDeckButton(this.deckButtonCount);
            await this.addDeckPageMovementButton();
+           this.addTransparentRectangles();
            this.renderCurrentDeckButtonPage();
            this.addDeckCardPageMovementButton();
            this.addTestCardRectangles('testDeckButton1', 'test1Card', 0x0000ff);
@@ -230,6 +232,43 @@ export class TCGJustTestMyDeckView implements Component{
                    console.error("Background texture not found.");
                }
        }
+
+
+      private addTransparentRectangles(): void {
+          // 로비 버튼
+          const lobbyButtonX = 0.21561;
+          const lobbyButtonY = 0.03534;
+          const lobbyWidth = 0.08415;
+          const lobbyHeight = 0.05658;
+          this.addTransparentRectangle('lobbyButton', lobbyButtonX, lobbyButtonY, lobbyWidth, lobbyHeight);
+
+          console.log('Add Transparent Button !');
+
+          }
+
+      private addTransparentRectangle(id: string, positionXPercent: number, positionYPercent: number, buttonWidth:number, buttonHeight:number): void {
+          const screenWidth = window.innerWidth;
+          const screenHeight = window.innerHeight;
+
+          const positionX = (positionXPercent - 0.5) * screenWidth
+          const positionY = (0.5 - positionYPercent) * screenHeight
+
+          console.log('TransparentRectangle Position:', positionX, positionY);
+
+          const position = new THREE.Vector2(
+              positionX, positionY
+              );
+
+          const width = buttonWidth * screenWidth
+          const height = buttonHeight * screenHeight
+          console.log('Calculated position:', position, 'Width:', width, 'Height:', height);
+
+          const transparentRectangle = new TransparentRectangle(position, width, height, 0xffffff, 0.5, id);
+          transparentRectangle.addToScene(this.scene);
+          this.transparentRectangles.push(transparentRectangle);
+
+          }
+
 
        private addMyDeckButton(deckButtonCount: number): void {
            const initialX = 0.3268; // 초기 X 좌표
