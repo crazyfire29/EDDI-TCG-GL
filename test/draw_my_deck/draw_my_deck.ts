@@ -12,6 +12,9 @@ import { DeckPageMovementButtonConfigList } from "./DeckPageMovementButtonConfig
 import { DeckPageMovementButtonType} from "./DeckPageMovementButtonType";
 import { DeckCardPageMovementButtonConfigList } from "./DeckCardPageMovementButtonConfigList";
 import { DeckCardPageMovementButtonType } from "./DeckCardPageMovementButtonType";
+import { RouteMap } from "../../src/router/RouteMap";
+import { routes } from "../../src/router/routes";
+import { TCGMainLobbyView } from "../../src/lobby/TCGMainLobbyView";
 
 
 export class TCGJustTestMyDeckView implements Component{
@@ -34,7 +37,6 @@ export class TCGJustTestMyDeckView implements Component{
         private deckButtonPageCount: number = 1; // 페이지 count
         private deckButtonsPerPage: number = 6; // 페이지 당 덱 버튼 갯수
         private currentDeckButtonList: NonBackgroundImage[] = [];
-        private currentNeonDeckButtonList: NonBackgroundImage[] = [];
         private currentClickDeckButtonId: string| null = null;; // 현재 클릭된 버튼
         private currentClickDeckButtonIdList: string[] = [];
         private cardPageCount: number = 1;
@@ -148,6 +150,42 @@ export class TCGJustTestMyDeckView implements Component{
            this.isAnimating = false;
            this.renderer.domElement.style.display = 'none';
            this.myDeckContainer.style.display = 'none';
+
+           this.transparentRectangles.forEach(rectangle => {
+               this.mouseController.unregisterButton(rectangle.getMesh());
+               this.scene.remove(rectangle.getMesh());
+               });
+
+           this.notClickMyDeckButtons.forEach(button => {
+               this.scene.remove(button.getMesh());
+               });
+
+           this.clickMyDeckButtons.forEach(button => {
+               this.scene.remove(button.getMesh());
+               });
+
+           this.deckPageMovementButtons.forEach(button => {
+               this.scene.remove(button.getMesh());
+               });
+
+           this.deckCardPageMovementButtons.forEach(button => {
+               this.scene.remove(button.getMesh());
+               });
+
+           this.currentDeckButtonList.forEach(button => {
+               this.scene.remove(button.getMesh());
+               });
+
+           this.currentCardList.forEach(button => {
+               this.scene.remove(button.getMesh());
+               });
+
+           this.deckCardMap.forEach((rectangles, key) => {
+               rectangles.forEach(rectangle => {
+                   this.mouseController.unregisterButton(rectangle.getMesh());
+                   this.scene.remove(rectangle.getMesh());
+               });
+           });
 
            this.mouseController.clearButtons();
 
@@ -265,6 +303,7 @@ export class TCGJustTestMyDeckView implements Component{
 
           const transparentRectangle = new TransparentRectangle(position, width, height, 0xffffff, 0.5, id);
           transparentRectangle.addToScene(this.scene);
+          this.mouseController.registerButton(transparentRectangle.getMesh(), this.onTransparentRectangleClick.bind(this, id));
           this.transparentRectangles.push(transparentRectangle);
 
           }
@@ -679,6 +718,32 @@ export class TCGJustTestMyDeckView implements Component{
            this.showDeckButton(id);
            this.currentClickDeckButtonId == null;
            }
+
+       private onTransparentRectangleClick(id: string): void {
+           console.log("TransparentRectangle Button Click !");
+           switch(id) {
+               case 'lobbyButton':
+                   console.log("My Card Lobby Button Click!");
+                   this.hide();
+                   const rootElement = document.getElementById('lobby');
+                   if (rootElement) {
+                       const routeMap = new RouteMap(rootElement, '/tcg-main-lobby');
+                       routeMap.registerRoutes(routes);
+
+                       rootElement.style.display = 'block';
+                       const lobbyView = TCGMainLobbyView.getInstance(rootElement, routeMap);
+                       lobbyView.initialize();
+
+                   } else {
+                       console.error('Root element not found');
+                       }
+                   break;
+
+               default:
+                   console.error("Unknown TransparentRectangle ID:", id);
+               }
+           }
+
 
 
        public animate(): void {
