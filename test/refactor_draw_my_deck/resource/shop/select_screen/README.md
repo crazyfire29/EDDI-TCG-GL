@@ -1,0 +1,1 @@
+# Place Every Shop Resource to here
