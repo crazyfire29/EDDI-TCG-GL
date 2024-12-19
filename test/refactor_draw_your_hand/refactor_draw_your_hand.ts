@@ -25,6 +25,8 @@ import {WindowSceneServiceImpl} from "../../src/window_scene/service/WindowScene
 import {WindowSceneRepositoryImpl} from "../../src/window_scene/repository/WindowSceneRepositoryImpl";
 import {CameraServiceImpl} from "../../src/camera/service/CameraServiceImpl";
 import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepositoryImpl";
+import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServiceImpl";
+import {BackgroundRepositoryImpl} from "../../src/background/repository/BackgroundRepositoryImpl";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -35,11 +37,14 @@ export class TCGJustTestBattleFieldView {
     private renderer: THREE.WebGLRenderer;
     private textureManager: TextureManager;
     private simulationBattleFieldContainer: HTMLElement;
-    private background: NonBackgroundImage | null = null;
+
     private buttons: NonBackgroundImage[] = [];
     private buttonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
     private audioController: AudioController;
     private mouseController: MouseController;
+
+    private background: NonBackgroundImage | null = null;
+    private backgroundService = BackgroundServiceImpl.getInstance()
 
     private battleFieldUnitRepository = BattleFieldUnitRepository.getInstance();
     private battleFieldUnitScene = new BattleFieldUnitScene();
@@ -121,7 +126,7 @@ export class TCGJustTestBattleFieldView {
 
         console.log("Textures preloaded. Adding background and buttons...");
 
-        this.addBackground();
+        await this.addBackground();
         this.addYourHandUnitList()
 
         this.initialized = true;
@@ -150,20 +155,20 @@ export class TCGJustTestBattleFieldView {
     }
 
     private async addBackground(): Promise<void> {
-        const texture = await this.textureManager.getTexture('battle_field_background', 1);
-        console.log('addBackground():', texture);
-        if (texture) {
-            if (!this.background) {
-                this.background = new NonBackgroundImage(
-                    window.innerWidth,
-                    window.innerHeight,
-                    new THREE.Vector2(0, 0)
-                );
+        try {
+            const background = await this.backgroundService.createBackground(
+                'battle_field_background',
+                1, // BackgroundType 값
+                window.innerWidth,
+                window.innerHeight
+            );
+
+            this.background = background;
+            if (this.background instanceof NonBackgroundImage) {
+                this.background.draw(this.scene);
             }
-            this.background.createNonBackgroundImageWithTexture(texture, 1, 1);
-            this.background.draw(this.scene);
-        } else {
-            console.error("Background texture not found.");
+        } catch (error) {
+            console.error('Failed to add background:', error);
         }
     }
 
