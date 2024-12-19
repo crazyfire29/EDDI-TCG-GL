@@ -1,1 +1,0 @@
-# Place Every Select Result Background Resource to here
