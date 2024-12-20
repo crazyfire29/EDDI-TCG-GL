@@ -11,15 +11,15 @@ export class MyDeckCardPageMovementButtonConfigList {
     public buttonConfigs: ButtonConfig[] = [
         {
             id: 1,
-            width: 63 / window.innerWidth,
-            height: 42 / window.innerHeight,
-            position: new THREE.Vector2(-358 / window.innerWidth, -400 / window.innerHeight)
+            width: 73 / 1920,
+            height: 46 / 1080,
+            position: new THREE.Vector2(-395 / 1920, -487 / 1080)
         },
         {
             id: 2,
-            width: 63 / window.innerWidth,
-            height: 42 / window.innerHeight,
-            position: new THREE.Vector2(-152 / window.innerWidth, -400 / window.innerHeight)
+            width: 73 / 1920,
+            height: 46 / 1080,
+            position: new THREE.Vector2(-169 / 1920, -487 / 1080)
         },
     ];
 }
