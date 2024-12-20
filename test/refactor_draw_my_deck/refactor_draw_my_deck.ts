@@ -17,7 +17,9 @@ import {BackgroundRepositoryImpl} from "../../src/background/repository/Backgrou
 
 import {MyDeckCardPageMovementButtonServiceImpl} from "../../src/my_deck_card_page_movement_button/service/MyDeckCardPageMovementButtonServiceImpl";
 import {MyDeckCardPageMovementButtonRepositoryImpl} from "../../src/my_deck_card_page_movement_button/repository/MyDeckCardPageMovementButtonRepositoryImpl";
-
+import {MyDeckButtonPageMovementButtonServiceImpl} from "../../src/my_deck_button_page_movement_button/service/MyDeckButtonPageMovementButtonServiceImpl";
+import {MyDeckButtonPageMovementButtonRepositoryImpl} from "../../src/my_deck_button_page_movement_button/repository/MyDeckButtonPageMovementButtonRepositoryImpl";
+import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButtonConfigList";
 
 export class TCGJustTestMyDeckView {
     private static instance: TCGJustTestMyDeckView | null = null;
@@ -37,8 +39,11 @@ export class TCGJustTestMyDeckView {
 
     private myDeckCardPageMovementButtons: NonBackgroundImage[] = [];
     private myDeckCardPageMovementButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
-    private myDeckCardPageMovementButton: NonBackgroundImage | null = null;
-    private myDeckCardPageMovementButtonService = MyDeckCardPageMovementButtonRepositoryImpl.getInstance()
+    private myDeckCardPageMovementButtonService = MyDeckCardPageMovementButtonServiceImpl.getInstance()
+
+    private myDeckButtonPageMovementButtons: NonBackgroundImage[] = [];
+    private myDeckButtonPageMovementButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
+    private myDeckButtonPageMovementButtonService = MyDeckButtonPageMovementButtonServiceImpl.getInstance()
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -109,6 +114,7 @@ export class TCGJustTestMyDeckView {
 
         await this.addBackground();
         this.addMyDeckCardPageMovementButton();
+        this.addMyDeckButtonPageMovementButton();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -187,6 +193,37 @@ export class TCGJustTestMyDeckView {
         }
     }
 
+    private async addMyDeckButtonPageMovementButton(): Promise<void> {
+        try {
+            const configList = new MyDeckButtonPageMovementButtonConfigList();
+            await Promise.all(
+                configList.buttonConfigs.map(async (config) => {
+                    const button = await this.myDeckButtonPageMovementButtonService.createMyDeckButtonPageMovementButton(
+                        'deck_page_movement_buttons',
+                        config.id,
+                        config.width,
+                        config.height,
+                        config.position
+                    );
+
+                    if (button instanceof NonBackgroundImage) {
+                        button.draw(this.scene);
+                        this.myDeckButtonPageMovementButtons.push(button);
+                        this.myDeckButtonPageMovementButtonInitialInfo.set(button.getMesh()?.uuid ?? '', {
+                            positionPercent: config.position,
+                            widthPercent: config.width,
+                            heightPercent: config.height,
+                        });
+                        console.log(`Draw My Deck Button Page Movement Button: ${config.id}`);
+                    }
+                })
+            );
+        } catch (error) {
+            console.error('Failed to add my deck button page movement buttons:', error);
+        }
+    }
+
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -207,6 +244,21 @@ export class TCGJustTestMyDeckView {
 
             this.myDeckCardPageMovementButtons.forEach(button => {
                 const initialInfo = this.myDeckCardPageMovementButtonInitialInfo.get(button.getMesh()?.uuid ?? '');
+                if (initialInfo) {
+                    const buttonWidth = window.innerWidth * initialInfo.widthPercent;
+                    const buttonHeight = window.innerHeight * initialInfo.heightPercent;
+                    const newPosition = new THREE.Vector2(
+                        window.innerWidth * initialInfo.positionPercent.x,
+                        window.innerHeight * initialInfo.positionPercent.y
+                    );
+
+                    button.setPosition(newPosition.x, newPosition.y);
+                    button.setScale(buttonWidth / button.getWidth(), buttonHeight / button.getHeight());
+                }
+            });
+
+            this.myDeckButtonPageMovementButtons.forEach(button => {
+                const initialInfo = this.myDeckButtonPageMovementButtonInitialInfo.get(button.getMesh()?.uuid ?? '');
                 if (initialInfo) {
                     const buttonWidth = window.innerWidth * initialInfo.widthPercent;
                     const buttonHeight = window.innerHeight * initialInfo.heightPercent;
