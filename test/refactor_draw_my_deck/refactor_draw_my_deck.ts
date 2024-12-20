@@ -15,6 +15,8 @@ import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepository
 import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServiceImpl";
 import {BackgroundRepositoryImpl} from "../../src/background/repository/BackgroundRepositoryImpl";
 
+import {MyDeckCardPageMovementButtonServiceImpl} from "../../src/my_deck_card_page_movement_button/service/MyDeckCardPageMovementButtonServiceImpl";
+import {MyDeckCardPageMovementButtonRepositoryImpl} from "../../src/my_deck_card_page_movement_button/repository/MyDeckCardPageMovementButtonRepositoryImpl";
 
 
 export class TCGJustTestMyDeckView {
@@ -32,6 +34,11 @@ export class TCGJustTestMyDeckView {
 
     private background: NonBackgroundImage | null = null;
     private backgroundService = BackgroundServiceImpl.getInstance()
+
+    private myDeckCardPageMovementButtons: NonBackgroundImage[] = [];
+    private myDeckCardPageMovementButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
+    private myDeckCardPageMovementButton: NonBackgroundImage | null = null;
+    private myDeckCardPageMovementButtonService = MyDeckCardPageMovementButtonRepositoryImpl.getInstance()
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -101,6 +108,7 @@ export class TCGJustTestMyDeckView {
         console.log("Textures preloaded. Adding background and buttons...");
 
         await this.addBackground();
+        this.addMyDeckCardPageMovementButton();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -145,6 +153,40 @@ export class TCGJustTestMyDeckView {
         }
     }
 
+    private async addMyDeckCardPageMovementButton(): Promise<void> {
+        try {
+            const buttonConfigs = [
+                { id: 1, position: new THREE.Vector2(-358 / window.innerWidth, -400 / window.innerHeight),
+                    width: 63 / window.innerWidth, height: 42 / window.innerHeight },
+                { id: 2, position: new THREE.Vector2(-152 / window.innerWidth, -400 / window.innerHeight),
+                    width: 63 / window.innerWidth, height: 42 / window.innerHeight },
+            ];
+            for (const config of buttonConfigs) {
+                const button = await this.myDeckCardPageMovementButtonService.createMyDeckCardPageMovementButton(
+                    'deck_card_page_movement_buttons',
+                    config.id,
+                    config.width,
+                    config.height,
+                    config.position
+                    );
+
+                if (button instanceof NonBackgroundImage) {
+                    button.draw(this.scene);
+                    this.myDeckCardPageMovementButtons.push(button);
+                    this.myDeckCardPageMovementButtonInitialInfo.set(button.getMesh()?.uuid ?? '', {
+                        positionPercent: config.position,
+                        widthPercent: config.width,
+                        heightPercent: config.height
+                    });
+                    console.log(`Draw my deck card page movement button ${config.id}!`);
+                }
+            }
+
+        } catch (error) {
+            console.error('Failed to add my deck card page movement button:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -162,6 +204,21 @@ export class TCGJustTestMyDeckView {
                 const scaleY = newHeight / this.background.getHeight();
                 this.background.setScale(scaleX, scaleY);
             }
+
+            this.myDeckCardPageMovementButtons.forEach(button => {
+                const initialInfo = this.myDeckCardPageMovementButtonInitialInfo.get(button.getMesh()?.uuid ?? '');
+                if (initialInfo) {
+                    const buttonWidth = window.innerWidth * initialInfo.widthPercent;
+                    const buttonHeight = window.innerHeight * initialInfo.heightPercent;
+                    const newPosition = new THREE.Vector2(
+                        window.innerWidth * initialInfo.positionPercent.x,
+                        window.innerHeight * initialInfo.positionPercent.y
+                    );
+
+                    button.setPosition(newPosition.x, newPosition.y);
+                    button.setScale(buttonWidth / button.getWidth(), buttonHeight / button.getHeight());
+                }
+            });
 
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
