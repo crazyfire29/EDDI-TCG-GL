@@ -19,6 +19,7 @@ import {MyDeckCardPageMovementButtonServiceImpl} from "../../src/my_deck_card_pa
 import {MyDeckCardPageMovementButtonRepositoryImpl} from "../../src/my_deck_card_page_movement_button/repository/MyDeckCardPageMovementButtonRepositoryImpl";
 import {MyDeckButtonPageMovementButtonServiceImpl} from "../../src/my_deck_button_page_movement_button/service/MyDeckButtonPageMovementButtonServiceImpl";
 import {MyDeckButtonPageMovementButtonRepositoryImpl} from "../../src/my_deck_button_page_movement_button/repository/MyDeckButtonPageMovementButtonRepositoryImpl";
+import {MyDeckCardPageMovementButtonConfigList} from "../../src/my_deck_card_page_movement_button/entity/MyDeckCardPageMovementButtonConfigList";
 import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButtonConfigList";
 
 export class TCGJustTestMyDeckView {
@@ -161,33 +162,28 @@ export class TCGJustTestMyDeckView {
 
     private async addMyDeckCardPageMovementButton(): Promise<void> {
         try {
-            const buttonConfigs = [
-                { id: 1, position: new THREE.Vector2(-358 / window.innerWidth, -400 / window.innerHeight),
-                    width: 63 / window.innerWidth, height: 42 / window.innerHeight },
-                { id: 2, position: new THREE.Vector2(-152 / window.innerWidth, -400 / window.innerHeight),
-                    width: 63 / window.innerWidth, height: 42 / window.innerHeight },
-            ];
-            for (const config of buttonConfigs) {
-                const button = await this.myDeckCardPageMovementButtonService.createMyDeckCardPageMovementButton(
-                    'deck_card_page_movement_buttons',
-                    config.id,
-                    config.width,
-                    config.height,
-                    config.position
+            const configList = new MyDeckCardPageMovementButtonConfigList();
+            await Promise.all(
+                configList.buttonConfigs.map(async (config) =>{
+                    const button = await this.myDeckCardPageMovementButtonService.createMyDeckCardPageMovementButton(
+                        'deck_card_page_movement_buttons',
+                        config.id,
+                        config.width,
+                        config.height,
+                        config.position
                     );
-
-                if (button instanceof NonBackgroundImage) {
-                    button.draw(this.scene);
-                    this.myDeckCardPageMovementButtons.push(button);
-                    this.myDeckCardPageMovementButtonInitialInfo.set(button.getMesh()?.uuid ?? '', {
-                        positionPercent: config.position,
-                        widthPercent: config.width,
-                        heightPercent: config.height
-                    });
-                    console.log(`Draw my deck card page movement button ${config.id}!`);
-                }
-            }
-
+                    if (button instanceof NonBackgroundImage) {
+                        button.draw(this.scene);
+                        this.myDeckCardPageMovementButtons.push(button);
+                        this.myDeckCardPageMovementButtonInitialInfo.set(button.getMesh()?.uuid ?? '', {
+                            positionPercent: config.position,
+                            widthPercent: config.width,
+                            heightPercent: config.height
+                        });
+                        console.log(`Draw My Deck Card Page Movement Button ${config.id}`);
+                    }
+                })
+            );
         } catch (error) {
             console.error('Failed to add my deck card page movement button:', error);
         }
