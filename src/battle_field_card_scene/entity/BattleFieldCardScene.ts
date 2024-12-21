@@ -9,4 +9,8 @@ export class BattleFieldCardScene {
         this.id = IdGenerator.generateId();
         this.mesh = mesh;
     }
+
+    getMesh(): THREE.Mesh {
+        return this.mesh;
+    }
 }
