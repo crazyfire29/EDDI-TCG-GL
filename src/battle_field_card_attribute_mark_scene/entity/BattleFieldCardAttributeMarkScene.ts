@@ -11,4 +11,8 @@ export class BattleFieldCardAttributeMarkScene {
         this.mesh = mesh;
         this.renderingOrder = renderingOrder;
     }
+
+    getId(): number {
+        return this.id;
+    }
 }
