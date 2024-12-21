@@ -22,10 +22,11 @@ import {BattleFieldHandPositionRepository} from "../../src/battle_field_hand/dep
 
 import {UserWindowSize} from "../../src/window_size/WindowSize"
 import {UnitCardGenerator} from "../../src/card/unit/generate";
-import {BattleFieldHandMapRepository} from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandMapRepository";
+import {BattleFieldHandMapRepository} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepository";
 import {SupportCardGenerator} from "../../src/card/support/generate";
 import {ItemCardGenerator} from "../../src/card/item/generate";
 import {EnergyCardGenerator} from "../../src/card/energy/generate";
+import {BattleFieldHandMapRepositoryImpl} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepositoryImpl";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -47,7 +48,7 @@ export class TCGJustTestBattleFieldView {
     private battleFieldUnitRenderer?: BattleFieldUnitRenderer;
 
     // private battleFieldHandRepository = BattleFieldHandRepository.getInstance()
-    private battleFieldHandMapRepository = BattleFieldHandMapRepository.getInstance()
+    private battleFieldHandMapRepository = BattleFieldHandMapRepositoryImpl.getInstance()
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
     private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
