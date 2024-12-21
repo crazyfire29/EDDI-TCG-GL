@@ -11,7 +11,6 @@ export class BattleFieldCardSceneRepositoryImpl implements BattleFieldCardSceneR
     private cardSceneMap: Map<number, BattleFieldCardScene> = new Map();
 
     private readonly CARD_WIDTH: number = 0.06493506493
-    private readonly CARD_HEIGHT: number = this.CARD_WIDTH * 1.615
 
     private constructor() {}
 
@@ -35,7 +34,7 @@ export class BattleFieldCardSceneRepositoryImpl implements BattleFieldCardSceneR
         }
 
         const cardWidth = this.CARD_WIDTH * window.innerWidth;
-        const cardHeight = this.CARD_HEIGHT;
+        const cardHeight = cardWidth * 1.615;
 
         const mainCardMesh = MeshGenerator.createMesh(cardTexture, cardWidth, cardHeight, position);
 
