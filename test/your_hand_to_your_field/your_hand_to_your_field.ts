@@ -22,12 +22,13 @@ import { BattleFieldHandPositionRepository } from "../../src/battle_field_hand/d
 
 import { UserWindowSize } from "../../src/window_size/WindowSize";
 import { UnitCardGenerator } from "../../src/card/unit/generate";
-import { BattleFieldHandMapRepository } from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandMapRepository";
+import { BattleFieldHandMapRepository } from "../../src/battle_field_hand/repository/BattleFieldHandMapRepository";
 import { SupportCardGenerator } from "../../src/card/support/generate";
 import { ItemCardGenerator } from "../../src/card/item/generate";
 import { EnergyCardGenerator } from "../../src/card/energy/generate";
 import {DragAndDropManager} from "../../src/drag_and_drop/DragAndDropManager";
 import {CardState} from "../../src/card/state";
+import {BattleFieldHandMapRepositoryImpl} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepositoryImpl";
 
 let selectedGroup: THREE.Object3D[] = [];
 let selectedObject: NonBackgroundImage | null = null;
@@ -57,7 +58,7 @@ export class TCGJustTestBattleFieldYourHandToYourFieldView {
     private battleFieldResourceManager = new ResourceManager();
     private battleFieldUnitRenderer?: BattleFieldUnitRenderer;
 
-    private battleFieldHandMapRepository = BattleFieldHandMapRepository.getInstance();
+    private battleFieldHandMapRepository = BattleFieldHandMapRepositoryImpl.getInstance();
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance();
     private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance();
 
