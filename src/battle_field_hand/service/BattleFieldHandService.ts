@@ -1,6 +1,10 @@
+import * as THREE from 'three';
 import {BattleFieldHand} from "../entity/BattleFieldHand";
 
 
 export interface BattleFieldHandService {
-    create(cardId: number): BattleFieldHand;
+    // createHand(cardId: number);
+    // createHand(cardId: number): BattleFieldHand;
+    createHand(cardId: number): Promise<THREE.Group>;
+    createBattleFieldFirstDrawHand(): any;
 }

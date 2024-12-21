@@ -11,13 +11,12 @@ import {BattleFieldUnitScene} from "../../src/battle_field_unit/scene/BattleFiel
 import {ResourceManager} from "../../src/resouce_manager/ResourceManager";
 import {BattleFieldUnitRenderer} from "../../src/battle_field_unit/renderer/BattleFieldUnitRenderer";
 
-import {CardGenerationHandler} from "../../src/card/handler";
 import {BattleFieldHandSceneRepository} from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandSceneRepository";
 import {BattleFieldHandPositionRepository} from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandPositionRepository";
 
 import {UserWindowSize} from "../../src/window_size/WindowSize"
 import {UnitCardGenerator} from "../../src/card/unit/generate";
-import {BattleFieldHandMapRepository} from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandMapRepository";
+
 import {SupportCardGenerator} from "../../src/card/support/generate";
 import {ItemCardGenerator} from "../../src/card/item/generate";
 import {EnergyCardGenerator} from "../../src/card/energy/generate";
@@ -27,6 +26,9 @@ import {CameraServiceImpl} from "../../src/camera/service/CameraServiceImpl";
 import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepositoryImpl";
 import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServiceImpl";
 import {BackgroundRepositoryImpl} from "../../src/background/repository/BackgroundRepositoryImpl";
+import {BattleFieldHandServiceImpl} from "../../src/battle_field_hand/service/BattleFieldHandServiceImpl";
+import {BattleFieldHandMapRepositoryImpl} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepositoryImpl";
+import {CardGenerationHandler} from "../../src/card/handler";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -51,8 +53,9 @@ export class TCGJustTestBattleFieldView {
     private battleFieldResourceManager = new ResourceManager()
     private battleFieldUnitRenderer?: BattleFieldUnitRenderer;
 
+    private battleFieldHandService = BattleFieldHandServiceImpl.getInstance()
     // private battleFieldHandRepository = BattleFieldHandRepository.getInstance()
-    private battleFieldHandMapRepository = BattleFieldHandMapRepository.getInstance()
+    private battleFieldHandMapRepository = BattleFieldHandMapRepositoryImpl.getInstance()
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
     private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
@@ -173,22 +176,22 @@ export class TCGJustTestBattleFieldView {
     }
 
     private async addYourHandUnitList(): Promise<void> {
+        // this.battleFieldHandService.createBattleFieldHand()
+
         const battleFieldHandList = this.battleFieldHandMapRepository.getBattleFieldHandList()
         console.log('battleFieldHandList:', battleFieldHandList)
 
         let indexCount = 0
 
-        for (const listNumber of battleFieldHandList) {
-            console.log('addYourHandUnitList() indexCount:', indexCount)
-            const positionVector = this.battleFieldHandPositionRepository.addBattleFieldHandPosition(indexCount)
-            const createdHand = await CardGenerationHandler.createCardById(listNumber, positionVector, indexCount)
+        for (const handCardId of battleFieldHandList) {
+            // console.log(`hardCardId: ${handCardId}`)
+            // const createdHand = await CardGenerationHandler.createCardById(listNumber, positionVector, indexCount)
+            const createdHand = await this.battleFieldHandService.createHand(handCardId)
 
             if (createdHand) {
                 this.battleFieldHandSceneRepository.addBattleFieldHandScene(createdHand);
                 this.scene.add(createdHand);
             }
-
-            indexCount++
         }
     }
 
