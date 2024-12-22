@@ -14,6 +14,7 @@
             this.currentHandMap.set(3, 20);
             this.currentHandMap.set(4, 93);
             this.currentHandMap.set(5, 26);
+            this.currentHandMap.set(6, 27);
         }
 
         public static getInstance(): BattleFieldHandMapRepositoryImpl {

@@ -93,7 +93,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
 
         try {
             const textures = await this.loadCardTextures(unitJob, cardKind, card);
-            await this.addAttributesToCardGroup(cardKind, cardGroup, handPosition, textures);
+            await this.addAttributesToCardGroup(cardKind, unitJob, cardGroup, handPosition, textures);
         } catch (error) {
             console.error("Error loading textures:", error);
         }
@@ -154,18 +154,27 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
 
     private async addAttributesToCardGroup(
         cardKind: number,
+        unitJob: number,
         cardGroup: THREE.Group,
         handPosition: Vector2d,
         textures: (Texture | null)[]
     ): Promise<void> {
         const [kindsOrWeaponTexture, raceTexture, hpTexture, energyTexture] = textures;
 
-        if (cardKind === CardKind.UNIT && kindsOrWeaponTexture) {
+        if (cardKind === CardKind.UNIT && unitJob === CardJob.WARRIOR && kindsOrWeaponTexture) {
             const weaponPosition = this.calculateWeaponPosition(handPosition);
             const weaponMesh = this.createWeaponMesh(kindsOrWeaponTexture, weaponPosition);
             cardGroup.add(weaponMesh);
 
             await this.saveCardAttributeMark(weaponMesh, weaponPosition);
+        }
+
+        if (cardKind === CardKind.UNIT && unitJob === CardJob.MAGICIAN && kindsOrWeaponTexture) {
+            const staffPosition = this.calculateStaffPosition(handPosition);
+            const staffMesh = this.createStaffMesh(kindsOrWeaponTexture, staffPosition);
+            cardGroup.add(staffMesh);
+
+            await this.saveCardAttributeMark(staffMesh, staffPosition);
         }
 
         if (cardKind !== CardKind.UNIT && kindsOrWeaponTexture) {
@@ -212,6 +221,21 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             texture,
             this.CARD_WIDTH * 0.63 * window.innerWidth,
             this.CARD_WIDTH * 0.63 * 1.651 * window.innerWidth,
+            position
+        );
+    }
+
+    private calculateStaffPosition(handPosition: Vector2d): Vector2d {
+        const x = handPosition.getX() + this.CARD_WIDTH * 0.54 * window.innerWidth;
+        const y = handPosition.getY() - this.CARD_HEIGHT * 0.30666 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private createStaffMesh(texture: THREE.Texture, position: Vector2d): THREE.Mesh {
+        return MeshGenerator.createMesh(
+            texture,
+            this.CARD_WIDTH * 0.63 * window.innerWidth,
+            this.CARD_WIDTH * 0.63 * 1.9353 * window.innerWidth,
             position
         );
     }
