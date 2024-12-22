@@ -5,6 +5,7 @@ import {MyDeckButtonPageMovementButton} from "../entity/MyDeckButtonPageMovement
 import {MyDeckButtonPageMovementButtonRepository} from "../repository/MyDeckButtonPageMovementButtonRepository";
 import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
 import {MyDeckButtonPageMovementButtonRepositoryImpl} from "../repository/MyDeckButtonPageMovementButtonRepositoryImpl";
+import {Vector2d} from "../../common/math/Vector2d";
 
 export class MyDeckButtonPageMovementButtonServiceImpl implements MyDeckButtonPageMovementButtonService {
     private static instance: MyDeckButtonPageMovementButtonServiceImpl;
@@ -23,20 +24,21 @@ export class MyDeckButtonPageMovementButtonServiceImpl implements MyDeckButtonPa
     }
 
     public async createMyDeckButtonPageMovementButton(
-        textureName: string,
         type: MyDeckButtonPageMovementButtonType,
-        widthPercent: number,
-        heightPercent: number,
-        positionPercent: THREE.Vector2
-    ): Promise<NonBackgroundImage | null> {
+        position: Vector2d
+    ): Promise<THREE.Group | null> {
+        const buttonGroup = new THREE.Group();
         try {
-            const button = await this.myDeckButtonPageMovementButtonRepository.createMyDeckButtonPageMovementButton(
-                textureName, type, widthPercent, heightPercent, positionPercent);
-            return button;
+            const button = await this.myDeckButtonPageMovementButtonRepository.createMyDeckButtonPageMovementButton(type, position);
+            const buttonMesh = button.getMesh()
+            buttonGroup.add(buttonMesh)
+//             return button;
+
         } catch (error) {
             console.error('Error creating my deck button page movement button:', error);
             return null;
         }
+        return buttonGroup;
     }
 
     public getMyDeckButtonPageMovementButtonById(id: number): MyDeckButtonPageMovementButton | null {

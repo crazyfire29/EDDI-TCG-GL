@@ -1,17 +1,10 @@
 import * as THREE from 'three';
 import {MyDeckButtonPageMovementButton} from "../entity/MyDeckButtonPageMovementButton";
 import {MyDeckButtonPageMovementButtonType} from "../entity/MyDeckButtonPageMovementButtonType";
-import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
+import {Vector2d} from "../../common/math/Vector2d";
 
 export interface MyDeckButtonPageMovementButtonRepository {
-    createMyDeckButtonPageMovementButton(
-        textureName: string,
-        type: MyDeckButtonPageMovementButtonType,
-        widthPercent: number,
-        heightPercent: number,
-        positionPercent: THREE.Vector2
-    ): Promise<NonBackgroundImage>;
-    save(myDeckButtonPageMovementButton: MyDeckButtonPageMovementButton): void;
+    createMyDeckButtonPageMovementButton(type: MyDeckButtonPageMovementButtonType, position: Vector2d): Promise<MyDeckButtonPageMovementButton>;
     findById(id: number): MyDeckButtonPageMovementButton | null;
     findAll(): MyDeckButtonPageMovementButton[];
     deleteById(id: number): void;
