@@ -3,12 +3,16 @@ import { MyDeckButtonPageMovementButtonRepository } from './MyDeckButtonPageMove
 import {MyDeckButtonPageMovementButton} from "../entity/MyDeckButtonPageMovementButton";
 import {TextureManager} from "../../texture_manager/TextureManager";
 import {MyDeckButtonPageMovementButtonType} from "../entity/MyDeckButtonPageMovementButtonType";
-import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
+import {MeshGenerator} from "../../mesh/generator";
+import {Vector2d} from "../../common/math/Vector2d";
 
 export class MyDeckButtonPageMovementButtonRepositoryImpl implements MyDeckButtonPageMovementButtonRepository {
     private static instance: MyDeckButtonPageMovementButtonRepositoryImpl;
-    private storage: Map<number, MyDeckButtonPageMovementButton> = new Map();
+    private buttonMap: Map<number, MyDeckButtonPageMovementButton> = new Map();
     private textureManager: TextureManager;
+
+    private readonly BUTTON_WIDTH: number = 45 / 1920
+    private readonly BUTTON_HEIGHT: number = 44 / 1080
 
     private constructor(textureManager: TextureManager) {
         this.textureManager = textureManager;
@@ -23,49 +27,40 @@ export class MyDeckButtonPageMovementButtonRepositoryImpl implements MyDeckButto
     }
 
     public async createMyDeckButtonPageMovementButton(
-        textureName: string,
         type: MyDeckButtonPageMovementButtonType,
-        widthPercent: number,
-        heightPercent: number,
-        positionPercent: THREE.Vector2
-    ): Promise<NonBackgroundImage> {
-        const texture = await this.textureManager.getTexture(textureName, type);
-        if (!texture) throw new Error('MyDeckButtonPageMovementButton texture not found.');
+        position: Vector2d
+    ): Promise<MyDeckButtonPageMovementButton> {
+        const texture = await this.textureManager.getTexture('deck_page_movement_buttons', type);
 
-        const nonBackgroundImage = new NonBackgroundImage(
-            window.innerWidth * widthPercent,
-            window.innerHeight * heightPercent,
-            new THREE.Vector2(
-                window.innerWidth * positionPercent.x,
-                window.innerHeight * positionPercent.y)
-        );
+        if (!texture) {
+            console.error('Failed to load texture for type:', type);
+            throw new Error('MyDeckButtonPageMovementButton texture not found.');
+        }
 
-        nonBackgroundImage.createNonBackgroundImageWithTexture(texture, 1, 1);
+        const buttonWidth = this.BUTTON_WIDTH * window.innerWidth;
+        const buttonHeight = this.BUTTON_HEIGHT * window.innerHeight;
 
-        const button = new MyDeckButtonPageMovementButton(type, widthPercent, heightPercent, positionPercent);
-        button.texture = texture;
-        this.save(button);
+        const buttonMesh = MeshGenerator.createMesh(texture, buttonWidth, buttonHeight, position);
 
-        return nonBackgroundImage;
-    }
+        const newButton = new MyDeckButtonPageMovementButton(type, buttonMesh, position);
+        this.buttonMap.set(newButton.id, newButton);
 
-    public save(button: MyDeckButtonPageMovementButton): void {
-        this.storage.set(button.id, button);
+        return newButton;
     }
 
     public findById(id: number): MyDeckButtonPageMovementButton | null {
-        return this.storage.get(id) || null;
+        return this.buttonMap.get(id) || null;
     }
 
     public findAll(): MyDeckButtonPageMovementButton[] {
-        return Array.from(this.storage.values());
+        return Array.from(this.buttonMap.values());
     }
 
     public deleteById(id: number): void {
-        this.storage.delete(id);
+        this.buttonMap.delete(id);
     }
 
     public deleteAll(): void {
-        this.storage.clear();
+        this.buttonMap.clear();
     }
 }

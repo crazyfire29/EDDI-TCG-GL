@@ -114,8 +114,8 @@ export class TCGJustTestMyDeckView {
         console.log("Textures preloaded. Adding background and buttons...");
 
         await this.addBackground();
+        await this.addMyDeckButtonPageMovementButton();
         this.addMyDeckCardPageMovementButton();
-        this.addMyDeckButtonPageMovementButton();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -195,21 +195,18 @@ export class TCGJustTestMyDeckView {
             await Promise.all(
                 configList.buttonConfigs.map(async (config) => {
                     const button = await this.myDeckButtonPageMovementButtonService.createMyDeckButtonPageMovementButton(
-                        'deck_page_movement_buttons',
                         config.id,
-                        config.width,
-                        config.height,
                         config.position
                     );
 
-                    if (button instanceof NonBackgroundImage) {
-                        button.draw(this.scene);
-                        this.myDeckButtonPageMovementButtons.push(button);
-                        this.myDeckButtonPageMovementButtonInitialInfo.set(button.getMesh()?.uuid ?? '', {
-                            positionPercent: config.position,
-                            widthPercent: config.width,
-                            heightPercent: config.height,
-                        });
+                    if (button) {
+                        this.scene.add(button);
+//                         this.myDeckButtonPageMovementButtons.push(button);
+//                         this.myDeckButtonPageMovementButtonInitialInfo.set(button.getMesh()?.uuid ?? '', {
+//                             positionPercent: config.position,
+//                             widthPercent: config.width,
+//                             heightPercent: config.height,
+//                         });
                         console.log(`Draw My Deck Button Page Movement Button: ${config.id}`);
                     }
                 })
@@ -253,20 +250,20 @@ export class TCGJustTestMyDeckView {
                 }
             });
 
-            this.myDeckButtonPageMovementButtons.forEach(button => {
-                const initialInfo = this.myDeckButtonPageMovementButtonInitialInfo.get(button.getMesh()?.uuid ?? '');
-                if (initialInfo) {
-                    const buttonWidth = window.innerWidth * initialInfo.widthPercent;
-                    const buttonHeight = window.innerHeight * initialInfo.heightPercent;
-                    const newPosition = new THREE.Vector2(
-                        window.innerWidth * initialInfo.positionPercent.x,
-                        window.innerHeight * initialInfo.positionPercent.y
-                    );
-
-                    button.setPosition(newPosition.x, newPosition.y);
-                    button.setScale(buttonWidth / button.getWidth(), buttonHeight / button.getHeight());
-                }
-            });
+//             this.myDeckButtonPageMovementButtons.forEach(button => {
+//                 const initialInfo = this.myDeckButtonPageMovementButtonInitialInfo.get(button.getMesh()?.uuid ?? '');
+//                 if (initialInfo) {
+//                     const buttonWidth = window.innerWidth * initialInfo.widthPercent;
+//                     const buttonHeight = window.innerHeight * initialInfo.heightPercent;
+//                     const newPosition = new THREE.Vector2(
+//                         window.innerWidth * initialInfo.positionPercent.x,
+//                         window.innerHeight * initialInfo.positionPercent.y
+//                     );
+//
+//                     button.setPosition(newPosition.x, newPosition.y);
+//                     button.setScale(buttonWidth / button.getWidth(), buttonHeight / button.getHeight());
+//                 }
+//             });
 
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
