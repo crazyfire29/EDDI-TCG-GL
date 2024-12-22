@@ -8,6 +8,7 @@ print(f"Current working directory: {current_directory}")
 class WillBeReferenceImageLocation(Enum):
     CARD = "resource/battle_field_unit/card/"
     SWORD_POWER = "resource/battle_field_unit/sword_power/"
+    STAFF_POWER = "resource/battle_field_unit/staff_power/"
     HP = "resource/battle_field_unit/hp/"
     ENERGY = "resource/battle_field_unit/energy/"
     RACE = "resource/card_race/"
@@ -33,6 +34,7 @@ class WillBeReferenceImageLocation(Enum):
 class RelativeImageLocation(Enum):
     CARD = "../../resource/battle_field_unit/card/"
     SWORD_POWER = "../../resource/battle_field_unit/sword_power/"
+    STAFF_POWER = "../../resource/battle_field_unit/staff_power/"
     HP = "../../resource/battle_field_unit/hp/"
     ENERGY = "../../resource/battle_field_unit/energy/"
     RACE = "../../resource/card_race/"
@@ -59,6 +61,7 @@ class RelativeImageLocation(Enum):
 relative_paths = {
     RelativeImageLocation.CARD: RelativeImageLocation.CARD.value,
     RelativeImageLocation.SWORD_POWER: RelativeImageLocation.SWORD_POWER.value,
+    RelativeImageLocation.STAFF_POWER: RelativeImageLocation.STAFF_POWER.value,
     RelativeImageLocation.HP: RelativeImageLocation.HP.value,
     RelativeImageLocation.ENERGY: RelativeImageLocation.ENERGY.value,
     RelativeImageLocation.RACE: RelativeImageLocation.RACE.value,
@@ -85,6 +88,7 @@ relative_paths = {
 reference_paths = {
     WillBeReferenceImageLocation.CARD: WillBeReferenceImageLocation.CARD.value,
     WillBeReferenceImageLocation.SWORD_POWER: WillBeReferenceImageLocation.SWORD_POWER.value,
+    WillBeReferenceImageLocation.STAFF_POWER: WillBeReferenceImageLocation.STAFF_POWER.value,
     WillBeReferenceImageLocation.HP: WillBeReferenceImageLocation.HP.value,
     WillBeReferenceImageLocation.ENERGY: WillBeReferenceImageLocation.ENERGY.value,
     WillBeReferenceImageLocation.RACE: WillBeReferenceImageLocation.RACE.value,
@@ -111,6 +115,7 @@ reference_paths = {
 image_paths = {
     "card": [],
     "sword_power": [],
+    "staff_power": [],
     "hp": [],
     "energy": [],
     "race": [],
