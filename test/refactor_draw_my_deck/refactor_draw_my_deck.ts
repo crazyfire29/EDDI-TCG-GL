@@ -42,8 +42,6 @@ export class TCGJustTestMyDeckView {
     private myDeckCardPageMovementButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
     private myDeckCardPageMovementButtonService = MyDeckCardPageMovementButtonServiceImpl.getInstance()
 
-    private myDeckButtonPageMovementButtons: NonBackgroundImage[] = [];
-    private myDeckButtonPageMovementButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
     private myDeckButtonPageMovementButtonService = MyDeckButtonPageMovementButtonServiceImpl.getInstance()
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -201,12 +199,6 @@ export class TCGJustTestMyDeckView {
 
                     if (button) {
                         this.scene.add(button);
-//                         this.myDeckButtonPageMovementButtons.push(button);
-//                         this.myDeckButtonPageMovementButtonInitialInfo.set(button.getMesh()?.uuid ?? '', {
-//                             positionPercent: config.position,
-//                             widthPercent: config.width,
-//                             heightPercent: config.height,
-//                         });
                         console.log(`Draw My Deck Button Page Movement Button: ${config.id}`);
                     }
                 })
@@ -250,23 +242,9 @@ export class TCGJustTestMyDeckView {
                 }
             });
 
-//             this.myDeckButtonPageMovementButtons.forEach(button => {
-//                 const initialInfo = this.myDeckButtonPageMovementButtonInitialInfo.get(button.getMesh()?.uuid ?? '');
-//                 if (initialInfo) {
-//                     const buttonWidth = window.innerWidth * initialInfo.widthPercent;
-//                     const buttonHeight = window.innerHeight * initialInfo.heightPercent;
-//                     const newPosition = new THREE.Vector2(
-//                         window.innerWidth * initialInfo.positionPercent.x,
-//                         window.innerHeight * initialInfo.positionPercent.y
-//                     );
-//
-//                     button.setPosition(newPosition.x, newPosition.y);
-//                     button.setScale(buttonWidth / button.getWidth(), buttonHeight / button.getHeight());
-//                 }
-//             });
-
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
+            this.myDeckButtonPageMovementButtonService.adjustMyDeckButtonPageMovementButtonPosition();
         }
     }
 

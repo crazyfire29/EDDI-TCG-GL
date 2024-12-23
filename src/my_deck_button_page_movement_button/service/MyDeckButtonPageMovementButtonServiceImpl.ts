@@ -41,6 +41,29 @@ export class MyDeckButtonPageMovementButtonServiceImpl implements MyDeckButtonPa
         return buttonGroup;
     }
 
+    public adjustMyDeckButtonPageMovementButtonPosition(): void {
+        const buttonList = this.myDeckButtonPageMovementButtonRepository.getAllMyDeckPageMovementButtons();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        buttonList.forEach((button) =>{
+            const buttonMesh = button.getMesh();
+            const initialPosition = button.position;
+
+            const buttonWidth = (45 / 1920) * windowWidth;
+            const buttonHeight = (44 / 1080) * windowHeight;
+
+            const newPositionX = initialPosition.getX() * windowWidth;
+            const newPositionY = initialPosition.getY() * windowHeight;
+
+            buttonMesh.geometry.dispose();
+            buttonMesh.geometry = new THREE.PlaneGeometry(buttonWidth, buttonHeight);
+
+            buttonMesh.position.set(newPositionX, newPositionY, 0);
+        });
+
+    }
+
     public getMyDeckButtonPageMovementButtonById(id: number): MyDeckButtonPageMovementButton | null {
         return this.myDeckButtonPageMovementButtonRepository.findById(id);
     }

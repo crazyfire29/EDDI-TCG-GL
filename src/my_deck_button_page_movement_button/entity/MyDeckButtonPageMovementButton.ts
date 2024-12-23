@@ -8,10 +8,14 @@ export class MyDeckButtonPageMovementButton {
     mesh: THREE.Mesh;
     public position: Vector2d;
     public type: MyDeckButtonPageMovementButtonType;
+    public width: number;
+    public height: number;
 
-    constructor(type: MyDeckButtonPageMovementButtonType, mesh: THREE.Mesh, position: Vector2d) {
+    constructor(type: MyDeckButtonPageMovementButtonType, width: number, height: number, mesh: THREE.Mesh, position: Vector2d) {
         this.id = IdGenerator.generateId();
         this.type = type;
+        this.width = width;
+        this.height = height;
         this.mesh = mesh;
         this.position = position;
     }
@@ -19,9 +23,5 @@ export class MyDeckButtonPageMovementButton {
     public getMesh(): THREE.Mesh {
         return this.mesh;
         }
-
-//     public setPosition(x: number, y: number): void {
-//         this.position.set(x, y);
-//     }
 
 }
