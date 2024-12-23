@@ -26,7 +26,7 @@ import { BattleFieldHandMapRepository } from "../../src/battle_field_hand/reposi
 import { SupportCardGenerator } from "../../src/card/support/generate";
 import { ItemCardGenerator } from "../../src/card/item/generate";
 import { EnergyCardGenerator } from "../../src/card/energy/generate";
-import {DragAndDropManager} from "../../src/drag_and_drop/DragAndDropManager";
+import {LegacyDragAndDropManager} from "../../src/drag_and_drop/LegacyDragAndDropManager";
 import {CardState} from "../../src/card/state";
 import {BattleFieldHandMapRepositoryImpl} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepositoryImpl";
 
@@ -51,7 +51,7 @@ export class TCGJustTestBattleFieldReturnToInitialPositionView {
     private buttonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
     private audioController: AudioController;
     private mouseController: MouseController;
-    private dragAndDropManager: DragAndDropManager;
+    private dragAndDropManager: LegacyDragAndDropManager;
 
     private battleFieldUnitRepository = BattleFieldUnitRepository.getInstance();
     private battleFieldUnitScene = new BattleFieldUnitScene();
@@ -87,7 +87,7 @@ export class TCGJustTestBattleFieldReturnToInitialPositionView {
         this.camera.position.set(0, 0, 5);
         this.camera.lookAt(0, 0, 0);
 
-        this.dragAndDropManager = DragAndDropManager.getInstance(this.camera, this.scene);
+        this.dragAndDropManager = LegacyDragAndDropManager.getInstance(this.camera, this.scene);
 
         this.textureManager = TextureManager.getInstance();
         this.audioController = AudioController.getInstance();
