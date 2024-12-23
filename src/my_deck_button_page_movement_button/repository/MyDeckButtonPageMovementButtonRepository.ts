@@ -5,6 +5,7 @@ import {Vector2d} from "../../common/math/Vector2d";
 
 export interface MyDeckButtonPageMovementButtonRepository {
     createMyDeckButtonPageMovementButton(type: MyDeckButtonPageMovementButtonType, position: Vector2d): Promise<MyDeckButtonPageMovementButton>;
+    getAllMyDeckPageMovementButtons(): Map<number, MyDeckButtonPageMovementButton>;
     findById(id: number): MyDeckButtonPageMovementButton | null;
     findAll(): MyDeckButtonPageMovementButton[];
     deleteById(id: number): void;

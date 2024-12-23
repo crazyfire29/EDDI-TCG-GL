@@ -46,10 +46,14 @@ export class MyDeckButtonPageMovementButtonRepositoryImpl implements MyDeckButto
         const buttonMesh = MeshGenerator.createMesh(texture, buttonWidth, buttonHeight, position);
         buttonMesh.position.set(buttonPositionX, buttonPositionY, 0);
 
-        const newButton = new MyDeckButtonPageMovementButton(type, buttonMesh, position);
+        const newButton = new MyDeckButtonPageMovementButton(type, buttonWidth, buttonHeight, buttonMesh, position);
         this.buttonMap.set(newButton.id, newButton);
 
         return newButton;
+    }
+
+    public getAllMyDeckPageMovementButtons(): Map<number, MyDeckButtonPageMovementButton> {
+        return this.buttonMap;
     }
 
     public findById(id: number): MyDeckButtonPageMovementButton | null {
