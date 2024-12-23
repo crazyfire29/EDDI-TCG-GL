@@ -3,12 +3,16 @@ import { MyDeckCardPageMovementButtonRepository } from './MyDeckCardPageMovement
 import {MyDeckCardPageMovementButton} from "../entity/MyDeckCardPageMovementButton";
 import {TextureManager} from "../../texture_manager/TextureManager";
 import {MyDeckCardPageMovementButtonType} from "../entity/MyDeckCardPageMovementButtonType";
-import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
+import {MeshGenerator} from "../../mesh/generator";
+import {Vector2d} from "../../common/math/Vector2d";
 
 export class MyDeckCardPageMovementButtonRepositoryImpl implements MyDeckCardPageMovementButtonRepository {
     private static instance: MyDeckCardPageMovementButtonRepositoryImpl;
-    private storage: Map<number, MyDeckCardPageMovementButton> = new Map();
+    private buttonMap: Map<number, MyDeckCardPageMovementButton> = new Map();
     private textureManager: TextureManager;
+
+    private readonly BUTTON_WIDTH: number = 73 / 1920
+    private readonly BUTTON_HEIGHT: number = 46 / 1080
 
     private constructor(textureManager: TextureManager) {
         this.textureManager = textureManager;
@@ -23,49 +27,48 @@ export class MyDeckCardPageMovementButtonRepositoryImpl implements MyDeckCardPag
     }
 
     public async createMyDeckCardPageMovementButton(
-        textureName: string,
         type: MyDeckCardPageMovementButtonType,
-        widthPercent: number,
-        heightPercent: number,
-        positionPercent: THREE.Vector2
-    ): Promise<NonBackgroundImage> {
-        const texture = await this.textureManager.getTexture(textureName, type);
-        if (!texture) throw new Error('MyDeckCardPageMovementButton texture not found.');
+        position: Vector2d
+    ): Promise<MyDeckCardPageMovementButton> {
+        const texture = await this.textureManager.getTexture('deck_card_page_movement_buttons', type);
 
-        const nonBackgroundImage = new NonBackgroundImage(
-            window.innerWidth * widthPercent,
-            window.innerHeight * heightPercent,
-            new THREE.Vector2(
-                window.innerWidth * positionPercent.x,
-                window.innerHeight * positionPercent.y)
-        );
+        if (!texture) {
+            console.error('Failed to load texture for type:', type);
+            throw new Error('MyDeckCardPageMovementButton texture not found.');
+        }
 
-        nonBackgroundImage.createNonBackgroundImageWithTexture(texture, 1, 1);
+        const buttonWidth = this.BUTTON_WIDTH * window.innerWidth;
+        const buttonHeight = this.BUTTON_HEIGHT * window.innerHeight;
 
-        const button = new MyDeckCardPageMovementButton(type, widthPercent, heightPercent, positionPercent);
-        button.texture = texture;
-        this.save(button);
+        const buttonPositionX = position.getX() * window.innerWidth;
+        const buttonPositionY = position.getY() * window.innerHeight;
 
-        return nonBackgroundImage;
+        const buttonMesh = MeshGenerator.createMesh(texture, buttonWidth, buttonHeight, position);
+        buttonMesh.position.set(buttonPositionX, buttonPositionY, 0);
+
+        const newButton = new MyDeckCardPageMovementButton(type, buttonWidth, buttonHeight, buttonMesh, position);
+        this.buttonMap.set(newButton.id, newButton);
+
+        return newButton;
     }
 
-    public save(button: MyDeckCardPageMovementButton): void {
-        this.storage.set(button.id, button);
+    public getAllMyDeckCardPageMovementButtons(): Map<number, MyDeckCardPageMovementButton> {
+        return this.buttonMap;
     }
 
     public findById(id: number): MyDeckCardPageMovementButton | null {
-        return this.storage.get(id) || null;
+        return this.buttonMap.get(id) || null;
     }
 
     public findAll(): MyDeckCardPageMovementButton[] {
-        return Array.from(this.storage.values());
+        return Array.from(this.buttonMap.values());
     }
 
     public deleteById(id: number): void {
-        this.storage.delete(id);
+        this.buttonMap.delete(id);
     }
 
     public deleteAll(): void {
-        this.storage.clear();
+        this.buttonMap.clear();
     }
 }

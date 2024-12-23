@@ -3,8 +3,8 @@ import { MyDeckCardPageMovementButtonService } from './MyDeckCardPageMovementBut
 import {MyDeckCardPageMovementButtonType} from "../entity/MyDeckCardPageMovementButtonType";
 import {MyDeckCardPageMovementButton} from "../entity/MyDeckCardPageMovementButton";
 import {MyDeckCardPageMovementButtonRepository} from "../repository/MyDeckCardPageMovementButtonRepository";
-import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
 import {MyDeckCardPageMovementButtonRepositoryImpl} from "../repository/MyDeckCardPageMovementButtonRepositoryImpl";
+import {Vector2d} from "../../common/math/Vector2d";
 
 export class MyDeckCardPageMovementButtonServiceImpl implements MyDeckCardPageMovementButtonService {
     private static instance: MyDeckCardPageMovementButtonServiceImpl;
@@ -23,20 +23,43 @@ export class MyDeckCardPageMovementButtonServiceImpl implements MyDeckCardPageMo
     }
 
     public async createMyDeckCardPageMovementButton(
-        textureName: string,
         type: MyDeckCardPageMovementButtonType,
-        widthPercent: number,
-        heightPercent: number,
-        positionPercent: THREE.Vector2
-    ): Promise<NonBackgroundImage | null> {
+        position: Vector2d
+    ): Promise<THREE.Group | null> {
+        const buttonGroup = new THREE.Group();
         try {
-            const button = await this.myDeckCardPageMovementButtonRepository.createMyDeckCardPageMovementButton(
-                textureName, type, widthPercent, heightPercent, positionPercent);
-            return button;
+            const button = await this.myDeckCardPageMovementButtonRepository.createMyDeckCardPageMovementButton(type, position);
+            const buttonMesh = button.getMesh()
+            buttonGroup.add(buttonMesh)
+
         } catch (error) {
             console.error('Error creating my deck card page movement button:', error);
             return null;
         }
+        return buttonGroup;
+    }
+
+    public adjustMyDeckCardPageMovementButtonPosition(): void {
+        const buttonList = this.myDeckCardPageMovementButtonRepository.getAllMyDeckCardPageMovementButtons();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        buttonList.forEach((button) =>{
+            const buttonMesh = button.getMesh();
+            const initialPosition = button.position;
+
+            const buttonWidth = (73 / 1920) * windowWidth;
+            const buttonHeight = (46 / 1080) * windowHeight;
+
+            const newPositionX = initialPosition.getX() * windowWidth;
+            const newPositionY = initialPosition.getY() * windowHeight;
+
+            buttonMesh.geometry.dispose();
+            buttonMesh.geometry = new THREE.PlaneGeometry(buttonWidth, buttonHeight);
+
+            buttonMesh.position.set(newPositionX, newPositionY, 0);
+        });
+
     }
 
     public getMyDeckCardPageMovementButtonById(id: number): MyDeckCardPageMovementButton | null {
