@@ -38,10 +38,7 @@ export class TCGJustTestMyDeckView {
     private background: NonBackgroundImage | null = null;
     private backgroundService = BackgroundServiceImpl.getInstance()
 
-    private myDeckCardPageMovementButtons: NonBackgroundImage[] = [];
-    private myDeckCardPageMovementButtonInitialInfo: Map<string, { positionPercent: THREE.Vector2, widthPercent: number, heightPercent: number }> = new Map();
     private myDeckCardPageMovementButtonService = MyDeckCardPageMovementButtonServiceImpl.getInstance()
-
     private myDeckButtonPageMovementButtonService = MyDeckButtonPageMovementButtonServiceImpl.getInstance()
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -164,20 +161,12 @@ export class TCGJustTestMyDeckView {
             await Promise.all(
                 configList.buttonConfigs.map(async (config) =>{
                     const button = await this.myDeckCardPageMovementButtonService.createMyDeckCardPageMovementButton(
-                        'deck_card_page_movement_buttons',
                         config.id,
-                        config.width,
-                        config.height,
                         config.position
                     );
-                    if (button instanceof NonBackgroundImage) {
-                        button.draw(this.scene);
-                        this.myDeckCardPageMovementButtons.push(button);
-                        this.myDeckCardPageMovementButtonInitialInfo.set(button.getMesh()?.uuid ?? '', {
-                            positionPercent: config.position,
-                            widthPercent: config.width,
-                            heightPercent: config.height
-                        });
+
+                    if (button) {
+                        this.scene.add(button);
                         console.log(`Draw My Deck Card Page Movement Button ${config.id}`);
                     }
                 })
@@ -227,24 +216,10 @@ export class TCGJustTestMyDeckView {
                 this.background.setScale(scaleX, scaleY);
             }
 
-            this.myDeckCardPageMovementButtons.forEach(button => {
-                const initialInfo = this.myDeckCardPageMovementButtonInitialInfo.get(button.getMesh()?.uuid ?? '');
-                if (initialInfo) {
-                    const buttonWidth = window.innerWidth * initialInfo.widthPercent;
-                    const buttonHeight = window.innerHeight * initialInfo.heightPercent;
-                    const newPosition = new THREE.Vector2(
-                        window.innerWidth * initialInfo.positionPercent.x,
-                        window.innerHeight * initialInfo.positionPercent.y
-                    );
-
-                    button.setPosition(newPosition.x, newPosition.y);
-                    button.setScale(buttonWidth / button.getWidth(), buttonHeight / button.getHeight());
-                }
-            });
-
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
             this.myDeckButtonPageMovementButtonService.adjustMyDeckButtonPageMovementButtonPosition();
+            this.myDeckCardPageMovementButtonService.adjustMyDeckCardPageMovementButtonPosition();
         }
     }
 

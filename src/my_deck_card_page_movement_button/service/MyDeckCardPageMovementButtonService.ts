@@ -1,12 +1,9 @@
 import * as THREE from 'three';
-import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
+import {Vector2d} from "../../common/math/Vector2d";
 
 export interface MyDeckCardPageMovementButtonService {
     createMyDeckCardPageMovementButton(
-        textureName: string,
         type: number,
-        widthPercent: number,
-        heightPercent: number,
-        positionPercent:THREE.Vector2
-    ): Promise<NonBackgroundImage | null>;
+        positionPercent:Vector2d
+    ): Promise<THREE.Group | null>;
 }
