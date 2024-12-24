@@ -31,6 +31,8 @@ import {BattleFieldHandMapRepositoryImpl} from "../../src/battle_field_hand/repo
 import {CardGenerationHandler} from "../../src/card/handler";
 import {LegacyDragAndDropManager} from "../../src/drag_and_drop/LegacyDragAndDropManager";
 import {DragAndDropManager} from "../../src/drag_and_drop/DragAndDropManager";
+import {LeftClickDetectServiceImpl} from "../../src/left_click_detect/service/LeftClickDetectServiceImpl";
+import {LeftClickDetectService} from "../../src/left_click_detect/service/LeftClickDetectService";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -61,7 +63,8 @@ export class TCGJustTestBattleFieldView {
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
     private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
-    private dragAndDropManager: DragAndDropManager;
+    // private dragAndDropManager: DragAndDropManager;
+    private leftClickDetectService: LeftClickDetectService
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -105,11 +108,17 @@ export class TCGJustTestBattleFieldView {
 
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
 
-        this.dragAndDropManager = DragAndDropManager.getInstance(this.camera, this.scene);
+        // this.dragAndDropManager = DragAndDropManager.getInstance(this.camera, this.scene);
+        this.leftClickDetectService = LeftClickDetectServiceImpl.getInstance(this.camera, this.scene)
 
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.dragAndDropManager.onMouseDown(e), false);
-        this.renderer.domElement.addEventListener('mousemove', (e) => this.dragAndDropManager.onMouseMove(e), false);
-        this.renderer.domElement.addEventListener('mouseup', () => this.dragAndDropManager.onMouseUp(), false);
+        this.renderer.domElement.addEventListener('mousedown', (e) => {
+            if (e.button === 0) { // 좌클릭만 처리
+                this.leftClickDetectService.handleLeftClick(e);
+            }
+        }, false)
+        // this.renderer.domElement.addEventListener('mousedown', (e) => this.leftClickDetectService.handleLeftClick(e), false);
+        // this.renderer.domElement.addEventListener('mousemove', (e) => this.dragAndDropManager.onMouseMove(e), false);
+        // this.renderer.domElement.addEventListener('mouseup', () => this.dragAndDropManager.onMouseUp(), false);
     }
 
     public static getInstance(lobbyContainer: HTMLElement): TCGJustTestBattleFieldView {
@@ -177,7 +186,7 @@ export class TCGJustTestBattleFieldView {
             );
 
             this.background = background;
-            this.dragAndDropManager.setBackground(this.background)
+            // this.dragAndDropManager.setBackground(this.background)
 
             if (this.background instanceof NonBackgroundImage) {
                 this.background.draw(this.scene);
