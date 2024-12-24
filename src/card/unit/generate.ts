@@ -7,7 +7,7 @@ import { UserWindowSize } from "../../window_size/WindowSize";
 import {CardState} from "../state";
 import {CardStateManager} from "../CardStateManager";
 import {BattleFieldUnitRepository} from "../../battle_field_unit/repository/BattleFieldUnitRepository";
-import {DragAndDropManager} from "../../drag_and_drop/DragAndDropManager";
+import {LegacyDragAndDropManager} from "../../drag_and_drop/LegacyDragAndDropManager";
 
 // interface CardInitialInfo {
 //     cardMesh: THREE.Mesh;
@@ -220,7 +220,7 @@ export class UnitCardGenerator {
         const repository = BattleFieldUnitRepository.getInstance();
         const currentUnitCount = repository.getBattleFieldUnitList().length
 
-        const dragAndDropManager = DragAndDropManager.getExistingInstance()
+        const dragAndDropManager = LegacyDragAndDropManager.getExistingInstance()
         const targetShape = dragAndDropManager?.getTargetShape();
         if (!targetShape) {
             console.log("No targetShape found.");
