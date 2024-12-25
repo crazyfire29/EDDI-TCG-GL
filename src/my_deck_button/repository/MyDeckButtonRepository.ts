@@ -1,0 +1,13 @@
+import * as THREE from 'three';
+import {MyDeckButton} from "../entity/MyDeckButton";
+import {MyDeckButtonType} from "../entity/MyDeckButtonType";
+import {Vector2d} from "../../common/math/Vector2d";
+
+export interface MyDeckButtonRepository {
+    createMyDeckButton(type: MyDeckButtonType, position: Vector2d): Promise<MyDeckButton>;
+    getAllMyDeckButtons(): Map<number, MyDeckButton>;
+    findById(id: number): MyDeckButton | null;
+    findAll(): MyDeckButton[];
+    deleteById(id: number): void;
+    deleteAll(): void;
+}

@@ -21,6 +21,7 @@ import {MyDeckButtonPageMovementButtonServiceImpl} from "../../src/my_deck_butto
 import {MyDeckButtonPageMovementButtonRepositoryImpl} from "../../src/my_deck_button_page_movement_button/repository/MyDeckButtonPageMovementButtonRepositoryImpl";
 import {MyDeckCardPageMovementButtonConfigList} from "../../src/my_deck_card_page_movement_button/entity/MyDeckCardPageMovementButtonConfigList";
 import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButtonConfigList";
+import {MyDeckButtonServiceImpl} from "../../src/my_deck_button/service/MyDeckButtonServiceImpl";
 
 export class TCGJustTestMyDeckView {
     private static instance: TCGJustTestMyDeckView | null = null;
@@ -111,6 +112,7 @@ export class TCGJustTestMyDeckView {
         await this.addBackground();
         await this.addMyDeckButtonPageMovementButton();
         this.addMyDeckCardPageMovementButton();
+        this.addMyDeckButton();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -158,8 +160,7 @@ export class TCGJustTestMyDeckView {
     private async addMyDeckCardPageMovementButton(): Promise<void> {
         try {
             const configList = new MyDeckCardPageMovementButtonConfigList();
-            await Promise.all(
-                configList.buttonConfigs.map(async (config) =>{
+            await Promise.all(configList.buttonConfigs.map(async (config) =>{
                     const button = await this.myDeckCardPageMovementButtonService.createMyDeckCardPageMovementButton(
                         config.id,
                         config.position
@@ -179,8 +180,7 @@ export class TCGJustTestMyDeckView {
     private async addMyDeckButtonPageMovementButton(): Promise<void> {
         try {
             const configList = new MyDeckButtonPageMovementButtonConfigList();
-            await Promise.all(
-                configList.buttonConfigs.map(async (config) => {
+            await Promise.all(configList.buttonConfigs.map(async (config) => {
                     const button = await this.myDeckButtonPageMovementButtonService.createMyDeckButtonPageMovementButton(
                         config.id,
                         config.position
@@ -196,6 +196,22 @@ export class TCGJustTestMyDeckView {
             console.error('Failed to add my deck button page movement buttons:', error);
         }
     }
+
+    private async addMyDeckButton(): Promise<void>{
+        try {
+            let deckCount = 6; // 현재 사용자가 6개의 덱을 생성했다고 가정
+
+            const myDeckButtonService = MyDeckButtonServiceImpl.getInstance();
+            const buttonGroup = await myDeckButtonService.createMyDeckButtonWithPosition(deckCount);
+
+            if (buttonGroup) {
+                this.scene.add(buttonGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add my deck buttons:', error);
+            }
+        }
 
 
     private onWindowResize(): void {
