@@ -33,6 +33,8 @@ import {LegacyDragAndDropManager} from "../../src/drag_and_drop/LegacyDragAndDro
 import {DragAndDropManager} from "../../src/drag_and_drop/DragAndDropManager";
 import {LeftClickDetectServiceImpl} from "../../src/left_click_detect/service/LeftClickDetectServiceImpl";
 import {LeftClickDetectService} from "../../src/left_click_detect/service/LeftClickDetectService";
+import {DragMoveServiceImpl} from "../../src/drag_move/service/DragMoveServiceImpl";
+import {DragMoveService} from "../../src/drag_move/service/DragMoveService";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -65,6 +67,7 @@ export class TCGJustTestBattleFieldView {
 
     // private dragAndDropManager: DragAndDropManager;
     private leftClickDetectService: LeftClickDetectService
+    private dragMoveService: DragMoveService
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -110,12 +113,20 @@ export class TCGJustTestBattleFieldView {
 
         // this.dragAndDropManager = DragAndDropManager.getInstance(this.camera, this.scene);
         this.leftClickDetectService = LeftClickDetectServiceImpl.getInstance(this.camera, this.scene)
+        this.dragMoveService = DragMoveServiceImpl.getInstance(this.camera, this.scene)
 
-        this.renderer.domElement.addEventListener('mousedown', (e) => {
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
             if (e.button === 0) { // 좌클릭만 처리
-                this.leftClickDetectService.handleLeftClick(e);
+                await this.leftClickDetectService.handleLeftClick(e);
+                this.leftClickDetectService.setLeftMouseDown(true)
             }
         }, false)
+
+        this.renderer.domElement.addEventListener('mousemove', (e) => {
+            if (this.leftClickDetectService.isLeftMouseDown()) {
+                this.dragMoveService.onMouseMove(e);
+            }
+        });
         // this.renderer.domElement.addEventListener('mousedown', (e) => this.leftClickDetectService.handleLeftClick(e), false);
         // this.renderer.domElement.addEventListener('mousemove', (e) => this.dragAndDropManager.onMouseMove(e), false);
         // this.renderer.domElement.addEventListener('mouseup', () => this.dragAndDropManager.onMouseUp(), false);

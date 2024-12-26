@@ -12,4 +12,8 @@ export class BattleFieldHand {
         this.positionId = positionId;
         this.attributeMarkIdList = attributeMarkIdList;
     }
+
+    getId(): number {
+        return this.id;
+    }
 }

@@ -10,6 +10,10 @@ export class BattleFieldCardPosition {
         this.position = new Vector2d(x, y);
     }
 
+    getId(): number {
+        return this.id;
+    }
+
     setPosition(x: number, y: number): void {
         this.position.setVector2d(x, y);
     }

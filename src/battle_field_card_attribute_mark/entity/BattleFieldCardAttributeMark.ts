@@ -13,4 +13,8 @@ export class BattleFieldCardAttributeMark {
         this.attributeMarkSceneId = attributeMarkSceneId;
         this.attributeMarkPositionId = attributeMarkPositionId
     }
+
+    getId(): number {
+        return this.id;
+    }
 }

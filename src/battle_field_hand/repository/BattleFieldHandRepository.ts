@@ -6,4 +6,6 @@ export interface BattleFieldHandRepository {
     findAll(): BattleFieldHand[];
     deleteById(id: number): boolean;
     deleteAll(): void;
+    findByCardSceneId(cardSceneId: number): BattleFieldHand | null
+    findAttributeMarkIdListByCardSceneId(cardSceneId: number): number[] | null
 }

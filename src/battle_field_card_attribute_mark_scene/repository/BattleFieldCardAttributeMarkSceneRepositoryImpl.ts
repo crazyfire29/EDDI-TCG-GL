@@ -20,6 +20,7 @@ export class BattleFieldCardAttributeMarkSceneRepositoryImpl implements BattleFi
     }
 
     async findById(id: number): Promise<BattleFieldCardAttributeMarkScene | null> {
+        // console.log(`BattleFieldCardAttributeMarkSceneRepositoryImpl: Current scenes -> ${JSON.stringify(this.scenes, null, 2)}`);
         return this.scenes.find(scene => scene.id === id) || null;
     }
 
