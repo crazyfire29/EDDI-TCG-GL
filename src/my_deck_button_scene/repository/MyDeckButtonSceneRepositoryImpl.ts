@@ -5,11 +5,13 @@ import {MyDeckButtonRepositoryImpl} from "../../my_deck_button/repository/MyDeck
 
 import {TextureManager} from "../../texture_manager/TextureManager";
 import {Vector2d} from "../../common/math/Vector2d";
+import {IdGenerator} from "../../common/id_generator/IdGenerator";
 
 export class MyDeckButtonSceneRepositoryImpl implements MyDeckButtonSceneRepository {
     private static instance: MyDeckButtonSceneRepositoryImpl;
-    private myDeckButtonSceneMap: Map<number, MyDeckButtonScene> = new Map();
+    private deckId: number = 0
 
+    private myDeckButtonSceneMap: Map<number, MyDeckButtonScene> = new Map();
     private myDeckButtonRepositoryImpl = MyDeckButtonRepositoryImpl.getInstance();
 
     private constructor() {}
@@ -23,11 +25,14 @@ export class MyDeckButtonSceneRepositoryImpl implements MyDeckButtonSceneReposit
 
     // To-do: 사용자가 버튼을 클릭했을 때 나타나는 네온 버튼 별도 관리 필요
     // 현재는 사용자가 덱을 몇 개 만들었다 가정하고 사용.
-    async createMyDeckButtonScene(deckCount: number, position: Vector2d): Promise<MyDeckButtonScene> {
+    async createMyDeckButtonScene(position: Vector2d): Promise<MyDeckButtonScene> {
 
         const buttonMesh = await this.myDeckButtonRepositoryImpl.createMyDeckButton(2, position);
         const newButtonScene = new MyDeckButtonScene(buttonMesh.mesh);
-        this.myDeckButtonSceneMap.set(deckCount, newButtonScene);
+        newButtonScene.id = this.deckId;
+        this.myDeckButtonSceneMap.set(newButtonScene.id, newButtonScene);
+
+        this.deckId++
 
         return newButtonScene;
     }

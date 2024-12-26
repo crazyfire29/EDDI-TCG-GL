@@ -33,7 +33,8 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
             for (let i = 1; i <= deckCount; i++) {
                 const position = positionRepository.addMyDeckButtonPosition(i);
-                const deckButtonScene = await sceneRepository.createMyDeckButtonScene(i, position);
+                positionRepository.save(position);
+                const deckButtonScene = await sceneRepository.createMyDeckButtonScene(position.position);
 
                 const buttonMesh = deckButtonScene.getMesh();
                 buttonGroup.add(buttonMesh);
@@ -44,6 +45,69 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
             return null;
         }
         return buttonGroup;
+    }
+
+    public adjustMyDeckButtonPosition(): void {
+        const positionRepository = MyDeckButtonPositionRepositoryImpl.getInstance();
+        const sceneRepository = MyDeckButtonSceneRepositoryImpl.getInstance();
+
+        const buttonList = sceneRepository.findAll();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const buttonPositionMap = new Map(
+            positionRepository.findAll().map((position) => [position.id, position.position])
+        );
+        console.log('buttonList:', buttonList);
+        console.log('buttonPositionMap:', buttonPositionMap);
+
+        for (let i = 0; i < buttonList.length; i++) {
+            const button = buttonList[i];
+            const buttonMesh = button.getMesh();
+            const buttonId = button.id;
+
+            console.log(`buttonId?: ${buttonId}`);
+            const initialPosition = buttonPositionMap.get(buttonId);
+
+            if (!initialPosition) {
+                console.error(`No position found for button id: ${buttonId}`);
+                continue;
+            }
+
+            const buttonWidth = (350 / 1920) * window.innerWidth;
+            const buttonHeight = (90 / 1080) * window.innerHeight;
+
+            const newPositionX = initialPosition.getX() * window.innerWidth;
+            const newPositionY = initialPosition.getY() * window.innerHeight;
+
+            buttonMesh.geometry.dispose();
+            buttonMesh.geometry = new THREE.PlaneGeometry(buttonWidth, buttonHeight);
+
+            buttonMesh.position.set(newPositionX, newPositionY, 0);
+        }
+
+//         buttonList.forEach((button) =>{
+//             const buttonMesh = button.getMesh();
+//             const buttonId = button.id;
+//             console.log(`buttonId?: ${buttonId}`);
+//             const initialPosition = buttonPositionMap.get(buttonId);
+//
+//             if (!initialPosition) {
+//                 console.error(`No position found for button id: ${buttonId}`);
+//                 return;
+//             }
+//
+//             const buttonWidth = (350 / 1920) * windowWidth;
+//             const buttonHeight = (90 / 1080) * windowHeight;
+//
+//             const newPositionX = initialPosition.getX() * windowWidth;
+//             const newPositionY = initialPosition.getY() * windowHeight;
+//
+//             buttonMesh.geometry.dispose();
+//             buttonMesh.geometry = new THREE.PlaneGeometry(buttonWidth, buttonHeight);
+//
+//             buttonMesh.position.set(newPositionX, newPositionY, 0);
+//         });
+
     }
 
 
