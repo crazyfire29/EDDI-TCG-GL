@@ -47,4 +47,23 @@ export class MyDeckButtonSceneRepositoryImpl implements MyDeckButtonSceneReposit
     deleteAll(): void {
         this.myDeckButtonSceneMap.clear();
     }
+
+    hideById(id: number): boolean {
+        const buttonScene = this.myDeckButtonSceneMap.get(id);
+        if (buttonScene) {
+            buttonScene.getMesh().visible = false;
+            return true;
+        }
+        return false;
+    }
+
+    showById(id: number): boolean {
+        const buttonScene = this.myDeckButtonSceneMap.get(id);
+        if (buttonScene) {
+            buttonScene.getMesh().visible = true;
+            return true;
+        }
+        return false;
+    }
+
 }

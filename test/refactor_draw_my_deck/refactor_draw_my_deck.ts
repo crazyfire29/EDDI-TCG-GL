@@ -23,6 +23,9 @@ import {MyDeckCardPageMovementButtonConfigList} from "../../src/my_deck_card_pag
 import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButtonConfigList";
 import {MyDeckButtonServiceImpl} from "../../src/my_deck_button/service/MyDeckButtonServiceImpl";
 import {MyDeckButtonMapRepositoryImpl} from "../../src/my_deck_button/repository/MyDeckButtonMapRepositoryImpl";
+import {MyDeckButtonSceneRepositoryImpl} from "../../src/my_deck_button_scene/repository/MyDeckButtonSceneRepositoryImpl";
+import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
+import {MyDeckButtonClickDetectService} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectService";
 
 export class TCGJustTestMyDeckView {
     private static instance: TCGJustTestMyDeckView | null = null;
@@ -50,6 +53,9 @@ export class TCGJustTestMyDeckView {
 
     private readonly cameraRepository = CameraRepositoryImpl.getInstance();
     private readonly cameraService = CameraServiceImpl.getInstance(this.cameraRepository);
+
+    private myDeckButtonClickDetectService: MyDeckButtonClickDetectService
+    private myDeckButtonSceneRepository = MyDeckButtonSceneRepositoryImpl.getInstance();
 
     private initialized = false;
     private isAnimating = false;
@@ -83,6 +89,29 @@ export class TCGJustTestMyDeckView {
         this.mouseController = new MouseController(this.camera, this.scene);
 
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
+
+        this.myDeckButtonClickDetectService = MyDeckButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
+
+//         this.renderer.domElement.addEventListener('mousedown', async (e) => {
+//             if (e.button === 0) {
+//                 const clickPoint = { x: e.clientX, y: e.clientY };
+//                 await this.myDeckButtonClickDetectService.handleLeftClick(clickPoint);
+//             }
+//         });
+
+        this.renderer.domElement.addEventListener('mousedown', async (e: MouseEvent) => {
+            if (e.button === 0) {
+                await this.myDeckButtonClickDetectService.handleLeftClick(e, (clickedDeckButton) => {
+                    const buttonHide = this.myDeckButtonSceneRepository.hideById(clickedDeckButton.id);
+                    if (buttonHide) {
+                        console.log(`Deck Button ID ${clickedDeckButton.id} is now hidden.`);
+                    } else {
+                        console.error(`Failed to hide Deck Button ID ${clickedDeckButton.id}`);
+                    }
+                });
+            }
+        });
+
     }
 
     public static getInstance(simulationMyDeckContainer: HTMLElement): TCGJustTestMyDeckView {
