@@ -32,4 +32,14 @@ export class DragMoveRepositoryImpl implements DragMoveRepository {
     setSelectedGroup(group: BattleFieldCardAttributeMarkScene[]): void {
         this.selectedGroup = group;
     }
+
+    deleteSelectedObject(): void {
+        this.selectedObject = null;
+        console.log("Selected object deleted.");
+    }
+
+    deleteSelectedGroup(): void {
+        this.selectedGroup = [];
+        console.log("Selected group deleted.");
+    }
 }

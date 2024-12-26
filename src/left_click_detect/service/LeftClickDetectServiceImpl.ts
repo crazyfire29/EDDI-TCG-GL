@@ -64,6 +64,9 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     ): Promise<any | null> {
         const { x, y } = clickPoint;
 
+        await this.dragMoveRepository.deleteSelectedObject()
+        await this.dragMoveRepository.deleteSelectedGroup()
+
         const handSceneList = this.battleFieldCardSceneRepository.findAll()
         const clickedHandCard = this.leftClickHandDetectRepository.isYourHandAreaClicked(
             { x, y },

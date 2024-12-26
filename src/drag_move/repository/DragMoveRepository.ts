@@ -6,6 +6,8 @@ export interface DragMoveRepository {
     setSelectedObject(object: THREE.Object3D | null): void;
 
     getSelectedGroup(): BattleFieldCardAttributeMarkScene[];
-
     setSelectedGroup(group: BattleFieldCardAttributeMarkScene[]): void;
+
+    deleteSelectedObject(): void
+    deleteSelectedGroup(): void
 }
