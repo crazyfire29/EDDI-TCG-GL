@@ -84,9 +84,9 @@ export class DragMoveServiceImpl implements DragMoveService {
 
             // 새로운 위치 계산
             const newPosition = intersection.clone().sub(this.offset);
-            console.log(`offset: ${this.offset.toArray()}`);
-            console.log(`newPosition: ${newPosition.toArray()}`);
-            console.log(`lastPosition: ${lastPosition.toArray()}`);
+            // console.log(`offset: ${this.offset.toArray()}`);
+            // console.log(`newPosition: ${newPosition.toArray()}`);
+            // console.log(`lastPosition: ${lastPosition.toArray()}`);
 
             // 이동 계산
             const movement = newPosition.clone().sub(lastPosition);
@@ -97,7 +97,7 @@ export class DragMoveServiceImpl implements DragMoveService {
             // 속성 마크의 위치 갱신
             this.dragMoveRepository.getSelectedGroup().forEach((obj) => {
                 const attributeMesh = obj.getMesh();
-                console.log(`origin position: ${attributeMesh.position.toArray()}`)
+                // console.log(`origin position: ${attributeMesh.position.toArray()}`)
                 if (attributeMesh) {
                     attributeMesh.position.add(movement); // 이동 거리만큼 속성 마크 이동
                 }
