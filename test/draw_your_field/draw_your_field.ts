@@ -35,6 +35,8 @@ import {LeftClickDetectServiceImpl} from "../../src/left_click_detect/service/Le
 import {LeftClickDetectService} from "../../src/left_click_detect/service/LeftClickDetectService";
 import {DragMoveServiceImpl} from "../../src/drag_move/service/DragMoveServiceImpl";
 import {DragMoveService} from "../../src/drag_move/service/DragMoveService";
+import {YourFieldAreaServiceImpl} from "../../src/your_field_area/service/YourFieldAreaServiceImpl";
+import {CardState} from "../../src/card/state";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -68,6 +70,8 @@ export class TCGJustTestBattleFieldView {
     // private dragAndDropManager: DragAndDropManager;
     private leftClickDetectService: LeftClickDetectService
     private dragMoveService: DragMoveService
+
+    private yourFieldAreaService = YourFieldAreaServiceImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -160,6 +164,7 @@ export class TCGJustTestBattleFieldView {
         console.log("Textures preloaded. Adding background and buttons...");
 
         await this.addBackground();
+        this.addYourField();
         this.addYourHandUnitList()
 
         this.initialized = true;
@@ -205,6 +210,16 @@ export class TCGJustTestBattleFieldView {
         } catch (error) {
             console.error('Failed to add background:', error);
         }
+    }
+
+    private addYourField(): void {
+        const yourField = this.yourFieldAreaService.createYourField()
+        const yourFieldAreaMesh = yourField.getArea()
+
+        this.scene.add(yourFieldAreaMesh);
+
+        // this.dragAndDropManager.setTargetShape(yourBattleFieldRectangle, CardState.FIELD)
+        // this.yourBattleFieldRectangle = yourBattleFieldRectangle;
     }
 
     private async addYourHandUnitList(): Promise<void> {
