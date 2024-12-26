@@ -82,7 +82,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
         const card = this.getCardByIdOrThrowError(cardId);
 
         const handPosition = this.calculateHandPosition();
-        this.saveHandPosition(handPosition);
+        const createdHandPosition = this.saveHandPosition(handPosition);
 
         const mainCardScene = await this.createMainCardScene(cardId, handPosition);
         const mainCardMesh = mainCardScene.getMesh()
@@ -93,7 +93,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
 
         try {
             const textures = await this.loadCardTextures(unitJob, cardKind, card);
-            await this.addAttributesToCardGroup(cardKind, unitJob, cardGroup, handPosition, textures);
+            await this.addAttributesToCardGroup(mainCardScene, createdHandPosition, cardKind, unitJob, cardGroup, handPosition, textures);
         } catch (error) {
             console.error("Error loading textures:", error);
         }
@@ -117,9 +117,9 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
         return new Vector2d(handPositionX, handPositionY);
     }
 
-    private saveHandPosition(position: Vector2d): void {
+    private saveHandPosition(position: Vector2d): BattleFieldCardPosition {
         const cardPosition = new BattleFieldCardPosition(position.getX(), position.getY());
-        this.battleFieldHandCardPositionRepository.save(cardPosition);
+        return this.battleFieldHandCardPositionRepository.save(cardPosition);
     }
 
     private async createMainCardScene(cardId: number, position: Vector2d): Promise<BattleFieldCardScene> {
@@ -153,6 +153,8 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
     }
 
     private async addAttributesToCardGroup(
+        mainCardScene: BattleFieldCardScene,
+        createdHandPosition: BattleFieldCardPosition,
         cardKind: number,
         unitJob: number,
         cardGroup: THREE.Group,
@@ -160,13 +162,16 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
         textures: (Texture | null)[]
     ): Promise<void> {
         const [kindsOrWeaponTexture, raceTexture, hpTexture, energyTexture] = textures;
+        const attributeMarks: BattleFieldCardAttributeMark[] = [];
 
         if (cardKind === CardKind.UNIT && unitJob === CardJob.WARRIOR && kindsOrWeaponTexture) {
             const weaponPosition = this.calculateWeaponPosition(handPosition);
             const weaponMesh = this.createWeaponMesh(kindsOrWeaponTexture, weaponPosition);
             cardGroup.add(weaponMesh);
 
-            await this.saveCardAttributeMark(weaponMesh, weaponPosition);
+            const weaponMark = await this.saveCardAttributeMark(weaponMesh, weaponPosition);
+            // console.log(`weaponMark id -> ${weaponMark.getId()}`)
+            attributeMarks.push(weaponMark)
         }
 
         if (cardKind === CardKind.UNIT && unitJob === CardJob.MAGICIAN && kindsOrWeaponTexture) {
@@ -174,7 +179,8 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const staffMesh = this.createStaffMesh(kindsOrWeaponTexture, staffPosition);
             cardGroup.add(staffMesh);
 
-            await this.saveCardAttributeMark(staffMesh, staffPosition);
+            const staffMark = await this.saveCardAttributeMark(staffMesh, staffPosition);
+            attributeMarks.push(staffMark)
         }
 
         if (cardKind !== CardKind.UNIT && kindsOrWeaponTexture) {
@@ -182,7 +188,8 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const kinsMesh = this.createKindsMesh(kindsOrWeaponTexture, kindsPosition);
             cardGroup.add(kinsMesh);
 
-            await this.saveCardAttributeMark(kinsMesh, kindsPosition);
+            const kindsMark = await this.saveCardAttributeMark(kinsMesh, kindsPosition);
+            attributeMarks.push(kindsMark)
         }
 
         if (raceTexture) {
@@ -190,7 +197,8 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const raceMesh = this.createRaceMesh(raceTexture, racePosition);
             cardGroup.add(raceMesh);
 
-            await this.saveCardAttributeMark(raceMesh, racePosition);
+            const raceMark = await this.saveCardAttributeMark(raceMesh, racePosition);
+            attributeMarks.push(raceMark)
         }
 
         if (hpTexture) {
@@ -198,7 +206,8 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const hpMesh = this.createHpMesh(hpTexture, hpPosition);
             cardGroup.add(hpMesh);
 
-            await this.saveCardAttributeMark(hpMesh, hpPosition);
+            const hpMark = await this.saveCardAttributeMark(hpMesh, hpPosition);
+            attributeMarks.push(hpMark)
         }
 
         if (cardKind === CardKind.UNIT && energyTexture) {
@@ -206,8 +215,12 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const energyMesh = this.createEnergyMesh(energyTexture, energyPosition);
             cardGroup.add(energyMesh);
 
-            await this.saveCardAttributeMark(energyMesh, energyPosition);
+            const energyMark = await this.saveCardAttributeMark(energyMesh, energyPosition);
+            attributeMarks.push(energyMark)
         }
+
+        const attributeMarkIdList = attributeMarks.map((mark) => mark.getId())
+        this.battleFieldHandRepository.save(mainCardScene.getId(), createdHandPosition.getId(), attributeMarkIdList)
     }
 
     private calculateWeaponPosition(handPosition: Vector2d): Vector2d {
@@ -300,19 +313,22 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
         );
     }
 
-    private async saveCardAttributeMark(mesh: THREE.Mesh, position: Vector2d): Promise<void> {
+    private async saveCardAttributeMark(mesh: THREE.Mesh, position: Vector2d): Promise<BattleFieldCardAttributeMark> {
         const attributeMarkPosition = new BattleFieldCardAttributeMarkPosition(position.getX(), position.getY());
         await this.battleFieldCardAttributeMarkPositionRepository.save(attributeMarkPosition);
 
         const attributeMarkScene = new BattleFieldCardAttributeMarkScene(mesh);
         await this.battleFieldCardAttributeMarkSceneRepository.save(attributeMarkScene);
 
+        console.log(`attributeMarkScene id -> ${attributeMarkScene.getId()}`);
+        // console.log('Current scenes:', await this.battleFieldCardAttributeMarkSceneRepository.findAll());
+
         const attributeMark = new BattleFieldCardAttributeMark(
             BattleFieldCardAttributeMarkStatus.HAND,
             attributeMarkScene.getId(),
             attributeMarkPosition.getId()
         );
-        await this.battleFieldCardAttributeMarkRepository.save(attributeMark);
+        return await this.battleFieldCardAttributeMarkRepository.save(attributeMark);
     }
 
     createBattleFieldFirstDrawHand() {

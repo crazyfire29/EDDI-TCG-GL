@@ -16,8 +16,9 @@ export class BattleFieldHandCardPositionRepositoryImpl implements BattleFieldHan
         return BattleFieldHandCardPositionRepositoryImpl.instance;
     }
 
-    save(position: BattleFieldCardPosition): void {
+    save(position: BattleFieldCardPosition): BattleFieldCardPosition {
         this.positionMap.set(position.id, position);
+        return position
     }
 
     findById(id: number): BattleFieldCardPosition | undefined {

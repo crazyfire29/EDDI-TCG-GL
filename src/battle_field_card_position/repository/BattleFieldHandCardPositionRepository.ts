@@ -1,7 +1,7 @@
 import { BattleFieldCardPosition } from "../entity/BattleFieldCardPosition";
 
 export interface BattleFieldHandCardPositionRepository {
-    save(position: BattleFieldCardPosition): void;
+    save(position: BattleFieldCardPosition): BattleFieldCardPosition;
     findById(id: number): BattleFieldCardPosition | undefined;
     findAll(): BattleFieldCardPosition[];
     deleteById(id: number): boolean;

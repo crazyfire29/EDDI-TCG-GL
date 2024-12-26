@@ -42,4 +42,18 @@ export class BattleFieldHandRepositoryImpl implements BattleFieldHandRepository 
     deleteAll(): void {
         this.cardMap.clear();
     }
+
+    findByCardSceneId(cardSceneId: number): BattleFieldHand | null {
+        const hand = Array.from(this.cardMap.values()).find(hand => hand.cardSceneId === cardSceneId);
+        return hand || null;
+    }
+
+    findAttributeMarkIdListByCardSceneId(cardSceneId: number): number[] | null {
+        const hand = this.findByCardSceneId(cardSceneId);
+        if (hand instanceof BattleFieldHand) {
+            console.log(`BattleFieldHandRepositoryImpl findAttributeMarkIdListByCardSceneId() -> hand.attributeMarkIdList: ${hand.attributeMarkIdList}`)
+        }
+
+        return hand ? hand.attributeMarkIdList : null;
+    }
 }

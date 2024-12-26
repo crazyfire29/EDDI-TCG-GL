@@ -10,6 +10,10 @@ export class BattleFieldCardScene {
         this.mesh = mesh;
     }
 
+    getId(): number {
+        return this.id;
+    }
+
     getMesh(): THREE.Mesh {
         return this.mesh;
     }

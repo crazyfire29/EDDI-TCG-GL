@@ -47,7 +47,7 @@
     "return-to-initial-position": "webpack serve --config ./test/return_to_initial_position/config/webpack.dev.js",
     "your-hand-to-your-field": "webpack serve --config ./test/your_hand_to_your_field/config/webpack.dev.js",
     "refactor-draw-your-hand": "webpack serve --config ./test/refactor_draw_your_hand/config/webpack.dev.js",
-    "draw-your-field": "webpack serve --config ./test/draw_your_field/config/webpack.dev.js"
+    "draw-your-field": "webpack serve --config ./test/draw_your_field/config/webpack.dev.js",
     "refactor-draw-my-deck": "webpack serve --config ./test/refactor_draw_my_deck/config/webpack.dev.js"
   }
 }

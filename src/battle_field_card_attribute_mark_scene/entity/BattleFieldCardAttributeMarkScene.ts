@@ -15,4 +15,8 @@ export class BattleFieldCardAttributeMarkScene {
     getId(): number {
         return this.id;
     }
+
+    getMesh(): THREE.Mesh {
+        return this.mesh;
+    }
 }
