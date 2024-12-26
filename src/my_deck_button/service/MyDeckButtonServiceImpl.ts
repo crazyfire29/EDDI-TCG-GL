@@ -7,14 +7,20 @@ import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
 import {MyDeckButtonRepositoryImpl} from "../repository/MyDeckButtonRepositoryImpl";
 import {MyDeckButtonPositionRepositoryImpl} from "../../my_deck_button_position/repository/MyDeckButtonPositionRepositoryImpl";
 import {MyDeckButtonSceneRepositoryImpl} from "../../my_deck_button_scene/repository/MyDeckButtonSceneRepositoryImpl";
+import {MyDeckButtonScene} from "../../my_deck_button_scene/entity/MyDeckButtonScene";
+import { MyDeckButtonPosition } from "../../my_deck_button_position/entity/MyDeckButtonPosition";
 import {Vector2d} from "../../common/math/Vector2d";
 
 export class MyDeckButtonServiceImpl implements MyDeckButtonService {
     private static instance: MyDeckButtonServiceImpl;
     private myDeckButtonRepository: MyDeckButtonRepository;
+    private myDeckButtonSceneRepository: MyDeckButtonSceneRepositoryImpl;
+    private myDeckButtonPositionRepository: MyDeckButtonPositionRepositoryImpl;
 
     private constructor(myDeckButtonRepository: MyDeckButtonRepository) {
         this.myDeckButtonRepository = myDeckButtonRepository;
+        this.myDeckButtonSceneRepository = MyDeckButtonSceneRepositoryImpl.getInstance();
+        this.myDeckButtonPositionRepository = MyDeckButtonPositionRepositoryImpl.getInstance();
     }
 
     public static getInstance(): MyDeckButtonServiceImpl {
@@ -25,26 +31,34 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         return MyDeckButtonServiceImpl.instance;
     }
 
-    public async createMyDeckButtonWithPosition(deckCount: number): Promise<THREE.Group | null> {
+    public async createMyDeckButtonWithPosition(deckId: number): Promise<THREE.Group | null> {
         const buttonGroup = new THREE.Group();
         try {
-            const positionRepository = MyDeckButtonPositionRepositoryImpl.getInstance();
-            const sceneRepository = MyDeckButtonSceneRepositoryImpl.getInstance();
+            const position = this.myDeckButtonPosition(deckId);
+            console.log(`Deck ${deckId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+            this.saveMyDeckButtonPosition(deckId, position);
 
-            for (let i = 1; i <= deckCount; i++) {
-                const position = positionRepository.addMyDeckButtonPosition(i);
-                positionRepository.save(position);
-                const deckButtonScene = await sceneRepository.createMyDeckButtonScene(position.position);
-
-                const buttonMesh = deckButtonScene.getMesh();
-                buttonGroup.add(buttonMesh);
-            }
+            const deckButtonScene = await this.createDeckButtonScene(deckId, position.position);
+            const buttonMesh = deckButtonScene.getMesh();
+            buttonGroup.add(buttonMesh);
 
         } catch (error) {
             console.error('Error creating my deck button with position:', error);
             return null;
         }
         return buttonGroup;
+    }
+
+    private async createDeckButtonScene(deckId: number, position: Vector2d): Promise<MyDeckButtonScene> {
+        return await this.myDeckButtonSceneRepository.createMyDeckButtonScene(deckId, position);
+    }
+
+    private myDeckButtonPosition(deckId: number): MyDeckButtonPosition {
+        return this.myDeckButtonPositionRepository.addMyDeckButtonPosition(deckId);
+    }
+
+    private saveMyDeckButtonPosition(deckId: number, position: MyDeckButtonPosition): void {
+        this.myDeckButtonPositionRepository.save(deckId, position);
     }
 
     public adjustMyDeckButtonPosition(): void {
@@ -54,19 +68,17 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         const buttonList = sceneRepository.findAll();
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        const buttonPositionMap = new Map(
-            positionRepository.findAll().map((position) => [position.id, position.position])
-        );
-        console.log('buttonList:', buttonList);
-        console.log('buttonPositionMap:', buttonPositionMap);
+        const buttonPosition = positionRepository.findAll();
 
-        for (let i = 0; i < buttonList.length; i++) {
-            const button = buttonList[i];
+        console.log('buttonList:', buttonList);
+        console.log('buttonPosition:', buttonPosition);
+
+        for (const button of buttonList) {
+            console.log(`Button ID: ${button.id}`);
             const buttonMesh = button.getMesh();
             const buttonId = button.id;
-
-            console.log(`buttonId?: ${buttonId}`);
-            const initialPosition = buttonPositionMap.get(buttonId);
+            const initialPosition = positionRepository.findById(buttonId);
+            console.log(`InitialPosition: ${initialPosition}`);
 
             if (!initialPosition) {
                 console.error(`No position found for button id: ${buttonId}`);
@@ -76,37 +88,19 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
             const buttonWidth = (350 / 1920) * window.innerWidth;
             const buttonHeight = (90 / 1080) * window.innerHeight;
 
-            const newPositionX = initialPosition.getX() * window.innerWidth;
-            const newPositionY = initialPosition.getY() * window.innerHeight;
+            const newPositionX = initialPosition.position.getX() * window.innerWidth;
+            const newPositionY = initialPosition.position.getY() * window.innerHeight;
+            console.log(`Button ${buttonId}:`, {
+                initialPosition: initialPosition.position,
+                newPositionX,
+                newPositionY,
+            });
 
             buttonMesh.geometry.dispose();
             buttonMesh.geometry = new THREE.PlaneGeometry(buttonWidth, buttonHeight);
 
             buttonMesh.position.set(newPositionX, newPositionY, 0);
         }
-
-//         buttonList.forEach((button) =>{
-//             const buttonMesh = button.getMesh();
-//             const buttonId = button.id;
-//             console.log(`buttonId?: ${buttonId}`);
-//             const initialPosition = buttonPositionMap.get(buttonId);
-//
-//             if (!initialPosition) {
-//                 console.error(`No position found for button id: ${buttonId}`);
-//                 return;
-//             }
-//
-//             const buttonWidth = (350 / 1920) * windowWidth;
-//             const buttonHeight = (90 / 1080) * windowHeight;
-//
-//             const newPositionX = initialPosition.getX() * windowWidth;
-//             const newPositionY = initialPosition.getY() * windowHeight;
-//
-//             buttonMesh.geometry.dispose();
-//             buttonMesh.geometry = new THREE.PlaneGeometry(buttonWidth, buttonHeight);
-//
-//             buttonMesh.position.set(newPositionX, newPositionY, 0);
-//         });
 
     }
 
