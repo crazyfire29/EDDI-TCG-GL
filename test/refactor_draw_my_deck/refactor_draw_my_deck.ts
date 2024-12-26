@@ -22,6 +22,7 @@ import {MyDeckButtonPageMovementButtonRepositoryImpl} from "../../src/my_deck_bu
 import {MyDeckCardPageMovementButtonConfigList} from "../../src/my_deck_card_page_movement_button/entity/MyDeckCardPageMovementButtonConfigList";
 import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButtonConfigList";
 import {MyDeckButtonServiceImpl} from "../../src/my_deck_button/service/MyDeckButtonServiceImpl";
+import {MyDeckButtonMapRepositoryImpl} from "../../src/my_deck_button/repository/MyDeckButtonMapRepositoryImpl";
 
 export class TCGJustTestMyDeckView {
     private static instance: TCGJustTestMyDeckView | null = null;
@@ -42,6 +43,7 @@ export class TCGJustTestMyDeckView {
     private myDeckCardPageMovementButtonService = MyDeckCardPageMovementButtonServiceImpl.getInstance();
     private myDeckButtonPageMovementButtonService = MyDeckButtonPageMovementButtonServiceImpl.getInstance();
     private myDeckButtonService = MyDeckButtonServiceImpl.getInstance();
+    private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -200,12 +202,16 @@ export class TCGJustTestMyDeckView {
 
     private async addMyDeckButton(): Promise<void>{
         try {
-            let deckCount = 6; // 현재 사용자가 6개의 덱을 생성했다고 가정
 
-            const buttonGroup = await this.myDeckButtonService.createMyDeckButtonWithPosition(deckCount);
+            const myDeckButtonList = this.myDeckButtonMapRepository.getMyDeckList()
+            console.log('myDeckButtonList:', myDeckButtonList)
 
-            if (buttonGroup) {
-                this.scene.add(buttonGroup);
+            for (const deckId of myDeckButtonList) {
+                const buttonGroup = await this.myDeckButtonService.createMyDeckButtonWithPosition(deckId);
+
+                if (buttonGroup) {
+                    this.scene.add(buttonGroup);
+                }
             }
 
         } catch (error) {

@@ -5,14 +5,12 @@ import { MyDeckButtonPositionRepository } from "./MyDeckButtonPositionRepository
 export class MyDeckButtonPositionRepositoryImpl implements MyDeckButtonPositionRepository {
     private static instance: MyDeckButtonPositionRepositoryImpl;
     private positionMap: Map<number, MyDeckButtonPosition>;
-    private currentMyDeckButtonPositionList: MyDeckButtonPosition[] = [];
+
 
     private initialX = 0.3268;
     private initialY = 0.22242;
     private incrementY = - 0.103;
     private maxButtonsPerPage = 6;
-
-    private deckId: number = 0
 
     private constructor() {
         this.positionMap = new Map<number, MyDeckButtonPosition>();
@@ -25,21 +23,18 @@ export class MyDeckButtonPositionRepositoryImpl implements MyDeckButtonPositionR
         return MyDeckButtonPositionRepositoryImpl.instance;
     }
 
-    public addMyDeckButtonPosition(deckCount: number): MyDeckButtonPosition {
+    public addMyDeckButtonPosition(deckId: number): MyDeckButtonPosition {
         const positionX = this.initialX;
-        const positionY = this.initialY + ((deckCount - 1) % this.maxButtonsPerPage) * this.incrementY;
+        const positionY = this.initialY + ((deckId - 1) % this.maxButtonsPerPage) * this.incrementY;
 
         const position = new MyDeckButtonPosition(positionX, positionY);
-        position.id = this.deckId;
-        this.currentMyDeckButtonPositionList.push(position);
-
-        this.deckId++
+        position.id = deckId;
 
         return position;
-        }
+    }
 
-    save(position: MyDeckButtonPosition): void {
-        this.positionMap.set(position.id, position);
+    save(deckId: number, position: MyDeckButtonPosition): void {
+        this.positionMap.set(deckId, position);
     }
 
     findById(id: number): MyDeckButtonPosition | undefined {

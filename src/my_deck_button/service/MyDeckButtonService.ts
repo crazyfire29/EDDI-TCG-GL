@@ -5,5 +5,7 @@ import {MyDeckButton} from "../entity/MyDeckButton";
 
 export interface MyDeckButtonService {
     getMyDeckButtonById(id: number): MyDeckButton | null;
-
+    deleteMyDeckButtonById(id: number): void;
+    getAllMyDeckButton(): MyDeckButton[];
+    deleteAllMyDeckButton(): void;
 }
