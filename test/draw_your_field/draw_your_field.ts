@@ -37,6 +37,8 @@ import {DragMoveServiceImpl} from "../../src/drag_move/service/DragMoveServiceIm
 import {DragMoveService} from "../../src/drag_move/service/DragMoveService";
 import {YourFieldAreaServiceImpl} from "../../src/your_field_area/service/YourFieldAreaServiceImpl";
 import {CardState} from "../../src/card/state";
+import {MouseDropService} from "../../src/mouse_drop/service/MouseDropService";
+import {MouseDropServiceImpl} from "../../src/mouse_drop/service/MouseDropServiceImpl";
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -70,6 +72,7 @@ export class TCGJustTestBattleFieldView {
     // private dragAndDropManager: DragAndDropManager;
     private leftClickDetectService: LeftClickDetectService
     private dragMoveService: DragMoveService
+    private mouseDropService: MouseDropService
 
     private yourFieldAreaService = YourFieldAreaServiceImpl.getInstance();
 
@@ -115,9 +118,9 @@ export class TCGJustTestBattleFieldView {
 
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
 
-        // this.dragAndDropManager = DragAndDropManager.getInstance(this.camera, this.scene);
         this.leftClickDetectService = LeftClickDetectServiceImpl.getInstance(this.camera, this.scene)
         this.dragMoveService = DragMoveServiceImpl.getInstance(this.camera, this.scene)
+        this.mouseDropService = MouseDropServiceImpl.getInstance()
 
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
             if (e.button === 0) { // 좌클릭만 처리
@@ -131,6 +134,13 @@ export class TCGJustTestBattleFieldView {
                 this.dragMoveService.onMouseMove(e);
             }
         });
+
+        this.renderer.domElement.addEventListener('mouseup', () => {
+            if (this.leftClickDetectService.isLeftMouseDown()) {
+                this.mouseDropService.onMouseUp();
+                this.leftClickDetectService.setLeftMouseDown(false); // 드롭 후 상태 초기화
+            }
+        }, false);
         // this.renderer.domElement.addEventListener('mousedown', (e) => this.leftClickDetectService.handleLeftClick(e), false);
         // this.renderer.domElement.addEventListener('mousemove', (e) => this.dragAndDropManager.onMouseMove(e), false);
         // this.renderer.domElement.addEventListener('mouseup', () => this.dragAndDropManager.onMouseUp(), false);

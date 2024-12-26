@@ -54,4 +54,8 @@ export class YourFieldAreaRepositoryImpl implements YourFieldAreaRepository {
 
         return yourFieldArea
     }
+
+    getYourFieldArea(): YourFieldArea | null {
+        return this.yourFieldArea;
+    }
 }
