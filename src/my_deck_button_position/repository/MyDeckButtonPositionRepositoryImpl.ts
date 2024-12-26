@@ -5,14 +5,14 @@ import { MyDeckButtonPositionRepository } from "./MyDeckButtonPositionRepository
 export class MyDeckButtonPositionRepositoryImpl implements MyDeckButtonPositionRepository {
     private static instance: MyDeckButtonPositionRepositoryImpl;
     private positionMap: Map<number, MyDeckButtonPosition>;
-    private currentMyDeckButtonPositionList: Vector2d[] = [];
+    private currentMyDeckButtonPositionList: MyDeckButtonPosition[] = [];
 
     private initialX = 0.3268;
     private initialY = 0.22242;
     private incrementY = - 0.103;
     private maxButtonsPerPage = 6;
 
-    private currentCount: number = 0
+    private deckId: number = 0
 
     private constructor() {
         this.positionMap = new Map<number, MyDeckButtonPosition>();
@@ -25,14 +25,15 @@ export class MyDeckButtonPositionRepositoryImpl implements MyDeckButtonPositionR
         return MyDeckButtonPositionRepositoryImpl.instance;
     }
 
-    public addMyDeckButtonPosition(deckCount: number): Vector2d {
+    public addMyDeckButtonPosition(deckCount: number): MyDeckButtonPosition {
         const positionX = this.initialX;
         const positionY = this.initialY + ((deckCount - 1) % this.maxButtonsPerPage) * this.incrementY;
 
-        const position = new Vector2d(positionX, positionY);
+        const position = new MyDeckButtonPosition(positionX, positionY);
+        position.id = this.deckId;
         this.currentMyDeckButtonPositionList.push(position);
 
-        this.currentCount++
+        this.deckId++
 
         return position;
         }

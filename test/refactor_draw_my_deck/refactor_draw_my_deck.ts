@@ -37,16 +37,17 @@ export class TCGJustTestMyDeckView {
     private mouseController: MouseController;
 
     private background: NonBackgroundImage | null = null;
-    private backgroundService = BackgroundServiceImpl.getInstance()
+    private backgroundService = BackgroundServiceImpl.getInstance();
 
-    private myDeckCardPageMovementButtonService = MyDeckCardPageMovementButtonServiceImpl.getInstance()
-    private myDeckButtonPageMovementButtonService = MyDeckButtonPageMovementButtonServiceImpl.getInstance()
+    private myDeckCardPageMovementButtonService = MyDeckCardPageMovementButtonServiceImpl.getInstance();
+    private myDeckButtonPageMovementButtonService = MyDeckButtonPageMovementButtonServiceImpl.getInstance();
+    private myDeckButtonService = MyDeckButtonServiceImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
 
-    private readonly cameraRepository = CameraRepositoryImpl.getInstance()
-    private readonly cameraService = CameraServiceImpl.getInstance(this.cameraRepository)
+    private readonly cameraRepository = CameraRepositoryImpl.getInstance();
+    private readonly cameraService = CameraServiceImpl.getInstance(this.cameraRepository);
 
     private initialized = false;
     private isAnimating = false;
@@ -201,8 +202,7 @@ export class TCGJustTestMyDeckView {
         try {
             let deckCount = 6; // 현재 사용자가 6개의 덱을 생성했다고 가정
 
-            const myDeckButtonService = MyDeckButtonServiceImpl.getInstance();
-            const buttonGroup = await myDeckButtonService.createMyDeckButtonWithPosition(deckCount);
+            const buttonGroup = await this.myDeckButtonService.createMyDeckButtonWithPosition(deckCount);
 
             if (buttonGroup) {
                 this.scene.add(buttonGroup);
@@ -236,6 +236,7 @@ export class TCGJustTestMyDeckView {
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
             this.myDeckButtonPageMovementButtonService.adjustMyDeckButtonPageMovementButtonPosition();
             this.myDeckCardPageMovementButtonService.adjustMyDeckCardPageMovementButtonPosition();
+            this.myDeckButtonService.adjustMyDeckButtonPosition();
         }
     }
 
