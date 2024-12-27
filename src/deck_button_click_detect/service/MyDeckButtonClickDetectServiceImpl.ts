@@ -1,7 +1,7 @@
 import {MyDeckButtonClickDetectService} from "./MyDeckButtonClickDetectService";
-import {MyDeckButtonSceneRepositoryImpl} from "../../my_deck_button_scene/repository/MyDeckButtonSceneRepositoryImpl";
-import {MyDeckButtonSceneRepository} from "../../my_deck_button_scene/repository/MyDeckButtonSceneRepository";
-import {MyDeckButtonScene} from "../../my_deck_button_scene/entity/MyDeckButtonScene";
+import {MyDeckButtonRepositoryImpl} from "../../my_deck_button/repository/MyDeckButtonRepositoryImpl";
+import {MyDeckButtonRepository} from "../../my_deck_button/repository/MyDeckButtonRepository";
+import {MyDeckButton} from "../../my_deck_button/entity/MyDeckButton";
 
 import {MyDeckButtonClickDetectRepositoryImpl} from "../repository/MyDeckButtonClickDetectRepositoryImpl";
 import {MyDeckButtonClickDetectRepository} from "../repository/MyDeckButtonClickDetectRepository";
@@ -13,7 +13,7 @@ import * as THREE from "three";
 export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDetectService {
     private static instance: MyDeckButtonClickDetectServiceImpl | null = null;
 
-    private myDeckButtonSceneRepository: MyDeckButtonSceneRepositoryImpl;
+    private myDeckButtonRepository: MyDeckButtonRepositoryImpl;
     private myDeckButtonClickDetectRepository: MyDeckButtonClickDetectRepositoryImpl;
 
     private cameraRepository: CameraRepository
@@ -21,7 +21,7 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     private leftMouseDown: boolean = false;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
-        this.myDeckButtonSceneRepository = MyDeckButtonSceneRepositoryImpl.getInstance();
+        this.myDeckButtonRepository = MyDeckButtonRepositoryImpl.getInstance();
         this.myDeckButtonClickDetectRepository = MyDeckButtonClickDetectRepositoryImpl.getInstance()
         this.cameraRepository = CameraRepositoryImpl.getInstance()
     }
@@ -43,13 +43,13 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
 
     async handleLeftClick(
         clickPoint: { x: number; y: number },
-    ): Promise<MyDeckButtonScene | null> {
+    ): Promise<MyDeckButton | null> {
         const { x, y } = clickPoint;
 
-        const deckSceneList = this.myDeckButtonSceneRepository.findAll()
+        const deckButtonList = this.myDeckButtonRepository.findAll()
         const clickedDeckButton = this.myDeckButtonClickDetectRepository.isMyDeckButtonClicked(
             { x, y },
-            deckSceneList,
+            deckButtonList,
             this.camera
         );
         if (clickedDeckButton) {
@@ -57,10 +57,10 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             this.myDeckButtonClickDetectRepository.saveCurrentClickDeckButtonId(clickedDeckButton.id);
             const currentClickDeckButtonId = this.myDeckButtonClickDetectRepository.getCurrentClickDeckButtonId();
 
-            const hiddenButton = deckSceneList.find((button) => !button.getMesh().visible);
+            const hiddenButton = deckButtonList.find((button) => !button.getMesh().visible);
 
             if (hiddenButton && hiddenButton.id !== currentClickDeckButtonId) {
-                const buttonShow = this.myDeckButtonSceneRepository.showById(hiddenButton.id);
+                const buttonShow = this.myDeckButtonRepository.showById(hiddenButton.id);
                 if (buttonShow) {
                     console.log(`Deck Button ID ${currentClickDeckButtonId} is now shown.`);
                 } else {
@@ -70,7 +70,7 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             }
 
             if (currentClickDeckButtonId !== null){
-                const buttonHide = this.myDeckButtonSceneRepository.hideById(currentClickDeckButtonId);
+                const buttonHide = this.myDeckButtonRepository.hideById(currentClickDeckButtonId);
                 if (buttonHide) {
                     console.log(`Deck Button ID ${currentClickDeckButtonId} is now hidden.`);
                 } else {

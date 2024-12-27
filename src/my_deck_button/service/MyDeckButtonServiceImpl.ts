@@ -6,27 +6,23 @@ import {MyDeckButtonRepository} from "../repository/MyDeckButtonRepository";
 import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
 import {MyDeckButtonRepositoryImpl} from "../repository/MyDeckButtonRepositoryImpl";
 import {MyDeckButtonPositionRepositoryImpl} from "../../my_deck_button_position/repository/MyDeckButtonPositionRepositoryImpl";
-import {MyDeckButtonSceneRepositoryImpl} from "../../my_deck_button_scene/repository/MyDeckButtonSceneRepositoryImpl";
-import {MyDeckButtonScene} from "../../my_deck_button_scene/entity/MyDeckButtonScene";
 import { MyDeckButtonPosition } from "../../my_deck_button_position/entity/MyDeckButtonPosition";
 import {Vector2d} from "../../common/math/Vector2d";
 
 export class MyDeckButtonServiceImpl implements MyDeckButtonService {
     private static instance: MyDeckButtonServiceImpl;
-    private myDeckButtonRepository: MyDeckButtonRepository;
-    private myDeckButtonSceneRepository: MyDeckButtonSceneRepositoryImpl;
+    private myDeckButtonRepository: MyDeckButtonRepositoryImpl;
     private myDeckButtonPositionRepository: MyDeckButtonPositionRepositoryImpl;
 
     private constructor(myDeckButtonRepository: MyDeckButtonRepository) {
-        this.myDeckButtonRepository = myDeckButtonRepository;
-        this.myDeckButtonSceneRepository = MyDeckButtonSceneRepositoryImpl.getInstance();
+        this.myDeckButtonRepository = MyDeckButtonRepositoryImpl.getInstance();
         this.myDeckButtonPositionRepository = MyDeckButtonPositionRepositoryImpl.getInstance();
     }
 
     public static getInstance(): MyDeckButtonServiceImpl {
         if (!MyDeckButtonServiceImpl.instance) {
-            const myDeckButtonRepository = MyDeckButtonRepositoryImpl.getInstance();
-            MyDeckButtonServiceImpl.instance = new MyDeckButtonServiceImpl(myDeckButtonRepository);
+            const repository = MyDeckButtonRepositoryImpl.getInstance();
+            MyDeckButtonServiceImpl.instance = new MyDeckButtonServiceImpl(repository);
         }
         return MyDeckButtonServiceImpl.instance;
     }
@@ -38,9 +34,8 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
             console.log(`Deck ${deckId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
             this.saveMyDeckButtonPosition(deckId, position);
 
-            const deckButtonScene = await this.createDeckButtonScene(deckId, position.position);
-            const buttonMesh = deckButtonScene.getMesh();
-            buttonGroup.add(buttonMesh);
+            const deckButton = await this.createMyDeckButton(deckId, position.position);
+            buttonGroup.add(deckButton.mesh);
 
         } catch (error) {
             console.error('Error creating my deck button with position:', error);
@@ -70,13 +65,10 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 //         return buttonGroup;
 //     }
 
-    private async createDeckButtonScene(deckId: number, position: Vector2d): Promise<MyDeckButtonScene> {
-        return await this.myDeckButtonSceneRepository.createMyDeckButtonScene(deckId, position);
-    }
 
-//     private async createNeonDeckButtonScene(deckId: number, position: Vector2d): Promise<MyDeckButtonScene> {
-//         return await this.myDeckButtonSceneRepository.createMyDeckNeonButtonScene(deckId, position);
-//     }
+    private async createMyDeckButton(deckId: number, position: Vector2d): Promise<MyDeckButton> {
+        return await this.myDeckButtonRepository.createMyDeckButton(deckId, position);
+    }
 
     private myDeckButtonPosition(deckId: number): MyDeckButtonPosition {
         return this.myDeckButtonPositionRepository.addMyDeckButtonPosition(deckId);
@@ -91,13 +83,14 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
     }
 
     public adjustMyDeckButtonPosition(): void {
-        const positionRepository = MyDeckButtonPositionRepositoryImpl.getInstance();
-        const sceneRepository = MyDeckButtonSceneRepositoryImpl.getInstance();
+        const positionRepository = this.myDeckButtonPositionRepository
+        const buttonRepository = this.myDeckButtonRepository
 
-        const buttonList = sceneRepository.findAll();
+        const buttonList = buttonRepository.findAll();
+        const buttonPosition = positionRepository.findAll();
+
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        const buttonPosition = positionRepository.findAll();
 
         console.log('buttonList:', buttonList);
         console.log('buttonPosition:', buttonPosition);
@@ -149,11 +142,4 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         this.myDeckButtonRepository.deleteAll();
     }
 
-//     public hideMyDeckButtonById(id: number): boolean {
-//         return this.myDeckButtonSceneRepository.hideById(id);
-//     }
-//
-//    public showMyDeckButtonById(id: number): boolean {
-//        return this.myDeckButtonSceneRepository.showById(id);
-//        }
 }
