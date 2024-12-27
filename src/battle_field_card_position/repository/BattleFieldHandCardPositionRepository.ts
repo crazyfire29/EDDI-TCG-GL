@@ -7,4 +7,5 @@ export interface BattleFieldHandCardPositionRepository {
     deleteById(id: number): boolean;
     deleteAll(): void;
     count(): number;
+    extractById(id: number): BattleFieldCardPosition | undefined
 }

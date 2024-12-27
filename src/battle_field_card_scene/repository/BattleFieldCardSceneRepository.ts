@@ -7,4 +7,5 @@ export interface BattleFieldCardSceneRepository {
     findAll(): BattleFieldCardScene[];
     deleteById(id: number): boolean;
     deleteAll(): void;
+    extractByIndex(index: number): BattleFieldCardScene | undefined
 }

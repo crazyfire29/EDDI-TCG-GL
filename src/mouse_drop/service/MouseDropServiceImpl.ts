@@ -23,6 +23,13 @@ import {YourFieldRepositoryImpl} from "../../your_field/repository/YourFieldRepo
 import {YourFieldRepository} from "../../your_field/repository/YourFieldRepository";
 import {getCardById} from "../../card/utility";
 import {CardKind} from "../../card/kind";
+import {BattleFieldCardSceneRepository} from "../../battle_field_card_scene/repository/BattleFieldCardSceneRepository";
+import {BattleFieldCardSceneRepositoryImpl} from "../../battle_field_card_scene/repository/BattleFieldCardSceneRepositoryImpl";
+import {YourFieldCardSceneRepository} from "../../your_field_card_scene/repository/YourFieldCardSceneRepository";
+import {YourFieldCardSceneRepositoryImpl} from "../../your_field_card_scene/repository/YourFieldCardSceneRepositoryImpl";
+import {YourFieldCardPositionRepository} from "../../your_field_card_position/repository/YourFieldCardPositionRepository";
+import {YourFieldCardPositionRepositoryImpl} from "../../your_field_card_position/repository/YourFieldCardPositionRepositoryImpl";
+import {YourFieldCardPosition} from "../../your_field_card_position/entity/YourFieldCardPosition";
 
 export class MouseDropServiceImpl implements MouseDropService {
     private static instance: MouseDropServiceImpl | null = null;
@@ -33,12 +40,15 @@ export class MouseDropServiceImpl implements MouseDropService {
 
     private battleFieldHandRepository: BattleFieldHandRepository
     private battleFieldHandCardPositionRepository: BattleFieldHandCardPositionRepository
+    private battleFieldCardSceneRepository: BattleFieldCardSceneRepository
 
     private battleFieldCardAttributeMarkRepository: BattleFieldCardAttributeMarkRepository
     private battleFieldCardAttributeMarkPositionRepository: BattleFieldCardAttributeMarkPositionRepository
     private battleFieldCardAttributeMarkSceneRepository: BattleFieldCardAttributeMarkSceneRepository
 
     private yourFieldRepository: YourFieldRepository
+    private yourFieldCardSceneRepository: YourFieldCardSceneRepository
+    private yourFieldCardPositionRepository: YourFieldCardPositionRepository
 
     constructor() {
         this.raycaster = new THREE.Raycaster();
@@ -47,11 +57,15 @@ export class MouseDropServiceImpl implements MouseDropService {
 
         this.battleFieldHandRepository = BattleFieldHandRepositoryImpl.getInstance()
         this.battleFieldHandCardPositionRepository = BattleFieldHandCardPositionRepositoryImpl.getInstance()
+        this.battleFieldCardSceneRepository = BattleFieldCardSceneRepositoryImpl.getInstance()
+
         this.battleFieldCardAttributeMarkRepository = BattleFieldCardAttributeMarkRepositoryImpl.getInstance()
         this.battleFieldCardAttributeMarkPositionRepository = BattleFieldCardAttributeMarkPositionRepositoryImpl.getInstance()
         this.battleFieldCardAttributeMarkSceneRepository = BattleFieldCardAttributeMarkSceneRepositoryImpl.getInstance()
 
         this.yourFieldRepository = YourFieldRepositoryImpl.getInstance()
+        this.yourFieldCardSceneRepository = YourFieldCardSceneRepositoryImpl.getInstance()
+        this.yourFieldCardPositionRepository = YourFieldCardPositionRepositoryImpl.getInstance()
     }
 
     public static getInstance(): MouseDropServiceImpl {
@@ -112,7 +126,34 @@ export class MouseDropServiceImpl implements MouseDropService {
         console.log("handleValidDrop() yourFieldRepository saved");
 
         const handCardIndex = this.battleFieldHandRepository.findCardIndexByCardSceneId(cardSceneId)
+
+        if (handCardIndex === null) {
+            console.error(`sceneId ${cardSceneId} 존재하지 않음`);
+            return
+        }
+
         console.log(`handCardIndex: ${handCardIndex}`)
+        const willBePlaceYourFieldCardScene = this.battleFieldCardSceneRepository.extractByIndex(handCardIndex)
+        const willBePlaceYourFieldCardSceneMesh = willBePlaceYourFieldCardScene?.getMesh()
+        if (willBePlaceYourFieldCardSceneMesh) {
+            this.yourFieldCardSceneRepository.create(willBePlaceYourFieldCardSceneMesh);
+        }
+
+        const handCardPositionId = this.battleFieldHandRepository.findPositionIdByCardSceneId(cardSceneId)
+        if (handCardPositionId === null) {
+            console.error('Position ID를 찾을 수 없습니다');
+            return
+        }
+        const willBePlaceYourFieldCardPosition = this.battleFieldHandCardPositionRepository.extractById(handCardPositionId)
+        if (willBePlaceYourFieldCardPosition) {
+            const positionX = willBePlaceYourFieldCardPosition.getX()
+            const positionY = willBePlaceYourFieldCardPosition.getY()
+            const yourFieldCardPosition = new YourFieldCardPosition(positionX, positionY)
+            this.yourFieldCardPositionRepository.save(yourFieldCardPosition);
+        }
+
+        // const remainHandCardSceneList = this.battleFieldCardSceneRepository.findAll()
+
     }
 
     private async restoreOriginalPosition(selectedObject: THREE.Object3D): Promise<void> {
