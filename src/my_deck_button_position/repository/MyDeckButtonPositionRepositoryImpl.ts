@@ -28,7 +28,6 @@ export class MyDeckButtonPositionRepositoryImpl implements MyDeckButtonPositionR
         const positionY = this.initialY + ((deckId - 1) % this.maxButtonsPerPage) * this.incrementY;
 
         const position = new MyDeckButtonPosition(positionX, positionY);
-        position.id = deckId;
 
         return position;
     }
