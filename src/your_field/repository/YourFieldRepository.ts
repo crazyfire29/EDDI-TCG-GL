@@ -1,7 +1,7 @@
 import {YourField} from "../entity/YourField";
 
 export interface YourFieldRepository {
-    save(cardSceneId: number, positionId: number, attributeMarkIdList: number[]): YourField;
+    save(cardSceneId: number, positionId: number, attributeMarkIdList: number[], cardId: number): YourField;
     findById(id: number): YourField | undefined;
     findAll(): YourField[];
     deleteById(id: number): boolean;

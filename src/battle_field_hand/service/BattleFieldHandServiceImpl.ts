@@ -93,7 +93,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
 
         try {
             const textures = await this.loadCardTextures(unitJob, cardKind, card);
-            await this.addAttributesToCardGroup(mainCardScene, createdHandPosition, cardKind, unitJob, cardGroup, handPosition, textures);
+            await this.addAttributesToCardGroup(mainCardScene, createdHandPosition, cardId, cardKind, unitJob, cardGroup, handPosition, textures);
         } catch (error) {
             console.error("Error loading textures:", error);
         }
@@ -155,6 +155,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
     private async addAttributesToCardGroup(
         mainCardScene: BattleFieldCardScene,
         createdHandPosition: BattleFieldCardPosition,
+        cardId: number,
         cardKind: number,
         unitJob: number,
         cardGroup: THREE.Group,
@@ -220,7 +221,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
         }
 
         const attributeMarkIdList = attributeMarks.map((mark) => mark.getId())
-        this.battleFieldHandRepository.save(mainCardScene.getId(), createdHandPosition.getId(), attributeMarkIdList)
+        this.battleFieldHandRepository.save(mainCardScene.getId(), createdHandPosition.getId(), attributeMarkIdList, cardId)
     }
 
     private calculateWeaponPosition(handPosition: Vector2d): Vector2d {
@@ -330,48 +331,4 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
         );
         return await this.battleFieldCardAttributeMarkRepository.save(attributeMark);
     }
-
-    createBattleFieldFirstDrawHand() {
-        const handPositionCount = this.battleFieldHandCardPositionRepository.count()
-        const handPositionX = (this.HAND_INITIAL_X + handPositionCount * this.GAP_OF_EACH_CARD) * window.innerWidth;
-        const handPositionY = this.HAND_INITIAL_Y * window.innerHeight
-            + (this.CARD_HEIGHT * this.HALF * window.innerWidth);
-        const handPosition = new Vector2d(handPositionX, handPositionY);
-
-        const cardPosition = new BattleFieldCardPosition(handPosition.getX(), handPosition.getY());
-        this.battleFieldHandCardPositionRepository.save(cardPosition);
-
-        // const cardScene = this.battleFieldCardSceneRepository.create(cardId, handPosition);
-
-        // this.battleFieldHandCardPositionRepository.save()
-
-        // BattleFieldCardPosition
-        // this.battleFieldCardPositionRepository.save()
-        // this.battleFieldCardSceneRepository.create(cardId)
-        // this.battleFieldCardRepository.save(cardSceneId, positionId, attributeMarkIdList, status);
-
-        return this.battleFieldHandRepository.save(1, 1, [1]);
-    }
-
-    // create(cardId: number): BattleFieldHand {
-    //     const handPositionCount = this.battleFieldHandCardPositionRepository.count()
-    //     const handPositionX = (this.HAND_INITIAL_X + handPositionCount * this.GAP_OF_EACH_CARD) * window.innerWidth;
-    //     const handPositionY = this.HAND_INITIAL_Y * window.innerHeight
-    //         + (this.CARD_HEIGHT * this.HALF * window.innerWidth);
-    //     const handPosition = new Vector2d(handPositionX, handPositionY);
-    //
-    //     const cardPosition = new BattleFieldCardPosition(handPosition.getX(), handPosition.getY());
-    //     this.battleFieldHandCardPositionRepository.save(cardPosition);
-    //
-    //     const cardScene = this.battleFieldCardSceneRepository.create(cardId, handPosition);
-    //
-    //     // this.battleFieldHandCardPositionRepository.save()
-    //
-    //     // BattleFieldCardPosition
-    //     // this.battleFieldCardPositionRepository.save()
-    //     // this.battleFieldCardSceneRepository.create(cardId)
-    //     // this.battleFieldCardRepository.save(cardSceneId, positionId, attributeMarkIdList, status);
-    //
-    //     return this.battleFieldHandRepository.save(1, 1, [1]);
-    // }
 }

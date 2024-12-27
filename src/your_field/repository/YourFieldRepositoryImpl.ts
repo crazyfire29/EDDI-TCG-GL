@@ -14,14 +14,14 @@ export class YourFieldRepositoryImpl implements YourFieldRepository {
         return YourFieldRepositoryImpl.instance;
     }
 
-    save(cardSceneId: number, positionId: number, attributeMarkIdList: number[]): YourField {
+    save(cardSceneId: number, positionId: number, attributeMarkIdList: number[], cardId: number): YourField {
         const existingCard = Array.from(this.cardMap.values()).find(card => card.cardSceneId === cardSceneId && card.positionId === positionId);
         if (existingCard) {
             existingCard.attributeMarkIdList = attributeMarkIdList;
             return existingCard;
         }
 
-        const newCard = new YourField(cardSceneId, positionId, attributeMarkIdList);
+        const newCard = new YourField(cardSceneId, positionId, attributeMarkIdList, cardId);
         this.cardMap.set(newCard.id, newCard);
 
         return newCard;

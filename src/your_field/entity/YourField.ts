@@ -6,11 +6,15 @@ export class YourField {
     positionId: number;
     attributeMarkIdList: number[];
 
-    constructor(cardSceneId: number, positionId: number, attributeMarkIdList: number[]) {
+    cardId: number
+
+    constructor(cardSceneId: number, positionId: number, attributeMarkIdList: number[], cardId: number) {
         this.id = IdGenerator.generateId("YourField");
         this.cardSceneId = cardSceneId;
         this.positionId = positionId;
         this.attributeMarkIdList = attributeMarkIdList;
+
+        this.cardId = cardId
     }
 
     getId(): number {

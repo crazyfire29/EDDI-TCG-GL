@@ -227,9 +227,6 @@ export class TCGJustTestBattleFieldView {
         const yourFieldAreaMesh = yourField.getArea()
 
         this.scene.add(yourFieldAreaMesh);
-
-        // this.dragAndDropManager.setTargetShape(yourBattleFieldRectangle, CardState.FIELD)
-        // this.yourBattleFieldRectangle = yourBattleFieldRectangle;
     }
 
     private async addYourHandUnitList(): Promise<void> {

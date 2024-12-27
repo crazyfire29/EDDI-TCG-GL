@@ -1,12 +1,14 @@
 import {BattleFieldHand} from "../entity/BattleFieldHand";
 
 export interface BattleFieldHandRepository {
-    save(cardSceneId: number, positionId: number, attributeMarkIdList: number[]): BattleFieldHand;
+    save(cardSceneId: number, positionId: number, attributeMarkIdList: number[], cardId: number): BattleFieldHand;
     findById(id: number): BattleFieldHand | undefined;
     findAll(): BattleFieldHand[];
     deleteById(id: number): boolean;
     deleteAll(): void;
+
     findByCardSceneId(cardSceneId: number): BattleFieldHand | null
     findAttributeMarkIdListByCardSceneId(cardSceneId: number): number[] | null
     findPositionIdByCardSceneId(cardSceneId: number): number | null
+    findCardIndexByCardSceneId(cardSceneId: number): number | null
 }

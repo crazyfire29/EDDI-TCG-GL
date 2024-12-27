@@ -21,6 +21,8 @@ import {BattleFieldCardAttributeMarkSceneRepositoryImpl} from "../../battle_fiel
 import {BattleFieldCardAttributeMarkSceneRepository} from "../../battle_field_card_attribute_mark_scene/repository/BattleFieldCardAttributeMarkSceneRepository";
 import {YourFieldRepositoryImpl} from "../../your_field/repository/YourFieldRepositoryImpl";
 import {YourFieldRepository} from "../../your_field/repository/YourFieldRepository";
+import {getCardById} from "../../card/utility";
+import {CardKind} from "../../card/kind";
 
 export class MouseDropServiceImpl implements MouseDropService {
     private static instance: MouseDropServiceImpl | null = null;
@@ -84,7 +86,33 @@ export class MouseDropServiceImpl implements MouseDropService {
         const cardSceneId = selectedObject.getId()
 
         const handCard = this.battleFieldHandRepository.findByCardSceneId(cardSceneId);
-        console.log("Updated object state to 'YourField'.");
+
+        const cardId = handCard?.getCardId() ?? 0; // 기본값 0
+        const card = getCardById(cardId)
+
+        if (!card) {
+            console.error(`Card not found for cardId: ${cardId}`);
+            throw new Error(`Card not found for cardId: ${cardId}`);
+        }
+
+        const cardKind = parseInt(card.종류, 10) as CardKind;
+
+        if (cardKind !== CardKind.UNIT) {
+            this.restoreOriginalPosition(selectedObject as unknown as THREE.Object3D);
+            return
+        }
+
+        // UNIT 카드에 대한 처리 로직
+        console.log("Handling UNIT card:", card);
+
+        const positionId = handCard?.getPositionId() ?? 0; // 기본값 0
+        const attributeMarkIdList = handCard?.getAttributeMarkIdList() ?? [];
+
+        this.yourFieldRepository.save(cardSceneId, positionId, attributeMarkIdList, cardId);
+        console.log("handleValidDrop() yourFieldRepository saved");
+
+        const handCardIndex = this.battleFieldHandRepository.findCardIndexByCardSceneId(cardSceneId)
+        console.log(`handCardIndex: ${handCardIndex}`)
     }
 
     private async restoreOriginalPosition(selectedObject: THREE.Object3D): Promise<void> {

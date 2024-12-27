@@ -6,11 +6,15 @@ export class BattleFieldHand {
     positionId: number;
     attributeMarkIdList: number[];
 
-    constructor(cardSceneId: number, positionId: number, attributeMarkIdList: number[]) {
+    cardId: number;
+
+    constructor(cardSceneId: number, positionId: number, attributeMarkIdList: number[], cardId: number) {
         this.id = IdGenerator.generateId("BattleFieldHand");
         this.cardSceneId = cardSceneId;
         this.positionId = positionId;
         this.attributeMarkIdList = attributeMarkIdList;
+
+        this.cardId = cardId
     }
 
     getId(): number {
@@ -27,5 +31,9 @@ export class BattleFieldHand {
 
     getAttributeMarkIdList(): number[] {
         return this.attributeMarkIdList;
+    }
+
+    getCardId(): number {
+        return this.cardId
     }
 }
