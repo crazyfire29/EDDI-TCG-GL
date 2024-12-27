@@ -26,14 +26,10 @@ export class MyDeckButtonRepositoryImpl implements MyDeckButtonRepository {
         return MyDeckButtonRepositoryImpl.instance;
     }
 
-    public async createMyDeckButton(
-        type: MyDeckButtonType,
-        position: Vector2d
-    ): Promise<MyDeckButton> {
-        const texture = await this.textureManager.getTexture('my_deck_buttons', type);
+    public async createMyDeckButton(deckId: number, position: Vector2d): Promise<MyDeckButton> {
+        const texture = await this.textureManager.getTexture('my_deck_buttons', 2);
 
         if (!texture) {
-            console.error('Failed to load texture for type:', type);
             throw new Error('MyDeckButton texture not found.');
         }
 
@@ -46,8 +42,8 @@ export class MyDeckButtonRepositoryImpl implements MyDeckButtonRepository {
         const buttonMesh = MeshGenerator.createMesh(texture, buttonWidth, buttonHeight, position);
         buttonMesh.position.set(buttonPositionX, buttonPositionY, 0);
 
-        const newButton = new MyDeckButton(type, buttonWidth, buttonHeight, buttonMesh, position);
-//         this.buttonMap.set(newButton.id, newButton);
+        const newButton = new MyDeckButton(buttonWidth, buttonHeight, buttonMesh, position);
+        this.buttonMap.set(deckId, newButton);
 
         return newButton;
     }
@@ -70,5 +66,23 @@ export class MyDeckButtonRepositoryImpl implements MyDeckButtonRepository {
 
     public deleteAll(): void {
         this.buttonMap.clear();
+    }
+
+    hideById(id: number): boolean {
+        const button = this.findById(id);
+        if (button) {
+            button.getMesh().visible = false;
+            return true;
+        }
+        return false;
+    }
+
+    showById(id: number): boolean {
+        const button = this.findById(id);
+        if (button) {
+            button.getMesh().visible = true;
+            return true;
+        }
+        return false;
     }
 }

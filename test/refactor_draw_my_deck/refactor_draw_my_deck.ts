@@ -23,7 +23,6 @@ import {MyDeckCardPageMovementButtonConfigList} from "../../src/my_deck_card_pag
 import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButtonConfigList";
 import {MyDeckButtonServiceImpl} from "../../src/my_deck_button/service/MyDeckButtonServiceImpl";
 import {MyDeckButtonMapRepositoryImpl} from "../../src/my_deck_button/repository/MyDeckButtonMapRepositoryImpl";
-import {MyDeckButtonSceneRepositoryImpl} from "../../src/my_deck_button_scene/repository/MyDeckButtonSceneRepositoryImpl";
 import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
 import {MyDeckButtonClickDetectService} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectService";
 
@@ -55,7 +54,6 @@ export class TCGJustTestMyDeckView {
     private readonly cameraService = CameraServiceImpl.getInstance(this.cameraRepository);
 
     private myDeckButtonClickDetectService: MyDeckButtonClickDetectService
-    private myDeckButtonSceneRepository = MyDeckButtonSceneRepositoryImpl.getInstance();
 
     private initialized = false;
     private isAnimating = false;

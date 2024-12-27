@@ -4,7 +4,7 @@ import {MyDeckButtonType} from "../entity/MyDeckButtonType";
 import {Vector2d} from "../../common/math/Vector2d";
 
 export interface MyDeckButtonRepository {
-    createMyDeckButton(type: MyDeckButtonType, position: Vector2d): Promise<MyDeckButton>;
+    createMyDeckButton(deckId: number, position: Vector2d): Promise<MyDeckButton>;
     getAllMyDeckButtons(): Map<number, MyDeckButton>;
     findById(id: number): MyDeckButton | null;
     findAll(): MyDeckButton[];
