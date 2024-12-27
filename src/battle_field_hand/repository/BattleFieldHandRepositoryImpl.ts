@@ -56,4 +56,13 @@ export class BattleFieldHandRepositoryImpl implements BattleFieldHandRepository 
 
         return hand ? hand.attributeMarkIdList : null;
     }
+
+    findPositionIdByCardSceneId(cardSceneId: number): number | null {
+        const hand = this.findByCardSceneId(cardSceneId);
+        if (hand) {
+            console.log(`BattleFieldHandRepositoryImpl findPositionIdByCardSceneId() -> hand.positionId: ${hand.positionId}`);
+            return hand.positionId;
+        }
+        return null;
+    }
 }

@@ -8,4 +8,5 @@ export interface BattleFieldHandRepository {
     deleteAll(): void;
     findByCardSceneId(cardSceneId: number): BattleFieldHand | null
     findAttributeMarkIdListByCardSceneId(cardSceneId: number): number[] | null
+    findPositionIdByCardSceneId(cardSceneId: number): number | null
 }
