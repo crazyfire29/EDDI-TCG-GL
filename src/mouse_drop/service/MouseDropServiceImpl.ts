@@ -59,8 +59,7 @@ export class MouseDropServiceImpl implements MouseDropService {
             return;
         }
 
-        const isDroppedInField = this.mouseDropFieldRepository.isYourFieldAreaDropped(selectedObject, this.raycaster);
-        if (isDroppedInField) {
+        if (this.mouseDropFieldRepository.isYourFieldAreaDropped(selectedObject, this.raycaster)) {
             console.log("Dropped inside YourFieldArea.");
             if (selectedObject instanceof BattleFieldCardScene) {
                 this.handleValidDrop(selectedObject);
@@ -70,14 +69,11 @@ export class MouseDropServiceImpl implements MouseDropService {
             this.restoreOriginalPosition(selectedObject);
         }
 
-        this.dragMoveRepository.deleteSelectedObject();
-        this.dragMoveRepository.deleteSelectedGroup();
+        this.clearSelection();
     }
 
     private handleValidDrop(selectedObject: BattleFieldCardScene): void {
-        const cardScene = selectedObject as BattleFieldCardScene; // 안전하게 타입 캐스팅
-        const cardSceneMesh = cardScene.getMesh();
-
+        const cardSceneMesh = selectedObject.getMesh();
         cardSceneMesh.userData.state = 'YourField';
         console.log("Updated object state to 'YourField'.");
     }
@@ -85,78 +81,75 @@ export class MouseDropServiceImpl implements MouseDropService {
     private async restoreOriginalPosition(selectedObject: THREE.Object3D): Promise<void> {
         if (selectedObject instanceof BattleFieldCardScene) {
             const cardSceneId = selectedObject.getId();
-            const cardPositionId = this.battleFieldHandRepository.findPositionIdByCardSceneId(cardSceneId)
-            // TODO: 여기서 main Card 원위치, attribute Mark 원위치
+            const cardPositionId = this.battleFieldHandRepository.findPositionIdByCardSceneId(cardSceneId);
             if (cardPositionId !== null) {
-                const cardPositionEntity = this.battleFieldHandCardPositionRepository.findById(cardPositionId);
-                console.log(`restoreOriginalPosition() -> cardPosition: ${JSON.stringify(cardPositionEntity)}`);
-
-                if (cardPositionEntity instanceof BattleFieldCardPosition) { // 타입 검사
-                    const x = cardPositionEntity.getX();
-                    const y = cardPositionEntity.getY();
-                    console.log(`Card Position -> X: ${x}, Y: ${y}`);
-
-                    const mainCardSceneMesh = selectedObject.getMesh()
-
-                    if (mainCardSceneMesh) {
-                        // 원위치로 복원
-                        mainCardSceneMesh.position.set(x, y, mainCardSceneMesh.position.z);
-                        console.log(`Main card mesh restored to position X: ${x}, Y: ${y}`);
-                    }
+                const cardPositionEntity = await this.battleFieldHandCardPositionRepository.findById(cardPositionId);
+                if (cardPositionEntity) {
+                    this.restoreCardPosition(selectedObject, cardPositionEntity);
                 }
             }
 
-            const attributeMarkIdList = this.battleFieldHandRepository.findAttributeMarkIdListByCardSceneId(cardSceneId);
-            console.log(`restoreOriginalPosition() -> attributeMarkIdList: ${attributeMarkIdList}`);
-
-            if (attributeMarkIdList && attributeMarkIdList.length > 0) {
-                const attributeMarkList = await Promise.all(
-                    attributeMarkIdList.map(id =>
-                        this.battleFieldCardAttributeMarkRepository.findById(id)
-                    )
-                );
-                console.log("restoreOriginalPosition() Attribute marks found:", attributeMarkList.map(mark => JSON.stringify(mark)));
-
-                const attributeMarkPositionPromises = attributeMarkList
-                    .filter((attributeMark): attributeMark is BattleFieldCardAttributeMark => attributeMark !== null)
-                    .map(attributeMark =>
-                        this.battleFieldCardAttributeMarkPositionRepository.findById(attributeMark.attributeMarkPositionId)
-                    );
-
-                const validAttributePositions = await Promise.all(attributeMarkPositionPromises);
-                console.log("restoreOriginalPosition() Attribute marks position:", validAttributePositions.map(position => JSON.stringify(position)));
-
-                const attributeMarkScenePromises = attributeMarkList
-                    .filter((attributeMark): attributeMark is BattleFieldCardAttributeMark => attributeMark !== null)
-                    .map(attributeMark =>
-                        this.battleFieldCardAttributeMarkSceneRepository.findById(attributeMark.attributeMarkSceneId)
-                    );
-
-                const validAttributeScenes = await Promise.all(attributeMarkScenePromises);
-                console.log("restoreOriginalPosition() Attribute marks position:", validAttributeScenes);
-
-                const validAttributeSceneList = validAttributeScenes.filter(
-                    (scene): scene is BattleFieldCardAttributeMarkScene => scene !== null
-                );
-
-                validAttributeSceneList.forEach((attributeScene, index) => {
-                    const attributePosition = validAttributePositions[index]; // 매칭된 Position
-                    if (attributePosition) {
-                        const x = attributePosition.position.getX(); // X 값 추출
-                        const y = attributePosition.position.getY(); // Y 값 추출
-                        const mesh = attributeScene.getMesh()
-
-                        if (mesh) {
-                            mesh.position.set(x, y, mesh.position.z); // 위치 복원
-                            console.log(`Attribute mark scene restored to position X: ${x}, Y: ${y}`);
-                        } else {
-                            console.log(`Mesh not found for attribute scene ID: ${attributeScene.getId()}`);
-                        }
-                    }
-                });
-            }
+            await this.restoreAttributeMarksPosition(cardSceneId);
         } else {
             console.log("Selected object is not a BattleFieldCardScene.");
         }
+    }
+
+    private restoreCardPosition(selectedObject: BattleFieldCardScene, cardPositionEntity: BattleFieldCardPosition): void {
+        const x = cardPositionEntity.getX();
+        const y = cardPositionEntity.getY();
+        const mainCardSceneMesh = selectedObject.getMesh();
+        if (mainCardSceneMesh) {
+            mainCardSceneMesh.position.set(x, y, mainCardSceneMesh.position.z);
+            console.log(`Main card mesh restored to position X: ${x}, Y: ${y}`);
+        }
+    }
+
+    private async restoreAttributeMarksPosition(cardSceneId: number): Promise<void> {
+        const attributeMarkIdList = this.battleFieldHandRepository.findAttributeMarkIdListByCardSceneId(cardSceneId);
+        if (attributeMarkIdList?.length) {
+            const attributeMarkList = await this.getAttributeMarks(attributeMarkIdList);
+            const validAttributePositions = await this.getValidAttributePositions(attributeMarkList);
+            const validAttributeScenes = await this.getValidAttributeScenes(attributeMarkList);
+            this.restoreAttributeMarkScenes(validAttributePositions, validAttributeScenes);
+        }
+    }
+
+    private async getAttributeMarks(attributeMarkIdList: number[]): Promise<BattleFieldCardAttributeMark[]> {
+        const marks = await Promise.all(attributeMarkIdList.map(id => this.battleFieldCardAttributeMarkRepository.findById(id)));
+        return marks.filter((mark): mark is BattleFieldCardAttributeMark => mark !== null); // Type guard to filter null values
+    }
+
+    private async getValidAttributePositions(attributeMarkList: BattleFieldCardAttributeMark[]): Promise<any[]> {
+        return Promise.all(attributeMarkList.map(attributeMark =>
+            this.battleFieldCardAttributeMarkPositionRepository.findById(attributeMark.attributeMarkPositionId)
+        ));
+    }
+
+    private async getValidAttributeScenes(attributeMarkList: BattleFieldCardAttributeMark[]): Promise<any[]> {
+        return Promise.all(attributeMarkList.map(attributeMark =>
+            this.battleFieldCardAttributeMarkSceneRepository.findById(attributeMark.attributeMarkSceneId)
+        ));
+    }
+
+    private restoreAttributeMarkScenes(validAttributePositions: any[], validAttributeScenes: any[]): void {
+        validAttributeScenes.forEach((attributeScene, index) => {
+            const attributePosition = validAttributePositions[index];
+            if (attributePosition) {
+                const x = attributePosition.position.getX();
+                const y = attributePosition.position.getY();
+                const mesh = attributeScene.getMesh();
+
+                if (mesh) {
+                    mesh.position.set(x, y, mesh.position.z);
+                    console.log(`Attribute mark scene restored to position X: ${x}, Y: ${y}`);
+                }
+            }
+        });
+    }
+
+    private clearSelection(): void {
+        this.dragMoveRepository.deleteSelectedObject();
+        this.dragMoveRepository.deleteSelectedGroup();
     }
 }
