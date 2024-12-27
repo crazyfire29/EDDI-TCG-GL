@@ -47,7 +47,7 @@ export class MyDeckButtonRepositoryImpl implements MyDeckButtonRepository {
         buttonMesh.position.set(buttonPositionX, buttonPositionY, 0);
 
         const newButton = new MyDeckButton(type, buttonWidth, buttonHeight, buttonMesh, position);
-        this.buttonMap.set(newButton.id, newButton);
+//         this.buttonMap.set(newButton.id, newButton);
 
         return newButton;
     }

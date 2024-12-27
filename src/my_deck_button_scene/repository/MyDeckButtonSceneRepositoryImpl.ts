@@ -11,6 +11,7 @@ export class MyDeckButtonSceneRepositoryImpl implements MyDeckButtonSceneReposit
     private static instance: MyDeckButtonSceneRepositoryImpl;
 
     private myDeckButtonSceneMap: Map<number, MyDeckButtonScene> = new Map();
+    private myDeckNeonButtonSceneMap: Map<number, MyDeckButtonScene> = new Map();
     private myDeckButtonRepositoryImpl = MyDeckButtonRepositoryImpl.getInstance();
 
     private constructor() {}
@@ -22,15 +23,25 @@ export class MyDeckButtonSceneRepositoryImpl implements MyDeckButtonSceneReposit
         return MyDeckButtonSceneRepositoryImpl.instance;
     }
 
-    // To-do: 사용자가 버튼을 클릭했을 때 나타나는 네온 버튼 별도 관리 필요
     async createMyDeckButtonScene(deckId: number, position: Vector2d): Promise<MyDeckButtonScene> {
         const buttonMesh = await this.myDeckButtonRepositoryImpl.createMyDeckButton(2, position);
         const newButtonScene = new MyDeckButtonScene(buttonMesh.mesh);
-        newButtonScene.id = deckId;
-        this.myDeckButtonSceneMap.set(newButtonScene.id, newButtonScene);
+
+        console.log(`Generated ID for deckId ${deckId}:`, newButtonScene.id);
+
+        this.myDeckButtonSceneMap.set(deckId, newButtonScene);
 
         return newButtonScene;
     }
+
+//     async createMyDeckNeonButtonScene(deckId: number, position: Vector2d): Promise<MyDeckButtonScene> {
+//         const buttonMesh = await this.myDeckButtonRepositoryImpl.createMyDeckButton(1, position);
+//         const newButtonScene = new MyDeckButtonScene(buttonMesh.mesh);
+//         this.myDeckNeonButtonSceneMap.set(deckId, newButtonScene);
+//
+//         return newButtonScene;
+//     }
+
 
     findById(id: number): MyDeckButtonScene | undefined {
         return this.myDeckButtonSceneMap.get(id);
@@ -65,5 +76,31 @@ export class MyDeckButtonSceneRepositoryImpl implements MyDeckButtonSceneReposit
         }
         return false;
     }
+
+//     findNeonButtonById(id: number): MyDeckButtonScene | undefined {
+//         return this.myDeckNeonButtonSceneMap.get(id);
+//     }
+//
+//     findNeonButtonAll(): MyDeckButtonScene[] {
+//         return Array.from(this.myDeckNeonButtonSceneMap.values());
+//     }
+//
+//     hideNeonButtonById(id: number): boolean {
+//         const neonButtonScene = this.findNeonButtonById(id);
+//         if (neonButtonScene) {
+//             neonButtonScene.getMesh().visible = false;
+//             return true;
+//         }
+//         return false;
+//     }
+//
+//     showNeonButtonById(id: number): boolean {
+//         const neonButtonScene = this.findNeonButtonById(id);
+//         if (neonButtonScene) {
+//             neonButtonScene.getMesh().visible = true;
+//             return true;
+//         }
+//         return false;
+//     }
 
 }

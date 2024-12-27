@@ -49,9 +49,34 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         return buttonGroup;
     }
 
+//     public async createMyDeckNeonButtonWithPosition(deckId: number): Promise<THREE.Group | null> {
+//         const buttonGroup = new THREE.Group();
+//         try {
+//             const position = this.findMyDeckButtonPosition(deckId);
+//
+//             if (!position) {
+//                 console.error(`Position not found for deckId: ${deckId}`);
+//                 return null;
+//             }
+//
+//             const neonDeckButtonScene = await this.createNeonDeckButtonScene(deckId, position.position);
+//             const buttonMesh = neonDeckButtonScene.getMesh();
+//             buttonGroup.add(buttonMesh);
+//
+//         } catch (error) {
+//             console.log('Error creating neon button with position:', error);
+//             return null;
+//         }
+//         return buttonGroup;
+//     }
+
     private async createDeckButtonScene(deckId: number, position: Vector2d): Promise<MyDeckButtonScene> {
         return await this.myDeckButtonSceneRepository.createMyDeckButtonScene(deckId, position);
     }
+
+//     private async createNeonDeckButtonScene(deckId: number, position: Vector2d): Promise<MyDeckButtonScene> {
+//         return await this.myDeckButtonSceneRepository.createMyDeckNeonButtonScene(deckId, position);
+//     }
 
     private myDeckButtonPosition(deckId: number): MyDeckButtonPosition {
         return this.myDeckButtonPositionRepository.addMyDeckButtonPosition(deckId);
@@ -59,6 +84,10 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
     private saveMyDeckButtonPosition(deckId: number, position: MyDeckButtonPosition): void {
         this.myDeckButtonPositionRepository.save(deckId, position);
+    }
+
+    private findMyDeckButtonPosition(deckId: number): MyDeckButtonPosition | undefined{
+        return this.myDeckButtonPositionRepository.findById(deckId);
     }
 
     public adjustMyDeckButtonPosition(): void {
