@@ -120,7 +120,11 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         this.myDeckButtonRepository.deleteAll();
     }
 
-    public hideMyDeckButtonById(id: number): boolean {
-        return this.myDeckButtonSceneRepository.hideById(id);
-    }
+//     public hideMyDeckButtonById(id: number): boolean {
+//         return this.myDeckButtonSceneRepository.hideById(id);
+//     }
+//
+//    public showMyDeckButtonById(id: number): boolean {
+//        return this.myDeckButtonSceneRepository.showById(id);
+//        }
 }

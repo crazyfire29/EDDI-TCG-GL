@@ -5,6 +5,7 @@ import {MyDeckButtonScene} from "../../my_deck_button_scene/entity/MyDeckButtonS
 
 export class MyDeckButtonClickDetectRepositoryImpl implements MyDeckButtonClickDetectRepository {
     private static instance: MyDeckButtonClickDetectRepositoryImpl;
+    private currentClickDeckButtonId: number | null = null;
     private raycaster = new THREE.Raycaster();
 
     public static getInstance(): MyDeckButtonClickDetectRepositoryImpl {
@@ -43,4 +44,13 @@ export class MyDeckButtonClickDetectRepositoryImpl implements MyDeckButtonClickD
 
         return null;
     }
+
+    saveCurrentClickDeckButtonId(id: number): void {
+        this.currentClickDeckButtonId = id;
+    }
+
+    getCurrentClickDeckButtonId(): number | null {
+        return this.currentClickDeckButtonId;
+    }
+
 }

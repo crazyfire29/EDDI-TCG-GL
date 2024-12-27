@@ -92,23 +92,10 @@ export class TCGJustTestMyDeckView {
 
         this.myDeckButtonClickDetectService = MyDeckButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
 
-//         this.renderer.domElement.addEventListener('mousedown', async (e) => {
-//             if (e.button === 0) {
-//                 const clickPoint = { x: e.clientX, y: e.clientY };
-//                 await this.myDeckButtonClickDetectService.handleLeftClick(clickPoint);
-//             }
-//         });
-
-        this.renderer.domElement.addEventListener('mousedown', async (e: MouseEvent) => {
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
             if (e.button === 0) {
-                await this.myDeckButtonClickDetectService.handleLeftClick(e, (clickedDeckButton) => {
-                    const buttonHide = this.myDeckButtonService.hideMyDeckButtonById(clickedDeckButton.id);
-                    if (buttonHide) {
-                        console.log(`Deck Button ID ${clickedDeckButton.id} is now hidden.`);
-                    } else {
-                        console.error(`Failed to hide Deck Button ID ${clickedDeckButton.id}`);
-                    }
-                });
+                const clickPoint = { x: e.clientX, y: e.clientY };
+                await this.myDeckButtonClickDetectService.handleLeftClick(clickPoint);
             }
         });
 

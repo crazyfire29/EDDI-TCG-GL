@@ -58,7 +58,7 @@ export class MyDeckButtonSceneRepositoryImpl implements MyDeckButtonSceneReposit
     }
 
     showById(id: number): boolean {
-        const buttonScene = this.myDeckButtonSceneMap.get(id);
+        const buttonScene = this.findById(id);
         if (buttonScene) {
             buttonScene.getMesh().visible = true;
             return true;
