@@ -40,4 +40,12 @@ export class BattleFieldHandCardPositionRepositoryImpl implements BattleFieldHan
     count(): number {
         return this.positionMap.size;
     }
+
+    extractById(id: number): BattleFieldCardPosition | undefined {
+        const position = this.positionMap.get(id);
+        if (position) {
+            this.positionMap.delete(id);
+        }
+        return position;
+    }
 }
