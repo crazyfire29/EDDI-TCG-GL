@@ -7,7 +7,7 @@ export class BattleFieldCardAttributeMarkScene {
     renderingOrder: number;
 
     constructor(mesh: THREE.Mesh, renderingOrder: number = 0) {
-        this.id = IdGenerator.generateId();
+        this.id = IdGenerator.generateId("BattleFieldCardAttributeMarkScene");
         this.mesh = mesh;
         this.renderingOrder = renderingOrder;
     }

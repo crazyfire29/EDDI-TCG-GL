@@ -11,7 +11,7 @@ export class Background {
     public type: BackgroundType;
 
     constructor(type: BackgroundType, width: number, height: number, position: THREE.Vector2) {
-        this.id = IdGenerator.generateId();
+        this.id = IdGenerator.generateId("Background");
         this.type = type;
         this.width = width;
         this.height = height;

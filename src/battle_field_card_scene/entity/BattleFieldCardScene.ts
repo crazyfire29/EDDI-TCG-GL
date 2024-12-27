@@ -6,7 +6,7 @@ export class BattleFieldCardScene {
     mesh: THREE.Mesh;
 
     constructor(mesh: THREE.Mesh) {
-        this.id = IdGenerator.generateId();
+        this.id = IdGenerator.generateId("BattleFieldCardScene");
         this.mesh = mesh;
     }
 

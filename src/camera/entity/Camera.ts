@@ -8,7 +8,7 @@ export class Camera {
     public camera: THREE.OrthographicCamera;
 
     constructor(aspectRatio: number, viewSize: number, camera: THREE.OrthographicCamera) {
-        this.id = IdGenerator.generateId();
+        this.id = IdGenerator.generateId("Camera");
         this.aspectRatio = aspectRatio;
         this.viewSize = viewSize;
         this.camera = camera;

@@ -9,7 +9,7 @@ export class BattleFieldCard {
     status: CardStatus;
 
     constructor(cardSceneId: number, positionId: number, attributeMarkIdList: number[], status: CardStatus = CardStatus.HAND) {
-        this.id = IdGenerator.generateId();
+        this.id = IdGenerator.generateId("BattleFieldCard");
         this.cardSceneId = cardSceneId;
         this.positionId = positionId;
         this.attributeMarkIdList = attributeMarkIdList;

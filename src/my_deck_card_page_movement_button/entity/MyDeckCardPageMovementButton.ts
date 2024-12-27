@@ -12,7 +12,7 @@ export class MyDeckCardPageMovementButton {
     public height: number;
 
     constructor(type: MyDeckCardPageMovementButtonType, width: number, height: number, mesh: THREE.Mesh, position: Vector2d) {
-        this.id = IdGenerator.generateId();
+        this.id = IdGenerator.generateId("MyDeckCardPageMovementButton");
         this.type = type;
         this.width = width;
         this.height = height;
