@@ -216,11 +216,11 @@ export class TCGJustTestMyDeckView {
 
     private async addMyDeckButton(): Promise<void>{
         try {
-
             const myDeckButtonList = this.myDeckButtonMapRepository.getMyDeckList()
 
             for (const deckId of myDeckButtonList) {
                 const buttonGroup = await this.myDeckButtonService.createMyDeckButtonWithPosition(deckId);
+                const buttonEffectGroup = await this.myDeckButtonService.createDeckButtonEffectWithPosition(deckId);
 
                 if (buttonGroup) {
                     this.scene.add(buttonGroup);
