@@ -220,7 +220,6 @@ export class TCGJustTestMyDeckView {
         try {
 
             const myDeckButtonList = this.myDeckButtonMapRepository.getMyDeckList()
-            console.log('myDeckButtonList:', myDeckButtonList)
 
             for (const deckId of myDeckButtonList) {
                 const buttonGroup = await this.myDeckButtonService.createMyDeckButtonWithPosition(deckId);
