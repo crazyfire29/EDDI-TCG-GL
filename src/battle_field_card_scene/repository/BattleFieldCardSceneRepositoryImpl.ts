@@ -48,8 +48,11 @@ export class BattleFieldCardSceneRepositoryImpl implements BattleFieldCardSceneR
         return this.cardSceneMap.get(id);
     }
 
+    // findAll(): BattleFieldCardScene[] {
+    //     return Array.from(this.cardSceneMap.values());
+    // }
     findAll(): BattleFieldCardScene[] {
-        return Array.from(this.cardSceneMap.values());
+        return Array.from(this.cardSceneMap.values()).filter(scene => scene !== null);
     }
 
     deleteById(id: number): boolean {
@@ -58,5 +61,17 @@ export class BattleFieldCardSceneRepositoryImpl implements BattleFieldCardSceneR
 
     deleteAll(): void {
         this.cardSceneMap.clear();
+    }
+
+    extractByIndex(index: number): BattleFieldCardScene | undefined {
+        const entries = Array.from(this.cardSceneMap.entries());
+        if (index < 0 || index >= entries.length) {
+            return undefined;
+        }
+
+        const [key, value] = entries[index];
+        this.cardSceneMap.delete(key);
+        this.cardSceneMap.set(key, null as any);
+        return value;
     }
 }
