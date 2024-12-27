@@ -133,6 +133,49 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
     }
 
+    public adjustMyDeckButtonEffectPosition(): void {
+        const positionRepository = this.myDeckButtonPositionRepository
+        const buttonEffectRepository = this.myDeckButtonEffectRepository
+
+        const buttonEffectList = buttonEffectRepository.findAll();
+        const buttonPosition = positionRepository.findAll();
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        console.log('buttonEffectList:', buttonEffectList);
+        console.log('buttonPosition:', buttonPosition);
+
+        for (const buttonEffect of buttonEffectList) {
+            const buttonEffectMesh = buttonEffect.getMesh();
+            const buttonEffectId = buttonEffect.id;
+            const initialPosition = positionRepository.findById(buttonEffectId);
+
+            if (!initialPosition) {
+                console.error(`No position found for button id: ${buttonEffectId}`);
+                continue;
+            }
+
+            const buttonWidth = (350 / 1920) * window.innerWidth;
+            const buttonHeight = (90 / 1080) * window.innerHeight;
+
+            const newPositionX = initialPosition.position.getX() * window.innerWidth;
+            const newPositionY = initialPosition.position.getY() * window.innerHeight;
+            console.log(`Button ${buttonEffectId}:`, {
+                initialPosition: initialPosition.position,
+                newPositionX,
+                newPositionY,
+            });
+
+            buttonEffectMesh.geometry.dispose();
+            buttonEffectMesh.geometry = new THREE.PlaneGeometry(buttonWidth, buttonHeight);
+
+            buttonEffectMesh.position.set(newPositionX, newPositionY, 0);
+        }
+
+    }
+
+
     public getMyDeckButtonById(id: number): MyDeckButton | null {
         return this.myDeckButtonRepository.findById(id);
     }
