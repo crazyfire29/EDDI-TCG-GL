@@ -6,6 +6,8 @@ import {MyDeckButtonRepository} from "../repository/MyDeckButtonRepository";
 import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
 import {MyDeckButtonRepositoryImpl} from "../repository/MyDeckButtonRepositoryImpl";
 import {MyDeckButtonPositionRepositoryImpl} from "../../my_deck_button_position/repository/MyDeckButtonPositionRepositoryImpl";
+import {MyDeckButtonEffectRepositoryImpl} from "../../my_deck_button_effect/repository/MyDeckButtonEffectRepositoryImpl";
+import {MyDeckButtonEffect} from "../../my_deck_button_effect/entity/MyDeckButtonEffect";
 import { MyDeckButtonPosition } from "../../my_deck_button_position/entity/MyDeckButtonPosition";
 import {Vector2d} from "../../common/math/Vector2d";
 
@@ -13,10 +15,12 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
     private static instance: MyDeckButtonServiceImpl;
     private myDeckButtonRepository: MyDeckButtonRepositoryImpl;
     private myDeckButtonPositionRepository: MyDeckButtonPositionRepositoryImpl;
+    private myDeckButtonEffectRepository: MyDeckButtonEffectRepositoryImpl;
 
     private constructor(myDeckButtonRepository: MyDeckButtonRepository) {
         this.myDeckButtonRepository = MyDeckButtonRepositoryImpl.getInstance();
         this.myDeckButtonPositionRepository = MyDeckButtonPositionRepositoryImpl.getInstance();
+        this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
     }
 
     public static getInstance(): MyDeckButtonServiceImpl {
@@ -44,26 +48,25 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         return buttonGroup;
     }
 
-//     public async createMyDeckNeonButtonWithPosition(deckId: number): Promise<THREE.Group | null> {
-//         const buttonGroup = new THREE.Group();
-//         try {
-//             const position = this.findMyDeckButtonPosition(deckId);
-//
-//             if (!position) {
-//                 console.error(`Position not found for deckId: ${deckId}`);
-//                 return null;
-//             }
-//
-//             const neonDeckButtonScene = await this.createNeonDeckButtonScene(deckId, position.position);
-//             const buttonMesh = neonDeckButtonScene.getMesh();
-//             buttonGroup.add(buttonMesh);
-//
-//         } catch (error) {
-//             console.log('Error creating neon button with position:', error);
-//             return null;
-//         }
-//         return buttonGroup;
-//     }
+    public async createDeckButtonEffectWithPosition(deckId: number): Promise<THREE.Group | null> {
+        const buttonGroup = new THREE.Group();
+        try {
+            const position = this.findMyDeckButtonPosition(deckId);
+
+            if (!position) {
+                console.error(`Position not found for deckId: ${deckId}`);
+                return null;
+            }
+
+            const deckButtonEffect = await this.createMyDeckButtonEffect(deckId, position.position);
+            buttonGroup.add(deckButtonEffect.mesh);
+
+        } catch (error) {
+            console.log('Error creating button effect with position:', error);
+            return null;
+        }
+        return buttonGroup;
+    }
 
 
     private async createMyDeckButton(deckId: number, position: Vector2d): Promise<MyDeckButton> {
@@ -80,6 +83,10 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
     private findMyDeckButtonPosition(deckId: number): MyDeckButtonPosition | undefined{
         return this.myDeckButtonPositionRepository.findById(deckId);
+    }
+
+    private async createMyDeckButtonEffect(deckId: number, position: Vector2d): Promise<MyDeckButtonEffect>{
+        return await this.myDeckButtonEffectRepository.createMyDeckButtonEffect(deckId, position);
     }
 
     public adjustMyDeckButtonPosition(): void {
