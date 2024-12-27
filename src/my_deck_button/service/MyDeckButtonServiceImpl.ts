@@ -104,7 +104,6 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
     }
 
-
     public getMyDeckButtonById(id: number): MyDeckButton | null {
         return this.myDeckButtonRepository.findById(id);
     }
@@ -119,5 +118,9 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
     public deleteAllMyDeckButton(): void {
         this.myDeckButtonRepository.deleteAll();
+    }
+
+    public hideMyDeckButtonById(id: number): void{
+        this.myDeckButtonRepository.hideById(id);
     }
 }

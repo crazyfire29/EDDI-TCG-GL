@@ -102,7 +102,7 @@ export class TCGJustTestMyDeckView {
         this.renderer.domElement.addEventListener('mousedown', async (e: MouseEvent) => {
             if (e.button === 0) {
                 await this.myDeckButtonClickDetectService.handleLeftClick(e, (clickedDeckButton) => {
-                    const buttonHide = this.myDeckButtonSceneRepository.hideById(clickedDeckButton.id);
+                    const buttonHide = this.myDeckButtonService.hideMyDeckButtonById(clickedDeckButton.id);
                     if (buttonHide) {
                         console.log(`Deck Button ID ${clickedDeckButton.id} is now hidden.`);
                     } else {
