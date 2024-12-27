@@ -1,13 +1,13 @@
 import {IdGenerator} from "../../common/id_generator/IdGenerator";
 
-export class BattleFieldHand {
+export class YourField {
     id: number;
     cardSceneId: number;
     positionId: number;
     attributeMarkIdList: number[];
 
     constructor(cardSceneId: number, positionId: number, attributeMarkIdList: number[]) {
-        this.id = IdGenerator.generateId("BattleFieldHand");
+        this.id = IdGenerator.generateId("YourField");
         this.cardSceneId = cardSceneId;
         this.positionId = positionId;
         this.attributeMarkIdList = attributeMarkIdList;

@@ -1,0 +1,12 @@
+import {YourField} from "../entity/YourField";
+
+export interface YourFieldRepository {
+    save(cardSceneId: number, positionId: number, attributeMarkIdList: number[]): YourField;
+    findById(id: number): YourField | undefined;
+    findAll(): YourField[];
+    deleteById(id: number): boolean;
+    deleteAll(): void;
+    findByCardSceneId(cardSceneId: number): YourField | null
+    findAttributeMarkIdListByCardSceneId(cardSceneId: number): number[] | null
+    findPositionIdByCardSceneId(cardSceneId: number): number | null
+}

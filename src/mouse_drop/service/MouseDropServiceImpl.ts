@@ -19,6 +19,8 @@ import {BattleFieldCardPosition} from "../../battle_field_card_position/entity/B
 import {BattleFieldCardAttributeMarkScene} from "../../battle_field_card_attribute_mark_scene/entity/BattleFieldCardAttributeMarkScene";
 import {BattleFieldCardAttributeMarkSceneRepositoryImpl} from "../../battle_field_card_attribute_mark_scene/repository/BattleFieldCardAttributeMarkSceneRepositoryImpl";
 import {BattleFieldCardAttributeMarkSceneRepository} from "../../battle_field_card_attribute_mark_scene/repository/BattleFieldCardAttributeMarkSceneRepository";
+import {YourFieldRepositoryImpl} from "../../your_field/repository/YourFieldRepositoryImpl";
+import {YourFieldRepository} from "../../your_field/repository/YourFieldRepository";
 
 export class MouseDropServiceImpl implements MouseDropService {
     private static instance: MouseDropServiceImpl | null = null;
@@ -34,15 +36,20 @@ export class MouseDropServiceImpl implements MouseDropService {
     private battleFieldCardAttributeMarkPositionRepository: BattleFieldCardAttributeMarkPositionRepository
     private battleFieldCardAttributeMarkSceneRepository: BattleFieldCardAttributeMarkSceneRepository
 
+    private yourFieldRepository: YourFieldRepository
+
     constructor() {
         this.raycaster = new THREE.Raycaster();
         this.mouseDropFieldRepository = MouseDropFieldRepositoryImpl.getInstance();
         this.dragMoveRepository = DragMoveRepositoryImpl.getInstance()
+
         this.battleFieldHandRepository = BattleFieldHandRepositoryImpl.getInstance()
         this.battleFieldHandCardPositionRepository = BattleFieldHandCardPositionRepositoryImpl.getInstance()
         this.battleFieldCardAttributeMarkRepository = BattleFieldCardAttributeMarkRepositoryImpl.getInstance()
         this.battleFieldCardAttributeMarkPositionRepository = BattleFieldCardAttributeMarkPositionRepositoryImpl.getInstance()
         this.battleFieldCardAttributeMarkSceneRepository = BattleFieldCardAttributeMarkSceneRepositoryImpl.getInstance()
+
+        this.yourFieldRepository = YourFieldRepositoryImpl.getInstance()
     }
 
     public static getInstance(): MouseDropServiceImpl {
@@ -74,7 +81,9 @@ export class MouseDropServiceImpl implements MouseDropService {
 
     private handleValidDrop(selectedObject: BattleFieldCardScene): void {
         const cardSceneMesh = selectedObject.getMesh();
-        cardSceneMesh.userData.state = 'YourField';
+        const cardSceneId = selectedObject.getId()
+
+        const handCard = this.battleFieldHandRepository.findByCardSceneId(cardSceneId);
         console.log("Updated object state to 'YourField'.");
     }
 

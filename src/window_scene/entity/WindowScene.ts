@@ -8,7 +8,7 @@ export class WindowScene {
     scene: THREE.Scene;
 
     constructor(name: string) {
-        this.id = IdGenerator.generateId();
+        this.id = IdGenerator.generateId("WindowScene");
         this.name = name;
         this.scene = new THREE.Scene();
     }

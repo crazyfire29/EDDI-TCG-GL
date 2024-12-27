@@ -6,7 +6,7 @@ export class BattleFieldCardAttributeMarkPosition {
     position: Vector2d;
 
     constructor(x: number = 0, y: number = 0) {
-        this.id = IdGenerator.generateId();
+        this.id = IdGenerator.generateId("BattleFieldCardAttributeMarkPosition");
         this.position = new Vector2d(x, y);
     }
 
