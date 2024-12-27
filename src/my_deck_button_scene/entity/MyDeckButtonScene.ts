@@ -6,7 +6,7 @@ export class MyDeckButtonScene {
     mesh: THREE.Mesh;
 
     constructor(mesh: THREE.Mesh) {
-        this.id = IdGenerator.generateId();
+        this.id = IdGenerator.generateId("MyDeckButtonScene");
         this.mesh = mesh;
     }
 
