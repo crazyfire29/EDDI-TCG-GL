@@ -12,7 +12,7 @@ export class MyDeckButton {
 
     constructor(width: number, height: number, mesh: THREE.Mesh, position: Vector2d) {
         this.id = IdGenerator.generateId("MyDeckButtonScene");
-        console.log(`[DEBUG] MyDeckButtonScene constructor called with id: ${this.id}`);
+//         console.log(`[DEBUG] MyDeckButtonScene constructor called with id: ${this.id}`);
         this.width = width;
         this.height = height;
         this.mesh = mesh;

@@ -225,12 +225,21 @@ export class TCGJustTestMyDeckView {
                 if (buttonGroup) {
                     this.scene.add(buttonGroup);
                 }
+
+                if (buttonEffectGroup) {
+                    const mesh = buttonEffectGroup.children.find((child) => child instanceof THREE.Mesh) as THREE.Mesh;
+                    if (mesh) {
+                        mesh.visible = false;
+                    }
+                    this.scene.add(buttonEffectGroup);
+                }
+
             }
 
         } catch (error) {
             console.error('Failed to add my deck buttons:', error);
-            }
         }
+    }
 
 
     private onWindowResize(): void {

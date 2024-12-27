@@ -1,8 +1,8 @@
-import {MyDeckButtonScene} from "../../my_deck_button_scene/entity/MyDeckButtonScene";
+import {MyDeckButton} from "../../my_deck_button/entity/MyDeckButton";
 import * as THREE from "three";
 
 export interface MyDeckButtonClickDetectRepository {
     isMyDeckButtonClicked(clickPoint: { x: number; y: number },
-                          deckSceneList: MyDeckButtonScene[],
+                          deckButtonList: MyDeckButton[],
                           camera: THREE.Camera): any | null;
 }
