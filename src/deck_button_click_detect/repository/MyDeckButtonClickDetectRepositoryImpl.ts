@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 import {MyDeckButtonClickDetectRepository} from "./MyDeckButtonClickDetectRepository";
-import {MyDeckButtonScene} from "../../my_deck_button_scene/entity/MyDeckButtonScene";
+import {MyDeckButton} from "../../my_deck_button/entity/MyDeckButton";
 
 export class MyDeckButtonClickDetectRepositoryImpl implements MyDeckButtonClickDetectRepository {
     private static instance: MyDeckButtonClickDetectRepositoryImpl;
@@ -16,7 +16,7 @@ export class MyDeckButtonClickDetectRepositoryImpl implements MyDeckButtonClickD
     }
 
     isMyDeckButtonClicked(clickPoint: { x: number; y: number },
-                          deckSceneList: MyDeckButtonScene[],
+                          deckButtonList: MyDeckButton[],
                           camera: THREE.Camera): any | null {
         const { x, y } = clickPoint;
 
@@ -27,18 +27,18 @@ export class MyDeckButtonClickDetectRepositoryImpl implements MyDeckButtonClickD
 
         this.raycaster.setFromCamera(normalizedMouse, camera);
 
-        const meshes = deckSceneList.map(deckScene => deckScene.getMesh());
+        const meshes = deckButtonList.map(deckButton => deckButton.getMesh());
         const intersects = this.raycaster.intersectObjects(meshes);
 
         if (intersects.length > 0) {
             const intersectedMesh = intersects[0].object;
-            const clickedDeckScene = deckSceneList.find(
-                deckScene => deckScene.getMesh() === intersectedMesh
+            const clickedDeckButton = deckButtonList.find(
+                deckButton => deckButton.getMesh() === intersectedMesh
             );
 
-            if (clickedDeckScene) {
+            if (clickedDeckButton) {
                 console.log('detect clicked deck Button!')
-                return clickedDeckScene;
+                return clickedDeckButton;
             }
         }
 
