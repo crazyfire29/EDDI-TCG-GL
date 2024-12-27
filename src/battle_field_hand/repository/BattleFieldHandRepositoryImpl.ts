@@ -14,14 +14,14 @@ export class BattleFieldHandRepositoryImpl implements BattleFieldHandRepository 
         return BattleFieldHandRepositoryImpl.instance;
     }
 
-    save(cardSceneId: number, positionId: number, attributeMarkIdList: number[]): BattleFieldHand {
+    save(cardSceneId: number, positionId: number, attributeMarkIdList: number[], cardId: number): BattleFieldHand {
         const existingCard = Array.from(this.cardMap.values()).find(card => card.cardSceneId === cardSceneId && card.positionId === positionId);
         if (existingCard) {
             existingCard.attributeMarkIdList = attributeMarkIdList;
             return existingCard;
         }
 
-        const newCard = new BattleFieldHand(cardSceneId, positionId, attributeMarkIdList);
+        const newCard = new BattleFieldHand(cardSceneId, positionId, attributeMarkIdList, cardId);
         this.cardMap.set(newCard.id, newCard);
 
         return newCard;
@@ -64,5 +64,11 @@ export class BattleFieldHandRepositoryImpl implements BattleFieldHandRepository 
             return hand.positionId;
         }
         return null;
+    }
+
+    findCardIndexByCardSceneId(cardSceneId: number): number | null {
+        const cardArray = Array.from(this.cardMap.values());
+        const index = cardArray.findIndex(card => card.cardSceneId === cardSceneId);
+        return index !== -1 ? index : null; // 인덱스를 찾으면 반환, 없으면 null 반환
     }
 }
