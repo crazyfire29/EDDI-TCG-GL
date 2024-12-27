@@ -42,11 +42,8 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     }
 
     async handleLeftClick(
-        event: MouseEvent,
-        onClick: (clickedDeckButton: MyDeckButtonScene) => void
-//         clickPoint: { x: number; y: number },
+        clickPoint: { x: number; y: number },
     ): Promise<MyDeckButtonScene | null> {
-        const clickPoint = { x: event.clientX, y: event.clientY };
         const { x, y } = clickPoint;
 
         const deckSceneList = this.myDeckButtonSceneRepository.findAll()
@@ -57,19 +54,34 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
         );
         if (clickedDeckButton) {
             console.log(`Clicked Deck Button ID: ${clickedDeckButton.id}`);
+            this.myDeckButtonClickDetectRepository.saveCurrentClickDeckButtonId(clickedDeckButton.id);
+            const currentClickDeckButtonId = this.myDeckButtonClickDetectRepository.getCurrentClickDeckButtonId();
 
-            onClick(clickedDeckButton);
+            const hiddenButton = deckSceneList.find((button) => !button.getMesh().visible);
 
-//             const buttonHide = this.myDeckButtonSceneRepository.hideById(clickedDeckButton.id);
-//             if (buttonHide) {
-//                 console.log(`Deck Button ID ${clickedDeckButton.id} is now hidden.`);
-//             } else {
-//                 console.error(`Failed to hide Deck Button ID ${clickedDeckButton.id}`);
-//             }
+            if (hiddenButton && hiddenButton.id !== currentClickDeckButtonId) {
+                const buttonShow = this.myDeckButtonSceneRepository.showById(hiddenButton.id);
+                if (buttonShow) {
+                    console.log(`Deck Button ID ${currentClickDeckButtonId} is now shown.`);
+                } else {
+                    console.error(`Failed to show Deck Button ID ${currentClickDeckButtonId}`);
+                }
+
+            }
+
+            if (currentClickDeckButtonId !== null){
+                const buttonHide = this.myDeckButtonSceneRepository.hideById(currentClickDeckButtonId);
+                if (buttonHide) {
+                    console.log(`Deck Button ID ${currentClickDeckButtonId} is now hidden.`);
+                } else {
+                    console.error(`Failed to hide Deck Button ID ${currentClickDeckButtonId}`);
+                }
+            }
 
             return clickedDeckButton;
         }
 
         return null;
     }
+
 }
