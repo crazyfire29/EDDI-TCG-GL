@@ -23,8 +23,11 @@ import {MyDeckCardPageMovementButtonConfigList} from "../../src/my_deck_card_pag
 import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButtonConfigList";
 import {MyDeckButtonServiceImpl} from "../../src/my_deck_button/service/MyDeckButtonServiceImpl";
 import {MyDeckButtonMapRepositoryImpl} from "../../src/my_deck_button/repository/MyDeckButtonMapRepositoryImpl";
+
 import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
 import {MyDeckButtonClickDetectService} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectService";
+import {DeckPageMovementButtonClickDetectServiceImpl} from "../../src/deck_button_page_movement_button_detect/service/DeckPageMoveButtonClickDetectServiceImpl";
+import {DeckPageMovementButtonClickDetectService} from "../../src/deck_button_page_movement_button_detect/service/DeckPageMoveButtonClickDetectService";
 
 export class TCGJustTestMyDeckView {
     private static instance: TCGJustTestMyDeckView | null = null;
@@ -54,6 +57,7 @@ export class TCGJustTestMyDeckView {
     private readonly cameraService = CameraServiceImpl.getInstance(this.cameraRepository);
 
     private myDeckButtonClickDetectService: MyDeckButtonClickDetectService
+    private deckPageMovementButtonClickDetectService: DeckPageMovementButtonClickDetectService
 
     private initialized = false;
     private isAnimating = false;
@@ -94,6 +98,14 @@ export class TCGJustTestMyDeckView {
             if (e.button === 0) {
                 const clickPoint = { x: e.clientX, y: e.clientY };
                 await this.myDeckButtonClickDetectService.handleLeftClick(clickPoint);
+            }
+        });
+
+        this.deckPageMovementButtonClickDetectService = DeckPageMovementButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
+            if (e.button === 0) {
+                const clickPoint = { x: e.clientX, y: e.clientY };
+                await this.deckPageMovementButtonClickDetectService.handleLeftClick(clickPoint);
             }
         });
 
