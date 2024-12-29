@@ -9,6 +9,9 @@ import {MyDeckButtonClickDetectRepository} from "../repository/MyDeckButtonClick
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
+import {ButtonStateManager} from "../../my_deck_button_manager/ButtonStateManager";
+import {ButtonEffectManager} from "../../my_deck_button_manager/ButtonEffectManager";
+
 import * as THREE from "three";
 
 export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDetectService {
@@ -17,6 +20,8 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     private myDeckButtonRepository: MyDeckButtonRepositoryImpl;
     private myDeckButtonClickDetectRepository: MyDeckButtonClickDetectRepositoryImpl;
     private myDeckButtonEffectRepository: MyDeckButtonEffectRepositoryImpl;
+    private buttonStateManager: ButtonStateManager;
+    private buttonEffectManager: ButtonEffectManager;
 
     private cameraRepository: CameraRepository
 
@@ -27,6 +32,9 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
         this.myDeckButtonClickDetectRepository = MyDeckButtonClickDetectRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
         this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
+
+        this.buttonStateManager = new ButtonStateManager();
+        this.buttonEffectManager = new ButtonEffectManager();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): MyDeckButtonClickDetectServiceImpl {
@@ -55,17 +63,24 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             deckButtonList,
             this.camera
         );
+
+
         if (clickedDeckButton) {
             console.log(`Clicked Deck Button ID: ${clickedDeckButton.id}`);
             this.myDeckButtonClickDetectRepository.saveCurrentClickDeckButtonId(clickedDeckButton.id);
             const currentClickDeckButtonId = this.myDeckButtonClickDetectRepository.getCurrentClickDeckButtonId();
 
-            const hiddenButton = deckButtonList.find((button) => !button.getMesh().visible);
+
+            const hiddenButton = deckButtonList.find(
+                (button) => !this.getButtonVisibility(button.id)
+            );
 
             if (hiddenButton && hiddenButton.id !== currentClickDeckButtonId) {
-                const buttonShow = this.myDeckButtonRepository.showById(hiddenButton.id);
+                this.setButtonVisibility(hiddenButton.id, true);
+                const buttonShow = this.showDeckButton(hiddenButton.id);
                 if (buttonShow) {
-                    this.myDeckButtonEffectRepository.hideById(hiddenButton.id);
+                    this.hideDeckButtonEffect(hiddenButton.id);
+                    this.setEffectVisibility(hiddenButton.id, false);
                     console.log(`Deck Button ID ${hiddenButton.id} is now shown.`);
                 } else {
                     console.error(`Failed to show Deck Button ID ${hiddenButton.id}`);
@@ -74,9 +89,11 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             }
 
             if (currentClickDeckButtonId !== null){
-                const buttonHide = this.myDeckButtonRepository.hideById(currentClickDeckButtonId);
+                const buttonHide = this.hideDeckButton(currentClickDeckButtonId);
                 if (buttonHide) {
-                    this.myDeckButtonEffectRepository.showById(currentClickDeckButtonId);
+                    this.setButtonVisibility(currentClickDeckButtonId, false);
+                    this.showDeckButtonEffect(currentClickDeckButtonId);
+                    this.setEffectVisibility(currentClickDeckButtonId, true);
                     console.log(`Deck Button ID ${currentClickDeckButtonId} is now hidden.`);
                 } else {
                     console.error(`Failed to hide Deck Button ID ${currentClickDeckButtonId}`);
@@ -89,5 +106,38 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
 
         return null;
     }
+
+    public getButtonVisibility(buttonId: number): boolean {
+        return this.buttonStateManager.getVisibility(buttonId);
+    }
+
+    public setButtonVisibility(buttonId: number, isVisible: boolean): void {
+       this.buttonStateManager.setVisibility(buttonId, isVisible);
+    }
+
+    public getEffectVisibility(buttonId: number): boolean {
+        return this.buttonEffectManager.getVisibility(buttonId);
+    }
+
+    public setEffectVisibility(buttonId: number, isVisible: boolean): void {
+        this.buttonEffectManager.setVisibility(buttonId, isVisible);
+    }
+
+    private showDeckButtonEffect(id: number): boolean {
+        return this.myDeckButtonEffectRepository.showById(id);
+    }
+
+    private hideDeckButtonEffect(id: number): boolean {
+        return this.myDeckButtonEffectRepository.hideById(id);
+    }
+
+    private showDeckButton(id: number): boolean {
+        return this.myDeckButtonRepository.showById(id);
+    }
+
+    private hideDeckButton(id: number): boolean {
+        return this.myDeckButtonRepository.hideById(id);
+    }
+
 
 }

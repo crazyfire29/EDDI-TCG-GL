@@ -8,19 +8,25 @@ import {MyDeckButtonRepositoryImpl} from "../repository/MyDeckButtonRepositoryIm
 import {MyDeckButtonPositionRepositoryImpl} from "../../my_deck_button_position/repository/MyDeckButtonPositionRepositoryImpl";
 import {MyDeckButtonEffectRepositoryImpl} from "../../my_deck_button_effect/repository/MyDeckButtonEffectRepositoryImpl";
 import {MyDeckButtonEffect} from "../../my_deck_button_effect/entity/MyDeckButtonEffect";
-import { MyDeckButtonPosition } from "../../my_deck_button_position/entity/MyDeckButtonPosition";
+import {MyDeckButtonPosition} from "../../my_deck_button_position/entity/MyDeckButtonPosition";
 import {Vector2d} from "../../common/math/Vector2d";
+import {ButtonStateManager} from "../../my_deck_button_manager/ButtonStateManager";
+import {ButtonEffectManager} from "../../my_deck_button_manager/ButtonEffectManager";
 
 export class MyDeckButtonServiceImpl implements MyDeckButtonService {
     private static instance: MyDeckButtonServiceImpl;
     private myDeckButtonRepository: MyDeckButtonRepositoryImpl;
     private myDeckButtonPositionRepository: MyDeckButtonPositionRepositoryImpl;
     private myDeckButtonEffectRepository: MyDeckButtonEffectRepositoryImpl;
+    private buttonStateManager: ButtonStateManager;
+    private buttonEffectManger: ButtonEffectManager;
 
     private constructor(myDeckButtonRepository: MyDeckButtonRepository) {
         this.myDeckButtonRepository = MyDeckButtonRepositoryImpl.getInstance();
         this.myDeckButtonPositionRepository = MyDeckButtonPositionRepositoryImpl.getInstance();
         this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
+        this.buttonStateManager = new ButtonStateManager();
+        this.buttonEffectManger = new ButtonEffectManager();
     }
 
     public static getInstance(): MyDeckButtonServiceImpl {
@@ -67,7 +73,6 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         }
         return buttonGroup;
     }
-
 
     private async createMyDeckButton(deckId: number, position: Vector2d): Promise<MyDeckButton> {
         return await this.myDeckButtonRepository.createMyDeckButton(deckId, position);
@@ -175,10 +180,34 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
     }
 
+    public setVisibleDeckButton(buttonId: number, isVisible: boolean): void {
+       // ButtonStateManager를 사용하여 버튼의 visibility 상태 설정
+       this.buttonStateManager.setVisibility(buttonId, isVisible);
+
+       // 버튼을 보이게 하거나 숨김
+       const button = this.getMyDeckButtonById(buttonId); // 버튼 찾기
+       if (button) {
+           button.getMesh().visible = isVisible;
+       }
+    }
+
+   public setVisibleDeckButtonEffect(buttonId: number, isVisible: boolean): void {
+       this.buttonEffectManger.setVisibility(buttonId, isVisible);
+
+       const button = this.getMyDeckButtonEffectById(buttonId);
+       if (button) {
+           button.getMesh().visible = isVisible;
+       }
+   }
+
 
     public getMyDeckButtonById(id: number): MyDeckButton | null {
         return this.myDeckButtonRepository.findById(id);
     }
+
+    public getMyDeckButtonEffectById(id: number): MyDeckButtonEffect | null {
+        return this.myDeckButtonEffectRepository.findById(id);
+        }
 
     public deleteMyDeckButtonById(id: number): void {
         this.myDeckButtonRepository.deleteById(id);
@@ -190,6 +219,10 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
     public deleteAllMyDeckButton(): void {
         this.myDeckButtonRepository.deleteAll();
+    }
+
+    public getAllMyDeckButtonById(): Map<number, MyDeckButton> {
+        return this.myDeckButtonRepository.getAllMyDeckButtons();
     }
 
 }

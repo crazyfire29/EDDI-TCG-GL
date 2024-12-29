@@ -226,27 +226,24 @@ export class TCGJustTestMyDeckView {
         }
     }
 
-    private async addMyDeckButton(): Promise<void>{
+    private async addMyDeckButton(): Promise<void> {
         try {
-            const myDeckButtonList = this.myDeckButtonMapRepository.getMyDeckList()
+            const myDeckButtonList = this.myDeckButtonMapRepository.getMyDeckList();
 
-            for (const deckId of myDeckButtonList) {
+            myDeckButtonList.forEach(async (deckId, index) => {
                 const buttonGroup = await this.myDeckButtonService.createMyDeckButtonWithPosition(deckId);
                 const buttonEffectGroup = await this.myDeckButtonService.createDeckButtonEffectWithPosition(deckId);
 
                 if (buttonGroup) {
+                    this.myDeckButtonService.setVisibleDeckButton(deckId, index < 6); // 처음 6개만 visible
                     this.scene.add(buttonGroup);
                 }
 
                 if (buttonEffectGroup) {
-                    const mesh = buttonEffectGroup.children.find((child) => child instanceof THREE.Mesh) as THREE.Mesh;
-                    if (mesh) {
-                        mesh.visible = false;
-                    }
+                    this.myDeckButtonService.setVisibleDeckButtonEffect(deckId, false);
                     this.scene.add(buttonEffectGroup);
                 }
-
-            }
+            });
 
         } catch (error) {
             console.error('Failed to add my deck buttons:', error);
