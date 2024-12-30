@@ -22,15 +22,30 @@ export class ButtonPageManager {
         });
     }
 
-    getCurrentPage(): number {
+    public getCurrentPage(): number {
         return this.currentPage;
     }
 
-    setCurrentPage(page: number): void {
+    public setCurrentPage(page: number): void {
         this.currentPage = page;
     }
 
-    showButtonsForPage(page: number): void {
+    // 특정 페이지에 해당하는 버튼 id를 반환
+    public getButtonsIdForPage(page: number): number[] {
+        const allIds = Array.from(this.allButtonsMap.keys()).sort((a, b) => a - b);
+
+        const startIndex = (page - 1) * this.buttonsPerPage;
+        const endIndex = Math.min(startIndex + this.buttonsPerPage, allIds.length);
+
+        const pageButtonIds = [];
+        for (let i = startIndex; i < endIndex; i++) {
+            pageButtonIds.push(allIds[i]);
+        }
+        console.log(`Current Page: ${page}, ButtonIds: ${pageButtonIds}`);
+        return pageButtonIds;
+    }
+
+    public showButtonsForPage(page: number): void {
         const allIds = Array.from(this.allButtonsMap.keys()).sort((a, b) => a - b);
 
         const startIndex = (page - 1) * this.buttonsPerPage;
@@ -61,7 +76,7 @@ export class ButtonPageManager {
         });
     }
 
-    getTotalPages(): number {
+    public getTotalPages(): number {
         return Math.ceil(this.allButtonsMap.size / this.buttonsPerPage);
     }
 }

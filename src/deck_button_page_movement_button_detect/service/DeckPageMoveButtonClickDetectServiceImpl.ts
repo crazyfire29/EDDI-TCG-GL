@@ -83,19 +83,20 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
             this.buttonEffectManager.resetVisibility();
 
             if (clickedDeckPageMovementButton.id === 1) {
-                if (this.buttonPageManager.getCurrentPage() > 1) {
-                    this.buttonPageManager.setCurrentPage(this.buttonPageManager.getCurrentPage() - 1);
-                    this.buttonPageManager.showButtonsForPage(this.buttonPageManager.getCurrentPage());
+                if (this.getCurrentPage() > 1) {
+                    this.setCurrentDeckButtonPage(this.getCurrentPage() - 1);
+                    this.showMyDeckButtonsForPage(this.getCurrentPage());
+                    this.getMyDeckButtonsIdForPage(this.getCurrentPage());
                 }
             }
 
             if (clickedDeckPageMovementButton.id === 2) {
-                if (this.buttonPageManager.getCurrentPage() < this.buttonPageManager.getTotalPages()) {
-                    this.buttonPageManager.setCurrentPage(this.buttonPageManager.getCurrentPage() + 1);
-                    this.buttonPageManager.showButtonsForPage(this.buttonPageManager.getCurrentPage());
+                if (this.getCurrentPage() < this.buttonPageManager.getTotalPages()) {
+                    this.setCurrentDeckButtonPage(this.getCurrentPage() + 1);
+                    this.showMyDeckButtonsForPage(this.getCurrentPage());
+                    this.getMyDeckButtonsIdForPage(this.getCurrentPage());
                 }
             }
-
             return clickedDeckPageMovementButton;
         }
 
@@ -128,6 +129,22 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
 
     private getEffectVisibility(id: number): boolean {
         return this.buttonEffectManager.getVisibility(id);
+    }
+
+    private getCurrentPage(): number {
+        return this.buttonPageManager.getCurrentPage();
+    }
+
+    private showMyDeckButtonsForPage(page: number): void {
+        this.buttonPageManager.showButtonsForPage(page);
+    }
+
+    private setCurrentDeckButtonPage(page: number): void {
+        this.buttonPageManager.setCurrentPage(page);
+    }
+
+    private getMyDeckButtonsIdForPage(page: number): number[] {
+        return this.buttonPageManager.getButtonsIdForPage(page);
     }
 
 }
