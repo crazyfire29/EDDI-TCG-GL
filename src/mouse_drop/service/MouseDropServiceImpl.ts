@@ -1,4 +1,3 @@
-// MouseDropServiceImpl.ts
 import * as THREE from 'three';
 import { MouseDropService } from './MouseDropService';
 import {MouseDropFieldRepositoryImpl} from "../repository/MouseDropRepositoryImpl";
@@ -16,7 +15,6 @@ import {BattleFieldCardAttributeMarkPositionRepositoryImpl} from "../../battle_f
 import {BattleFieldHandCardPositionRepositoryImpl} from "../../battle_field_card_position/repository/BattleFieldHandCardPositionRepositoryImpl";
 import {BattleFieldHandCardPositionRepository} from "../../battle_field_card_position/repository/BattleFieldHandCardPositionRepository";
 import {BattleFieldCardPosition} from "../../battle_field_card_position/entity/BattleFieldCardPosition";
-import {BattleFieldCardAttributeMarkScene} from "../../battle_field_card_attribute_mark_scene/entity/BattleFieldCardAttributeMarkScene";
 import {BattleFieldCardAttributeMarkSceneRepositoryImpl} from "../../battle_field_card_attribute_mark_scene/repository/BattleFieldCardAttributeMarkSceneRepositoryImpl";
 import {BattleFieldCardAttributeMarkSceneRepository} from "../../battle_field_card_attribute_mark_scene/repository/BattleFieldCardAttributeMarkSceneRepository";
 import {YourFieldRepositoryImpl} from "../../your_field/repository/YourFieldRepositoryImpl";
@@ -29,8 +27,9 @@ import {YourFieldCardSceneRepository} from "../../your_field_card_scene/reposito
 import {YourFieldCardSceneRepositoryImpl} from "../../your_field_card_scene/repository/YourFieldCardSceneRepositoryImpl";
 import {YourFieldCardPositionRepository} from "../../your_field_card_position/repository/YourFieldCardPositionRepository";
 import {YourFieldCardPositionRepositoryImpl} from "../../your_field_card_position/repository/YourFieldCardPositionRepositoryImpl";
-import {YourFieldCardPosition} from "../../your_field_card_position/entity/YourFieldCardPosition";
 import {Vector2d} from "../../common/math/Vector2d";
+import {MarkSceneType} from "../../battle_field_card_attribute_mark_scene/entity/MarkSceneType";
+import {AttributeMarkPositionCalculator} from "../../common/attribute_mark/AttributeMarkPositionCalculator";
 
 export class MouseDropServiceImpl implements MouseDropService {
     private static instance: MouseDropServiceImpl | null = null;
@@ -107,10 +106,10 @@ export class MouseDropServiceImpl implements MouseDropService {
         this.clearSelection();
     }
 
-    private alignHandCard(): void {
+    private async alignHandCard(): Promise<void> {
         const currentHandCardList = this.battleFieldHandRepository.findAll();
 
-        currentHandCardList.forEach((handCard, index) => {
+        await Promise.all(currentHandCardList.map(async (handCard, index) => {
             const calculatedPosition = this.calculateHandPositionByIndex(index);
             const positionId = handCard.getPositionId();
             const cardSceneId = handCard.getCardSceneId();
@@ -120,7 +119,7 @@ export class MouseDropServiceImpl implements MouseDropService {
             console.log(`cardSceneList: ${cardSceneList}`);
 
             const cardPosition = this.battleFieldHandCardPositionRepository.findById(positionId);
-            const mainCardScene = this.battleFieldCardSceneRepository.findById(cardSceneId);
+            const mainCardScene = await this.battleFieldCardSceneRepository.findById(cardSceneId); // 비동기 처리
 
             if (!cardPosition) {
                 console.error(`Position not found for Card Scene ID: ${handCard.getCardSceneId()}, PositionId: ${positionId}`);
@@ -143,7 +142,39 @@ export class MouseDropServiceImpl implements MouseDropService {
             } else {
                 console.error(`Mesh not found for Card Scene ID: ${handCard.getCardSceneId()}`);
             }
-        });
+
+            const attributeMarkSceneList = handCard.getAttributeMarkIdList();
+            if (!attributeMarkSceneList) {
+                console.error(`attributeMarkSceneList가 없다: ${attributeMarkSceneList}`);
+                return;
+            }
+            console.log(`attributeMarkSceneList: ${attributeMarkSceneList}`);
+
+            // 각 attributeMarkSceneId에 대해 비동기 작업을 처리
+            await Promise.all(attributeMarkSceneList.map(async (attributeMarkSceneId) => {
+                try {
+                    const attributeMarkScene = await this.battleFieldCardAttributeMarkSceneRepository.findById(attributeMarkSceneId); // 비동기 처리
+                    if (!attributeMarkScene) {
+                        console.error(`AttributeMarkScene not found for ID: ${attributeMarkSceneId}`);
+                        return;
+                    }
+
+                    const attributeMesh = attributeMarkScene.getMesh();
+                    if (attributeMesh) {
+                        const markSceneType = attributeMarkScene.getMarkSceneType();
+                        const attributeMarkPosition = AttributeMarkPositionCalculator.getPositionForType(markSceneType, calculatedPosition, this.CARD_WIDTH, this.CARD_HEIGHT);
+
+                        attributeMesh.position.x = attributeMarkPosition.getX();
+                        attributeMesh.position.y = attributeMarkPosition.getY();
+                        console.log(`Attribute Mark Mesh updated for AttributeMarkScene ID: ${attributeMarkSceneId}`);
+                    } else {
+                        console.error(`Mesh not found for AttributeMarkScene ID: ${attributeMarkSceneId}`);
+                    }
+                } catch (error) {
+                    console.error(`Error processing AttributeMarkScene ID: ${attributeMarkSceneId}`, error);
+                }
+            }));
+        }));
     }
 
     // private alignHandCard(): void {
