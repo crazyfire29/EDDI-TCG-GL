@@ -28,6 +28,7 @@ import {BattleFieldCardAttributeMark} from "../../battle_field_card_attribute_ma
 import {BattleFieldCardAttributeMarkStatus} from "../../battle_field_card_attribute_mark/entity/BattleFieldCardAttributeMarkStatus";
 import {Texture} from "three";
 import {CardKind} from "../../card/kind";
+import {MarkSceneType} from "../../battle_field_card_attribute_mark_scene/entity/MarkSceneType";
 
 export class BattleFieldHandServiceImpl implements BattleFieldHandService {
     private static instance: BattleFieldHandServiceImpl;
@@ -170,7 +171,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const weaponMesh = this.createWeaponMesh(kindsOrWeaponTexture, weaponPosition);
             cardGroup.add(weaponMesh);
 
-            const weaponMark = await this.saveCardAttributeMark(weaponMesh, weaponPosition);
+            const weaponMark = await this.saveCardAttributeMark(weaponMesh, weaponPosition, MarkSceneType.SWORD);
             // console.log(`weaponMark id -> ${weaponMark.getId()}`)
             attributeMarks.push(weaponMark)
         }
@@ -180,7 +181,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const staffMesh = this.createStaffMesh(kindsOrWeaponTexture, staffPosition);
             cardGroup.add(staffMesh);
 
-            const staffMark = await this.saveCardAttributeMark(staffMesh, staffPosition);
+            const staffMark = await this.saveCardAttributeMark(staffMesh, staffPosition, MarkSceneType.STAFF);
             attributeMarks.push(staffMark)
         }
 
@@ -189,7 +190,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const kinsMesh = this.createKindsMesh(kindsOrWeaponTexture, kindsPosition);
             cardGroup.add(kinsMesh);
 
-            const kindsMark = await this.saveCardAttributeMark(kinsMesh, kindsPosition);
+            const kindsMark = await this.saveCardAttributeMark(kinsMesh, kindsPosition, MarkSceneType.KINDS);
             attributeMarks.push(kindsMark)
         }
 
@@ -198,7 +199,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const raceMesh = this.createRaceMesh(raceTexture, racePosition);
             cardGroup.add(raceMesh);
 
-            const raceMark = await this.saveCardAttributeMark(raceMesh, racePosition);
+            const raceMark = await this.saveCardAttributeMark(raceMesh, racePosition, MarkSceneType.RACE);
             attributeMarks.push(raceMark)
         }
 
@@ -207,7 +208,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const hpMesh = this.createHpMesh(hpTexture, hpPosition);
             cardGroup.add(hpMesh);
 
-            const hpMark = await this.saveCardAttributeMark(hpMesh, hpPosition);
+            const hpMark = await this.saveCardAttributeMark(hpMesh, hpPosition, MarkSceneType.HP);
             attributeMarks.push(hpMark)
         }
 
@@ -216,7 +217,7 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
             const energyMesh = this.createEnergyMesh(energyTexture, energyPosition);
             cardGroup.add(energyMesh);
 
-            const energyMark = await this.saveCardAttributeMark(energyMesh, energyPosition);
+            const energyMark = await this.saveCardAttributeMark(energyMesh, energyPosition, MarkSceneType.ENERGY);
             attributeMarks.push(energyMark)
         }
 
@@ -314,11 +315,11 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
         );
     }
 
-    private async saveCardAttributeMark(mesh: THREE.Mesh, position: Vector2d): Promise<BattleFieldCardAttributeMark> {
+    private async saveCardAttributeMark(mesh: THREE.Mesh, position: Vector2d, markSceneType: MarkSceneType): Promise<BattleFieldCardAttributeMark> {
         const attributeMarkPosition = new BattleFieldCardAttributeMarkPosition(position.getX(), position.getY());
         await this.battleFieldCardAttributeMarkPositionRepository.save(attributeMarkPosition);
 
-        const attributeMarkScene = new BattleFieldCardAttributeMarkScene(mesh);
+        const attributeMarkScene = new BattleFieldCardAttributeMarkScene(mesh, markSceneType);
         await this.battleFieldCardAttributeMarkSceneRepository.save(attributeMarkScene);
 
         console.log(`attributeMarkScene id -> ${attributeMarkScene.getId()}`);
