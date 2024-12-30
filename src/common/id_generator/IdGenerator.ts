@@ -5,7 +5,6 @@ export class IdGenerator {
         if (!this.counters[entityType]) {
             this.counters[entityType] = 0;
         }
-        this.counters[entityType]++;
-        return this.counters[entityType];
+        return this.counters[entityType]++;
     }
 }

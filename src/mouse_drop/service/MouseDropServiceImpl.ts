@@ -30,9 +30,20 @@ import {YourFieldCardSceneRepositoryImpl} from "../../your_field_card_scene/repo
 import {YourFieldCardPositionRepository} from "../../your_field_card_position/repository/YourFieldCardPositionRepository";
 import {YourFieldCardPositionRepositoryImpl} from "../../your_field_card_position/repository/YourFieldCardPositionRepositoryImpl";
 import {YourFieldCardPosition} from "../../your_field_card_position/entity/YourFieldCardPosition";
+import {Vector2d} from "../../common/math/Vector2d";
 
 export class MouseDropServiceImpl implements MouseDropService {
     private static instance: MouseDropServiceImpl | null = null;
+
+    private readonly HALF: number = 0.5;
+    private readonly GAP_OF_EACH_CARD: number = 0.094696
+    private readonly HAND_X_CRITERIA: number = 0.311904
+    private readonly HAND_Y_CRITERIA: number = 0.972107
+    private readonly HAND_INITIAL_X: number = this.HAND_X_CRITERIA - this.HALF;
+    private readonly HAND_INITIAL_Y: number = this.HALF - this.HAND_Y_CRITERIA;
+
+    private readonly CARD_WIDTH: number = 0.06493506493
+    private readonly CARD_HEIGHT: number = this.CARD_WIDTH * 1.615
 
     private raycaster: THREE.Raycaster;
     private mouseDropFieldRepository: MouseDropFieldRepository;
@@ -86,6 +97,7 @@ export class MouseDropServiceImpl implements MouseDropService {
             console.log("Dropped inside YourFieldArea.");
             if (selectedObject instanceof BattleFieldCardScene) {
                 this.handleValidDrop(selectedObject);
+                this.alignHandCard()
             }
         } else {
             console.log("Dropped outside YourFieldArea.");
@@ -95,8 +107,104 @@ export class MouseDropServiceImpl implements MouseDropService {
         this.clearSelection();
     }
 
+    private alignHandCard(): void {
+        const currentHandCardList = this.battleFieldHandRepository.findAll();
+
+        currentHandCardList.forEach((handCard, index) => {
+            const calculatedPosition = this.calculateHandPositionByIndex(index);
+            const positionId = handCard.getPositionId();
+            const cardSceneId = handCard.getCardSceneId();
+
+            console.log(`cardSceneId: ${cardSceneId}`);
+            const cardSceneList = this.battleFieldCardSceneRepository.findAll();
+            console.log(`cardSceneList: ${cardSceneList}`);
+
+            const cardPosition = this.battleFieldHandCardPositionRepository.findById(positionId);
+            const mainCardScene = this.battleFieldCardSceneRepository.findById(cardSceneId);
+
+            if (!cardPosition) {
+                console.error(`Position not found for Card Scene ID: ${handCard.getCardSceneId()}, PositionId: ${positionId}`);
+                return;
+            }
+
+            if (!mainCardScene) {
+                console.error(`Scene not found for Card Scene ID: ${handCard.getCardSceneId()}`);
+                return;
+            }
+
+            cardPosition.setPosition(calculatedPosition.getX(), calculatedPosition.getY());
+            console.log(`Card Scene ID: ${handCard.getCardSceneId()}, New Position: (${calculatedPosition.getX()}, ${calculatedPosition.getY()})`);
+
+            const mainCardSceneMesh = mainCardScene.getMesh();
+            if (mainCardSceneMesh) {
+                mainCardSceneMesh.position.x = calculatedPosition.getX();
+                mainCardSceneMesh.position.y = calculatedPosition.getY();
+                console.log(`Mesh updated for Card Scene ID: ${handCard.getCardSceneId()}, Position: (${mainCardSceneMesh.position.x}, ${mainCardSceneMesh.position.y})`);
+            } else {
+                console.error(`Mesh not found for Card Scene ID: ${handCard.getCardSceneId()}`);
+            }
+        });
+    }
+
+    // private alignHandCard(): void {
+    //     const currentHandCardList = this.battleFieldHandRepository.findAll();
+    //
+    //     currentHandCardList.forEach((handCard, index) => {
+    //         // 현재 카드의 실제 위치를 계산
+    //         const calculatedPosition = this.calculateHandPositionByIndex(index);
+    //
+    //         // 현재 카드의 PositionId를 가져옴
+    //         const positionId = handCard.getPositionId();
+    //
+    //         // 해당 PositionId로 BattleFieldCardPosition을 찾음
+    //         const cardPosition = this.battleFieldHandCardPositionRepository.findById(positionId);
+    //         const cardSceneId = handCard.getCardSceneId()
+    //         console.log(`cardSceneId: ${cardSceneId}`)
+    //
+    //         const cardSceneList = this.battleFieldCardSceneRepository.findAll()
+    //         console.log(`cardSceneList: ${cardSceneList}`)
+    //
+    //         // Card Scene을 가져옴
+    //         const mainCardScene = this.battleFieldCardSceneRepository.findById(cardSceneId);
+    //         console.log(`mainCardScene: ${mainCardScene}`)
+    //
+    //         if (cardPosition && mainCardScene) {
+    //             // 위치 갱신
+    //             cardPosition.setPosition(calculatedPosition.getX(), calculatedPosition.getY());
+    //             console.log(`Card Scene ID: ${handCard.getCardSceneId()}, New Position: (${calculatedPosition.getX()}, ${calculatedPosition.getY()})`);
+    //
+    //             // Mesh를 업데이트
+    //             const mainCardSceneMesh = mainCardScene.getMesh();
+    //             if (mainCardSceneMesh) {
+    //                 mainCardSceneMesh.position.x = calculatedPosition.getX();
+    //                 mainCardSceneMesh.position.y = calculatedPosition.getY();
+    //                 console.log(`Mesh updated for Card Scene ID: ${handCard.getCardSceneId()}, Position: (${mainCardSceneMesh.position.x}, ${mainCardSceneMesh.position.y})`);
+    //             }
+    //
+    //             // 추가적으로 Attribute Mark Scene도 업데이트
+    //             // const attributeMarkSceneList = this.battleFieldCardAttributeMarkSceneRepository.findByCardSceneId(handCard.getCardSceneId());
+    //             // attributeMarkSceneList.forEach((attributeMarkScene) => {
+    //             //     const attributeMesh = attributeMarkScene.getMesh();
+    //             //     if (attributeMesh) {
+    //             //         attributeMesh.position.x = calculatedPosition.getX();
+    //             //         attributeMesh.position.y = calculatedPosition.getY() - this.ATTRIBUTE_MARK_OFFSET;
+    //             //         console.log(`Attribute Mark Mesh updated for Card Scene ID: ${handCard.getCardSceneId()}`);
+    //             //     }
+    //             // });
+    //         } else {
+    //             console.error(`Position or Scene not found for Card Scene ID: ${handCard.getCardSceneId()}`);
+    //         }
+    //     });
+    // }
+
+    private calculateHandPositionByIndex(index: number): Vector2d {
+        const handPositionX = (this.HAND_INITIAL_X + index * this.GAP_OF_EACH_CARD) * window.innerWidth;
+        const handPositionY = this.HAND_INITIAL_Y * window.innerHeight
+            + (this.CARD_HEIGHT * this.HALF * window.innerWidth);
+        return new Vector2d(handPositionX, handPositionY);
+    }
+
     private handleValidDrop(selectedObject: BattleFieldCardScene): void {
-        const cardSceneMesh = selectedObject.getMesh();
         const cardSceneId = selectedObject.getId()
 
         const handCard = this.battleFieldHandRepository.findByCardSceneId(cardSceneId);
@@ -125,32 +233,42 @@ export class MouseDropServiceImpl implements MouseDropService {
         this.yourFieldRepository.save(cardSceneId, positionId, attributeMarkIdList, cardId);
         console.log("handleValidDrop() yourFieldRepository saved");
 
-        const handCardIndex = this.battleFieldHandRepository.findCardIndexByCardSceneId(cardSceneId)
+        const handCardId = handCard?.getId()
 
-        if (handCardIndex === null) {
-            console.error(`sceneId ${cardSceneId} 존재하지 않음`);
+        if (handCardId === undefined) {
+            console.error("Hand card ID를 찾을 수 없습니다.");
             return
         }
 
-        console.log(`handCardIndex: ${handCardIndex}`)
-        const willBePlaceYourFieldCardScene = this.battleFieldCardSceneRepository.extractByIndex(handCardIndex)
-        const willBePlaceYourFieldCardSceneMesh = willBePlaceYourFieldCardScene?.getMesh()
-        if (willBePlaceYourFieldCardSceneMesh) {
-            this.yourFieldCardSceneRepository.create(willBePlaceYourFieldCardSceneMesh);
-        }
+        this.battleFieldHandRepository.deleteById(handCardId)
+        console.log(`handCard: ${JSON.stringify(this.battleFieldHandRepository.findAll(), null, 2)}`);
 
-        const handCardPositionId = this.battleFieldHandRepository.findPositionIdByCardSceneId(cardSceneId)
-        if (handCardPositionId === null) {
-            console.error('Position ID를 찾을 수 없습니다');
-            return
-        }
-        const willBePlaceYourFieldCardPosition = this.battleFieldHandCardPositionRepository.extractById(handCardPositionId)
-        if (willBePlaceYourFieldCardPosition) {
-            const positionX = willBePlaceYourFieldCardPosition.getX()
-            const positionY = willBePlaceYourFieldCardPosition.getY()
-            const yourFieldCardPosition = new YourFieldCardPosition(positionX, positionY)
-            this.yourFieldCardPositionRepository.save(yourFieldCardPosition);
-        }
+        // const handCardIndex = this.battleFieldHandRepository.findCardIndexByCardSceneId(cardSceneId)
+        //
+        // if (handCardIndex === null) {
+        //     console.error(`sceneId ${cardSceneId} 존재하지 않음`);
+        //     return
+        // }
+        //
+        // console.log(`handCardIndex: ${handCardIndex}`)
+        // const willBePlaceYourFieldCardScene = this.battleFieldCardSceneRepository.extractByIndex(handCardIndex)
+        // const willBePlaceYourFieldCardSceneMesh = willBePlaceYourFieldCardScene?.getMesh()
+        // if (willBePlaceYourFieldCardSceneMesh) {
+        //     this.yourFieldCardSceneRepository.create(willBePlaceYourFieldCardSceneMesh);
+        // }
+        //
+        // const handCardPositionId = this.battleFieldHandRepository.findPositionIdByCardSceneId(cardSceneId)
+        // if (handCardPositionId === null) {
+        //     console.error('Position ID를 찾을 수 없습니다');
+        //     return
+        // }
+        // const willBePlaceYourFieldCardPosition = this.battleFieldHandCardPositionRepository.extractById(handCardPositionId)
+        // if (willBePlaceYourFieldCardPosition) {
+        //     const positionX = willBePlaceYourFieldCardPosition.getX()
+        //     const positionY = willBePlaceYourFieldCardPosition.getY()
+        //     const yourFieldCardPosition = new YourFieldCardPosition(positionX, positionY)
+        //     this.yourFieldCardPositionRepository.save(yourFieldCardPosition);
+        // }
 
         // const remainHandCardSceneList = this.battleFieldCardSceneRepository.findAll()
 

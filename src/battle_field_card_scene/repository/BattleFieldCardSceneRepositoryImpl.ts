@@ -21,6 +21,10 @@ export class BattleFieldCardSceneRepositoryImpl implements BattleFieldCardSceneR
         return BattleFieldCardSceneRepositoryImpl.instance;
     }
 
+    count(): number {
+        return this.cardSceneMap.size;
+    }
+
     async create(cardId: number, position: Vector2d): Promise<BattleFieldCardScene> {
         const card = getCardById(cardId);
         if (!card) {
@@ -37,9 +41,10 @@ export class BattleFieldCardSceneRepositoryImpl implements BattleFieldCardSceneR
         const cardHeight = cardWidth * 1.615;
 
         const mainCardMesh = MeshGenerator.createMesh(cardTexture, cardWidth, cardHeight, position);
-
         const newCardScene = new BattleFieldCardScene(mainCardMesh);
-        this.cardSceneMap.set(cardId, newCardScene);
+
+        const currentCount = this.count()
+        this.cardSceneMap.set(currentCount, newCardScene);
 
         return newCardScene;
     }
