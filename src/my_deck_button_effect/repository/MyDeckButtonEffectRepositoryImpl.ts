@@ -7,7 +7,8 @@ import {Vector2d} from "../../common/math/Vector2d";
 
 export class MyDeckButtonEffectRepositoryImpl implements MyDeckButtonEffectRepository {
     private static instance: MyDeckButtonEffectRepositoryImpl;
-    private buttonMap: Map<number, MyDeckButtonEffect> = new Map();
+    private effectMap: Map<number, MyDeckButtonEffect> = new Map();
+    private deckToEffectMap: Map<number, number> = new Map();
     private textureManager: TextureManager;
 
     private readonly BUTTON_WIDTH: number = 350 / 1920
@@ -42,29 +43,46 @@ export class MyDeckButtonEffectRepositoryImpl implements MyDeckButtonEffectRepos
         buttonMesh.position.set(buttonPositionX, buttonPositionY, 0);
 
         const newButtonEffect = new MyDeckButtonEffect(buttonWidth, buttonHeight, buttonMesh, position);
-        this.buttonMap.set(deckId, newButtonEffect);
+        this.effectMap.set(newButtonEffect.id, newButtonEffect);
+        this.deckToEffectMap.set(deckId, newButtonEffect.id);
 
         return newButtonEffect;
     }
 
     public getAllMyDeckButtonEffect(): Map<number, MyDeckButtonEffect> {
-        return this.buttonMap;
+        return this.effectMap;
     }
 
     public findById(id: number): MyDeckButtonEffect | null {
-        return this.buttonMap.get(id) || null;
+        return this.effectMap.get(id) || null;
     }
 
     public findAll(): MyDeckButtonEffect[] {
-        return Array.from(this.buttonMap.values());
+        return Array.from(this.effectMap.values());
+    }
+
+    public findEffectByDeckId(deckId: number): MyDeckButtonEffect | null {
+            const effectId = this.deckToEffectMap.get(deckId);
+            if (effectId === undefined) {
+                return null;
+            }
+            return this.effectMap.get(effectId) || null;
+        }
+
+    public deleteEffectByDeckId(deckId: number): void {
+        const effectId = this.deckToEffectMap.get(deckId);
+        if (effectId !== undefined) {
+            this.effectMap.delete(effectId);
+            this.deckToEffectMap.delete(deckId);
+        }
     }
 
     public deleteById(id: number): void {
-        this.buttonMap.delete(id);
+        this.effectMap.delete(id);
     }
 
     public deleteAll(): void {
-        this.buttonMap.clear();
+        this.effectMap.clear();
     }
 
     hideById(id: number): boolean {
