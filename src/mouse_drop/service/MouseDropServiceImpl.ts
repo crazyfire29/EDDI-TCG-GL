@@ -143,90 +143,64 @@ export class MouseDropServiceImpl implements MouseDropService {
                 console.error(`Mesh not found for Card Scene ID: ${handCard.getCardSceneId()}`);
             }
 
-            const attributeMarkSceneList = handCard.getAttributeMarkIdList();
-            if (!attributeMarkSceneList) {
-                console.error(`attributeMarkSceneList가 없다: ${attributeMarkSceneList}`);
+            const attributeMarkList = handCard.getAttributeMarkIdList();
+            if (!attributeMarkList) {
+                console.error(`attributeMarkList 없다: ${attributeMarkList}`);
                 return;
             }
-            console.log(`attributeMarkSceneList: ${attributeMarkSceneList}`);
+            console.log(`attributeMarkSceneList: ${attributeMarkList}`);
 
             // 각 attributeMarkSceneId에 대해 비동기 작업을 처리
-            await Promise.all(attributeMarkSceneList.map(async (attributeMarkSceneId) => {
+            await Promise.all(attributeMarkList.map(async (attributeMarkId) => {
                 try {
-                    const attributeMarkScene = await this.battleFieldCardAttributeMarkSceneRepository.findById(attributeMarkSceneId); // 비동기 처리
+                    const attributeMark = await this.battleFieldCardAttributeMarkRepository.findById(attributeMarkId); // 비동기 처리
+                    if (!attributeMark) {
+                        console.error(`AttributeMark not found for ID: ${attributeMarkId}`);
+                        return;
+                    }
+
+                    const attributeMarkPosition = await this.battleFieldCardAttributeMarkPositionRepository.findById(attributeMark.attributeMarkPositionId);
+                    if (!attributeMarkPosition) {
+                        console.error(`AttributeMarkPosition not found for ID: ${attributeMark.attributeMarkPositionId}`);
+                        return;
+                    }
+
+                    const attributeMarkScene = await this.battleFieldCardAttributeMarkSceneRepository.findById(attributeMark.attributeMarkSceneId); // Scene 가져오기
                     if (!attributeMarkScene) {
-                        console.error(`AttributeMarkScene not found for ID: ${attributeMarkSceneId}`);
+                        console.error(`AttributeMarkScene not found for ID: ${attributeMark.attributeMarkSceneId}`);
                         return;
                     }
 
                     const attributeMesh = attributeMarkScene.getMesh();
                     if (attributeMesh) {
                         const markSceneType = attributeMarkScene.getMarkSceneType();
-                        const attributeMarkPosition = AttributeMarkPositionCalculator.getPositionForType(markSceneType, calculatedPosition, this.CARD_WIDTH, this.CARD_HEIGHT);
 
-                        attributeMesh.position.x = attributeMarkPosition.getX();
-                        attributeMesh.position.y = attributeMarkPosition.getY();
-                        console.log(`Attribute Mark Mesh updated for AttributeMarkScene ID: ${attributeMarkSceneId}`);
+                        // AttributeMarkPositionCalculator를 사용하여 위치 계산
+                        const calculatedAttributeMarkPosition = AttributeMarkPositionCalculator.getPositionForType(
+                            markSceneType,
+                            calculatedPosition, // 여기서 calculatedPosition을 사용
+                            this.CARD_WIDTH,
+                            this.CARD_HEIGHT
+                        );
+
+                        // 계산된 위치로 attributeMesh의 포지션 업데이트
+                        attributeMesh.position.x = calculatedAttributeMarkPosition.getX();
+                        attributeMesh.position.y = calculatedAttributeMarkPosition.getY();
+
+                        // attributeMarkPosition에 계산된 값 설정
+                        attributeMarkPosition.setPosition(calculatedAttributeMarkPosition.getX(), calculatedAttributeMarkPosition.getY());
+
+                        console.log(`Attribute Mark Mesh updated for AttributeMarkScene ID: ${attributeMark.attributeMarkSceneId}`);
                     } else {
-                        console.error(`Mesh not found for AttributeMarkScene ID: ${attributeMarkSceneId}`);
+                        console.error(`Mesh not found for AttributeMarkScene ID: ${attributeMark.attributeMarkSceneId}`);
                     }
                 } catch (error) {
-                    console.error(`Error processing AttributeMarkScene ID: ${attributeMarkSceneId}`, error);
+                    console.error(`Error processing AttributeMark ID: ${attributeMarkId}`, error);
                 }
             }));
+
         }));
     }
-
-    // private alignHandCard(): void {
-    //     const currentHandCardList = this.battleFieldHandRepository.findAll();
-    //
-    //     currentHandCardList.forEach((handCard, index) => {
-    //         // 현재 카드의 실제 위치를 계산
-    //         const calculatedPosition = this.calculateHandPositionByIndex(index);
-    //
-    //         // 현재 카드의 PositionId를 가져옴
-    //         const positionId = handCard.getPositionId();
-    //
-    //         // 해당 PositionId로 BattleFieldCardPosition을 찾음
-    //         const cardPosition = this.battleFieldHandCardPositionRepository.findById(positionId);
-    //         const cardSceneId = handCard.getCardSceneId()
-    //         console.log(`cardSceneId: ${cardSceneId}`)
-    //
-    //         const cardSceneList = this.battleFieldCardSceneRepository.findAll()
-    //         console.log(`cardSceneList: ${cardSceneList}`)
-    //
-    //         // Card Scene을 가져옴
-    //         const mainCardScene = this.battleFieldCardSceneRepository.findById(cardSceneId);
-    //         console.log(`mainCardScene: ${mainCardScene}`)
-    //
-    //         if (cardPosition && mainCardScene) {
-    //             // 위치 갱신
-    //             cardPosition.setPosition(calculatedPosition.getX(), calculatedPosition.getY());
-    //             console.log(`Card Scene ID: ${handCard.getCardSceneId()}, New Position: (${calculatedPosition.getX()}, ${calculatedPosition.getY()})`);
-    //
-    //             // Mesh를 업데이트
-    //             const mainCardSceneMesh = mainCardScene.getMesh();
-    //             if (mainCardSceneMesh) {
-    //                 mainCardSceneMesh.position.x = calculatedPosition.getX();
-    //                 mainCardSceneMesh.position.y = calculatedPosition.getY();
-    //                 console.log(`Mesh updated for Card Scene ID: ${handCard.getCardSceneId()}, Position: (${mainCardSceneMesh.position.x}, ${mainCardSceneMesh.position.y})`);
-    //             }
-    //
-    //             // 추가적으로 Attribute Mark Scene도 업데이트
-    //             // const attributeMarkSceneList = this.battleFieldCardAttributeMarkSceneRepository.findByCardSceneId(handCard.getCardSceneId());
-    //             // attributeMarkSceneList.forEach((attributeMarkScene) => {
-    //             //     const attributeMesh = attributeMarkScene.getMesh();
-    //             //     if (attributeMesh) {
-    //             //         attributeMesh.position.x = calculatedPosition.getX();
-    //             //         attributeMesh.position.y = calculatedPosition.getY() - this.ATTRIBUTE_MARK_OFFSET;
-    //             //         console.log(`Attribute Mark Mesh updated for Card Scene ID: ${handCard.getCardSceneId()}`);
-    //             //     }
-    //             // });
-    //         } else {
-    //             console.error(`Position or Scene not found for Card Scene ID: ${handCard.getCardSceneId()}`);
-    //         }
-    //     });
-    // }
 
     private calculateHandPositionByIndex(index: number): Vector2d {
         const handPositionX = (this.HAND_INITIAL_X + index * this.GAP_OF_EACH_CARD) * window.innerWidth;
