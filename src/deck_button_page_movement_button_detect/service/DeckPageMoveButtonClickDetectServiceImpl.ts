@@ -82,7 +82,7 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
 
             this.buttonEffectManager.resetVisibility();
 
-            if (clickedDeckPageMovementButton.id === 1) {
+            if (clickedDeckPageMovementButton.id === 0) {
                 if (this.getCurrentPage() > 1) {
                     this.setCurrentDeckButtonPage(this.getCurrentPage() - 1);
                     this.showMyDeckButtonsForPage(this.getCurrentPage());
@@ -90,7 +90,7 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
                 }
             }
 
-            if (clickedDeckPageMovementButton.id === 2) {
+            if (clickedDeckPageMovementButton.id === 1) {
                 if (this.getCurrentPage() < this.buttonPageManager.getTotalPages()) {
                     this.setCurrentDeckButtonPage(this.getCurrentPage() + 1);
                     this.showMyDeckButtonsForPage(this.getCurrentPage());
