@@ -41,7 +41,7 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         const buttonGroup = new THREE.Group();
         try {
             const position = this.myDeckButtonPosition(deckId);
-            console.log(`Deck ${deckId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+            console.log(`[DEBUG] Deck ${deckId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
             this.saveMyDeckButtonPosition(deckId, position);
 
             const deckButton = await this.createMyDeckButton(deckId, position.position);
@@ -86,8 +86,8 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         this.myDeckButtonPositionRepository.save(deckId, position);
     }
 
-    private findMyDeckButtonPosition(deckId: number): MyDeckButtonPosition | undefined{
-        return this.myDeckButtonPositionRepository.findById(deckId);
+    private findMyDeckButtonPosition(deckId: number): MyDeckButtonPosition | null {
+        return this.myDeckButtonPositionRepository.findPositionByDeckId(deckId);
     }
 
     private async createMyDeckButtonEffect(deckId: number, position: Vector2d): Promise<MyDeckButtonEffect>{
@@ -180,21 +180,21 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
     }
 
-    public setVisibleDeckButton(buttonId: number, isVisible: boolean): void {
+    public setVisibleDeckButton(deckId: number, isVisible: boolean): void {
        // ButtonStateManager를 사용하여 버튼의 visibility 상태 설정
-       this.buttonStateManager.setVisibility(buttonId, isVisible);
+       this.buttonStateManager.setVisibility(deckId, isVisible);
 
        // 버튼을 보이게 하거나 숨김
-       const button = this.getMyDeckButtonById(buttonId); // 버튼 찾기
+       const button = this.getMyDeckButtonById(deckId); // 버튼 찾기
        if (button) {
            button.getMesh().visible = isVisible;
        }
     }
 
-   public setVisibleDeckButtonEffect(buttonId: number, isVisible: boolean): void {
-       this.buttonEffectManger.setVisibility(buttonId, isVisible);
+   public setVisibleDeckButtonEffect(deckId: number, isVisible: boolean): void {
+       this.buttonEffectManger.setVisibility(deckId, isVisible);
 
-       const button = this.getMyDeckButtonEffectById(buttonId);
+       const button = this.getMyDeckButtonEffectById(deckId);
        if (button) {
            button.getMesh().visible = isVisible;
        }
@@ -202,11 +202,11 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
 
     public getMyDeckButtonById(id: number): MyDeckButton | null {
-        return this.myDeckButtonRepository.findById(id);
+        return this.myDeckButtonRepository.findButtonByDeckId(id);
     }
 
     public getMyDeckButtonEffectById(id: number): MyDeckButtonEffect | null {
-        return this.myDeckButtonEffectRepository.findById(id);
+        return this.myDeckButtonEffectRepository.findEffectByDeckId(id);
         }
 
     public deleteMyDeckButtonById(id: number): void {

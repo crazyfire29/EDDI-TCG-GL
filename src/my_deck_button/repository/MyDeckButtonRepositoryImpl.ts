@@ -9,6 +9,7 @@ import {Vector2d} from "../../common/math/Vector2d";
 export class MyDeckButtonRepositoryImpl implements MyDeckButtonRepository {
     private static instance: MyDeckButtonRepositoryImpl;
     private buttonMap: Map<number, MyDeckButton> = new Map();
+    private deckToButtonMap: Map<number, number> = new Map();
     private textureManager: TextureManager;
 
     private readonly BUTTON_WIDTH: number = 350 / 1920
@@ -43,7 +44,8 @@ export class MyDeckButtonRepositoryImpl implements MyDeckButtonRepository {
         buttonMesh.position.set(buttonPositionX, buttonPositionY, 0);
 
         const newButton = new MyDeckButton(buttonWidth, buttonHeight, buttonMesh, position);
-        this.buttonMap.set(deckId, newButton);
+        this.buttonMap.set(newButton.id, newButton);
+        this.deckToButtonMap.set(deckId, newButton.id);
 
         return newButton;
     }
@@ -58,6 +60,22 @@ export class MyDeckButtonRepositoryImpl implements MyDeckButtonRepository {
 
     public findAll(): MyDeckButton[] {
         return Array.from(this.buttonMap.values());
+    }
+
+    public findButtonByDeckId(deckId: number): MyDeckButton | null {
+        const buttonId = this.deckToButtonMap.get(deckId);
+        if (buttonId === undefined) {
+            return null;
+        }
+        return this.buttonMap.get(buttonId) || null;
+    }
+
+    public deleteButtonByDeckId(deckId: number): void {
+        const buttonId = this.deckToButtonMap.get(deckId);
+        if (buttonId !== undefined) {
+            this.buttonMap.delete(buttonId);
+            this.deckToButtonMap.delete(deckId);
+        }
     }
 
     public deleteById(id: number): void {
