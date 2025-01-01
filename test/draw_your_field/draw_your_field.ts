@@ -124,8 +124,11 @@ export class TCGJustTestBattleFieldView {
 
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
             if (e.button === 0) { // 좌클릭만 처리
-                await this.leftClickDetectService.handleLeftClick(e);
-                this.leftClickDetectService.setLeftMouseDown(true)
+                const result = await this.leftClickDetectService.handleLeftClick(e);
+                console.log(`result: ${JSON.stringify(result, null, 2)}`)
+                if (result !== null) {
+                    this.leftClickDetectService.setLeftMouseDown(true);
+                }
             }
         }, false)
 

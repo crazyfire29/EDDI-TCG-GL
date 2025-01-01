@@ -322,9 +322,6 @@ export class BattleFieldHandServiceImpl implements BattleFieldHandService {
         const attributeMarkScene = new BattleFieldCardAttributeMarkScene(mesh, markSceneType);
         await this.battleFieldCardAttributeMarkSceneRepository.save(attributeMarkScene);
 
-        console.log(`attributeMarkScene id -> ${attributeMarkScene.getId()}`);
-        // console.log('Current scenes:', await this.battleFieldCardAttributeMarkSceneRepository.findAll());
-
         const attributeMark = new BattleFieldCardAttributeMark(
             BattleFieldCardAttributeMarkStatus.HAND,
             attributeMarkScene.getId(),
