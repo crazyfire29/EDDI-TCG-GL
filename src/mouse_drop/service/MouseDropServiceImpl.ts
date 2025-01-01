@@ -30,6 +30,7 @@ import {YourFieldCardPositionRepositoryImpl} from "../../your_field_card_positio
 import {Vector2d} from "../../common/math/Vector2d";
 import {MarkSceneType} from "../../battle_field_card_attribute_mark_scene/entity/MarkSceneType";
 import {AttributeMarkPositionCalculator} from "../../common/attribute_mark/AttributeMarkPositionCalculator";
+import {YourFieldCardPosition} from "../../your_field_card_position/entity/YourFieldCardPosition";
 
 export class MouseDropServiceImpl implements MouseDropService {
     private static instance: MouseDropServiceImpl | null = null;
@@ -97,6 +98,7 @@ export class MouseDropServiceImpl implements MouseDropService {
             if (selectedObject instanceof BattleFieldCardScene) {
                 this.handleValidDrop(selectedObject);
                 this.alignHandCard()
+                // this.handSceneToYourFieldScene()
             }
         } else {
             console.log("Dropped outside YourFieldArea.");
@@ -198,7 +200,6 @@ export class MouseDropServiceImpl implements MouseDropService {
                     console.error(`Error processing AttributeMark ID: ${attributeMarkId}`, error);
                 }
             }));
-
         }));
     }
 
@@ -238,8 +239,32 @@ export class MouseDropServiceImpl implements MouseDropService {
         this.yourFieldRepository.save(cardSceneId, positionId, attributeMarkIdList, cardId);
         console.log("handleValidDrop() yourFieldRepository saved");
 
-        const handCardId = handCard?.getId()
+        const handCardIndex = this.battleFieldHandRepository.findCardIndexByCardSceneId(cardSceneId)
+        if (handCardIndex === null) {
+            console.error(`sceneId ${cardSceneId} 존재하지 않음`);
+            return
+        }
 
+        const willBePlaceYourFieldCardScene = this.battleFieldCardSceneRepository.extractByIndex(handCardIndex)
+        const willBePlaceYourFieldCardSceneMesh = willBePlaceYourFieldCardScene?.getMesh()
+        if (willBePlaceYourFieldCardSceneMesh) {
+            this.yourFieldCardSceneRepository.create(willBePlaceYourFieldCardSceneMesh);
+        }
+
+        const handCardPositionId = this.battleFieldHandRepository.findPositionIdByCardSceneId(cardSceneId)
+        if (handCardPositionId === null) {
+            console.error('Position ID를 찾을 수 없습니다');
+            return
+        }
+        const willBePlaceYourFieldCardPosition = this.battleFieldHandCardPositionRepository.extractById(handCardPositionId)
+        if (willBePlaceYourFieldCardPosition) {
+            const positionX = willBePlaceYourFieldCardPosition.getX()
+            const positionY = willBePlaceYourFieldCardPosition.getY()
+            const yourFieldCardPosition = new YourFieldCardPosition(positionX, positionY)
+            this.yourFieldCardPositionRepository.save(yourFieldCardPosition);
+        }
+
+        const handCardId = handCard?.getId()
         if (handCardId === undefined) {
             console.error("Hand card ID를 찾을 수 없습니다.");
             return
@@ -247,36 +272,6 @@ export class MouseDropServiceImpl implements MouseDropService {
 
         this.battleFieldHandRepository.deleteById(handCardId)
         console.log(`handCard: ${JSON.stringify(this.battleFieldHandRepository.findAll(), null, 2)}`);
-
-        // const handCardIndex = this.battleFieldHandRepository.findCardIndexByCardSceneId(cardSceneId)
-        //
-        // if (handCardIndex === null) {
-        //     console.error(`sceneId ${cardSceneId} 존재하지 않음`);
-        //     return
-        // }
-        //
-        // console.log(`handCardIndex: ${handCardIndex}`)
-        // const willBePlaceYourFieldCardScene = this.battleFieldCardSceneRepository.extractByIndex(handCardIndex)
-        // const willBePlaceYourFieldCardSceneMesh = willBePlaceYourFieldCardScene?.getMesh()
-        // if (willBePlaceYourFieldCardSceneMesh) {
-        //     this.yourFieldCardSceneRepository.create(willBePlaceYourFieldCardSceneMesh);
-        // }
-        //
-        // const handCardPositionId = this.battleFieldHandRepository.findPositionIdByCardSceneId(cardSceneId)
-        // if (handCardPositionId === null) {
-        //     console.error('Position ID를 찾을 수 없습니다');
-        //     return
-        // }
-        // const willBePlaceYourFieldCardPosition = this.battleFieldHandCardPositionRepository.extractById(handCardPositionId)
-        // if (willBePlaceYourFieldCardPosition) {
-        //     const positionX = willBePlaceYourFieldCardPosition.getX()
-        //     const positionY = willBePlaceYourFieldCardPosition.getY()
-        //     const yourFieldCardPosition = new YourFieldCardPosition(positionX, positionY)
-        //     this.yourFieldCardPositionRepository.save(yourFieldCardPosition);
-        // }
-
-        // const remainHandCardSceneList = this.battleFieldCardSceneRepository.findAll()
-
     }
 
     private async restoreOriginalPosition(selectedObject: THREE.Object3D): Promise<void> {
