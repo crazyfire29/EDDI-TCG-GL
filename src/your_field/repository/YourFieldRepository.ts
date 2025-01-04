@@ -1,6 +1,7 @@
 import {YourField} from "../entity/YourField";
 
 export interface YourFieldRepository {
+    count(): number
     save(cardSceneId: number, positionId: number, attributeMarkIdList: number[], cardId: number): YourField;
     findById(id: number): YourField | undefined;
     findAll(): YourField[];
