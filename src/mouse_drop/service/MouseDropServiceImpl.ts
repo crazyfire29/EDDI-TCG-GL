@@ -32,6 +32,7 @@ import {MarkSceneType} from "../../battle_field_card_attribute_mark_scene/entity
 import {AttributeMarkPositionCalculator} from "../../common/attribute_mark/AttributeMarkPositionCalculator";
 import {YourFieldCardPosition} from "../../your_field_card_position/entity/YourFieldCardPosition";
 import {YourField} from "../../your_field/entity/YourField";
+import {MeshGenerator} from "../../mesh/generator";
 
 export class MouseDropServiceImpl implements MouseDropService {
     private static instance: MouseDropServiceImpl | null = null;
@@ -112,6 +113,7 @@ export class MouseDropServiceImpl implements MouseDropService {
                 if (createdYourField) {
                     this.alignHandCard();
                     this.alignYourField(createdYourField);
+                    this.alignYourFieldAttributeMark(createdYourField)
                 } else {
                     console.log("Failed to create YourField.");
                 }
@@ -122,6 +124,67 @@ export class MouseDropServiceImpl implements MouseDropService {
         }
 
         this.clearSelection();
+    }
+
+    private async alignYourFieldAttributeMark(createdYourField: YourField): Promise<void> {
+        const yourFieldAttributeMarkSceneIdList = createdYourField.getAttributeMarkIdList();
+        console.log(`alignYourField() yourFieldAttributeMarkSceneIdList: ${yourFieldAttributeMarkSceneIdList}`);
+
+        for (const attributeMarkId of yourFieldAttributeMarkSceneIdList) {
+            // BattleFieldCardAttributeMark 객체를 비동기적으로 가져오기
+            const attributeMark = await this.battleFieldCardAttributeMarkRepository.findById(attributeMarkId);
+            console.log(`alignYourField() attributeMark: ${attributeMark}`);
+            if (!attributeMark) {
+                console.error(`AttributeMark을 찾을 수 없습니다. id: ${attributeMarkId}`);
+                continue; // attributeMarkId가 없으면 다음 attributeMarkId로 넘어갑니다
+            }
+
+            // attributeMark을 처리하는 부분 (예: 위치 업데이트)
+            const attributeMarkPositionId = attributeMark.attributeMarkPositionId;
+            const attributeMarkPosition = await this.battleFieldCardAttributeMarkPositionRepository.findById(attributeMarkPositionId);
+            if (!attributeMarkPosition) {
+                console.error(`AttributeMarkPosition을 찾을 수 없습니다. id: ${attributeMarkPositionId}`);
+                continue; // 위치가 없으면 다음 iteration으로 넘어갑니다
+            }
+
+            // 예시: attributeMarkPosition으로 mesh 위치 업데이트
+            const attributeMarkSceneId = attributeMark.attributeMarkSceneId;
+            const attributeMarkScene = await this.battleFieldCardAttributeMarkSceneRepository.findById(attributeMarkSceneId);
+            if (!attributeMarkScene) {
+                console.error(`AttributeMarkScene을 찾을 수 없습니다. id: ${attributeMarkSceneId}`);
+                continue; // Scene을 찾을 수 없으면 다음으로 넘어갑니다
+            }
+
+            // attributeMarkPosition에서 위치 데이터 {x, y, z}를 가져온다고 가정
+            const mesh = attributeMarkScene.getMesh();
+            const markSceneType = attributeMarkScene.getMarkSceneType();
+
+            if (mesh) {
+                const yourFieldPositionId = createdYourField.getPositionId()
+                const cardPosition = this.battleFieldHandCardPositionRepository.findById(yourFieldPositionId)
+
+                if (!cardPosition) {
+                    console.error(`yourFieldPosition을 찾을 수 없습니다: ${cardPosition}`);
+                    return;
+                }
+
+                const cardPositionVector2d = cardPosition.getPosition()
+
+                const calculatedPosition = AttributeMarkPositionCalculator.getPositionForType(markSceneType, cardPositionVector2d, this.CARD_WIDTH, this.CARD_HEIGHT);
+
+                const x = calculatedPosition.getX();
+                const y = calculatedPosition.getY();
+
+                mesh.position.set(x, y, 0); // mesh의 위치를 업데이트
+                console.log(`mesh의 위치가 업데이트되었습니다. id: ${attributeMarkSceneId}`);
+
+                attributeMarkPosition.setPosition(x, y);
+
+                // 업데이트된 position을 다시 저장
+                await this.battleFieldCardAttributeMarkPositionRepository.save(attributeMarkPosition);
+                console.log(`attributeMarkPosition이 업데이트되었습니다. id: ${attributeMarkPositionId}`);
+            }
+        }
     }
 
     private alignYourField(createdYourField: YourField): void {
@@ -151,8 +214,15 @@ export class MouseDropServiceImpl implements MouseDropService {
 
         const yourFieldSceneMesh = yourFieldScene.getMesh()
         if (yourFieldSceneMesh) {
-            yourFieldSceneMesh.position.x = calculatedYourFieldPosition.getX();
-            yourFieldSceneMesh.position.y = calculatedYourFieldPosition.getY();
+            const x = calculatedYourFieldPosition.getX()
+            const y = calculatedYourFieldPosition.getY()
+
+            // Update the mesh position
+            yourFieldSceneMesh.position.x = x;
+            yourFieldSceneMesh.position.y = y;
+
+            cardPosition.setPosition(x, y);
+            this.battleFieldHandCardPositionRepository.save(cardPosition);
         } else {
             console.error(`Mesh not found`);
         }
@@ -410,5 +480,41 @@ export class MouseDropServiceImpl implements MouseDropService {
     private clearSelection(): void {
         this.dragMoveRepository.deleteSelectedObject();
         this.dragMoveRepository.deleteSelectedGroup();
+    }
+
+    private calculateWeaponPosition(yourFieldPosition: Vector2d): Vector2d {
+        const x = yourFieldPosition.getX() + this.CARD_WIDTH * 0.44 * window.innerWidth;
+        const y = yourFieldPosition.getY() - this.CARD_HEIGHT * 0.45666 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private calculateStaffPosition(yourFieldPosition: Vector2d): Vector2d {
+        const x = yourFieldPosition.getX() + this.CARD_WIDTH * 0.54 * window.innerWidth;
+        const y = yourFieldPosition.getY() - this.CARD_HEIGHT * 0.30666 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private calculateKindsPosition(yourFieldPosition: Vector2d): Vector2d {
+        const x = yourFieldPosition.getX() + this.CARD_WIDTH * 0.5 * window.innerWidth;
+        const y = yourFieldPosition.getY() - this.CARD_HEIGHT * 0.5 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private calculateRacePosition(yourFieldPosition: Vector2d): Vector2d {
+        const x = yourFieldPosition.getX() + this.CARD_WIDTH * 0.5 * window.innerWidth;
+        const y = yourFieldPosition.getY() + this.CARD_HEIGHT * 0.5 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private calculateHpPosition(yourFieldPosition: Vector2d): Vector2d {
+        const x = yourFieldPosition.getX() - this.CARD_WIDTH * 0.5 * window.innerWidth;
+        const y = yourFieldPosition.getY() - this.CARD_HEIGHT * 0.43438 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private calculateEnergyPosition(yourFieldPosition: Vector2d): Vector2d {
+        const x = yourFieldPosition.getX() - this.CARD_WIDTH * 0.5 * window.innerWidth;
+        const y = yourFieldPosition.getY() + this.CARD_HEIGHT * 0.5 * window.innerWidth;
+        return new Vector2d(x, y);
     }
 }
