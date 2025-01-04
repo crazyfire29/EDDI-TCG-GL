@@ -30,8 +30,17 @@ export class YourFieldCardSceneRepositoryImpl implements YourFieldCardSceneRepos
         return yourFieldCardScene;
     }
 
-    findById(id: number): YourFieldCardScene | undefined {
+    findByIndex(id: number): YourFieldCardScene | undefined {
         return this.cardSceneMap.get(id);
+    }
+
+    findById(id: number): YourFieldCardScene | undefined {
+        for (const cardScene of this.cardSceneMap.values()) {
+            if (cardScene.getId() === id) {
+                return cardScene;
+            }
+        }
+        return undefined; // id에 해당하는 카드가 없을 경우
     }
 
     findAll(): YourFieldCardScene[] {

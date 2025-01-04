@@ -14,6 +14,10 @@ export class YourFieldRepositoryImpl implements YourFieldRepository {
         return YourFieldRepositoryImpl.instance;
     }
 
+    count(): number {
+        return this.cardMap.size;
+    }
+
     save(cardSceneId: number, positionId: number, attributeMarkIdList: number[], cardId: number): YourField {
         const existingCard = Array.from(this.cardMap.values()).find(card => card.cardSceneId === cardSceneId && card.positionId === positionId);
         if (existingCard) {

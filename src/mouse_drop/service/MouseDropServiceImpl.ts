@@ -31,6 +31,7 @@ import {Vector2d} from "../../common/math/Vector2d";
 import {MarkSceneType} from "../../battle_field_card_attribute_mark_scene/entity/MarkSceneType";
 import {AttributeMarkPositionCalculator} from "../../common/attribute_mark/AttributeMarkPositionCalculator";
 import {YourFieldCardPosition} from "../../your_field_card_position/entity/YourFieldCardPosition";
+import {YourField} from "../../your_field/entity/YourField";
 
 export class MouseDropServiceImpl implements MouseDropService {
     private static instance: MouseDropServiceImpl | null = null;
@@ -38,9 +39,19 @@ export class MouseDropServiceImpl implements MouseDropService {
     private readonly HALF: number = 0.5;
     private readonly GAP_OF_EACH_CARD: number = 0.094696
     private readonly HAND_X_CRITERIA: number = 0.311904
+    // 0.862217 + 0.06493506493 * 1.615 = 0.1048701
+    // 0.862217 + 0.1048701
     private readonly HAND_Y_CRITERIA: number = 0.972107
     private readonly HAND_INITIAL_X: number = this.HAND_X_CRITERIA - this.HALF;
     private readonly HAND_INITIAL_Y: number = this.HALF - this.HAND_Y_CRITERIA;
+
+    private readonly YOUR_FIELD_X_CRITERIA: number = 0.186458
+    // private readonly YOUR_FIELD_Y_CRITERIA: number = 0.972107
+    // private readonly YOUR_FIELD_Y_CRITERIA: number = 0.328463
+    private readonly YOUR_FIELD_Y_CRITERIA: number = 0.653391 + 0.1048701
+    // private readonly YOUR_FIELD_Y_CRITERIA: number = 0.770721
+    private readonly YOUR_FIELD_INITIAL_X: number = this.YOUR_FIELD_X_CRITERIA - this.HALF
+    private readonly YOUR_FIELD_INITIAL_Y: number = this.HALF - this.YOUR_FIELD_Y_CRITERIA;
 
     private readonly CARD_WIDTH: number = 0.06493506493
     private readonly CARD_HEIGHT: number = this.CARD_WIDTH * 1.615
@@ -86,7 +97,7 @@ export class MouseDropServiceImpl implements MouseDropService {
         return MouseDropServiceImpl.instance;
     }
 
-    public onMouseUp(): void {
+    public async onMouseUp(): Promise<void> {
         const selectedObject = this.dragMoveRepository.getSelectedObject();
         if (!selectedObject) {
             console.log("No object selected.");
@@ -96,9 +107,14 @@ export class MouseDropServiceImpl implements MouseDropService {
         if (this.mouseDropFieldRepository.isYourFieldAreaDropped(selectedObject, this.raycaster)) {
             console.log("Dropped inside YourFieldArea.");
             if (selectedObject instanceof BattleFieldCardScene) {
-                this.handleValidDrop(selectedObject);
-                this.alignHandCard()
-                // this.handSceneToYourFieldScene()
+                const createdYourField = await this.handleValidDrop(selectedObject);
+
+                if (createdYourField) {
+                    this.alignHandCard();
+                    this.alignYourField(createdYourField);
+                } else {
+                    console.log("Failed to create YourField.");
+                }
             }
         } else {
             console.log("Dropped outside YourFieldArea.");
@@ -106,6 +122,47 @@ export class MouseDropServiceImpl implements MouseDropService {
         }
 
         this.clearSelection();
+    }
+
+    private alignYourField(createdYourField: YourField): void {
+        console.log(`createdYourField: ${JSON.stringify(createdYourField, null, 2)}`)
+        // x = 1920, y = 1848
+        // (358, 607)
+        const yourFieldCount = this.yourFieldRepository.count()
+        console.log(`yourFieldCount: ${yourFieldCount}`)
+
+        const calculatedYourFieldPosition = this.calculateYourFieldPositionByIndex(yourFieldCount - 1)
+        const yourFieldPositionId = createdYourField.getPositionId()
+        const cardPosition = this.battleFieldHandCardPositionRepository.findById(yourFieldPositionId)
+
+        if (!cardPosition) {
+            console.error(`yourFieldPosition: ${cardPosition}`);
+            return;
+        }
+
+        const yourFieldSceneId = createdYourField.getCardSceneId()
+        console.log(`alignYourField() yourFieldSceneId: ${yourFieldSceneId}`)
+        const yourFieldScene = this.yourFieldCardSceneRepository.findById(yourFieldSceneId)
+
+        if (!yourFieldScene) {
+            console.error(`yourFieldScene: ${yourFieldScene}`);
+            return;
+        }
+
+        const yourFieldSceneMesh = yourFieldScene.getMesh()
+        if (yourFieldSceneMesh) {
+            yourFieldSceneMesh.position.x = calculatedYourFieldPosition.getX();
+            yourFieldSceneMesh.position.y = calculatedYourFieldPosition.getY();
+        } else {
+            console.error(`Mesh not found`);
+        }
+    }
+
+    private calculateYourFieldPositionByIndex(index: number): Vector2d {
+        const yourFieldPositionX = (this.YOUR_FIELD_INITIAL_X + index * this.GAP_OF_EACH_CARD) * window.innerWidth;
+        const yourFieldPositionY = this.YOUR_FIELD_INITIAL_Y * window.innerHeight
+            + (this.CARD_HEIGHT * this.HALF * window.innerWidth);
+        return new Vector2d(yourFieldPositionX, yourFieldPositionY);
     }
 
     private async alignHandCard(): Promise<void> {
@@ -210,12 +267,12 @@ export class MouseDropServiceImpl implements MouseDropService {
         return new Vector2d(handPositionX, handPositionY);
     }
 
-    private handleValidDrop(selectedObject: BattleFieldCardScene): void {
+    private async handleValidDrop(selectedObject: BattleFieldCardScene): Promise<YourField> {
         const cardSceneId = selectedObject.getId()
 
-        const handCard = this.battleFieldHandRepository.findByCardSceneId(cardSceneId);
+        const willBePlacedYourFieldHandCard = this.battleFieldHandRepository.findByCardSceneId(cardSceneId);
 
-        const cardId = handCard?.getCardId() ?? 0; // 기본값 0
+        const cardId = willBePlacedYourFieldHandCard?.getCardId() ?? 0; // 기본값 0
         const card = getCardById(cardId)
 
         if (!card) {
@@ -227,51 +284,57 @@ export class MouseDropServiceImpl implements MouseDropService {
 
         if (cardKind !== CardKind.UNIT) {
             this.restoreOriginalPosition(selectedObject as unknown as THREE.Object3D);
-            return
+            throw new Error('유닛이 아닙니다')
         }
 
         // UNIT 카드에 대한 처리 로직
         console.log("Handling UNIT card:", card);
 
-        const positionId = handCard?.getPositionId() ?? 0; // 기본값 0
-        const attributeMarkIdList = handCard?.getAttributeMarkIdList() ?? [];
-
-        this.yourFieldRepository.save(cardSceneId, positionId, attributeMarkIdList, cardId);
-        console.log("handleValidDrop() yourFieldRepository saved");
+        const positionId = willBePlacedYourFieldHandCard?.getPositionId() ?? 0; // 기본값 0
+        const attributeMarkIdList = willBePlacedYourFieldHandCard?.getAttributeMarkIdList() ?? [];
 
         const handCardIndex = this.battleFieldHandRepository.findCardIndexByCardSceneId(cardSceneId)
         if (handCardIndex === null) {
-            console.error(`sceneId ${cardSceneId} 존재하지 않음`);
-            return
+            throw new Error(`sceneId ${cardSceneId} 존재하지 않음`);
         }
 
+        let yourFieldCardScene;
         const willBePlaceYourFieldCardScene = this.battleFieldCardSceneRepository.extractByIndex(handCardIndex)
         const willBePlaceYourFieldCardSceneMesh = willBePlaceYourFieldCardScene?.getMesh()
+
         if (willBePlaceYourFieldCardSceneMesh) {
-            this.yourFieldCardSceneRepository.create(willBePlaceYourFieldCardSceneMesh);
+            yourFieldCardScene = await this.yourFieldCardSceneRepository.create(willBePlaceYourFieldCardSceneMesh);
         }
 
-        const handCardPositionId = this.battleFieldHandRepository.findPositionIdByCardSceneId(cardSceneId)
-        if (handCardPositionId === null) {
-            console.error('Position ID를 찾을 수 없습니다');
-            return
-        }
-        const willBePlaceYourFieldCardPosition = this.battleFieldHandCardPositionRepository.extractById(handCardPositionId)
-        if (willBePlaceYourFieldCardPosition) {
-            const positionX = willBePlaceYourFieldCardPosition.getX()
-            const positionY = willBePlaceYourFieldCardPosition.getY()
-            const yourFieldCardPosition = new YourFieldCardPosition(positionX, positionY)
-            this.yourFieldCardPositionRepository.save(yourFieldCardPosition);
+        if (!yourFieldCardScene) {
+            throw new Error("yourFieldCardScene이 생성되지 않았습니다.");
         }
 
-        const handCardId = handCard?.getId()
+        const createdYourField = this.yourFieldRepository.save(yourFieldCardScene.getId(), positionId, attributeMarkIdList, cardId);
+        console.log(`handleValidDrop() yourFieldRepository saved: ${JSON.stringify(createdYourField, null, 2)}`);
+
+        // const handCardPositionId = this.battleFieldHandRepository.findPositionIdByCardSceneId(cardSceneId)
+        // if (handCardPositionId === null) {
+        //     throw new Error('Position ID를 찾을 수 없습니다');
+        // }
+        //
+        // const willBePlaceYourFieldCardPosition = this.battleFieldHandCardPositionRepository.extractById(handCardPositionId)
+        // if (willBePlaceYourFieldCardPosition) {
+        //     const positionX = willBePlaceYourFieldCardPosition.getX()
+        //     const positionY = willBePlaceYourFieldCardPosition.getY()
+        //     const yourFieldCardPosition = new YourFieldCardPosition(positionX, positionY)
+        //     this.yourFieldCardPositionRepository.save(yourFieldCardPosition);
+        // }
+
+        const handCardId = willBePlacedYourFieldHandCard?.getId()
         if (handCardId === undefined) {
-            console.error("Hand card ID를 찾을 수 없습니다.");
-            return
+            throw new Error("Hand card ID를 찾을 수 없습니다.");
         }
 
         this.battleFieldHandRepository.deleteById(handCardId)
         console.log(`handCard: ${JSON.stringify(this.battleFieldHandRepository.findAll(), null, 2)}`);
+
+        return createdYourField
     }
 
     private async restoreOriginalPosition(selectedObject: THREE.Object3D): Promise<void> {
