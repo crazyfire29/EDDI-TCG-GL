@@ -80,8 +80,8 @@ export class TCGJustTestBattleFieldView {
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
     private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
-    // private lightningGenerator = new LightningGenerator(10)
-    // private lightning: THREE.Line[] = [];
+    private lightningGenerator = new LightningGenerator(10)
+    private lightning: THREE.Line[] = [];
 
     private leftClickDetectService: LeftClickDetectService
     private dragMoveService: DragMoveService
@@ -431,22 +431,21 @@ export class TCGJustTestBattleFieldView {
 
     animate(): void {
         if (this.isAnimating) {
-            // this.lightning.forEach(line => this.scene.remove(line));
-            // this.lightning = [];
-            //
-            // // 새로운 번개 생성
-            // const newLightning = this.lightningGenerator.generateLightning(
-            //     new THREE.Vector3(0, -100, 0),
-            //     new THREE.Vector3(0, 100, 0),
-            // );
-            //
-            // newLightning.forEach((segment) => {
-            //     this.scene.add(segment);
-            // });
-            //
-            // // newLightning.forEach(line => this.scene.add(line));
-            // this.lightning = newLightning;
-            // this.renderer.render(this.scene, this.camera);
+            this.lightning.forEach(line => this.scene.remove(line));
+            this.lightning = [];
+
+            // 새로운 번개 생성
+            const newLightning = this.lightningGenerator.generateLightning(
+                new THREE.Vector3(0, -100, 0),
+                new THREE.Vector3(0, 100, 0),
+            );
+
+            newLightning.forEach((segment) => {
+                this.scene.add(segment);
+            });
+
+            this.lightning = newLightning;
+            this.renderer.render(this.scene, this.camera);
 
             requestAnimationFrame(() => this.animate());
             // this.battleFieldHandRenderer?.render(this.renderer, this.camera);
