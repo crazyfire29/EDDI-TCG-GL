@@ -49,6 +49,7 @@ import {LeftClickDetectServiceImpl} from "../../src/left_click_detect/service/Le
 import {DragMoveServiceImpl} from "../../src/drag_move/service/DragMoveServiceImpl";
 import {MouseDropServiceImpl} from "../../src/mouse_drop/service/MouseDropServiceImpl";
 import {LightningGenerator} from "../../src/lightning/LightningGenerator";
+import {NeonShape} from "../../src/neon/NeonShape";
 
 
 export class TCGJustTestBattleFieldView {
@@ -80,8 +81,10 @@ export class TCGJustTestBattleFieldView {
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
     private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
-    private lightningGenerator = new LightningGenerator(10)
-    private lightning: THREE.Line[] = [];
+    // private lightningGenerator = new LightningGenerator(20)
+    // private lightning: THREE.Mesh[] = [];
+
+    private neonShape: NeonShape
 
     private leftClickDetectService: LeftClickDetectService
     private dragMoveService: DragMoveService
@@ -121,6 +124,8 @@ export class TCGJustTestBattleFieldView {
         this.textureManager = TextureManager.getInstance();
         this.audioController = AudioController.getInstance();
         this.audioController.setMusic(battleFieldMusic);
+
+        this.neonShape = new NeonShape(this.scene, this.renderer, this.camera);
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
 
@@ -187,7 +192,9 @@ export class TCGJustTestBattleFieldView {
         this.addYourField();
         this.addYourHandUnitList()
 
-        this.addBlueNeonRectangle();
+        // this.addBlueNeonRectangle();
+
+        this.addNeonShape()
 
         this.initialized = true;
         this.isAnimating = true;
@@ -212,6 +219,14 @@ export class TCGJustTestBattleFieldView {
         this.isAnimating = false;
         this.renderer.domElement.style.display = 'none';
         this.simulationBattleFieldContainer.style.display = 'none';
+    }
+
+    public async addNeonShape(): Promise<void> {
+        // await this.neonShape.addNeonRectangle(100, 100, 200,);
+        await this.neonShape.addNeonLine(0, 0, 200, 200);
+
+        await this.neonShape.addNeonRectangle2(-200, -2000, 0, 0, 8);
+        await this.neonShape.addNeonRectangle1(0, 0, 200);
     }
 
     private async addBackground(): Promise<void> {
@@ -258,12 +273,12 @@ export class TCGJustTestBattleFieldView {
         const startPosition = new THREE.Vector3(0, 100, 0); // 번개의 시작 위치
         const endPosition = new THREE.Vector3(0, -100, 0); // 번개의 끝 위치
 
-        const lightningSegments = this.lightningGenerator.generateLightning(startPosition, endPosition);
-
-        // 번개 세그먼트를 장면에 추가
-        lightningSegments.forEach((segment) => {
-            this.scene.add(segment);
-        });
+        // const lightningSegments = this.lightningGenerator.generateLightning(startPosition, endPosition);
+        //
+        // // 번개 세그먼트를 장면에 추가
+        // lightningSegments.forEach((segment) => {
+        //     this.scene.add(segment);
+        // });
 
         console.log('Lightning effect added to the scene.');
     }
@@ -431,20 +446,20 @@ export class TCGJustTestBattleFieldView {
 
     animate(): void {
         if (this.isAnimating) {
-            this.lightning.forEach(line => this.scene.remove(line));
-            this.lightning = [];
-
-            // 새로운 번개 생성
-            const newLightning = this.lightningGenerator.generateLightning(
-                new THREE.Vector3(0, -100, 0),
-                new THREE.Vector3(0, 100, 0),
-            );
-
-            newLightning.forEach((segment) => {
-                this.scene.add(segment);
-            });
-
-            this.lightning = newLightning;
+            // this.lightning.forEach(line => this.scene.remove(line));
+            // this.lightning = [];
+            //
+            // // 새로운 번개 생성
+            // const newLightning = this.lightningGenerator.generateLightning(
+            //     new THREE.Vector3(0, -100, 0),
+            //     new THREE.Vector3(0, 100, 0),
+            // );
+            //
+            // newLightning.forEach((segment) => {
+            //     this.scene.add(segment);
+            // });
+            //
+            // this.lightning = newLightning;
             this.renderer.render(this.scene, this.camera);
 
             requestAnimationFrame(() => this.animate());
