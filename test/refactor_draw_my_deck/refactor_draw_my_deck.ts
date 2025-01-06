@@ -56,8 +56,8 @@ export class TCGJustTestMyDeckView {
     private readonly cameraRepository = CameraRepositoryImpl.getInstance();
     private readonly cameraService = CameraServiceImpl.getInstance(this.cameraRepository);
 
-    private myDeckButtonClickDetectService: MyDeckButtonClickDetectService
-    private deckPageMovementButtonClickDetectService: DeckPageMovementButtonClickDetectService
+    private myDeckButtonClickDetectService: MyDeckButtonClickDetectService;
+    private deckPageMovementButtonClickDetectService: DeckPageMovementButtonClickDetectService;
 
     private initialized = false;
     private isAnimating = false;
@@ -87,19 +87,11 @@ export class TCGJustTestMyDeckView {
         this.audioController.setMusic(myCardMusic);
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
-
         this.mouseController = new MouseController(this.camera, this.scene);
-
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
 
         this.myDeckButtonClickDetectService = MyDeckButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-
-        this.renderer.domElement.addEventListener('mousedown', async (e) => {
-            if (e.button === 0) {
-                const clickPoint = { x: e.clientX, y: e.clientY };
-                await this.myDeckButtonClickDetectService.handleLeftClick(clickPoint);
-            }
-        });
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.myDeckButtonClickDetectService.onMouseDown(e), false);
 
         this.deckPageMovementButtonClickDetectService = DeckPageMovementButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousedown', async (e) => {

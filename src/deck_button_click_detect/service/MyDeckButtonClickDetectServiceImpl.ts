@@ -11,6 +11,7 @@ import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl
 
 import {ButtonStateManager} from "../../my_deck_button_manager/ButtonStateManager";
 import {ButtonEffectManager} from "../../my_deck_button_manager/ButtonEffectManager";
+import {ButtonPageManager} from "../../my_deck_button_manager/ButtonPageManager";
 
 import * as THREE from "three";
 
@@ -22,6 +23,7 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     private myDeckButtonEffectRepository: MyDeckButtonEffectRepositoryImpl;
     private buttonStateManager: ButtonStateManager;
     private buttonEffectManager: ButtonEffectManager;
+    private buttonPageManager: ButtonPageManager;
 
     private cameraRepository: CameraRepository
 
@@ -35,6 +37,9 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
 
         this.buttonStateManager = new ButtonStateManager();
         this.buttonEffectManager = new ButtonEffectManager();
+
+        const allButtonsMap = this.myDeckButtonRepository.getAllMyDeckButtons();
+        this.buttonPageManager = ButtonPageManager.getInstance(allButtonsMap);
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): MyDeckButtonClickDetectServiceImpl {
@@ -57,7 +62,13 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     ): Promise<MyDeckButton | null> {
         const { x, y } = clickPoint;
 
-        const deckButtonList = this.myDeckButtonRepository.findAll()
+        console.log(`Checking!!!`);
+        const currentPageIds = this.getMyDeckButtonsIdForPage(this.getCurrentPage());
+
+//         const deckButtonList = this.myDeckButtonRepository.findAll();
+        const deckButtonList = this.myDeckButtonRepository.findAll().filter(button =>
+                currentPageIds.includes(button.id)
+        );
         const clickedDeckButton = this.myDeckButtonClickDetectRepository.isMyDeckButtonClicked(
             { x, y },
             deckButtonList,
@@ -107,6 +118,13 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
         return null;
     }
 
+    public async onMouseDown(event: MouseEvent): Promise<void> {
+        if (event.button === 0) {
+            const clickPoint = { x: event.clientX, y: event.clientY };
+            await this.handleLeftClick(clickPoint);
+        }
+    }
+
     public getButtonVisibility(buttonId: number): boolean {
         return this.buttonStateManager.getVisibility(buttonId);
     }
@@ -139,5 +157,16 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
         return this.myDeckButtonRepository.hideById(id);
     }
 
+    private getCurrentPage(): number {
+        return this.buttonPageManager.getCurrentPage();
+    }
+
+    private getMyDeckButtonsIdForPage(page: number): number[] {
+        return this.buttonPageManager.getButtonsIdForPage(page);
+    }
+
+    private getDeckButtonById(buttonId: number): MyDeckButton | null {
+        return this.myDeckButtonRepository.findById(buttonId);
+    }
 
 }

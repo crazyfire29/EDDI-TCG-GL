@@ -44,7 +44,7 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
         const allButtonsMap = this.myDeckButtonRepository.getAllMyDeckButtons();
-        this.buttonPageManager = new ButtonPageManager(allButtonsMap);
+        this.buttonPageManager = ButtonPageManager.getInstance(allButtonsMap);
         this.buttonStateManager = new ButtonStateManager();
         this.buttonEffectManager = new ButtonEffectManager();
         this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
