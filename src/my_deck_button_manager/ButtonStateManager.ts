@@ -8,17 +8,17 @@ export class ButtonStateManager {
     }
 
     // 버튼의 visibility 상태를 설정
-    setVisibility(buttonId: number, isVisible: boolean): void {
+    public setVisibility(buttonId: number, isVisible: boolean): void {
         this.buttonVisibilityState.set(buttonId, isVisible);
     }
 
     // 버튼의 visibility 상태를 가져옴
-    getVisibility(buttonId: number): boolean {
+    public getVisibility(buttonId: number): boolean {
         return this.buttonVisibilityState.get(buttonId) || false;
     }
 
     // 모든 버튼의 상태를 초기화
-    resetVisibility(): void {
+    public resetVisibility(): void {
         this.buttonVisibilityState.clear();  // 모든 상태를 초기화
     }
 }

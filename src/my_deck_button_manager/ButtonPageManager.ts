@@ -4,13 +4,14 @@ import {ButtonEffectManager} from "./ButtonEffectManager";
 import {MyDeckButtonEffectRepositoryImpl} from "../my_deck_button_effect/repository/MyDeckButtonEffectRepositoryImpl";
 
 export class ButtonPageManager {
+    private static instance: ButtonPageManager | null = null;
     private currentPage: number;
     private buttonsPerPage: number;
     private buttonStateManager: ButtonStateManager;
     private buttonEffectManager: ButtonEffectManager;
     private myDeckButtonEffectRepository: MyDeckButtonEffectRepositoryImpl;
 
-    constructor(private allButtonsMap: Map<number, MyDeckButton>, buttonsPerPage: number = 6) {
+    private constructor(private allButtonsMap: Map<number, MyDeckButton>, buttonsPerPage: number = 6) {
         this.currentPage = 1;
         this.buttonsPerPage = buttonsPerPage;
         this.buttonStateManager = new ButtonStateManager();
@@ -20,6 +21,13 @@ export class ButtonPageManager {
         Array.from(this.allButtonsMap.keys()).forEach((id) => {
             this.buttonStateManager.setVisibility(id, false); // 모든 버튼을 숨김 상태로 초기화
         });
+    }
+
+    static getInstance(allButtonsMap: Map<number, MyDeckButton>): ButtonPageManager {
+        if (!ButtonPageManager.instance) {
+            ButtonPageManager.instance = new ButtonPageManager(allButtonsMap);
+        }
+        return ButtonPageManager.instance;
     }
 
     public getCurrentPage(): number {
