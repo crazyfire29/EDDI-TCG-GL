@@ -26,8 +26,9 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     private buttonPageManager: ButtonPageManager;
 
     private cameraRepository: CameraRepository
-
     private leftMouseDown: boolean = false;
+
+    private clickCount: number = 0;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.myDeckButtonRepository = MyDeckButtonRepositoryImpl.getInstance();
@@ -62,7 +63,6 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     ): Promise<MyDeckButton | null> {
         const { x, y } = clickPoint;
 
-        console.log(`Checking!!!`);
         const currentPageIds = this.getMyDeckButtonsIdForPage(this.getCurrentPage());
 
 //         const deckButtonList = this.myDeckButtonRepository.findAll();
@@ -81,12 +81,13 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             this.myDeckButtonClickDetectRepository.saveCurrentClickDeckButtonId(clickedDeckButton.id);
             const currentClickDeckButtonId = this.myDeckButtonClickDetectRepository.getCurrentClickDeckButtonId();
 
-
             const hiddenButton = deckButtonList.find(
                 (button) => !this.getButtonVisibility(button.id)
             );
 
             if (hiddenButton && hiddenButton.id !== currentClickDeckButtonId) {
+                this.clickCount = 1;
+                console.log(`[DEBUG] Different button clicked. Reset click count to 1.`);
                 this.setButtonVisibility(hiddenButton.id, true);
                 const buttonShow = this.showDeckButton(hiddenButton.id);
                 if (buttonShow) {
@@ -97,6 +98,31 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
                     console.error(`Failed to show Deck Button ID ${hiddenButton.id}`);
                 }
 
+            } else {
+                this.clickCount++;
+                console.log(`[DEBUG] button clicked. Click Count: ${this.clickCount}`);
+
+                if (this.clickCount === 2) {
+                    console.log(`[DEBUG] Trigger event for the same button on 2nd click.`);
+                    if (currentClickDeckButtonId !== null) {
+                        console.log(`[DEBUG] Current Click Button?: ${currentClickDeckButtonId}`);
+                        this.setButtonVisibility(currentClickDeckButtonId, true);
+                        const effectHide = this.hideDeckButtonEffect(currentClickDeckButtonId);
+                        if (effectHide) {
+                            this.setEffectVisibility(currentClickDeckButtonId, false);
+                            this.showDeckButton(currentClickDeckButtonId);
+                            console.log(`[DEBUG]Deck Button ID ${currentClickDeckButtonId} is now shown.`);
+                        } else {
+                            console.error(`[DEBUG]Failed to show Deck Button ID ${currentClickDeckButtonId}`);
+                        }
+                    }
+                    return null;
+
+                } else if (this.clickCount > 2) {
+                    this.clickCount = 1;
+                    console.log(`[DEBUG] Reset click count to 1 after 3rd click.`);
+                    console.log(`[DEBUG] button clicked. Click Count: ${this.clickCount}`);
+                }
             }
 
             if (currentClickDeckButtonId !== null){
