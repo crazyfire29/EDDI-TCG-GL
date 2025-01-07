@@ -8,8 +8,8 @@ export class LightningGenerator {
         this.numSegments = numSegments; // 번개의 세그먼트 개수
     }
 
-    public generateLightning(start: THREE.Vector3, end: THREE.Vector3): THREE.Line[] {
-        const segments: THREE.Line[] = [];
+    public generateLightning(start: THREE.Vector3, end: THREE.Vector3): THREE.Mesh[] {
+        const segments: THREE.Mesh[] = [];
         const direction = new THREE.Vector3().subVectors(end, start).normalize();
         const segmentLength = start.distanceTo(end) / this.numSegments;
 
