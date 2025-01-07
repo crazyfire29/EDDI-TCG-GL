@@ -13,7 +13,7 @@ interface CustomMeshBasicMaterialParameters extends THREE.MeshBasicMaterialParam
 }
 
 // Custom shader material interface
-interface Shader extends THREE.ShaderMaterial {
+export interface Shader extends THREE.ShaderMaterial {
     uniforms: any;
     fragmentShader: string;
 }
@@ -22,6 +22,8 @@ export class NeonShape {
     private scene: THREE.Scene;
     private renderer: THREE.WebGLRenderer;
     private camera: THREE.OrthographicCamera;
+    private neonMaterial: Shader | null = null;
+    private materials: THREE.ShaderMaterial[] = [];
 
     constructor(scene: THREE.Scene, renderer: THREE.WebGLRenderer, camera: THREE.OrthographicCamera) {
         this.scene = scene;
@@ -31,7 +33,10 @@ export class NeonShape {
 
     // 통합된 createNeonLine
     private createNeonLine(startX: number, startY: number, endX: number, endY: number): THREE.Mesh {
-        const color = 0x3137FD; // 네온 블루 색상
+        // const color = 0x3137FD; // 네온 블루 색상
+        // const color = 0x2c75ff; // 네온 블루 색상
+        const color = 0x2EFEF7; // 네온 블루 색상
+        // const color = 0x2C75FF; // 네온 블루 색상
         const lineWidth = 10; // 선 두께
 
         const direction = new THREE.Vector3(endX - startX, endY - startY, 0);
@@ -134,5 +139,90 @@ export class NeonShape {
         await this.addNeonLine(startX + rectLength, startY - 5.0, startX + rectLength, startY + rectLength); // 우측
         await this.addNeonLine(startX + rectLength + 5.0, startY + rectLength + 5.0, startX - 5.0, startY + rectLength + 5.0); // 상단
         await this.addNeonLine(startX, startY + rectLength, startX, startY - 5.0); // 좌측
+    }
+
+    createNeonShaderMaterial(): Shader {
+        const shaderMaterial: Shader = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0.0 },
+                baseColor: { value: new THREE.Color(0x2c75ff) }, // 기본 파란색
+                glowColor: { value: new THREE.Color(0x2EFEF7) }, // 더 밝은 파란색
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float time;
+                uniform vec3 baseColor;
+                uniform vec3 glowColor;
+                varying vec2 vUv;
+            
+                void main() {
+                    // 번쩍거림 효과 계산
+                    float glowFactor = sin(time * 5.0) * 0.5 + 0.5; // 진동하는 글로우
+            
+                    // 기본 색상과 글로우 색상을 섞어서 최종 색상 계산
+                    vec3 finalColor = mix(baseColor, glowColor, glowFactor);
+            
+                    gl_FragColor = vec4(finalColor, 1.0);
+                }
+            `,
+            transparent: true,
+        });
+
+        return shaderMaterial;
+    }
+
+    public async addNeonShaderRectangle(startX: number, startY: number, width: number, height: number): Promise<void> {
+        // 사각형의 각 변에 대해 4개의 선을 추가
+        await this.addNeonShaderLine(startX + 5.0, startY, startX + width - 5.0, startY); // 하단
+        await this.addNeonShaderLine(startX + width, startY - 5.0, startX + width, startY + height); // 우측
+        await this.addNeonShaderLine(startX + width + 5.0, startY + height + 5.0, startX - 5.0, startY + height + 5.0); // 상단
+        await this.addNeonShaderLine(startX, startY + height, startX, startY - 5.0); // 좌측
+    }
+
+    private async addNeonShaderLine(startX: number, startY: number, endX: number, endY: number): Promise<void> {
+        // 네온 셰이더 머티리얼 생성
+        const neonMaterial = this.createNeonShaderMaterial();
+
+        // 선의 방향과 길이 계산
+        const direction = new THREE.Vector3(endX - startX, endY - startY, 0);
+        const length = direction.length();
+        direction.normalize();
+
+        // 선의 기하학적 정의
+        const geometry = new THREE.PlaneGeometry(length, 10); // 선 두께는 10으로 설정
+        const line = new THREE.Mesh(geometry, neonMaterial);
+
+        // 선 회전 (방향 맞추기)
+        const angle = Math.atan2(direction.y, direction.x);
+        line.rotation.z = angle;
+        line.position.set(startX + direction.x * length / 2, startY + direction.y * length / 2, 0);
+
+        this.scene.add(line);
+        this.materials.push(neonMaterial);
+    }
+
+    // public addMultipleNeonRectangles(): void {
+    //     const positions = [
+    //         { startX: 0, startY: 0, width: 200, height: 10 },
+    //         { startX: 250, startY: 50, width: 150, height: 20 },
+    //         { startX: 500, startY: 100, width: 100, height: 15 }
+    //     ];
+    //
+    //     positions.forEach(pos => {
+    //         this.addNeonShaderRectangle(pos.startX, pos.startY, pos.width, pos.height);
+    //     });
+    // }
+
+    // 애니메이션 루프에서 시간 업데이트
+    public updateNeonEffect(): void {
+        this.materials.forEach(material => {
+            material.uniforms.time.value += 0.05;
+        });
     }
 }

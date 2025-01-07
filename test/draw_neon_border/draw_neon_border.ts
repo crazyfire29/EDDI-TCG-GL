@@ -49,7 +49,7 @@ import {LeftClickDetectServiceImpl} from "../../src/left_click_detect/service/Le
 import {DragMoveServiceImpl} from "../../src/drag_move/service/DragMoveServiceImpl";
 import {MouseDropServiceImpl} from "../../src/mouse_drop/service/MouseDropServiceImpl";
 import {LightningGenerator} from "../../src/lightning/LightningGenerator";
-import {NeonShape} from "../../src/neon/NeonShape";
+import {NeonShape, Shader} from "../../src/neon/NeonShape";
 
 
 export class TCGJustTestBattleFieldView {
@@ -85,6 +85,7 @@ export class TCGJustTestBattleFieldView {
     // private lightning: THREE.Mesh[] = [];
 
     private neonShape: NeonShape
+    private neonMaterial?: Shader
 
     private leftClickDetectService: LeftClickDetectService
     private dragMoveService: DragMoveService
@@ -194,7 +195,8 @@ export class TCGJustTestBattleFieldView {
 
         // this.addBlueNeonRectangle();
 
-        this.addNeonShape()
+        // this.addNeonShape()
+        this.animatedNeonShape()
 
         this.initialized = true;
         this.isAnimating = true;
@@ -227,6 +229,21 @@ export class TCGJustTestBattleFieldView {
 
         await this.neonShape.addNeonRectangle2(-200, -2000, 0, 0, 8);
         await this.neonShape.addNeonRectangle1(0, 0, 200);
+    }
+
+    public async animatedNeonShape(): Promise<void> {
+        // this.neonMaterial = await this.neonShape.createNeonShaderMaterial();
+        // const geometry = new THREE.PlaneGeometry(200, 10);
+        // if (this.neonMaterial !== undefined) {
+        //     const line = new THREE.Mesh(geometry, this.neonMaterial);
+        //     line.position.x += 100
+        //     this.scene.add(line); // Only add the line if it is defined
+        // } else {
+        //     console.warn("Neon material is undefined; skipping line creation.");
+        // }
+
+        // this.neonShape.addNeonShaderRectangle(startX, startY, width, height)
+        this.neonShape.addNeonShaderRectangle(0, 0, 200, 200)
     }
 
     private async addBackground(): Promise<void> {
@@ -460,6 +477,12 @@ export class TCGJustTestBattleFieldView {
             // });
             //
             // this.lightning = newLightning;
+
+            // if (this.neonMaterial) {
+            //     this.neonMaterial.uniforms.time.value += 0.05;
+            // }
+            this.neonShape.updateNeonEffect();
+
             this.renderer.render(this.scene, this.camera);
 
             requestAnimationFrame(() => this.animate());
