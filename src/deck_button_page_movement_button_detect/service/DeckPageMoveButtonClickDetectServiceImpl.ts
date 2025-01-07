@@ -45,7 +45,7 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
 
         const allButtonsMap = this.myDeckButtonRepository.getAllMyDeckButtons();
         this.buttonPageManager = ButtonPageManager.getInstance(allButtonsMap);
-        this.buttonStateManager = new ButtonStateManager();
+        this.buttonStateManager = ButtonStateManager.getInstance();
         this.buttonEffectManager = new ButtonEffectManager();
         this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
     }
@@ -81,6 +81,7 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
             console.log(`Clicked Deck Page Movement Button ID: ${clickedDeckPageMovementButton.id}`);
 
             this.buttonEffectManager.resetVisibility();
+            this.resetButtonClickCount();
 
             if (clickedDeckPageMovementButton.id === 0) {
                 if (this.getCurrentPage() > 1) {
@@ -145,6 +146,10 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
 
     private getMyDeckButtonsIdForPage(page: number): number[] {
         return this.buttonPageManager.getButtonsIdForPage(page);
+    }
+
+    private resetButtonClickCount(): void {
+        this.buttonStateManager.resetButtonClickCount();
     }
 
 }
