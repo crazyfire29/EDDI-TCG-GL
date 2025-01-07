@@ -28,15 +28,13 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
 
-    private clickCount: number = 0;
-
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.myDeckButtonRepository = MyDeckButtonRepositoryImpl.getInstance();
         this.myDeckButtonClickDetectRepository = MyDeckButtonClickDetectRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
         this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
 
-        this.buttonStateManager = new ButtonStateManager();
+        this.buttonStateManager = ButtonStateManager.getInstance();
         this.buttonEffectManager = new ButtonEffectManager();
 
         const allButtonsMap = this.myDeckButtonRepository.getAllMyDeckButtons();
@@ -86,7 +84,7 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             );
 
             if (hiddenButton && hiddenButton.id !== currentClickDeckButtonId) {
-                this.clickCount = 1;
+                this.setButtonClickCount(1);
                 console.log(`[DEBUG] Different button clicked. Reset click count to 1.`);
                 this.setButtonVisibility(hiddenButton.id, true);
                 const buttonShow = this.showDeckButton(hiddenButton.id);
@@ -99,10 +97,10 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
                 }
 
             } else {
-                this.clickCount++;
-                console.log(`[DEBUG] button clicked. Click Count: ${this.clickCount}`);
+                this.setButtonClickCount(this.getButtonClickCount() + 1);
+                console.log(`[DEBUG] button clicked. Click Count: ${this.getButtonClickCount()}`);
 
-                if (this.clickCount === 2) {
+                if (this.getButtonClickCount() === 2) {
                     console.log(`[DEBUG] Trigger event for the same button on 2nd click.`);
                     if (currentClickDeckButtonId !== null) {
                         console.log(`[DEBUG] Current Click Button?: ${currentClickDeckButtonId}`);
@@ -118,10 +116,10 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
                     }
                     return null;
 
-                } else if (this.clickCount > 2) {
-                    this.clickCount = 1;
+                } else if (this.getButtonClickCount() > 2) {
+                    this.setButtonClickCount(1);
                     console.log(`[DEBUG] Reset click count to 1 after 3rd click.`);
-                    console.log(`[DEBUG] button clicked. Click Count: ${this.clickCount}`);
+                    console.log(`[DEBUG] button clicked. Click Count: ${this.getButtonClickCount()}`);
                 }
             }
 
@@ -149,6 +147,18 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             const clickPoint = { x: event.clientX, y: event.clientY };
             await this.handleLeftClick(clickPoint);
         }
+    }
+
+    private getButtonClickCount(): number {
+        return this.buttonStateManager.getButtonClickCount();
+    }
+
+    private setButtonClickCount(clickCount: number): void {
+        this.buttonStateManager.setButtonClickCount(clickCount);
+    }
+
+    private resetButtonClickCount(): void {
+        this.buttonStateManager.resetButtonClickCount();
     }
 
     public getButtonVisibility(buttonId: number): boolean {
