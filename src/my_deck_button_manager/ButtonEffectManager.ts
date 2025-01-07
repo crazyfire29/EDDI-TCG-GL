@@ -10,7 +10,7 @@ export class ButtonEffectManager {
 
     setVisibility(buttonId: number, isVisible: boolean): void {
         this.buttonEffectState.set(buttonId, isVisible);
-        console.log(`[DEBUG] Set button ${buttonId} visibility to ${isVisible}`);
+        console.log(`[DEBUG] Set effect ${buttonId} visibility to ${isVisible}`);
 
         const buttonEffect = MyDeckButtonEffectRepositoryImpl.getInstance().findById(buttonId);
             if (buttonEffect) {
