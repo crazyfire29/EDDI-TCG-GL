@@ -21,8 +21,11 @@ import {MyDeckButtonPageMovementButtonServiceImpl} from "../../src/my_deck_butto
 import {MyDeckButtonPageMovementButtonRepositoryImpl} from "../../src/my_deck_button_page_movement_button/repository/MyDeckButtonPageMovementButtonRepositoryImpl";
 import {MyDeckCardPageMovementButtonConfigList} from "../../src/my_deck_card_page_movement_button/entity/MyDeckCardPageMovementButtonConfigList";
 import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButtonConfigList";
+
 import {MyDeckButtonServiceImpl} from "../../src/my_deck_button/service/MyDeckButtonServiceImpl";
 import {MyDeckButtonMapRepositoryImpl} from "../../src/my_deck_button/repository/MyDeckButtonMapRepositoryImpl";
+import {MyDeckCardSceneServiceImpl} from "../../src/my_deck_card_scene/service/MyDeckCardSceneServiceImpl";
+import {MyDeckCardMapRepositoryImpl} from "../../src/my_deck_card/repository/MyDeckCardMapRepositoryImpl";
 
 import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
 import {MyDeckButtonClickDetectService} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectService";
@@ -49,6 +52,8 @@ export class TCGJustTestMyDeckView {
     private myDeckButtonPageMovementButtonService = MyDeckButtonPageMovementButtonServiceImpl.getInstance();
     private myDeckButtonService = MyDeckButtonServiceImpl.getInstance();
     private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
+    private myDeckCardSceneService = MyDeckCardSceneServiceImpl.getInstance();
+    private myDeckCardMapRepository = MyDeckCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -134,6 +139,7 @@ export class TCGJustTestMyDeckView {
         await this.addMyDeckButtonPageMovementButton();
         this.addMyDeckCardPageMovementButton();
         this.addMyDeckButton();
+        await this.addMyDeckCard();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -239,6 +245,21 @@ export class TCGJustTestMyDeckView {
 
         } catch (error) {
             console.error('Failed to add my deck buttons:', error);
+        }
+    }
+
+    private async addMyDeckCard(): Promise<void> {
+        try{
+            const myDeckCardList = this.myDeckCardMapRepository.getDeckIdAndCardLists();
+           for (const [deckId, cardIdList] of myDeckCardList) {
+               const cardGroup = await this.myDeckCardSceneService.createMyDeckCardSceneWithPosition(deckId, cardIdList);
+               if (cardGroup) {
+                   this.scene.add(cardGroup);
+               }
+           }
+
+        } catch (error) {
+            console.error('Failed to add my deck cards:', error);
         }
     }
 
