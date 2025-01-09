@@ -288,6 +288,7 @@ export class TCGJustTestMyDeckView {
             this.myDeckCardPageMovementButtonService.adjustMyDeckCardPageMovementButtonPosition();
             this.myDeckButtonService.adjustMyDeckButtonPosition();
             this.myDeckButtonService.adjustMyDeckButtonEffectPosition();
+            this.myDeckCardSceneService.adjustMyDeckCardPosition();
         }
     }
 
