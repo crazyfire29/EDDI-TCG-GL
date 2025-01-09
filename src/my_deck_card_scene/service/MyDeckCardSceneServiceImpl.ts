@@ -54,6 +54,47 @@ export class MyDeckCardSceneServiceImpl implements MyDeckCardSceneService {
         return cardGroup;
     }
 
+    public adjustMyDeckCardPosition(): void {
+        const cardList = this.myDeckCardRepository.findAll();
+        const cardPosition = this.myDeckCardPositionRepository.findAll();
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        console.log('cardList:', cardList);
+        console.log('cardPosition:', cardPosition);
+
+        for (const card of cardList) {
+            console.log(`Card ID: ${card.id}`);
+            const cardMesh = card.getMesh();
+            const cardId = card.id;
+            const initialPosition = this.myDeckCardPositionRepository.findById(cardId);
+            console.log(`InitialPosition: ${initialPosition}`);
+
+            if (!initialPosition) {
+                console.error(`No position found for card id: ${cardId}`);
+                continue;
+            }
+
+            const cardWidth = 0.126 * window.innerWidth;
+            const cardHeight = 0.365 * window.innerHeight;
+
+            const newPositionX = initialPosition.position.getX() * window.innerWidth;
+            const newPositionY = initialPosition.position.getY() * window.innerHeight;
+            console.log(`Card ${cardId}:`, {
+                initialPosition: initialPosition.position,
+                newPositionX,
+                newPositionY,
+            });
+
+            cardMesh.geometry.dispose();
+            cardMesh.geometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
+
+            cardMesh.position.set(newPositionX, newPositionY, 0);
+        }
+
+    }
+
     private async createMyDeckCard(cardId: number, position: Vector2d): Promise<MyDeckCard> {
         return await this.myDeckCardRepository.createMyDeckCard(cardId, position);
     }
