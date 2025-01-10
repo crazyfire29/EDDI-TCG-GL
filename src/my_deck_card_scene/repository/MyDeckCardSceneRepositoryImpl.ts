@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import {MyDeckCardSceneRepository} from "./MyDeckCardSceneRepository";
 import {MyDeckCardScene} from "../entity/MyDeckCardScene";
 
@@ -15,13 +16,39 @@ export class MyDeckCardSceneRepositoryImpl implements MyDeckCardSceneRepository 
         return MyDeckCardSceneRepositoryImpl.instance;
     }
 
-    public save(deckId: number, cardIdList: number[], positionIdList: number[]): MyDeckCardScene {
-        const newDeckCardScene = new MyDeckCardScene(deckId, cardIdList, positionIdList);
+    public save(deckId: number, cardIdList: number[], positionIdList: number[], meshes?: THREE.Group): MyDeckCardScene {
+        const newDeckCardScene = new MyDeckCardScene(deckId, cardIdList, positionIdList, meshes);
         this.deckCardSceneMap.set(newDeckCardScene.id, newDeckCardScene);
         this.deckToDeckCardSceneMap.set(deckId, newDeckCardScene.id);
 
         return newDeckCardScene;
     }
+
+     public addMeshToScene(deckId: number, mesh: THREE.Mesh): boolean {
+         const scene = this.findCardSceneByDeckId(deckId);
+         if (!scene) return false;
+         scene.addMesh(mesh);
+         return true;
+     }
+
+     public addMeshesToScene(deckId: number, cardGroup: THREE.Group): boolean {
+         const scene = this.findCardSceneByDeckId(deckId);
+         if (!scene) return false;
+         scene.addMeshes(cardGroup);
+         return true;
+     }
+
+     public removeMeshFromScene(deckId: number, mesh: THREE.Mesh): boolean {
+         const scene = this.findCardSceneByDeckId(deckId);
+         if (!scene) return false;
+         return scene.removeMesh(mesh);
+     }
+
+     public getMeshesFromScene(deckId: number): THREE.Group | undefined {
+         const scene = this.findCardSceneByDeckId(deckId);
+         return scene ? scene.getMeshes() : undefined;
+     }
+
 
     findById(sceneId: number): MyDeckCardScene | undefined {
         return this.deckCardSceneMap.get(sceneId);
@@ -40,17 +67,17 @@ export class MyDeckCardSceneRepositoryImpl implements MyDeckCardSceneRepository 
     }
 
     public findCardSceneByDeckId(deckId: number): MyDeckCardScene | null {
-        const cardId = this.deckToDeckCardSceneMap.get(deckId);
-        if (cardId === undefined) {
+        const sceneId = this.deckToDeckCardSceneMap.get(deckId);
+        if (sceneId === undefined) {
             return null;
         }
-        return this.deckCardSceneMap.get(cardId) || null;
+        return this.deckCardSceneMap.get(sceneId) || null;
     }
 
     public deleteButtonByDeckId(deckId: number): void {
-        const cardId = this.deckToDeckCardSceneMap.get(deckId);
-        if (cardId !== undefined) {
-            this.deckCardSceneMap.delete(cardId);
+        const sceneId = this.deckToDeckCardSceneMap.get(deckId);
+        if (sceneId !== undefined) {
+            this.deckCardSceneMap.delete(sceneId);
             this.deckToDeckCardSceneMap.delete(deckId);
         }
     }

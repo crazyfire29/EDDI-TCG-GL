@@ -9,8 +9,8 @@ export class MyDeckCardPositionRepositoryImpl implements MyDeckCardPositionRepos
 
     private initialX = - 0.3985;
     private incrementX = 0.167;
-    private initialY = - 0.1929;
-    private incrementY = 0.411;
+    private initialY =  0.1929;
+    private incrementY = - 0.411;
     private maxCardsPerRow = 4;
     private cardsPerPage = 8;
 

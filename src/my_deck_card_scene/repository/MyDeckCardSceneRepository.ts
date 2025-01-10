@@ -10,4 +10,9 @@ export interface MyDeckCardSceneRepository {
 
     findCardSceneByDeckId(deckId: number): MyDeckCardScene | null;
     deleteButtonByDeckId(deckId: number): void;
+
+    addMeshToScene(deckId: number, mesh: THREE.Mesh): boolean;
+    addMeshesToScene(deckId: number, cardGroup: THREE.Group): boolean;
+    removeMeshFromScene(deckId: number, mesh: THREE.Mesh): boolean;
+    getMeshesFromScene(deckId: number): THREE.Group | undefined;
 }
