@@ -143,9 +143,9 @@ export class TCGJustTestMyDeckView {
 
         await this.addBackground();
         await this.addMyDeckButtonPageMovementButton();
+        await this.addMyDeckCard();
         this.addMyDeckCardPageMovementButton();
         this.addMyDeckButton();
-        await this.addMyDeckCard();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -257,13 +257,19 @@ export class TCGJustTestMyDeckView {
     private async addMyDeckCard(): Promise<void> {
         try{
             const myDeckCardList = this.myDeckCardMapRepository.getDeckIdAndCardLists();
-           for (const [deckId, cardIdList] of myDeckCardList) {
-               const cardGroup = await this.myDeckCardSceneService.createMyDeckCardSceneWithPosition(deckId, cardIdList);
-               if (cardGroup) {
-                   this.scene.add(cardGroup);
-               }
-           }
-
+            for (const [deckId, cardIdList] of myDeckCardList) {
+                await this.myDeckCardSceneService.createMyDeckCardSceneWithPosition(deckId, cardIdList);
+                const cardScene = this.myDeckCardSceneService.getMyDeckCardScene(deckId);
+                if (cardScene) {
+                    const cardMesh = cardScene.getMeshes();
+//                     cardMesh.children.forEach((child, index) => {
+//                         console.log(`[DEBUG] Mesh Index ${index}: Name=${child.name}`);
+//                     });
+                    this.scene.add(cardMesh);
+                }else {
+                    console.warn(`[WARN] cardScene is null for deckId: ${deckId}`);
+                }
+            }
         } catch (error) {
             console.error('Failed to add my deck cards:', error);
         }

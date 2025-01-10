@@ -7,17 +7,15 @@ export class MyDeckCardScene {
     uniqueCardIds: number[]; // 중복 제거한 카드 id 리스트
     positionIdList: number[];
     cardCountMap: Map<number, number> = new Map(); //각 카드의 갯수
-    meshes: THREE.Mesh[] = [];
+    meshes: THREE.Group;
 
-    constructor(deckId: number, cardIdList: number[], positionIdList: number[], meshes?: THREE.Mesh[]) {
+    constructor(deckId: number, cardIdList: number[], positionIdList: number[], meshes?: THREE.Group) {
         this.id = IdGenerator.generateId("MyDeckCardScene");
         this.deckId = deckId;
         this.uniqueCardIds = Array.from(new Set(cardIdList));
         this.positionIdList = positionIdList;
         this.cardCountMap = this.generateCardCountMap(cardIdList);
-        if (meshes) {
-            this.meshes = meshes;
-        }
+        this.meshes = meshes || new THREE.Group();
     }
 
     private generateCardCountMap(cardIdList: number[]): Map<number, number> {
@@ -30,23 +28,24 @@ export class MyDeckCardScene {
     }
 
     addMesh(mesh: THREE.Mesh): void {
-        this.meshes.push(mesh);
+        this.meshes.add(mesh);
     }
 
-    addMeshes(meshList: THREE.Mesh[]): void {
-        this.meshes.push(...meshList);
+    addMeshes(cardGroup: THREE.Group): void {
+        console.log(`[DEBUG] card group children length?: ${cardGroup.children.length}`);
+        this.meshes = cardGroup;
+        console.log(`[DEBUG] Meshes Length?: ${this.meshes.children.length}`);
     }
 
     removeMesh(mesh: THREE.Mesh): boolean {
-        const index = this.meshes.indexOf(mesh);
-        if (index !== -1) {
-            this.meshes.splice(index, 1);
+        if (this.meshes.children.includes(mesh)) {
+            this.meshes.remove(mesh);
             return true;
         }
         return false;
     }
 
-    getMeshes(): THREE.Mesh[] {
+    getMeshes(): THREE.Group {
         return this.meshes;
     }
 

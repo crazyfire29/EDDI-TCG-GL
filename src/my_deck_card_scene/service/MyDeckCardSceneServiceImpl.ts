@@ -36,17 +36,25 @@ export class MyDeckCardSceneServiceImpl implements MyDeckCardSceneService {
         const positionIdList: number[] = [];
 
         try {
-            for (let index = 0; index < cardList.length; index++) {
-                const cardId = cardList[index];
-                const position = this.myDeckCardPosition(cardId, index + 1);
-                positionIdList.push(position.id);
+            const deckCards = await Promise.all(
+                cardList.map(async (cardId, index) => {
+                    const position = this.myDeckCardPosition(cardId, index + 1);
+                    console.log(`[DEBUG] CardId ${cardId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+                    positionIdList.push(position.id);
 
-                const deckCard = await this.createMyDeckCard(cardId, position.position);
+                    const deckCard = await this.createMyDeckCard(cardId, position.position);
+                    return { cardId, deckCard };
+                })
+            );
+
+            // 순서대로 Group에 추가
+            deckCards.forEach(({ deckCard }) => {
                 cardGroup.add(deckCard.getMesh());
-            }
+            });
+
             // Scene 저장
-            const myDeckCardScene = this.saveMyDeckCardScene(deckId, cardList, positionIdList);
-            myDeckCardScene.addMeshes(cardGroup.children as THREE.Mesh[]);
+            const myDeckCardScene = this.saveMyDeckCardScene(deckId, cardList, positionIdList, cardGroup);
+            console.log(`[DEBUG] card Scene mesh list length: ${this.getCardMeshesFromScene(deckId)}`);
         } catch (error) {
             console.error(`[Error] Failed to create MyDeckCardScene: ${error}`);
             return null;
@@ -105,8 +113,21 @@ export class MyDeckCardSceneServiceImpl implements MyDeckCardSceneService {
         return position;
     }
 
-    private saveMyDeckCardScene(deckId: number, cardIdList: number[], positionIdList: number[]): MyDeckCardScene {
-        return this.myDeckCardSceneRepository.save(deckId, cardIdList, positionIdList)
+    private saveMyDeckCardScene(deckId: number, cardIdList: number[], positionIdList: number[], meshes?: THREE.Group): MyDeckCardScene {
+        return this.myDeckCardSceneRepository.save(deckId, cardIdList, positionIdList, meshes);
     }
+
+    public getMyDeckCardScene(deckId: number): MyDeckCardScene | null {
+        return this.myDeckCardSceneRepository.findCardSceneByDeckId(deckId);
+    }
+
+    public getCardMeshesFromScene(deckId: number):THREE.Group | undefined {
+        return this.myDeckCardSceneRepository.getMeshesFromScene(deckId);
+    }
+
+    public getPositionByCardId(cardId: number): MyDeckCardPosition | null{
+        return this.myDeckCardPositionRepository.findPositionByCardId(cardId);
+    }
+
 
 }
