@@ -1,0 +1,43 @@
+import {MyDeckCard} from "../my_deck_card/entity/MyDeckCard";
+import {CardStateManager} from "./CardStateManager";
+
+export class CardPageManager {
+    private static instance: CardPageManager | null = null;
+    private currentPage: number;
+    private cardsPerPage: number;
+    private cardStateManager: CardStateManager;
+
+    private constructor(cardsPerPage: number = 8) {
+        this.currentPage = 1;
+        this.cardsPerPage = cardsPerPage;
+        this.cardStateManager = CardStateManager.getInstance();
+    }
+
+    static getInstance(): CardPageManager {
+        if (!CardPageManager.instance) {
+            CardPageManager.instance = new CardPageManager();
+        }
+        return CardPageManager.instance;
+    }
+
+    public getCurrentPage(): number {
+        return this.currentPage;
+    }
+
+    public setCurrentPage(page: number): void {
+        this.currentPage = page;
+    }
+
+    public getTotalPages(cardIdList: number[]): number {
+        return Math.ceil(cardIdList.length / this.cardsPerPage);
+    }
+
+//     public findCardIndexForPage(page: number, cardIdList: number[]): void {
+//         const cardIds = cardIdList;
+//
+//         const startIndex = (page - 1) * this.cardsPerPage;
+//         const endIndex = Math.min(startIndex + this.cardsPerPage, cardIds.length);
+//
+//     }
+
+}
