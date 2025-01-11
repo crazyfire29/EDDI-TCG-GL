@@ -7,16 +7,18 @@ import {MyDeckCardRepository} from "../../my_deck_card/repository/MyDeckCardRepo
 import {MyDeckCardRepositoryImpl} from "../../my_deck_card/repository/MyDeckCardRepositoryImpl";
 import {MyDeckCardPositionRepositoryImpl} from "../../my_deck_card_position/repository/MyDeckCardPositionRepositoryImpl";
 import {MyDeckCardPosition} from "../../my_deck_card_position/entity/MyDeckCardPosition";
-
+import {CardStateManager} from "../../my_deck_card_manager/CardStateManager";
 
 export class MyDeckCardServiceImpl implements MyDeckCardService {
     private static instance: MyDeckCardServiceImpl;
     private myDeckCardPositionRepository: MyDeckCardPositionRepositoryImpl;
     private myDeckCardRepository: MyDeckCardRepositoryImpl;
+    private cardStateManager: CardStateManager;
 
     private constructor(myDeckCardRepository: MyDeckCardRepository) {
         this.myDeckCardPositionRepository = MyDeckCardPositionRepositoryImpl.getInstance();
         this.myDeckCardRepository = MyDeckCardRepositoryImpl.getInstance();
+        this.cardStateManager = CardStateManager.getInstance();
     }
 
     public static getInstance(): MyDeckCardServiceImpl {
@@ -56,7 +58,7 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
         return cardGroup;
     }
 
-    // Todo: deckId 마다 자동으로 위치 조절 되도록 해야 함.
+    // Todo: 현재 화면에 그려진 card가 어떤 덱의 카드인지 체크해야 함.
     public adjustMyDeckCardPosition(deckId: number): void {
         const cardList = this.myDeckCardRepository.findCardMeshesByDeckId(deckId);
         const cardPosition = this.myDeckCardPositionRepository.findAll();
@@ -122,6 +124,17 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
 
     public initialCardMap(): void {
         this.myDeckCardRepository.initialCardMap();
+    }
+
+    public initializeCardState(deckId: number, cardIdList: number[]): void {
+        const uniqueCardIds = Array.from(new Set(cardIdList));
+        this.cardStateManager.initializeCardState(deckId, uniqueCardIds);
+        const cardMeshList = this.getCardMeshesByDeckId(deckId); // 버튼 찾기
+        if (cardMeshList) {
+            cardMeshList.forEach((mesh, index) => {
+                mesh.visible = index < 8;
+            });
+        }
     }
 
 }
