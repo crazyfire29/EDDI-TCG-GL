@@ -93,6 +93,15 @@ export class MyDeckCardRepositoryImpl implements MyDeckCardRepository {
         return Array.from(deckCardMap.values());
     }
 
+    public findCardIdsByDeckId(deckId: number): number[] {
+        const deckCardMap = this.deckToCardMap.get(deckId);
+        if (!deckCardMap) return [];
+
+        // 카드 ID만 추출하여 배열로 반환
+        console.log(`[DEBUG]Find CardIds By DeckId!: ${Array.from(deckCardMap.keys())}`);
+        return Array.from(deckCardMap.keys());
+    }
+
     // 특정 덱 id에 해당되는 특정 card 객체 불러오기
     // 예) 0번 덱의 카드 리스트중 3번 카드 불러오기
     public findCardMeshByDeckIdAndCardId(deckId: number, cardId: number): THREE.Mesh | null {

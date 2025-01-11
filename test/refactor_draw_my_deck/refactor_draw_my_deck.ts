@@ -110,7 +110,7 @@ export class TCGJustTestMyDeckView {
         });
 
         this.deckCardPageMoveButtonClickDetectService = DeckCardPageMoveButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.deckCardPageMoveButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.deckCardPageMoveButtonClickDetectService.onMouseDown(e, 1), false);
 
     }
 
@@ -259,8 +259,10 @@ export class TCGJustTestMyDeckView {
             const myDeckCardList = this.myDeckCardMapRepository.getDeckIdAndCardLists();
             for (const [deckId, cardIdList] of myDeckCardList) {
                 await this.myDeckCardService.createMyDeckCardSceneWithPosition(deckId, cardIdList);
+
+                //To-do: 덱 버튼을 클릭했을 때 각 덱 버튼에 해당되는 카드가 그려지도록 해야 함.
                 const cardMeshes = this.myDeckCardService.getCardMeshesByDeckId(deckId);
-                if (cardMeshes.length > 0) {
+                if (cardMeshes) {
                     this.myDeckCardService.initializeCardState(deckId, cardIdList);
                     cardMeshes.forEach((mesh) => {
                         this.scene.add(mesh);
