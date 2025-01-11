@@ -24,7 +24,7 @@ import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button
 
 import {MyDeckButtonServiceImpl} from "../../src/my_deck_button/service/MyDeckButtonServiceImpl";
 import {MyDeckButtonMapRepositoryImpl} from "../../src/my_deck_button/repository/MyDeckButtonMapRepositoryImpl";
-import {MyDeckCardSceneServiceImpl} from "../../src/my_deck_card_scene/service/MyDeckCardSceneServiceImpl";
+import {MyDeckCardServiceImpl} from "../../src/my_deck_card/service/MyDeckCardServiceImpl";
 import {MyDeckCardMapRepositoryImpl} from "../../src/my_deck_card/repository/MyDeckCardMapRepositoryImpl";
 
 import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
@@ -54,7 +54,7 @@ export class TCGJustTestMyDeckView {
     private myDeckButtonPageMovementButtonService = MyDeckButtonPageMovementButtonServiceImpl.getInstance();
     private myDeckButtonService = MyDeckButtonServiceImpl.getInstance();
     private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
-    private myDeckCardSceneService = MyDeckCardSceneServiceImpl.getInstance();
+    private myDeckCardService = MyDeckCardServiceImpl.getInstance();
     private myDeckCardMapRepository = MyDeckCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -258,16 +258,15 @@ export class TCGJustTestMyDeckView {
         try{
             const myDeckCardList = this.myDeckCardMapRepository.getDeckIdAndCardLists();
             for (const [deckId, cardIdList] of myDeckCardList) {
-                await this.myDeckCardSceneService.createMyDeckCardSceneWithPosition(deckId, cardIdList);
-                const cardScene = this.myDeckCardSceneService.getMyDeckCardScene(deckId);
-                if (cardScene) {
-                    const cardMesh = cardScene.getMeshes();
-//                     cardMesh.children.forEach((child, index) => {
-//                         console.log(`[DEBUG] Mesh Index ${index}: Name=${child.name}`);
-//                     });
-                    this.scene.add(cardMesh);
-                }else {
-                    console.warn(`[WARN] cardScene is null for deckId: ${deckId}`);
+                await this.myDeckCardService.createMyDeckCardSceneWithPosition(deckId, cardIdList);
+                const cardMeshes = this.myDeckCardService.getCardMeshesByDeckId(deckId);
+                if (cardMeshes.length > 0) {
+                    cardMeshes.forEach((mesh) => {
+                        this.scene.add(mesh); // 배열의 각 Mesh를 Scene에 추가
+                    });
+                    console.log(`[DEBUG] Added card meshes for deckId: ${deckId}`);
+                } else {
+                    console.warn(`[WARN] No card meshes found for deckId: ${deckId}`);
                 }
             }
         } catch (error) {
@@ -300,7 +299,7 @@ export class TCGJustTestMyDeckView {
             this.myDeckCardPageMovementButtonService.adjustMyDeckCardPageMovementButtonPosition();
             this.myDeckButtonService.adjustMyDeckButtonPosition();
             this.myDeckButtonService.adjustMyDeckButtonEffectPosition();
-            this.myDeckCardSceneService.adjustMyDeckCardPosition();
+            this.myDeckCardService.adjustMyDeckCardPosition(1);
         }
     }
 
