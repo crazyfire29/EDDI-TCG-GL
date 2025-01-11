@@ -32,12 +32,14 @@ export class CardPageManager {
         return Math.ceil(cardIdList.length / this.cardsPerPage);
     }
 
-//     public findCardIndexForPage(page: number, cardIdList: number[]): void {
-//         const cardIds = cardIdList;
-//
-//         const startIndex = (page - 1) * this.cardsPerPage;
-//         const endIndex = Math.min(startIndex + this.cardsPerPage, cardIds.length);
-//
-//     }
+    public findCardIdsForPage(page: number, cardIdList: number[]): number[] {
+        const startIndex = (page - 1) * this.cardsPerPage;
+        const endIndex = Math.min(startIndex + this.cardsPerPage, cardIdList.length);
+        const cardIdsInRange = cardIdList.slice(startIndex, endIndex);
+
+        console.log(`[DEBUG]Current Page: ${page}, CardId: ${cardIdsInRange}`);
+        return cardIdsInRange;
+
+    }
 
 }

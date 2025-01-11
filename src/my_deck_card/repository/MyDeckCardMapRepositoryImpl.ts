@@ -8,7 +8,9 @@ import {MyDeckCardMapRepository} from "./MyDeckCardMapRepository";
 
         private constructor() {
             // 예시 데이터를 추가
-            this.currentMyDeckCardMap.set(1, [2, 5, 8, 19, 20, 93, 26, 27, 2, 14, 15, 31, 33, 35, 36]);
+            this.currentMyDeckCardMap.set(1,
+                [2, 5, 8, 19, 20, 93, 26, 27, 2, 14, 15, 31, 33, 35, 36, 29,
+                 30, 32, 40, 43, 47, 49, 55, 56]);
         }
 
         public static getInstance(): MyDeckCardMapRepositoryImpl {
