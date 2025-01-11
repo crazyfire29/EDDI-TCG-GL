@@ -261,8 +261,9 @@ export class TCGJustTestMyDeckView {
                 await this.myDeckCardService.createMyDeckCardSceneWithPosition(deckId, cardIdList);
                 const cardMeshes = this.myDeckCardService.getCardMeshesByDeckId(deckId);
                 if (cardMeshes.length > 0) {
+                    this.myDeckCardService.initializeCardState(deckId, cardIdList);
                     cardMeshes.forEach((mesh) => {
-                        this.scene.add(mesh); // 배열의 각 Mesh를 Scene에 추가
+                        this.scene.add(mesh);
                     });
                     console.log(`[DEBUG] Added card meshes for deckId: ${deckId}`);
                 } else {
