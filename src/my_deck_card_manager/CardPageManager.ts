@@ -32,6 +32,10 @@ export class CardPageManager {
         return Math.ceil(cardIdList.length / this.cardsPerPage);
     }
 
+    public resetCurrentPage(): void {
+        this.currentPage = 1;
+    }
+
     public findCardIdsForPage(page: number, cardIdList: number[]): number[] {
         const startIndex = (page - 1) * this.cardsPerPage;
         const endIndex = Math.min(startIndex + this.cardsPerPage, cardIdList.length);
