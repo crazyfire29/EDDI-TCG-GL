@@ -11,6 +11,8 @@ import {MyDeckCardMapRepository} from "./MyDeckCardMapRepository";
             this.currentMyDeckCardMap.set(1,
                 [2, 5, 8, 19, 20, 93, 26, 27, 2, 14, 15, 31, 33, 35, 36, 29,
                  30, 32, 40, 43, 47, 49, 55, 56]);
+            this.currentMyDeckCardMap.set(2,
+                [5, 8, 8, 19, 20, 33, 35, 29, 30, 40, 56, 55, 2, 93]);
         }
 
         public static getInstance(): MyDeckCardMapRepositoryImpl {
