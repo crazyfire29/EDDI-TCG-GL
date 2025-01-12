@@ -7,17 +7,20 @@ import {MyDeckCardRepository} from "../../my_deck_card/repository/MyDeckCardRepo
 import {MyDeckCardRepositoryImpl} from "../../my_deck_card/repository/MyDeckCardRepositoryImpl";
 import {MyDeckCardPositionRepositoryImpl} from "../../my_deck_card_position/repository/MyDeckCardPositionRepositoryImpl";
 import {MyDeckCardPosition} from "../../my_deck_card_position/entity/MyDeckCardPosition";
+import {MyDeckButtonClickDetectRepositoryImpl} from "../../deck_button_click_detect/repository/MyDeckButtonClickDetectRepositoryImpl";
 import {CardStateManager} from "../../my_deck_card_manager/CardStateManager";
 
 export class MyDeckCardServiceImpl implements MyDeckCardService {
     private static instance: MyDeckCardServiceImpl;
     private myDeckCardPositionRepository: MyDeckCardPositionRepositoryImpl;
     private myDeckCardRepository: MyDeckCardRepositoryImpl;
+    private myDeckButtonClickDetectRepository: MyDeckButtonClickDetectRepositoryImpl;
     private cardStateManager: CardStateManager;
 
     private constructor(myDeckCardRepository: MyDeckCardRepository) {
         this.myDeckCardPositionRepository = MyDeckCardPositionRepositoryImpl.getInstance();
         this.myDeckCardRepository = MyDeckCardRepositoryImpl.getInstance();
+        this.myDeckButtonClickDetectRepository = MyDeckButtonClickDetectRepositoryImpl.getInstance();
         this.cardStateManager = CardStateManager.getInstance();
     }
 
@@ -59,7 +62,13 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
     }
 
     // Todo: 현재 화면에 그려진 card가 어떤 덱의 카드인지 체크해야 함.
-    public adjustMyDeckCardPosition(deckId: number): void {
+    public adjustMyDeckCardPosition(): void {
+        const currentDeckButtonId = this.getCurrentClickDeckButton();
+        if (currentDeckButtonId === null) {
+            console.error("No deck button clicked");
+            return;
+        }
+        const deckId = currentDeckButtonId + 1;
         const cardList = this.myDeckCardRepository.findCardMeshesByDeckId(deckId);
         const cardPosition = this.myDeckCardPositionRepository.findAll();
 
@@ -135,6 +144,14 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
                 mesh.visible = index < 8;
             });
         }
+    }
+
+    public getCurrentClickDeckButton(): number | null {
+        return this.myDeckButtonClickDetectRepository.getCurrentClickDeckButtonId();
+    }
+
+    public getCardIdsByDeckId(deckId: number): number[] {
+        return this.myDeckCardRepository.findCardIdsByDeckId(deckId);
     }
 
 }

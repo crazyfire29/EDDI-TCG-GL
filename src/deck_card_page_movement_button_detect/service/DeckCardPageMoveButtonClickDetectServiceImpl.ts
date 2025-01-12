@@ -6,6 +6,7 @@ import {MyDeckCardPageMovementButton} from "../../my_deck_card_page_movement_but
 
 import {DeckCardPageMoveButtonClickDetectRepositoryImpl} from "../repository/DeckCardPageMoveButtonClickDetectRepositoryImpl";
 import {DeckCardPageMoveButtonClickDetectRepository} from "../repository/DeckCardPageMoveButtonClickDetectRepository";
+import {MyDeckButtonClickDetectRepositoryImpl} from "../../deck_button_click_detect/repository/MyDeckButtonClickDetectRepositoryImpl";
 
 import {MyDeckCardRepositoryImpl} from "../../my_deck_card/repository/MyDeckCardRepositoryImpl";
 import {CardPageManager} from "../../my_deck_card_manager/CardPageManager";
@@ -21,6 +22,7 @@ export class DeckCardPageMoveButtonClickDetectServiceImpl implements DeckCardPag
 
     private myDeckCardPageMovementButtonRepository: MyDeckCardPageMovementButtonRepositoryImpl;
     private deckCardPageMoveButtonClickDetectRepository: DeckCardPageMoveButtonClickDetectRepositoryImpl;
+    private myDeckButtonClickDetectRepository: MyDeckButtonClickDetectRepositoryImpl;
     private myDeckCardRepository: MyDeckCardRepositoryImpl;
     private cardPageManager: CardPageManager;
     private cardStateManager: CardStateManager;
@@ -31,6 +33,7 @@ export class DeckCardPageMoveButtonClickDetectServiceImpl implements DeckCardPag
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.myDeckCardPageMovementButtonRepository = MyDeckCardPageMovementButtonRepositoryImpl.getInstance();
         this.deckCardPageMoveButtonClickDetectRepository = DeckCardPageMoveButtonClickDetectRepositoryImpl.getInstance();
+        this.myDeckButtonClickDetectRepository = MyDeckButtonClickDetectRepositoryImpl.getInstance();
         this.myDeckCardRepository = MyDeckCardRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
@@ -55,12 +58,18 @@ export class DeckCardPageMoveButtonClickDetectServiceImpl implements DeckCardPag
 
     // deck id 마다 페이지 클릭 이벤트가 등록되어야 함.
     async handleLeftClick(
-        deckId: number,
         clickPoint: { x: number; y: number },
     ): Promise<MyDeckCardPageMovementButton | null> {
         const { x, y } = clickPoint;
 
         const deckCardPageMoveButtonList = this.getAllMovementButton();
+        const deckButtonId = this.getCurrentClickDeckButton();
+        if (deckButtonId === null) {
+            console.error("No deck button clicked");
+            return null;
+        }
+
+        const deckId = deckButtonId + 1;
         const cardIdList = this.getCardIdListByDeckId(deckId);
         const clickedDeckCardPageMovementButton = this.deckCardPageMoveButtonClickDetectRepository.isDeckCardPageMoveButtonClicked(
             { x, y },
@@ -70,11 +79,10 @@ export class DeckCardPageMoveButtonClickDetectServiceImpl implements DeckCardPag
         if (clickedDeckCardPageMovementButton) {
             console.log(`Clicked Deck Page Movement Button ID: ${clickedDeckCardPageMovementButton.id}`);
 
-            this.restCardMeshVisible(deckId, cardIdList);
-
             if (clickedDeckCardPageMovementButton.id === 0) {
                 console.log(`Clicked Pre Page Button!`);
                 if (this.getCurrentPage() > 1) {
+                    this.restCardMeshVisible(deckId, cardIdList);
                     this.setCurrentPage(this.getCurrentPage() - 1);
                     console.log(`[DEBUG]Current Card Page?: ${this.getCurrentPage()}`);
                     const currentCard = this.getCardIdsForPage(this.getCurrentPage(), cardIdList);
@@ -87,6 +95,7 @@ export class DeckCardPageMoveButtonClickDetectServiceImpl implements DeckCardPag
             if (clickedDeckCardPageMovementButton.id === 1) {
                 console.log(`Clicked Next Page Button!`);
                 if (this.getCurrentPage() < this.getTotalPages(cardIdList)) {
+                    this.restCardMeshVisible(deckId, cardIdList);
                     this.setCurrentPage(this.getCurrentPage() + 1);
                     console.log(`[DEBUG]Current Card Page?: ${this.getCurrentPage()}`);
                     const currentCard= this.getCardIdsForPage(this.getCurrentPage(), cardIdList);
@@ -101,10 +110,10 @@ export class DeckCardPageMoveButtonClickDetectServiceImpl implements DeckCardPag
         return null;
     }
 
-    public async onMouseDown(event: MouseEvent, deckId: number): Promise<void> {
+    public async onMouseDown(event: MouseEvent): Promise<void> {
         if (event.button === 0) {
             const clickPoint = { x: event.clientX, y: event.clientY };
-            await this.handleLeftClick(deckId, clickPoint);
+            await this.handleLeftClick(clickPoint);
         }
     }
 
@@ -163,6 +172,10 @@ export class DeckCardPageMoveButtonClickDetectServiceImpl implements DeckCardPag
         cardIdList.forEach((cardId) => {
             this.hideCardMesh(deckId, cardId);
         });
+    }
+
+    private getCurrentClickDeckButton(): number | null {
+        return this.myDeckButtonClickDetectRepository.getCurrentClickDeckButtonId();
     }
 
 }

@@ -99,7 +99,16 @@ export class TCGJustTestMyDeckView {
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
 
         this.myDeckButtonClickDetectService = MyDeckButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.myDeckButtonClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.myDeckButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
+            const clickButton = await this.myDeckButtonClickDetectService.onMouseDown(e);
+            if (clickButton) {
+                const clickButtonId = clickButton.id + 1;
+                if (clickButtonId) {
+                    await this.addMyDeckCardByDeckId(clickButtonId);
+                }
+            }
+        }, false);
 
         this.deckPageMovementButtonClickDetectService = DeckPageMovementButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
@@ -110,7 +119,7 @@ export class TCGJustTestMyDeckView {
         });
 
         this.deckCardPageMoveButtonClickDetectService = DeckCardPageMoveButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.deckCardPageMoveButtonClickDetectService.onMouseDown(e, 1), false);
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.deckCardPageMoveButtonClickDetectService.onMouseDown(e), false);
 
     }
 
@@ -143,7 +152,7 @@ export class TCGJustTestMyDeckView {
 
         await this.addBackground();
         await this.addMyDeckButtonPageMovementButton();
-        await this.addMyDeckCard();
+        await this.saveMyDeckCard();
         this.addMyDeckCardPageMovementButton();
         this.addMyDeckButton();
 
@@ -254,28 +263,49 @@ export class TCGJustTestMyDeckView {
         }
     }
 
-    private async addMyDeckCard(): Promise<void> {
+    private async saveMyDeckCard(): Promise<void> {
         try{
             const myDeckCardList = this.myDeckCardMapRepository.getDeckIdAndCardLists();
+
             for (const [deckId, cardIdList] of myDeckCardList) {
                 await this.myDeckCardService.createMyDeckCardSceneWithPosition(deckId, cardIdList);
 
                 //To-do: 덱 버튼을 클릭했을 때 각 덱 버튼에 해당되는 카드가 그려지도록 해야 함.
-                const cardMeshes = this.myDeckCardService.getCardMeshesByDeckId(deckId);
-                if (cardMeshes) {
-                    this.myDeckCardService.initializeCardState(deckId, cardIdList);
-                    cardMeshes.forEach((mesh) => {
-                        this.scene.add(mesh);
-                    });
-                    console.log(`[DEBUG] Added card meshes for deckId: ${deckId}`);
-                } else {
-                    console.warn(`[WARN] No card meshes found for deckId: ${deckId}`);
-                }
+//                 const cardMeshes = this.myDeckCardService.getCardMeshesByDeckId(deckId);
+//                 if (cardMeshes) {
+//                     console.log(`[DEBUG] current deckId: ${deckId}, card Mesh: ${cardMeshes}`);
+//                     this.myDeckCardService.initializeCardState(deckId, cardIdList);
+//                     cardMeshes.forEach((mesh) => {
+//                         this.scene.add(mesh);
+//                     });
+//                     console.log(`[DEBUG] Added card meshes for deckId: ${deckId}`);
+//                 } else {
+//                     console.warn(`[WARN] No card meshes found for deckId: ${deckId}`);
+//                 }
             }
         } catch (error) {
-            console.error('Failed to add my deck cards:', error);
+            console.error('Failed to save my deck cards:', error);
         }
     }
+
+    private async addMyDeckCardByDeckId(deckId: number): Promise<void> {
+        try {
+            const cardIdList = this.myDeckCardService.getCardIdsByDeckId(deckId);
+            const cardMeshes = this.myDeckCardService.getCardMeshesByDeckId(deckId);
+            if (cardMeshes) {
+                console.log(`[DEBUG] Adding cards for deckId: ${deckId}`);
+                this.myDeckCardService.initializeCardState(deckId, cardIdList);
+                cardMeshes.forEach((mesh) => {
+                    this.scene.add(mesh);
+                });
+            } else {
+                console.warn(`[WARN] No card meshes found for deckId: ${deckId}`);
+            }
+        } catch (error) {
+            console.error(`Failed to add cards for deckId: ${deckId}`, error);
+        }
+    }
+
 
 
     private onWindowResize(): void {
@@ -302,7 +332,7 @@ export class TCGJustTestMyDeckView {
             this.myDeckCardPageMovementButtonService.adjustMyDeckCardPageMovementButtonPosition();
             this.myDeckButtonService.adjustMyDeckButtonPosition();
             this.myDeckButtonService.adjustMyDeckButtonEffectPosition();
-            this.myDeckCardService.adjustMyDeckCardPosition(1);
+            this.myDeckCardService.adjustMyDeckCardPosition();
         }
     }
 
