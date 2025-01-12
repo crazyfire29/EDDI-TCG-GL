@@ -19,6 +19,8 @@ export interface Shader extends THREE.ShaderMaterial {
 }
 
 export class NeonShape {
+    private static instance: NeonShape | null = null;
+
     private scene: THREE.Scene;
     private renderer: THREE.WebGLRenderer;
     private camera: THREE.OrthographicCamera;
@@ -31,13 +33,22 @@ export class NeonShape {
         this.camera = camera;
     }
 
+    public static getInstance(scene?: THREE.Scene, renderer?: THREE.WebGLRenderer, camera?: THREE.OrthographicCamera): NeonShape {
+        if (!this.instance) {
+            if (!scene || !renderer || !camera) {
+                throw new Error("NeonShape has not been initialized. Please pass scene, renderer, and camera.");
+            }
+            this.instance = new NeonShape(scene, renderer, camera);
+        }
+        return this.instance;
+    }
+
     // 통합된 createNeonLine
-    private createNeonLine(startX: number, startY: number, endX: number, endY: number): THREE.Mesh {
+    private createNeonLine(startX: number, startY: number, endX: number, endY: number, lineWidth: number = 10): THREE.Mesh {
         // const color = 0x3137FD; // 네온 블루 색상
         // const color = 0x2c75ff; // 네온 블루 색상
         const color = 0x2EFEF7; // 네온 블루 색상
         // const color = 0x2C75FF; // 네온 블루 색상
-        const lineWidth = 10; // 선 두께
 
         const direction = new THREE.Vector3(endX - startX, endY - startY, 0);
         const length = direction.length();
@@ -48,7 +59,8 @@ export class NeonShape {
             emissive: color,
             emissiveIntensity: 1,
             transparent: true,
-            opacity: 0.8
+            opacity: 0.8,
+            depthTest: false,
         });
 
         const geometry = new THREE.PlaneGeometry(length, lineWidth);
@@ -77,8 +89,9 @@ export class NeonShape {
     }
 
     // 네온 라인 추가
-    public async addNeonLine(startX: number, startY: number, endX: number, endY: number): Promise<void> {
-        const line = this.createNeonLine(startX, startY, endX, endY);
+    public async addNeonLine(startX: number, startY: number, endX: number, endY: number, lineWidth: number = 10): Promise<void> {
+        const line = this.createNeonLine(startX, startY, endX, endY, lineWidth);
+        line.renderOrder = 1;
         this.scene.add(line);
         this.applyGlowEffect();
     }
@@ -141,7 +154,7 @@ export class NeonShape {
         await this.addNeonLine(startX, startY + rectLength, startX, startY - 5.0); // 좌측
     }
 
-    createNeonShaderMaterial(): Shader {
+    public createNeonShaderMaterial(): Shader {
         const shaderMaterial: Shader = new THREE.ShaderMaterial({
             uniforms: {
                 time: { value: 0.0 },

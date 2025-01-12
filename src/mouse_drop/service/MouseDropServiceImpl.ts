@@ -243,9 +243,9 @@ export class MouseDropServiceImpl implements MouseDropService {
             const positionId = handCard.getPositionId();
             const cardSceneId = handCard.getCardSceneId();
 
-            console.log(`cardSceneId: ${cardSceneId}`);
+            // console.log(`cardSceneId: ${cardSceneId}`);
             const cardSceneList = this.battleFieldCardSceneRepository.findAll();
-            console.log(`cardSceneList: ${cardSceneList}`);
+            // console.log(`cardSceneList: ${cardSceneList}`);
 
             const cardPosition = this.battleFieldHandCardPositionRepository.findById(positionId);
             const mainCardScene = await this.battleFieldCardSceneRepository.findById(cardSceneId); // 비동기 처리

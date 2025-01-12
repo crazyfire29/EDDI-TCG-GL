@@ -126,7 +126,7 @@ export class TCGJustTestBattleFieldView {
         this.audioController = AudioController.getInstance();
         this.audioController.setMusic(battleFieldMusic);
 
-        this.neonShape = new NeonShape(this.scene, this.renderer, this.camera);
+        this.neonShape = NeonShape.getInstance(this.scene, this.renderer, this.camera);
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
 
@@ -141,7 +141,7 @@ export class TCGJustTestBattleFieldView {
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
             if (e.button === 0) { // 좌클릭만 처리
                 const result = await this.leftClickDetectService.handleLeftClick(e);
-                console.log(`result: ${JSON.stringify(result, null, 2)}`)
+                // console.log(`result: ${JSON.stringify(result, null, 2)}`)
                 if (result !== null) {
                     this.leftClickDetectService.setLeftMouseDown(true);
                 }
