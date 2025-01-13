@@ -94,7 +94,7 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             );
 
             if (hiddenButton && hiddenButton.id !== currentClickDeckButtonId) {
-                this.setButtonClickCount(1);
+//                 this.setButtonClickCount(1);
                 console.log(`[DEBUG] Different button clicked. Reset click count to 1.`);
                 this.setButtonVisibility(hiddenButton.id, true);
                 const buttonShow = this.showDeckButton(hiddenButton.id);
@@ -108,33 +108,33 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
                     console.error(`Failed to show Deck Button ID ${hiddenButton.id}`);
                 }
 
-            } else {
-                this.setButtonClickCount(this.getButtonClickCount() + 1);
-                console.log(`[DEBUG] button clicked. Click Count: ${this.getButtonClickCount()}`);
-
-                if (this.getButtonClickCount() === 2) {
-                    console.log(`[DEBUG] Trigger event for the same button on 2nd click.`);
-                    if (currentClickDeckButtonId !== null) {
-                        console.log(`[DEBUG] Current Click Button?: ${currentClickDeckButtonId}`);
-                        this.setButtonVisibility(currentClickDeckButtonId, true);
-                        const effectHide = this.hideDeckButtonEffect(currentClickDeckButtonId);
-                        if (effectHide) {
-                            this.setEffectVisibility(currentClickDeckButtonId, false);
-                            this.showDeckButton(currentClickDeckButtonId);
-                            this.setDeckCardVisibility(currentClickDeckButtonId, false);
-                            this.resetCurrentCardPage();
-                            console.log(`[DEBUG]Deck Button ID ${currentClickDeckButtonId} is now shown.`);
-                        } else {
-                            console.error(`[DEBUG]Failed to show Deck Button ID ${currentClickDeckButtonId}`);
-                        }
-                    }
-                    return null;
-
-                } else if (this.getButtonClickCount() > 2) {
-                    this.setButtonClickCount(1);
-                    console.log(`[DEBUG] Reset click count to 1 after 3rd click.`);
-                    console.log(`[DEBUG] button clicked. Click Count: ${this.getButtonClickCount()}`);
-                }
+//             } else {
+//                 this.setButtonClickCount(this.getButtonClickCount() + 1);
+//                 console.log(`[DEBUG] button clicked. Click Count: ${this.getButtonClickCount()}`);
+//
+//                 if (this.getButtonClickCount() === 2) {
+//                     console.log(`[DEBUG] Trigger event for the same button on 2nd click.`);
+//                     if (currentClickDeckButtonId !== null) {
+//                         console.log(`[DEBUG] Current Click Button?: ${currentClickDeckButtonId}`);
+//                         this.setButtonVisibility(currentClickDeckButtonId, true);
+//                         const effectHide = this.hideDeckButtonEffect(currentClickDeckButtonId);
+//                         if (effectHide) {
+//                             this.setEffectVisibility(currentClickDeckButtonId, false);
+//                             this.showDeckButton(currentClickDeckButtonId);
+//                             this.setDeckCardVisibility(currentClickDeckButtonId, false);
+//                             this.resetCurrentCardPage();
+//                             console.log(`[DEBUG]Deck Button ID ${currentClickDeckButtonId} is now shown.`);
+//                         } else {
+//                             console.error(`[DEBUG]Failed to show Deck Button ID ${currentClickDeckButtonId}`);
+//                         }
+//                     }
+//                     return null;
+//
+//                 } else if (this.getButtonClickCount() > 2) {
+//                     this.setButtonClickCount(1);
+//                     console.log(`[DEBUG] Reset click count to 1 after 3rd click.`);
+//                     console.log(`[DEBUG] button clicked. Click Count: ${this.getButtonClickCount()}`);
+//                 }
             }
 
             if (currentClickDeckButtonId !== null){
