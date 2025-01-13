@@ -10,6 +10,7 @@ import {MyDeckButtonRepositoryImpl} from "../../my_deck_button/repository/MyDeck
 import {MyDeckButton} from "../../my_deck_button/entity/MyDeckButton";
 import {MyDeckButtonEffectRepositoryImpl} from "../../my_deck_button_effect/repository/MyDeckButtonEffectRepositoryImpl";
 import {MyDeckButtonEffect} from "../../my_deck_button_effect/entity/MyDeckButtonEffect";
+import {MyDeckCardRepositoryImpl} from "../../my_deck_card/repository/MyDeckCardRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -17,6 +18,7 @@ import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl
 import {ButtonPageManager} from "../../my_deck_button_manager/ButtonPageManager";
 import {ButtonStateManager} from "../../my_deck_button_manager/ButtonStateManager";
 import {ButtonEffectManager} from "../../my_deck_button_manager/ButtonEffectManager";
+import {CardStateManager} from "../../my_deck_card_manager/CardStateManager";
 
 
 import * as THREE from "three";
@@ -28,9 +30,12 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
     private deckPageMoveButtonClickDetectRepository: DeckPageMovementButtonClickDetectRepositoryImpl;
     private myDeckButtonRepository: MyDeckButtonRepositoryImpl;
     private myDeckButtonEffectRepository: MyDeckButtonEffectRepositoryImpl;
+    private myDeckCardRepository: MyDeckCardRepositoryImpl;
+
     private buttonPageManager: ButtonPageManager;
     private buttonStateManager: ButtonStateManager;
     private buttonEffectManager: ButtonEffectManager;
+    private cardStateManager: CardStateManager;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -47,7 +52,10 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         this.buttonPageManager = ButtonPageManager.getInstance(allButtonsMap);
         this.buttonStateManager = ButtonStateManager.getInstance();
         this.buttonEffectManager = new ButtonEffectManager();
+        this.cardStateManager = CardStateManager.getInstance();
+
         this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
+        this.myDeckCardRepository = MyDeckCardRepositoryImpl.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): DeckPageMovementButtonClickDetectServiceImpl {
@@ -81,10 +89,18 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
             console.log(`Clicked Deck Page Movement Button ID: ${clickedDeckPageMovementButton.id}`);
 
             this.buttonEffectManager.resetVisibility();
-            this.resetButtonClickCount();
+//             this.resetButtonClickCount();
 
             if (clickedDeckPageMovementButton.id === 0) {
                 if (this.getCurrentPage() > 1) {
+                    const buttonDeckIdList = this.getMyDeckButtonsIdForPage(this.getCurrentPage());
+
+                    buttonDeckIdList.forEach((buttonDeckId) => {
+                      const deckId = buttonDeckId + 1;
+                      const cardIdList = this.getCardIdsByDeckId(deckId);
+                      this.resetCardMeshVisible(deckId, cardIdList);
+                    });
+
                     this.setCurrentDeckButtonPage(this.getCurrentPage() - 1);
                     this.showMyDeckButtonsForPage(this.getCurrentPage());
                     this.getMyDeckButtonsIdForPage(this.getCurrentPage());
@@ -93,6 +109,14 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
 
             if (clickedDeckPageMovementButton.id === 1) {
                 if (this.getCurrentPage() < this.buttonPageManager.getTotalPages()) {
+                    const buttonDeckIdList = this.getMyDeckButtonsIdForPage(this.getCurrentPage());
+
+                    buttonDeckIdList.forEach((buttonDeckId) => {
+                        const deckId = buttonDeckId + 1;
+                        const cardIdList = this.getCardIdsByDeckId(deckId);
+                        this.resetCardMeshVisible(deckId, cardIdList);
+                    });
+
                     this.setCurrentDeckButtonPage(this.getCurrentPage() + 1);
                     this.showMyDeckButtonsForPage(this.getCurrentPage());
                     this.getMyDeckButtonsIdForPage(this.getCurrentPage());
@@ -144,12 +168,42 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         this.buttonPageManager.setCurrentPage(page);
     }
 
+    // 현재 페이지에 해당되는 덱 버튼 아이디 가져오기
     private getMyDeckButtonsIdForPage(page: number): number[] {
         return this.buttonPageManager.getButtonsIdForPage(page);
     }
 
-    private resetButtonClickCount(): void {
-        this.buttonStateManager.resetButtonClickCount();
+    private getCardIdsByDeckId(deckId: number): number[] {
+        return this.myDeckCardRepository.findCardIdsByDeckId(deckId);
     }
+
+    // 특정 덱의 특정 카드 mesh 가져오기
+    private getCardMeshByDeckIdAndCardId(deckId: number, cardId: number): THREE.Mesh | null {
+        return this.myDeckCardRepository.findCardMeshByDeckIdAndCardId(deckId, cardId);
+    }
+
+    // 특정 덱의 특정 카드 visible 상태 설정
+    private setCardVisibility(deckId: number, cardId: number, isVisible: boolean): void {
+        this.cardStateManager.setCardVisibility(deckId, cardId, isVisible);
+    }
+
+    private hideCardMesh(deckId: number, cardId: number): void {
+        this.setCardVisibility(deckId, cardId, false);
+        const cardMesh = this.getCardMeshByDeckIdAndCardId(deckId, cardId);
+        if (cardMesh) {
+            cardMesh.visible = false;
+        }
+    }
+
+    // 카드 visible 상태 초기화 (모두 false)
+    private resetCardMeshVisible(deckId: number, cardIdList: number[]): void {
+        cardIdList.forEach((cardId) => {
+            this.hideCardMesh(deckId, cardId);
+        });
+    }
+
+//     private resetButtonClickCount(): void {
+//         this.buttonStateManager.resetButtonClickCount();
+//     }
 
 }
