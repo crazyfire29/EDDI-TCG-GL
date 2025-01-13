@@ -28,7 +28,7 @@ export class MyDeckButtonRepositoryImpl implements MyDeckButtonRepository {
     }
 
     public async createMyDeckButton(deckId: number, position: Vector2d): Promise<MyDeckButton> {
-        const texture = await this.textureManager.getTexture('my_deck_buttons', 2);
+        const texture = await this.textureManager.getTexture('my_deck_buttons', 1);
 
         if (!texture) {
             throw new Error('MyDeckButton texture not found.');
