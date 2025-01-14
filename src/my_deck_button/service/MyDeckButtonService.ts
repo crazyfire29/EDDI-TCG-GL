@@ -4,8 +4,8 @@ import {Vector2d} from "../../common/math/Vector2d";
 import {MyDeckButton} from "../entity/MyDeckButton";
 
 export interface MyDeckButtonService {
-    getMyDeckButtonById(id: number): MyDeckButton | null;
-    deleteMyDeckButtonById(id: number): void;
+    getMyDeckButtonByDeckId(deckId: number): MyDeckButton | null;
     getAllMyDeckButton(): MyDeckButton[];
+    deleteMyDeckButtonByDeckId(deckId: number): void;
     deleteAllMyDeckButton(): void;
 }

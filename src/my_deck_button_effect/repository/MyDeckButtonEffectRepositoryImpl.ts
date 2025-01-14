@@ -62,12 +62,12 @@ export class MyDeckButtonEffectRepositoryImpl implements MyDeckButtonEffectRepos
     }
 
     public findEffectByDeckId(deckId: number): MyDeckButtonEffect | null {
-            const effectId = this.deckToEffectMap.get(deckId);
-            if (effectId === undefined) {
-                return null;
-            }
-            return this.effectMap.get(effectId) || null;
+        const effectId = this.deckToEffectMap.get(deckId);
+        if (effectId === undefined) {
+            return null;
         }
+        return this.effectMap.get(effectId) || null;
+    }
 
     public deleteEffectByDeckId(deckId: number): void {
         const effectId = this.deckToEffectMap.get(deckId);
@@ -75,6 +75,18 @@ export class MyDeckButtonEffectRepositoryImpl implements MyDeckButtonEffectRepos
             this.effectMap.delete(effectId);
             this.deckToEffectMap.delete(deckId);
         }
+    }
+
+    public findEffectIdByDeckId(deckId: number): number {
+        const effectId = this.deckToEffectMap.get(deckId);
+        if (effectId === undefined) {
+            throw new Error(`Button not found for deckId: ${deckId}`);
+        }
+        return effectId
+    }
+
+    public findAllEffectIds(): number[]{
+        return Array.from(this.deckToEffectMap.values());
     }
 
     public deleteById(id: number): void {

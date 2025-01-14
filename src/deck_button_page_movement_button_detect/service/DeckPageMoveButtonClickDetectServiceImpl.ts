@@ -1,16 +1,18 @@
 import {DeckPageMovementButtonClickDetectService} from "./DeckPageMoveButtonClickDetectService";
 
-import {MyDeckButtonPageMovementButtonRepositoryImpl} from "../../my_deck_button_page_movement_button/repository/MyDeckButtonPageMovementButtonRepositoryImpl";
-import {MyDeckButtonPageMovementButtonRepository} from "../../my_deck_button_page_movement_button/repository/MyDeckButtonPageMovementButtonRepository";
 import {MyDeckButtonPageMovementButton} from "../../my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButton";
+import {MyDeckButtonPageMovementButtonRepository} from "../../my_deck_button_page_movement_button/repository/MyDeckButtonPageMovementButtonRepository";
+import {MyDeckButtonPageMovementButtonRepositoryImpl} from "../../my_deck_button_page_movement_button/repository/MyDeckButtonPageMovementButtonRepositoryImpl";
 
-import {DeckPageMovementButtonClickDetectRepositoryImpl} from "../repository/DeckPageMoveButtonClickDetectRepositoryImpl";
 import {DeckPageMovementButtonClickDetectRepository} from "../repository/DeckPageMoveButtonClickDetectRepository";
-import {MyDeckButtonRepositoryImpl} from "../../my_deck_button/repository/MyDeckButtonRepositoryImpl";
+import {DeckPageMovementButtonClickDetectRepositoryImpl} from "../repository/DeckPageMoveButtonClickDetectRepositoryImpl";
+
 import {MyDeckButton} from "../../my_deck_button/entity/MyDeckButton";
-import {MyDeckButtonEffectRepositoryImpl} from "../../my_deck_button_effect/repository/MyDeckButtonEffectRepositoryImpl";
+import {MyDeckButtonRepositoryImpl} from "../../my_deck_button/repository/MyDeckButtonRepositoryImpl";
+
 import {MyDeckButtonEffect} from "../../my_deck_button_effect/entity/MyDeckButtonEffect";
 import {MyDeckCardRepositoryImpl} from "../../my_deck_card/repository/MyDeckCardRepositoryImpl";
+import {MyDeckButtonEffectRepositoryImpl} from "../../my_deck_button_effect/repository/MyDeckButtonEffectRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -48,10 +50,9 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         this.myDeckButtonRepository = MyDeckButtonRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
-        const allButtonsMap = this.myDeckButtonRepository.getAllMyDeckButtons();
-        this.buttonPageManager = ButtonPageManager.getInstance(allButtonsMap);
+        this.buttonPageManager = ButtonPageManager.getInstance();
         this.buttonStateManager = ButtonStateManager.getInstance();
-        this.buttonEffectManager = new ButtonEffectManager();
+        this.buttonEffectManager = ButtonEffectManager.getInstance();
         this.cardStateManager = CardStateManager.getInstance();
 
         this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
@@ -73,52 +74,39 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         return this.leftMouseDown;
     }
 
-    async handleLeftClick(
-        clickPoint: { x: number; y: number },
-    ): Promise<MyDeckButtonPageMovementButton | null> {
+    async handleLeftClick(clickPoint: { x: number; y: number }): Promise<MyDeckButtonPageMovementButton | null> {
         const { x, y } = clickPoint;
-
         const deckPageMoveButtonList = this.getAllMovementButton();
-        const deckButtonList = this.getAllDeckButton();
         const clickedDeckPageMovementButton = this.deckPageMoveButtonClickDetectRepository.isDeckMoveButtonClicked(
             { x, y },
             deckPageMoveButtonList,
             this.camera
         );
+
         if (clickedDeckPageMovementButton) {
             console.log(`Clicked Deck Page Movement Button ID: ${clickedDeckPageMovementButton.id}`);
-
             this.buttonEffectManager.resetVisibility();
-//             this.resetButtonClickCount();
 
             if (clickedDeckPageMovementButton.id === 0) {
                 if (this.getCurrentPage() > 1) {
-                    const buttonDeckIdList = this.getMyDeckButtonsIdForPage(this.getCurrentPage());
-
-                    buttonDeckIdList.forEach((buttonDeckId) => {
-                      const deckId = buttonDeckId + 1;
-                      const cardIdList = this.getCardIdsByDeckId(deckId);
-                      this.resetCardMeshVisible(deckId, cardIdList);
-                    });
+                    this.resetEffectState(this.getCurrentPage());
+                    this.resetButtonState(this.getCurrentPage());
+                    this.resetCardState(this.getCurrentPage());
 
                     this.setCurrentDeckButtonPage(this.getCurrentPage() - 1);
-                    this.showMyDeckButtonsForPage(this.getCurrentPage());
+                    this.showMyDeckButton(this.getCurrentPage());
                     this.getMyDeckButtonsIdForPage(this.getCurrentPage());
                 }
             }
 
             if (clickedDeckPageMovementButton.id === 1) {
-                if (this.getCurrentPage() < this.buttonPageManager.getTotalPages()) {
-                    const buttonDeckIdList = this.getMyDeckButtonsIdForPage(this.getCurrentPage());
-
-                    buttonDeckIdList.forEach((buttonDeckId) => {
-                        const deckId = buttonDeckId + 1;
-                        const cardIdList = this.getCardIdsByDeckId(deckId);
-                        this.resetCardMeshVisible(deckId, cardIdList);
-                    });
+                if (this.getCurrentPage() < this.getTotalDeckButtonPage()) {
+                    this.resetEffectState(this.getCurrentPage());
+                    this.resetButtonState(this.getCurrentPage());
+                    this.resetCardState(this.getCurrentPage());
 
                     this.setCurrentDeckButtonPage(this.getCurrentPage() + 1);
-                    this.showMyDeckButtonsForPage(this.getCurrentPage());
+                    this.showMyDeckButton(this.getCurrentPage());
                     this.getMyDeckButtonsIdForPage(this.getCurrentPage());
                 }
             }
@@ -136,14 +124,6 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         return this.myDeckButtonRepository.findAll();
     }
 
-    private hideDeckButton(id: number): boolean {
-        return this.myDeckButtonRepository.hideById(id);
-    }
-
-    public setButtonVisibility(buttonId: number, isVisible: boolean): void {
-         this.buttonStateManager.setVisibility(buttonId, isVisible);
-    }
-
     private getAllMyDeckButtonEffect(): MyDeckButtonEffect[] {
         return this.myDeckButtonEffectRepository.findAll();
     }
@@ -152,25 +132,89 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         return this.myDeckButtonEffectRepository.getAllMyDeckButtonEffect();
     }
 
-    private getEffectVisibility(id: number): boolean {
-        return this.buttonEffectManager.getVisibility(id);
-    }
-
     private getCurrentPage(): number {
         return this.buttonPageManager.getCurrentPage();
-    }
-
-    private showMyDeckButtonsForPage(page: number): void {
-        this.buttonPageManager.showButtonsForPage(page);
     }
 
     private setCurrentDeckButtonPage(page: number): void {
         this.buttonPageManager.setCurrentPage(page);
     }
 
-    // 현재 페이지에 해당되는 덱 버튼 아이디 가져오기
+    public getAllDeckButtonId(): number[] {
+        return this.myDeckButtonRepository.findAllButtonIds();
+    }
+
+    // 현재 페이지에 해당되는 버튼 아이디 가져오기
     private getMyDeckButtonsIdForPage(page: number): number[] {
-        return this.buttonPageManager.getButtonsIdForPage(page);
+        const buttonId = this.getAllDeckButtonId();
+        return this.buttonPageManager.findButtonIdsForPage(page, buttonId);
+    }
+
+    // 특정 버튼 객체 가져오기
+    private getButtonMeshByButtonId(buttonId: number): MyDeckButton | null {
+        return this.myDeckButtonRepository.findById(buttonId);
+    }
+
+    private getEffectMeshByEffectId(effectId: number): MyDeckButtonEffect | null {
+        return this.myDeckButtonEffectRepository.findById(effectId);
+    }
+
+    private setButtonVisibility(buttonId: number, isVisible: boolean): void {
+        this.buttonStateManager.setVisibility(buttonId, isVisible);
+    }
+
+    private setEffectVisibility(effectId: number, isVisible: boolean): void {
+        this.buttonEffectManager.setVisibility(effectId, isVisible);
+    }
+
+    private showButtonMesh(buttonId: number): void{
+        this.setButtonVisibility(buttonId, true);
+        const buttonMesh = this.getButtonMeshByButtonId(buttonId);
+        if (buttonMesh) {
+            buttonMesh.getMesh().visible = true;
+        }
+    }
+
+    private hideButtonMesh(buttonId: number): void {
+        this.setButtonVisibility(buttonId, false);
+        const buttonMesh = this.getButtonMeshByButtonId(buttonId);
+        if (buttonMesh) {
+            buttonMesh.getMesh().visible = false;
+        }
+    }
+
+    private hideEffectMesh(effectId: number): void {
+        this.setEffectVisibility(effectId, false);
+        const effectMesh = this.getEffectMeshByEffectId(effectId);
+        if (effectMesh) {
+            effectMesh.getMesh().visible = false;
+        }
+    }
+
+    private showMyDeckButton(page: number): void {
+        const currentButtonIds = this.getMyDeckButtonsIdForPage(page);
+        currentButtonIds.forEach((buttonId) => {
+            this.showButtonMesh(buttonId);
+        });
+    }
+
+    private resetButtonState(page: number): void {
+        const buttonIdList = this.getMyDeckButtonsIdForPage(page);
+        buttonIdList.forEach((buttonId) => {
+            this.hideButtonMesh(buttonId);
+        });
+    }
+
+    private resetEffectState(page: number): void {
+        const effectIdList = this.getMyDeckButtonsIdForPage(page);
+        effectIdList.forEach((effectId) => {
+            this.hideEffectMesh(effectId);
+        });
+    }
+
+    private getTotalDeckButtonPage(): number {
+        const buttonIdList = this.getAllDeckButtonId();
+        return this.buttonPageManager.getTotalPages(buttonIdList);
     }
 
     private getCardIdsByDeckId(deckId: number): number[] {
@@ -202,8 +246,13 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         });
     }
 
-//     private resetButtonClickCount(): void {
-//         this.buttonStateManager.resetButtonClickCount();
-//     }
+    private resetCardState(page: number): void {
+        const buttonIdList = this.getMyDeckButtonsIdForPage(page);
+        buttonIdList.forEach((buttonDeckId) => {
+            const deckId = buttonDeckId + 1;
+            const cardIdList = this.getCardIdsByDeckId(deckId);
+            this.resetCardMeshVisible(deckId, cardIdList);
+        });
+    }
 
 }

@@ -78,6 +78,18 @@ export class MyDeckButtonRepositoryImpl implements MyDeckButtonRepository {
         }
     }
 
+    public findButtonIdByDeckId(deckId: number): number {
+        const buttonId = this.deckToButtonMap.get(deckId);
+        if (buttonId === undefined) {
+            throw new Error(`Button not found for deckId: ${deckId}`);
+        }
+        return buttonId;
+    }
+
+    public findAllButtonIds(): number[]{
+        return Array.from(this.deckToButtonMap.values());
+    }
+
     public deleteById(id: number): void {
         this.buttonMap.delete(id);
     }
