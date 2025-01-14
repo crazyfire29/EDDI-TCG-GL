@@ -141,4 +141,9 @@ export class MyDeckCardRepositoryImpl implements MyDeckCardRepository {
         this.deckToCardMap.delete(deckId);
     }
 
+    public findDeckIds(): number[]{
+        const deckIdList = Array.from(this.deckToCardMap.keys());
+        return deckIdList
+    }
+
 }

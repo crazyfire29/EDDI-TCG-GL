@@ -1,12 +1,16 @@
 import {MyDeckButtonClickDetectService} from "./MyDeckButtonClickDetectService";
-import {MyDeckButtonRepositoryImpl} from "../../my_deck_button/repository/MyDeckButtonRepositoryImpl";
-import {MyDeckButtonRepository} from "../../my_deck_button/repository/MyDeckButtonRepository";
+
 import {MyDeckButton} from "../../my_deck_button/entity/MyDeckButton";
+import {MyDeckButtonRepository} from "../../my_deck_button/repository/MyDeckButtonRepository";
+import {MyDeckButtonRepositoryImpl} from "../../my_deck_button/repository/MyDeckButtonRepositoryImpl";
+
+import {MyDeckButtonEffect} from "../../my_deck_button_effect/entity/MyDeckButtonEffect";
 import {MyDeckButtonEffectRepositoryImpl} from "../../my_deck_button_effect/repository/MyDeckButtonEffectRepositoryImpl";
 
 import {MyDeckButtonClickDetectRepositoryImpl} from "../repository/MyDeckButtonClickDetectRepositoryImpl";
 import {MyDeckButtonClickDetectRepository} from "../repository/MyDeckButtonClickDetectRepository";
 import {MyDeckCardRepositoryImpl} from "../../my_deck_card/repository/MyDeckCardRepositoryImpl";
+
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
@@ -43,12 +47,10 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
         this.myDeckCardRepository = MyDeckCardRepositoryImpl.getInstance();
 
         this.buttonStateManager = ButtonStateManager.getInstance();
-        this.buttonEffectManager = new ButtonEffectManager();
+        this.buttonEffectManager = ButtonEffectManager.getInstance();
         this.cardStateManager = CardStateManager.getInstance();
         this.cardPageManager = CardPageManager.getInstance();
-
-        const allButtonsMap = this.myDeckButtonRepository.getAllMyDeckButtons();
-        this.buttonPageManager = ButtonPageManager.getInstance(allButtonsMap);
+        this.buttonPageManager = ButtonPageManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): MyDeckButtonClickDetectServiceImpl {
@@ -66,14 +68,10 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
         return this.leftMouseDown;
     }
 
-    async handleLeftClick(
-        clickPoint: { x: number; y: number },
-    ): Promise<MyDeckButton | null> {
+    async handleLeftClick(clickPoint: { x: number; y: number }): Promise<MyDeckButton | null> {
         const { x, y } = clickPoint;
-
-        const currentPageIds = this.getMyDeckButtonsIdForPage(this.getCurrentPage());
-
-//         const deckButtonList = this.myDeckButtonRepository.findAll();
+        const buttonIdList = this.getAllDeckButtonId();
+        const currentPageIds = this.getMyDeckButtonsIdForPage(this.getCurrentPage(), buttonIdList);
         const deckButtonList = this.myDeckButtonRepository.findAll().filter(button =>
                 currentPageIds.includes(button.id)
         );
@@ -82,7 +80,6 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             deckButtonList,
             this.camera
         );
-
 
         if (clickedDeckButton) {
             console.log(`Clicked Deck Button ID: ${clickedDeckButton.id}`);
@@ -94,60 +91,17 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             );
 
             if (hiddenButton && hiddenButton.id !== currentClickDeckButtonId) {
-//                 this.setButtonClickCount(1);
-                console.log(`[DEBUG] Different button clicked. Reset click count to 1.`);
-                this.setButtonVisibility(hiddenButton.id, true);
-                const buttonShow = this.showDeckButton(hiddenButton.id);
-                if (buttonShow) {
-                    this.hideDeckButtonEffect(hiddenButton.id);
-                    this.setEffectVisibility(hiddenButton.id, false);
-                    this.setDeckCardVisibility(hiddenButton.id, false);
-                    this.resetCurrentCardPage();
-                    console.log(`Deck Button ID ${hiddenButton.id} is now shown.`);
-                } else {
-                    console.error(`Failed to show Deck Button ID ${hiddenButton.id}`);
-                }
-
-//             } else {
-//                 this.setButtonClickCount(this.getButtonClickCount() + 1);
-//                 console.log(`[DEBUG] button clicked. Click Count: ${this.getButtonClickCount()}`);
-//
-//                 if (this.getButtonClickCount() === 2) {
-//                     console.log(`[DEBUG] Trigger event for the same button on 2nd click.`);
-//                     if (currentClickDeckButtonId !== null) {
-//                         console.log(`[DEBUG] Current Click Button?: ${currentClickDeckButtonId}`);
-//                         this.setButtonVisibility(currentClickDeckButtonId, true);
-//                         const effectHide = this.hideDeckButtonEffect(currentClickDeckButtonId);
-//                         if (effectHide) {
-//                             this.setEffectVisibility(currentClickDeckButtonId, false);
-//                             this.showDeckButton(currentClickDeckButtonId);
-//                             this.setDeckCardVisibility(currentClickDeckButtonId, false);
-//                             this.resetCurrentCardPage();
-//                             console.log(`[DEBUG]Deck Button ID ${currentClickDeckButtonId} is now shown.`);
-//                         } else {
-//                             console.error(`[DEBUG]Failed to show Deck Button ID ${currentClickDeckButtonId}`);
-//                         }
-//                     }
-//                     return null;
-//
-//                 } else if (this.getButtonClickCount() > 2) {
-//                     this.setButtonClickCount(1);
-//                     console.log(`[DEBUG] Reset click count to 1 after 3rd click.`);
-//                     console.log(`[DEBUG] button clicked. Click Count: ${this.getButtonClickCount()}`);
-//                 }
+                this.showDeckButton(hiddenButton.id);
+                this.hideDeckButtonEffect(hiddenButton.id);
+                this.setDeckCardVisibility(hiddenButton.id, false);
+                this.resetCurrentCardPage();
+                console.log(`Deck Button ID ${hiddenButton.id} is now shown.`);
             }
 
             if (currentClickDeckButtonId !== null){
-                const buttonHide = this.hideDeckButton(currentClickDeckButtonId);
-                if (buttonHide) {
-                    this.setButtonVisibility(currentClickDeckButtonId, false);
-                    this.showDeckButtonEffect(currentClickDeckButtonId);
-                    this.setEffectVisibility(currentClickDeckButtonId, true);
-                    console.log(`Deck Button ID ${currentClickDeckButtonId} is now hidden.`);
-                } else {
-                    console.error(`Failed to hide Deck Button ID ${currentClickDeckButtonId}`);
-                }
-
+                this.hideDeckButton(currentClickDeckButtonId);
+                this.showDeckButtonEffect(currentClickDeckButtonId);
+                console.log(`Deck Button ID ${currentClickDeckButtonId} is now hidden.`);
             }
 
             return clickedDeckButton;
@@ -166,11 +120,10 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     public async onMouseDown(event: MouseEvent): Promise<MyDeckButton | null> {
         if (event.button === 0) {
             const clickPoint = { x: event.clientX, y: event.clientY };
-            return await this.handleLeftClick(clickPoint); //
+            return await this.handleLeftClick(clickPoint);
         }
         return null;
     }
-
 
     private getButtonClickCount(): number {
         return this.buttonStateManager.getButtonClickCount();
@@ -185,47 +138,71 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     }
 
     public getButtonVisibility(buttonId: number): boolean {
-        return this.buttonStateManager.getVisibility(buttonId);
+        return this.buttonStateManager.findVisibility(buttonId);
     }
 
     public setButtonVisibility(buttonId: number, isVisible: boolean): void {
        this.buttonStateManager.setVisibility(buttonId, isVisible);
     }
 
-    public getEffectVisibility(buttonId: number): boolean {
-        return this.buttonEffectManager.getVisibility(buttonId);
+    public getEffectVisibility(effectId: number): boolean {
+        return this.buttonEffectManager.findVisibility(effectId);
     }
 
-    public setEffectVisibility(buttonId: number, isVisible: boolean): void {
-        this.buttonEffectManager.setVisibility(buttonId, isVisible);
+    public setEffectVisibility(effectId: number, isVisible: boolean): void {
+        this.buttonEffectManager.setVisibility(effectId, isVisible);
     }
 
-    private showDeckButtonEffect(id: number): boolean {
-        return this.myDeckButtonEffectRepository.showById(id);
+    private showDeckButton(buttonId: number): void {
+        this.setButtonVisibility(buttonId, true);
+        const button = this.getDeckButtonById(buttonId);
+        if (button) {
+            button.getMesh().visible = true;
+        }
     }
 
-    private hideDeckButtonEffect(id: number): boolean {
-        return this.myDeckButtonEffectRepository.hideById(id);
+    private hideDeckButton(buttonId: number): void {
+        this.setButtonVisibility(buttonId, false);
+        const button = this.getDeckButtonById(buttonId);
+        if (button) {
+            button.getMesh().visible = false;
+        }
     }
 
-    private showDeckButton(id: number): boolean {
-        return this.myDeckButtonRepository.showById(id);
+    private showDeckButtonEffect(effectId: number): void {
+        this.setEffectVisibility(effectId, true);
+        const buttonEffect = this.getDeckButtonEffectById(effectId);
+         if (buttonEffect) {
+             buttonEffect.getMesh().visible = true;
+         }
     }
 
-    private hideDeckButton(id: number): boolean {
-        return this.myDeckButtonRepository.hideById(id);
+    private hideDeckButtonEffect(effectId: number): void {
+        this.setEffectVisibility(effectId, false);
+        const buttonEffect = this.getDeckButtonEffectById(effectId);
+        if (buttonEffect) {
+            buttonEffect.getMesh().visible = false;
+        }
     }
 
     private getCurrentPage(): number {
         return this.buttonPageManager.getCurrentPage();
     }
 
-    private getMyDeckButtonsIdForPage(page: number): number[] {
-        return this.buttonPageManager.getButtonsIdForPage(page);
+    private getMyDeckButtonsIdForPage(page: number, buttonIdList: number[]): number[] {
+        return this.buttonPageManager.findButtonIdsForPage(page, buttonIdList);
     }
 
     private getDeckButtonById(buttonId: number): MyDeckButton | null {
         return this.myDeckButtonRepository.findById(buttonId);
+    }
+
+    public getAllDeckButtonId(): number[] {
+        return this.myDeckButtonRepository.findAllButtonIds();
+    }
+
+    private getDeckButtonEffectById(buttonId: number): MyDeckButtonEffect | null {
+        return this.myDeckButtonEffectRepository.findById(buttonId);
     }
 
     // 덱 버튼 클릭 시 이전에 클릭한 덱 카드 visible false

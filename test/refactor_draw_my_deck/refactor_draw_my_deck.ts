@@ -23,6 +23,7 @@ import {MyDeckCardPageMovementButtonConfigList} from "../../src/my_deck_card_pag
 import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButtonConfigList";
 
 import {MyDeckButtonServiceImpl} from "../../src/my_deck_button/service/MyDeckButtonServiceImpl";
+import {MyDeckButtonEffectServiceImpl} from "../../src/my_deck_button_effect/service/MyDeckButtonEffectServiceImpl";
 import {MyDeckButtonMapRepositoryImpl} from "../../src/my_deck_button/repository/MyDeckButtonMapRepositoryImpl";
 import {MyDeckCardServiceImpl} from "../../src/my_deck_card/service/MyDeckCardServiceImpl";
 import {MyDeckCardMapRepositoryImpl} from "../../src/my_deck_card/repository/MyDeckCardMapRepositoryImpl";
@@ -53,8 +54,10 @@ export class TCGJustTestMyDeckView {
     private myDeckCardPageMovementButtonService = MyDeckCardPageMovementButtonServiceImpl.getInstance();
     private myDeckButtonPageMovementButtonService = MyDeckButtonPageMovementButtonServiceImpl.getInstance();
     private myDeckButtonService = MyDeckButtonServiceImpl.getInstance();
-    private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
+    private myDeckButtonEffectService = MyDeckButtonEffectServiceImpl.getInstance();
     private myDeckCardService = MyDeckCardServiceImpl.getInstance();
+
+    private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
     private myDeckCardMapRepository = MyDeckCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -245,15 +248,15 @@ export class TCGJustTestMyDeckView {
 
             myDeckButtonList.forEach(async (deckId, index) => {
                 const buttonGroup = await this.myDeckButtonService.createMyDeckButtonWithPosition(deckId);
-                const buttonEffectGroup = await this.myDeckButtonService.createDeckButtonEffectWithPosition(deckId);
+                const buttonEffectGroup = await this.myDeckButtonEffectService.createDeckButtonEffectWithPosition(deckId);
 
                 if (buttonGroup) {
-                    this.myDeckButtonService.setVisibleDeckButton(deckId, index < 6); // 처음 6개만 visible
+                    this.myDeckButtonService.initializeDeckButton(); // 처음 6개만 visible
                     this.scene.add(buttonGroup);
                 }
 
                 if (buttonEffectGroup) {
-                    this.myDeckButtonService.setVisibleDeckButtonEffect(deckId, false);
+                    this.myDeckButtonEffectService.initializeDeckButtonEffect();
                     this.scene.add(buttonEffectGroup);
                 }
             });
@@ -306,8 +309,6 @@ export class TCGJustTestMyDeckView {
         }
     }
 
-
-
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -331,7 +332,7 @@ export class TCGJustTestMyDeckView {
             this.myDeckButtonPageMovementButtonService.adjustMyDeckButtonPageMovementButtonPosition();
             this.myDeckCardPageMovementButtonService.adjustMyDeckCardPageMovementButtonPosition();
             this.myDeckButtonService.adjustMyDeckButtonPosition();
-            this.myDeckButtonService.adjustMyDeckButtonEffectPosition();
+            this.myDeckButtonEffectService.adjustMyDeckButtonEffectPosition();
             this.myDeckCardService.adjustMyDeckCardPosition();
         }
     }
