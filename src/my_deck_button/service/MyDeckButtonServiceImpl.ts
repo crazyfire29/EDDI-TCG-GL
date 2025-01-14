@@ -1,32 +1,27 @@
 import * as THREE from 'three';
+import {Vector2d} from "../../common/math/Vector2d";
+
 import { MyDeckButtonService } from './MyDeckButtonService';
 import {MyDeckButtonType} from "../entity/MyDeckButtonType";
 import {MyDeckButton} from "../entity/MyDeckButton";
+
 import {MyDeckButtonRepository} from "../repository/MyDeckButtonRepository";
-import {NonBackgroundImage} from "../../shape/image/NonBackgroundImage";
 import {MyDeckButtonRepositoryImpl} from "../repository/MyDeckButtonRepositoryImpl";
-import {MyDeckButtonPositionRepositoryImpl} from "../../my_deck_button_position/repository/MyDeckButtonPositionRepositoryImpl";
-import {MyDeckButtonEffectRepositoryImpl} from "../../my_deck_button_effect/repository/MyDeckButtonEffectRepositoryImpl";
-import {MyDeckButtonEffect} from "../../my_deck_button_effect/entity/MyDeckButtonEffect";
 import {MyDeckButtonPosition} from "../../my_deck_button_position/entity/MyDeckButtonPosition";
-import {Vector2d} from "../../common/math/Vector2d";
+import {MyDeckButtonPositionRepositoryImpl} from "../../my_deck_button_position/repository/MyDeckButtonPositionRepositoryImpl";
+
 import {ButtonStateManager} from "../../my_deck_button_manager/ButtonStateManager";
-import {ButtonEffectManager} from "../../my_deck_button_manager/ButtonEffectManager";
 
 export class MyDeckButtonServiceImpl implements MyDeckButtonService {
     private static instance: MyDeckButtonServiceImpl;
     private myDeckButtonRepository: MyDeckButtonRepositoryImpl;
     private myDeckButtonPositionRepository: MyDeckButtonPositionRepositoryImpl;
-    private myDeckButtonEffectRepository: MyDeckButtonEffectRepositoryImpl;
     private buttonStateManager: ButtonStateManager;
-    private buttonEffectManger: ButtonEffectManager;
 
     private constructor(myDeckButtonRepository: MyDeckButtonRepository) {
         this.myDeckButtonRepository = MyDeckButtonRepositoryImpl.getInstance();
         this.myDeckButtonPositionRepository = MyDeckButtonPositionRepositoryImpl.getInstance();
-        this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
-        this.buttonStateManager = new ButtonStateManager();
-        this.buttonEffectManger = new ButtonEffectManager();
+        this.buttonStateManager = ButtonStateManager.getInstance();
     }
 
     public static getInstance(): MyDeckButtonServiceImpl {
@@ -54,26 +49,6 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         return buttonGroup;
     }
 
-    public async createDeckButtonEffectWithPosition(deckId: number): Promise<THREE.Group | null> {
-        const buttonGroup = new THREE.Group();
-        try {
-            const position = this.findMyDeckButtonPosition(deckId);
-
-            if (!position) {
-                console.error(`Position not found for deckId: ${deckId}`);
-                return null;
-            }
-
-            const deckButtonEffect = await this.createMyDeckButtonEffect(deckId, position.position);
-            buttonGroup.add(deckButtonEffect.mesh);
-
-        } catch (error) {
-            console.log('Error creating button effect with position:', error);
-            return null;
-        }
-        return buttonGroup;
-    }
-
     private async createMyDeckButton(deckId: number, position: Vector2d): Promise<MyDeckButton> {
         return await this.myDeckButtonRepository.createMyDeckButton(deckId, position);
     }
@@ -90,9 +65,6 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         return this.myDeckButtonPositionRepository.findPositionByDeckId(deckId);
     }
 
-    private async createMyDeckButtonEffect(deckId: number, position: Vector2d): Promise<MyDeckButtonEffect>{
-        return await this.myDeckButtonEffectRepository.createMyDeckButtonEffect(deckId, position);
-    }
 
     public adjustMyDeckButtonPosition(): void {
         const positionRepository = this.myDeckButtonPositionRepository
@@ -138,91 +110,49 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
     }
 
-    public adjustMyDeckButtonEffectPosition(): void {
-        const positionRepository = this.myDeckButtonPositionRepository
-        const buttonEffectRepository = this.myDeckButtonEffectRepository
+    public initializeDeckButton(): void {
+        const buttonIdList = this.getAllDeckButtonId();
+        this.initializeButtonState(buttonIdList);
 
-        const buttonEffectList = buttonEffectRepository.findAll();
-        const buttonPosition = positionRepository.findAll();
-
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-
-        console.log('buttonEffectList:', buttonEffectList);
-        console.log('buttonPosition:', buttonPosition);
-
-        for (const buttonEffect of buttonEffectList) {
-            const buttonEffectMesh = buttonEffect.getMesh();
-            const buttonEffectId = buttonEffect.id;
-            const initialPosition = positionRepository.findById(buttonEffectId);
-
-            if (!initialPosition) {
-                console.error(`No position found for button id: ${buttonEffectId}`);
-                continue;
-            }
-
-            const buttonWidth = (350 / 1920) * window.innerWidth;
-            const buttonHeight = (90 / 1080) * window.innerHeight;
-
-            const newPositionX = initialPosition.position.getX() * window.innerWidth;
-            const newPositionY = initialPosition.position.getY() * window.innerHeight;
-            console.log(`Button ${buttonEffectId}:`, {
-                initialPosition: initialPosition.position,
-                newPositionX,
-                newPositionY,
+        const buttonMeshList = this.getAllMyDeckButton();
+        if (buttonMeshList) {
+            buttonMeshList.forEach((button, index) => {
+                button.getMesh().visible = index < 6;
             });
-
-            buttonEffectMesh.geometry.dispose();
-            buttonEffectMesh.geometry = new THREE.PlaneGeometry(buttonWidth, buttonHeight);
-
-            buttonEffectMesh.position.set(newPositionX, newPositionY, 0);
         }
-
     }
 
-    public setVisibleDeckButton(deckId: number, isVisible: boolean): void {
-       // ButtonStateManager를 사용하여 버튼의 visibility 상태 설정
-       this.buttonStateManager.setVisibility(deckId, isVisible);
-
-       // 버튼을 보이게 하거나 숨김
-       const button = this.getMyDeckButtonById(deckId); // 버튼 찾기
-       if (button) {
-           button.getMesh().visible = isVisible;
-       }
-    }
-
-   public setVisibleDeckButtonEffect(deckId: number, isVisible: boolean): void {
-       this.buttonEffectManger.setVisibility(deckId, isVisible);
-
-       const button = this.getMyDeckButtonEffectById(deckId);
-       if (button) {
-           button.getMesh().visible = isVisible;
-       }
-   }
-
-
-    public getMyDeckButtonById(id: number): MyDeckButton | null {
-        return this.myDeckButtonRepository.findButtonByDeckId(id);
-    }
-
-    public getMyDeckButtonEffectById(id: number): MyDeckButtonEffect | null {
-        return this.myDeckButtonEffectRepository.findEffectByDeckId(id);
-        }
-
-    public deleteMyDeckButtonById(id: number): void {
-        this.myDeckButtonRepository.deleteById(id);
+    public getMyDeckButtonByDeckId(deckId: number): MyDeckButton | null {
+        return this.myDeckButtonRepository.findButtonByDeckId(deckId);
     }
 
     public getAllMyDeckButton(): MyDeckButton[] {
         return this.myDeckButtonRepository.findAll();
     }
 
-    public deleteAllMyDeckButton(): void {
-        this.myDeckButtonRepository.deleteAll();
+    public getDeckButtonIdByDeckId(deckId: number): number {
+        return this.myDeckButtonRepository.findButtonIdByDeckId(deckId);
     }
 
-    public getAllMyDeckButtonById(): Map<number, MyDeckButton> {
-        return this.myDeckButtonRepository.getAllMyDeckButtons();
+    public getAllDeckButtonId(): number[] {
+        return this.myDeckButtonRepository.findAllButtonIds();
+    }
+
+    public deleteMyDeckButtonByDeckId(deckId: number): void {
+        this.myDeckButtonRepository.deleteButtonByDeckId(deckId);
+    }
+
+     public deleteAllMyDeckButton(): void {
+         this.myDeckButtonRepository.deleteAll();
+     }
+
+    private setButtonVisibility(deckId: number, isVisible: boolean): void {
+        const buttonId = this.getDeckButtonIdByDeckId(deckId);
+        this.buttonStateManager.setVisibility(buttonId, isVisible);
+    }
+
+    private initializeButtonState(buttonIdList: number[]): void {
+        this.buttonStateManager.initializeButtonState(buttonIdList);
     }
 
 }
