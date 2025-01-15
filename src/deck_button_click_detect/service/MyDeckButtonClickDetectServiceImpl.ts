@@ -208,7 +208,7 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     // 덱 버튼 클릭 시 이전에 클릭한 덱 카드 visible false
     private setDeckCardVisibility(buttonId: number, isVisible: boolean): void {
         const deckId = buttonId + 1;
-        this.cardStateManager.setDeckVisibility(deckId, isVisible);
+        this.cardStateManager.setAllCardVisibility(deckId, isVisible);
 
         const cardMeshList = this.getCardMeshesByDeckId(deckId);
         cardMeshList.forEach((mesh) => {

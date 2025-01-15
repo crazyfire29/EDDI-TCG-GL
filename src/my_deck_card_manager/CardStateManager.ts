@@ -45,7 +45,7 @@ export class CardStateManager {
     }
 
     // 특정 deckId의 모든 카드 visible 상태 변경
-    public setDeckVisibility(deckId: number, isVisible: boolean): void {
+    public setAllCardVisibility(deckId: number, isVisible: boolean): void {
         const cardVisibility = this.deckCardVisibilityState.get(deckId);
         if (cardVisibility) {
             cardVisibility.forEach((_, cardId) => cardVisibility.set(cardId, isVisible));
