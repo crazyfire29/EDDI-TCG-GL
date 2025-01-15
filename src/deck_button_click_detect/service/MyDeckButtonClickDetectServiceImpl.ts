@@ -101,6 +101,7 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
             if (currentClickDeckButtonId !== null){
                 this.hideDeckButton(currentClickDeckButtonId);
                 this.showDeckButtonEffect(currentClickDeckButtonId);
+                this.showDeckCard(currentClickDeckButtonId);
                 console.log(`Deck Button ID ${currentClickDeckButtonId} is now hidden.`);
             }
 
@@ -223,6 +224,46 @@ export class MyDeckButtonClickDetectServiceImpl implements MyDeckButtonClickDete
     // 새로운 덱 버튼 클릭시 카드 페이지 초기화
     private resetCurrentCardPage(): void {
         this.cardPageManager.resetCurrentPage();
+    }
+
+    private getCurrentCardPage(): number {
+        return this.cardPageManager.getCurrentPage();
+    }
+
+    private getCardMeshIdByDeckIdAndCardId(deckId: number, cardId: number): THREE.Mesh | null {
+        return this.myDeckCardRepository.findCardMeshByDeckIdAndCardId(deckId, cardId);
+    }
+
+    private setCardVisibility(deckId: number, cardId: number, isVisible: boolean): void {
+        this.cardStateManager.setCardVisibility(deckId, cardId, isVisible);
+    }
+
+    private getCardIdsForPage(page: number, cardIdList: number[]): number[] {
+        return this.cardPageManager.findCardIdsForPage(page, cardIdList);
+    }
+
+    private getCardIdListByDeckId(deckId: number): number[]{
+        return this.myDeckCardRepository.findCardIdsByDeckId(deckId);
+    }
+
+    private showDeckCardMesh(deckId: number, cardId: number): void {
+        this.setCardVisibility(deckId, cardId, true);
+        const cardMesh = this.getCardMeshIdByDeckIdAndCardId(deckId, cardId);
+        if (cardMesh) {
+            cardMesh.visible = true;
+        }
+    }
+
+    private showDeckCard(buttonId: number): void {
+        const deckId = buttonId + 1;
+        const cardPage = this.getCurrentCardPage();
+        const cardIdList = this.getCardIdListByDeckId(deckId);
+        const currentPageCardId = this.getCardIdsForPage(cardPage, cardIdList);
+
+        currentPageCardId.forEach((cardId) => {
+            this.showDeckCardMesh(deckId, cardId);
+        });
+
     }
 
 }

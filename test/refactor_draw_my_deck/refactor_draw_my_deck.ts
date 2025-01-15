@@ -102,16 +102,7 @@ export class TCGJustTestMyDeckView {
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
 
         this.myDeckButtonClickDetectService = MyDeckButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-//         this.renderer.domElement.addEventListener('mousedown', (e) => this.myDeckButtonClickDetectService.onMouseDown(e), false);
-        this.renderer.domElement.addEventListener('mousedown', async (e) => {
-            const clickButton = await this.myDeckButtonClickDetectService.onMouseDown(e);
-            if (clickButton) {
-                const clickButtonId = clickButton.id + 1;
-                if (clickButtonId) {
-                    await this.addMyDeckCardByDeckId(clickButtonId);
-                }
-            }
-        }, false);
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.myDeckButtonClickDetectService.onMouseDown(e), false);
 
         this.deckPageMovementButtonClickDetectService = DeckPageMovementButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
@@ -291,25 +282,6 @@ export class TCGJustTestMyDeckView {
             });
         } catch (error) {
             console.error('Failed to save my deck cards:', error);
-        }
-    }
-
-    // To-do: 이 메서드 없애고, 버튼 클릭 이벤트 부분에서 visible 활용해서 카드 숨기고 나타내야 함.
-    private async addMyDeckCardByDeckId(deckId: number): Promise<void> {
-        try {
-            const cardIdList = this.myDeckCardService.getCardIdsByDeckId(deckId);
-            const cardMeshes = this.myDeckCardService.getCardMeshesByDeckId(deckId);
-            if (cardMeshes) {
-                console.log(`[DEBUG] Adding cards for deckId: ${deckId}`);
-                this.myDeckCardService.initializeCardState(deckId, cardIdList);
-                cardMeshes.forEach((mesh) => {
-                    this.scene.add(mesh);
-                });
-            } else {
-                console.warn(`[WARN] No card meshes found for deckId: ${deckId}`);
-            }
-        } catch (error) {
-            console.error(`Failed to add cards for deckId: ${deckId}`, error);
         }
     }
 
