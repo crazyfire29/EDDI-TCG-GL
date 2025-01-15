@@ -17,11 +17,22 @@ export class ButtonEffectManager {
     }
 
     // 처음에는 effect가 나타나면 안 됨.
+//     public initializeEffectState(effectIdList: number[]): void {
+//         effectIdList.forEach((effectId) => {
+//             this.buttonEffectState.set(effectId, false); // 기본값을 false로 설정
+//         });
+//     }
+
     public initializeEffectState(effectIdList: number[]): void {
-        effectIdList.forEach((effectId) => {
-            this.buttonEffectState.set(effectId, false); // 기본값을 false로 설정
+        effectIdList.forEach((effectId, index) => {
+            if (index === 0) {
+                this.buttonEffectState.set(effectId, true); // 첫 번째 요소는 true
+            } else {
+                this.buttonEffectState.set(effectId, false); // 나머지는 false
+            }
         });
     }
+
 
     public setVisibility(effectId: number, isVisible: boolean): void {
         this.buttonEffectState.set(effectId, isVisible);

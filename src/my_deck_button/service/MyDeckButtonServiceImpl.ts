@@ -9,6 +9,7 @@ import {MyDeckButtonRepository} from "../repository/MyDeckButtonRepository";
 import {MyDeckButtonRepositoryImpl} from "../repository/MyDeckButtonRepositoryImpl";
 import {MyDeckButtonPosition} from "../../my_deck_button_position/entity/MyDeckButtonPosition";
 import {MyDeckButtonPositionRepositoryImpl} from "../../my_deck_button_position/repository/MyDeckButtonPositionRepositoryImpl";
+import {MyDeckButtonClickDetectRepositoryImpl} from "../../deck_button_click_detect/repository/MyDeckButtonClickDetectRepositoryImpl";
 
 import {ButtonStateManager} from "../../my_deck_button_manager/ButtonStateManager";
 
@@ -16,11 +17,13 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
     private static instance: MyDeckButtonServiceImpl;
     private myDeckButtonRepository: MyDeckButtonRepositoryImpl;
     private myDeckButtonPositionRepository: MyDeckButtonPositionRepositoryImpl;
+    private myDeckButtonClickDetectRepository: MyDeckButtonClickDetectRepositoryImpl;
     private buttonStateManager: ButtonStateManager;
 
     private constructor(myDeckButtonRepository: MyDeckButtonRepository) {
         this.myDeckButtonRepository = MyDeckButtonRepositoryImpl.getInstance();
         this.myDeckButtonPositionRepository = MyDeckButtonPositionRepositoryImpl.getInstance();
+        this.myDeckButtonClickDetectRepository = MyDeckButtonClickDetectRepositoryImpl.getInstance();
         this.buttonStateManager = ButtonStateManager.getInstance();
     }
 
@@ -117,7 +120,10 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
         const buttonMeshList = this.getAllMyDeckButton();
         if (buttonMeshList) {
             buttonMeshList.forEach((button, index) => {
-                button.getMesh().visible = index < 6;
+//                 button.getMesh().visible = index < 6;
+                button.getMesh().visible = index > 0 && index < 6;
+                const firstButton = buttonIdList[0];
+                this.saveCurrentClickDeckButtonId(firstButton);
             });
         }
     }
@@ -153,6 +159,10 @@ export class MyDeckButtonServiceImpl implements MyDeckButtonService {
 
     private initializeButtonState(buttonIdList: number[]): void {
         this.buttonStateManager.initializeButtonState(buttonIdList);
+    }
+
+    private saveCurrentClickDeckButtonId(buttonId: number): void {
+        this.myDeckButtonClickDetectRepository.saveCurrentClickDeckButtonId(buttonId);
     }
 
 }

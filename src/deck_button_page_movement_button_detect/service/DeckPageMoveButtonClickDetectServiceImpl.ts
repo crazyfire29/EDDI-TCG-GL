@@ -6,6 +6,7 @@ import {MyDeckButtonPageMovementButtonRepositoryImpl} from "../../my_deck_button
 
 import {DeckPageMovementButtonClickDetectRepository} from "../repository/DeckPageMoveButtonClickDetectRepository";
 import {DeckPageMovementButtonClickDetectRepositoryImpl} from "../repository/DeckPageMoveButtonClickDetectRepositoryImpl";
+import {MyDeckButtonClickDetectRepositoryImpl} from "../../deck_button_click_detect/repository/MyDeckButtonClickDetectRepositoryImpl";
 
 import {MyDeckButton} from "../../my_deck_button/entity/MyDeckButton";
 import {MyDeckButtonRepositoryImpl} from "../../my_deck_button/repository/MyDeckButtonRepositoryImpl";
@@ -33,6 +34,7 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
     private myDeckButtonRepository: MyDeckButtonRepositoryImpl;
     private myDeckButtonEffectRepository: MyDeckButtonEffectRepositoryImpl;
     private myDeckCardRepository: MyDeckCardRepositoryImpl;
+    private myDeckButtonClickDetectRepository: MyDeckButtonClickDetectRepositoryImpl;
 
     private buttonPageManager: ButtonPageManager;
     private buttonStateManager: ButtonStateManager;
@@ -57,6 +59,7 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
 
         this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
         this.myDeckCardRepository = MyDeckCardRepositoryImpl.getInstance();
+        this.myDeckButtonClickDetectRepository = MyDeckButtonClickDetectRepositoryImpl.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): DeckPageMovementButtonClickDetectServiceImpl {
@@ -96,6 +99,7 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
                     this.setCurrentDeckButtonPage(this.getCurrentPage() - 1);
                     this.showMyDeckButton(this.getCurrentPage());
                     this.getMyDeckButtonsIdForPage(this.getCurrentPage());
+                    this.initialCardState(this.getCurrentPage());
                 }
             }
 
@@ -108,6 +112,7 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
                     this.setCurrentDeckButtonPage(this.getCurrentPage() + 1);
                     this.showMyDeckButton(this.getCurrentPage());
                     this.getMyDeckButtonsIdForPage(this.getCurrentPage());
+                    this.initialCardState(this.getCurrentPage());
                 }
             }
             return clickedDeckPageMovementButton;
@@ -183,6 +188,14 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         }
     }
 
+    private showEffectMesh(effectId: number): void {
+        this.setEffectVisibility(effectId, true);
+        const effectMesh = this.getEffectMeshByEffectId(effectId);
+        if (effectMesh) {
+            effectMesh.getMesh().visible = true;
+        }
+    }
+
     private hideEffectMesh(effectId: number): void {
         this.setEffectVisibility(effectId, false);
         const effectMesh = this.getEffectMeshByEffectId(effectId);
@@ -191,10 +204,25 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         }
     }
 
+//     private showMyDeckButton(page: number): void {
+//         const currentButtonIds = this.getMyDeckButtonsIdForPage(page);
+//         currentButtonIds.forEach((buttonId) => {
+//             this.showButtonMesh(buttonId);
+//         });
+//     }
+
     private showMyDeckButton(page: number): void {
         const currentButtonIds = this.getMyDeckButtonsIdForPage(page);
-        currentButtonIds.forEach((buttonId) => {
-            this.showButtonMesh(buttonId);
+
+        currentButtonIds.forEach((buttonId, index) => {
+            if (index === 0) {
+                this.myDeckButtonClickDetectRepository.saveCurrentClickDeckButtonId(buttonId);
+                this.hideButtonMesh(buttonId);
+                this.showEffectMesh(buttonId);
+            } else {
+                this.showButtonMesh(buttonId);
+                this.hideEffectMesh(buttonId);
+            }
         });
     }
 
@@ -239,6 +267,20 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         }
     }
 
+    private showCardMesh(deckId: number, cardId: number): void {
+        this.setCardVisibility(deckId, cardId, true);
+        const cardMesh = this.getCardMeshByDeckIdAndCardId(deckId, cardId);
+        if (cardMesh) {
+            cardMesh.visible = true;
+        }
+    }
+
+    private showCard(deckId: number, cardIdList: number[]): void {
+        cardIdList.slice(0, 8).forEach((cardId) => {
+            this.showCardMesh(deckId, cardId);
+        });
+    }
+
     // 카드 visible 상태 초기화 (모두 false)
     private resetCardMeshVisible(deckId: number, cardIdList: number[]): void {
         cardIdList.forEach((cardId) => {
@@ -253,6 +295,16 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
             const cardIdList = this.getCardIdsByDeckId(deckId);
             this.resetCardMeshVisible(deckId, cardIdList);
         });
+    }
+
+    private initialCardState(page: number): void {
+        const buttonIdList = this.getMyDeckButtonsIdForPage(page);
+        const firstButtonId = buttonIdList[0];
+        const deckId = firstButtonId + 1;
+        const cardIdList = this.getCardIdsByDeckId(deckId);
+        console.log(`[Deck Page Move!]current page?: ${page}, cardIdList?: ${cardIdList}`);
+
+        this.showCard(deckId, cardIdList);
     }
 
 }

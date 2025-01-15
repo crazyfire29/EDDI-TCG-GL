@@ -109,8 +109,15 @@ export class MyDeckButtonEffectServiceImpl implements MyDeckButtonEffectService 
 
         const effectMeshList = this.getAllMyButtonEffect();
         if (effectMeshList) {
-            effectMeshList.forEach((effect) => {
-                effect.getMesh().visible = false;
+//             effectMeshList.forEach((effect) => {
+//                 effect.getMesh().visible = false;
+//             });
+            effectMeshList.forEach((effect, index) => {
+                if (index === 0) {
+                    effect.getMesh().visible = true;
+                } else {
+                    effect.getMesh().visible = false;
+                }
             });
         }
     }

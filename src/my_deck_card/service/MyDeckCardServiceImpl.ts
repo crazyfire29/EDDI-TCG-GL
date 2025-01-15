@@ -174,6 +174,17 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
         }
     }
 
+    public setCardState(deckId: number, cardIdList: number[]): void {
+        const uniqueCardIds = Array.from(new Set(cardIdList));
+        this.cardStateManager.setAllCardVisibility(deckId, false);
+        const cardMeshList = this.getCardMeshesByDeckId(deckId);
+        if (cardMeshList){
+            cardMeshList.forEach((mesh) => {
+                mesh.visible = false;
+            });
+        }
+    }
+
     public getCurrentClickDeckButton(): number | null {
         return this.myDeckButtonClickDetectRepository.getCurrentClickDeckButtonId();
     }
@@ -182,4 +193,7 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
         return this.myDeckCardRepository.findCardIdsByDeckId(deckId);
     }
 
+    public getAllDeckIds(): number[] {
+        return this.myDeckCardRepository.findDeckIds();
+    }
 }

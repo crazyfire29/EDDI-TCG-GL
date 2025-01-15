@@ -157,7 +157,7 @@ export class TCGJustTestMyDeckView {
         await this.addMyDeckButtonPageMovementButton();
         await this.saveMyDeckCard();
         this.addMyDeckCardPageMovementButton();
-        this.addMyDeckButton();
+        await this.addMyDeckButton();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -272,25 +272,29 @@ export class TCGJustTestMyDeckView {
 
             for (const [deckId, cardIdList] of myDeckCardList) {
                 await this.myDeckCardService.createMyDeckCardSceneWithPosition(deckId, cardIdList);
-
-                //To-do: 덱 버튼을 클릭했을 때 각 덱 버튼에 해당되는 카드가 그려지도록 해야 함.
-//                 const cardMeshes = this.myDeckCardService.getCardMeshesByDeckId(deckId);
-//                 if (cardMeshes) {
-//                     console.log(`[DEBUG] current deckId: ${deckId}, card Mesh: ${cardMeshes}`);
-//                     this.myDeckCardService.initializeCardState(deckId, cardIdList);
-//                     cardMeshes.forEach((mesh) => {
-//                         this.scene.add(mesh);
-//                     });
-//                     console.log(`[DEBUG] Added card meshes for deckId: ${deckId}`);
-//                 } else {
-//                     console.warn(`[WARN] No card meshes found for deckId: ${deckId}`);
-//                 }
             }
+
+            const deckIdList = this.myDeckCardService.getAllDeckIds();
+            deckIdList.forEach((deckId, index) => {
+                const cardIds = this.myDeckCardService.getCardIdsByDeckId(deckId);
+                const cardMeshes = this.myDeckCardService.getCardMeshesByDeckId(deckId);
+                if (cardMeshes) {
+                    if (index === 0) {
+                        this.myDeckCardService.initializeCardState(deckId, cardIds);
+                    } else {
+                        this.myDeckCardService.setCardState(deckId, cardIds);
+                    }
+                    cardMeshes.forEach((mesh) => {
+                        this.scene.add(mesh);
+                    });
+                }
+            });
         } catch (error) {
             console.error('Failed to save my deck cards:', error);
         }
     }
 
+    // To-do: 이 메서드 없애고, 버튼 클릭 이벤트 부분에서 visible 활용해서 카드 숨기고 나타내야 함.
     private async addMyDeckCardByDeckId(deckId: number): Promise<void> {
         try {
             const cardIdList = this.myDeckCardService.getCardIdsByDeckId(deckId);

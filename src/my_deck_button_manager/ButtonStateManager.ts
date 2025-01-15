@@ -20,7 +20,8 @@ export class ButtonStateManager {
     // 첫 화면에서는 최대 6개의 덱이 배치됨
     public initializeButtonState(buttonIdList: number[]): void {
         buttonIdList.forEach((buttonId, index) => {
-            this.buttonVisibilityState.set(buttonId, index < 6);
+//             this.buttonVisibilityState.set(buttonId, index < 6);
+            this.buttonVisibilityState.set(buttonId, index > 0 && index < 6);
         });
     }
 
