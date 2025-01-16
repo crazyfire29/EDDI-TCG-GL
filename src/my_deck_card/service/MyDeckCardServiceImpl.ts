@@ -9,6 +9,7 @@ import {MyDeckCardPositionRepositoryImpl} from "../../my_deck_card_position/repo
 import {MyDeckCardPosition} from "../../my_deck_card_position/entity/MyDeckCardPosition";
 import {MyDeckButtonClickDetectRepositoryImpl} from "../../deck_button_click_detect/repository/MyDeckButtonClickDetectRepositoryImpl";
 import {CardStateManager} from "../../my_deck_card_manager/CardStateManager";
+import {CardPageManager} from "../../my_deck_card_manager/CardPageManager";
 
 export class MyDeckCardServiceImpl implements MyDeckCardService {
     private static instance: MyDeckCardServiceImpl;
@@ -16,12 +17,14 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
     private myDeckCardRepository: MyDeckCardRepositoryImpl;
     private myDeckButtonClickDetectRepository: MyDeckButtonClickDetectRepositoryImpl;
     private cardStateManager: CardStateManager;
+    private cardPageManager: CardPageManager;
 
     private constructor(myDeckCardRepository: MyDeckCardRepository) {
         this.myDeckCardPositionRepository = MyDeckCardPositionRepositoryImpl.getInstance();
         this.myDeckCardRepository = MyDeckCardRepositoryImpl.getInstance();
         this.myDeckButtonClickDetectRepository = MyDeckButtonClickDetectRepositoryImpl.getInstance();
         this.cardStateManager = CardStateManager.getInstance();
+        this.cardPageManager = CardPageManager.getInstance();
     }
 
     public static getInstance(): MyDeckCardServiceImpl {
@@ -72,23 +75,26 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
             console.error("No deck button clicked");
             return;
         }
+
         const deckId = currentDeckButtonId + 1;
-        const cardList = this.getCardMeshesByDeckId(deckId);
-        const cardPosition = this.getCardPositionByDeckId(deckId);
+        const carIdList = this.getCardIdsByDeckId(deckId);
+        const positionList = this.myDeckCardPositionRepository.findCardPositionByDeckId(deckId);
+        const currentPageCardIdList = this.getCardIdsForPage(carIdList);
 
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
 
-        console.log('[DEBUG] (adjust) cardList:', cardList);
-        console.log('[DEBUG] (adjust) cardPosition:', cardPosition);
+        console.log(`[DEBUG] (adjust) positionList: ${positionList}`);
+        console.log(`[DEBUG] (adjust) currentPageCardIdList: ${currentPageCardIdList}`);
 
-//         const cardMeshMap: Map<number, THREE.Mesh> = new Map();
-//         const positionMap: Map<number, MyDeckCardPosition> = new Map();
 
-        for (const card of cardList) {
-            console.log(`[DEBUG] (adjust) Card ID: ${card.id}`);
-            const cardMesh = card;
-            const cardId = card.id;
+        for (const cardId of currentPageCardIdList) {
+            console.log(`[DEBUG] (adjust) Card ID: ${cardId}`);
+            const cardMesh = this.getCardMeshIdByDeckIdAndCardId(deckId, cardId);
+            if (!cardMesh) {
+                console.warn(`[WARN] cardMesh with card ID ${cardId} not found`);
+                return;
+            }
             const initialPosition = this.getCardPositionByDeckIdAndCardId(deckId, cardId);
             console.log(`[DEBUG] (adjust) InitialPosition: ${initialPosition}`);
 
@@ -111,13 +117,7 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
             cardMesh.geometry.dispose();
             cardMesh.geometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
             cardMesh.position.set(newPositionX, newPositionY, 0);
-
-//             const newPosition = new MyDeckCardPosition(newPositionX, newPositionY);
-//             cardMeshMap.set(cardId, cardMesh);
-//             positionMap.set(cardId, newPosition);
         }
-//         this.saveMyDeckCardSceneInfo(deckId, cardMeshMap);
-//         this.saveCardPositionInfo(deckId, positionMap);
 
     }
 
@@ -196,4 +196,14 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
     public getAllDeckIds(): number[] {
         return this.myDeckCardRepository.findDeckIds();
     }
+
+    private getCardIdsForPage(cardIdList: number[]): number[] {
+        const currentCardPage = this.cardPageManager.getCurrentPage();
+        return this.cardPageManager.findCardIdsForPage(currentCardPage, cardIdList);
+    }
+
+    private getCardMeshIdByDeckIdAndCardId(deckId: number, cardId: number): THREE.Mesh | null {
+        return this.myDeckCardRepository.findCardMeshByDeckIdAndCardId(deckId, cardId);
+    }
+
 }
