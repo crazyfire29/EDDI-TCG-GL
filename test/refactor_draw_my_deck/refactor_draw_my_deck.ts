@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import myCardMusic from '@resource/music/my_card/my-card.mp3';
 
 import {TextureManager} from "../../src/texture_manager/TextureManager";
-import {TextGenerator} from "../../src/text/generator";
 import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
 import { AudioController } from "../../src/audio/AudioController";
 import {MouseController} from "../../src/mouse/MouseController";
@@ -28,6 +27,9 @@ import {MyDeckButtonEffectServiceImpl} from "../../src/my_deck_button_effect/ser
 import {MyDeckButtonMapRepositoryImpl} from "../../src/my_deck_button/repository/MyDeckButtonMapRepositoryImpl";
 import {MyDeckCardServiceImpl} from "../../src/my_deck_card/service/MyDeckCardServiceImpl";
 import {MyDeckCardMapRepositoryImpl} from "../../src/my_deck_card/repository/MyDeckCardMapRepositoryImpl";
+
+import {MyDeckNameTextServiceImpl} from "../../src/my_deck_name_text/service/MyDeckNameTextServiceImpl";
+import {MyDeckNameTextMapRepositoryImpl} from "../../src/my_deck_name_text/repository/MyDeckNameTextMapRepositoryImpl";
 
 import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
 import {MyDeckButtonClickDetectService} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectService";
@@ -57,9 +59,11 @@ export class TCGJustTestMyDeckView {
     private myDeckButtonService = MyDeckButtonServiceImpl.getInstance();
     private myDeckButtonEffectService = MyDeckButtonEffectServiceImpl.getInstance();
     private myDeckCardService = MyDeckCardServiceImpl.getInstance();
+    private myDeckNameTextService = MyDeckNameTextServiceImpl.getInstance();
 
     private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
     private myDeckCardMapRepository = MyDeckCardMapRepositoryImpl.getInstance();
+    private myDeckNameTextMapRepository = MyDeckNameTextMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -150,7 +154,7 @@ export class TCGJustTestMyDeckView {
         await this.saveMyDeckCard();
         this.addMyDeckCardPageMovementButton();
         await this.addMyDeckButton();
-        this.addTestText();
+        this.addMyDeckNameText();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -287,17 +291,22 @@ export class TCGJustTestMyDeckView {
         }
     }
 
-    // 확인용 To-do: 나중에 없애기
-    private async addTestText(): Promise<void> {
+    private async addMyDeckNameText(): Promise<void> {
         try{
-            const textGenerator = new TextGenerator();
-            textGenerator.createText('오프닝 언데드 덱', 30, 'Verdana', '#2A1B0A', new THREE.Vector2(565, 195), () => {
-                console.log('Text creation complete!');
+            const deckIdList = this.myDeckNameTextMapRepository.getDeckIds();
+            const myDeckNameList = this.myDeckNameTextMapRepository.getMyDeckNameTextList();
+
+            myDeckNameList.forEach(async (deckName, index) => {
+                const deckId = deckIdList[index];
+                const textGroup = await this.myDeckNameTextService.createMyDeckNameTextWithPosition(deckId, deckName);
+
+                if (textGroup) {
+                    this.myDeckNameTextService.initializeDeckNameText();
+                    this.scene.add(textGroup);
+                } else {
+                    console.warn(`No deckId found for index ${index}`);
+                }
             });
-            const testText = textGenerator.getMesh();
-            if (testText) {
-                this.scene.add(testText);
-            }
         } catch (error){
              console.error('Failed to add test text:', error);
         }
@@ -328,6 +337,7 @@ export class TCGJustTestMyDeckView {
             this.myDeckButtonService.adjustMyDeckButtonPosition();
             this.myDeckButtonEffectService.adjustMyDeckButtonEffectPosition();
             this.myDeckCardService.adjustMyDeckCardPosition();
+            this.myDeckNameTextService.adjustMyDeckNameTextPosition();
         }
     }
 
