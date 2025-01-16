@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import myCardMusic from '@resource/music/my_card/my-card.mp3';
 
 import {TextureManager} from "../../src/texture_manager/TextureManager";
+import {TextGenerator} from "../../src/text/generator";
 import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
 import { AudioController } from "../../src/audio/AudioController";
 import {MouseController} from "../../src/mouse/MouseController";
@@ -149,6 +150,7 @@ export class TCGJustTestMyDeckView {
         await this.saveMyDeckCard();
         this.addMyDeckCardPageMovementButton();
         await this.addMyDeckButton();
+        this.addTestText();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -282,6 +284,22 @@ export class TCGJustTestMyDeckView {
             });
         } catch (error) {
             console.error('Failed to save my deck cards:', error);
+        }
+    }
+
+    // 확인용 To-do: 나중에 없애기
+    private async addTestText(): Promise<void> {
+        try{
+            const textGenerator = new TextGenerator();
+            textGenerator.createText('오프닝 언데드 덱', 30, 'Verdana', '#2A1B0A', new THREE.Vector2(565, 195), () => {
+                console.log('Text creation complete!');
+            });
+            const testText = textGenerator.getMesh();
+            if (testText) {
+                this.scene.add(testText);
+            }
+        } catch (error){
+             console.error('Failed to add test text:', error);
         }
     }
 
