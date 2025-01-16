@@ -68,7 +68,6 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
         return cardGroup;
     }
 
-    // Todo: 현재 화면에 그려진 card가 어떤 덱의 카드인지 체크해야 함.
     public adjustMyDeckCardPosition(): void {
         const currentDeckButtonId = this.getCurrentClickDeckButton();
         if (currentDeckButtonId === null) {
@@ -76,50 +75,51 @@ export class MyDeckCardServiceImpl implements MyDeckCardService {
             return;
         }
 
-        const deckId = currentDeckButtonId + 1;
-        const carIdList = this.getCardIdsByDeckId(deckId);
-        const positionList = this.myDeckCardPositionRepository.findCardPositionByDeckId(deckId);
-        const currentPageCardIdList = this.getCardIdsForPage(carIdList);
-
+        const deckIdList = this.getAllDeckIds();
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
 
-        console.log(`[DEBUG] (adjust) positionList: ${positionList}`);
-        console.log(`[DEBUG] (adjust) currentPageCardIdList: ${currentPageCardIdList}`);
+        for (const deckId of deckIdList) {
+            const carIdList = this.getCardIdsByDeckId(deckId);
+            const positionList = this.myDeckCardPositionRepository.findCardPositionByDeckId(deckId);
 
+            console.log(`[DEBUG] (adjust) Processing deckId: ${deckId}`);
+            console.log(`[DEBUG] (adjust) positionList: ${positionList}`);
 
-        for (const cardId of currentPageCardIdList) {
-            console.log(`[DEBUG] (adjust) Card ID: ${cardId}`);
-            const cardMesh = this.getCardMeshIdByDeckIdAndCardId(deckId, cardId);
-            if (!cardMesh) {
-                console.warn(`[WARN] cardMesh with card ID ${cardId} not found`);
-                return;
+            for (const cardId of carIdList) {
+                console.log(`[DEBUG] (adjust) Card ID: ${cardId}`);
+                const cardMesh = this.getCardMeshIdByDeckIdAndCardId(deckId, cardId);
+                if (!cardMesh) {
+                    console.warn(`[WARN] cardMesh with card ID ${cardId} not found`);
+                    continue;
+                }
+
+                const initialPosition = this.getCardPositionByDeckIdAndCardId(deckId, cardId);
+                console.log(`[DEBUG] (adjust) InitialPosition: ${initialPosition}`);
+
+                if (!initialPosition) {
+                    console.error(`[DEBUG] (adjust) No position found for card id: ${cardId}`);
+                    continue;
+                }
+
+                const cardWidth = 0.126 * window.innerWidth;
+                const cardHeight = 0.365 * window.innerHeight;
+
+                const newPositionX = initialPosition.getX() * windowWidth;
+                const newPositionY = initialPosition.getY() * windowHeight;
+                console.log(`[DEBUG] (adjust) Card ${cardId}:`, {
+                    initialPosition: initialPosition,
+                    newPositionX,
+                    newPositionY,
+                });
+
+                cardMesh.geometry.dispose();
+                cardMesh.geometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
+                cardMesh.position.set(newPositionX, newPositionY, 0);
             }
-            const initialPosition = this.getCardPositionByDeckIdAndCardId(deckId, cardId);
-            console.log(`[DEBUG] (adjust) InitialPosition: ${initialPosition}`);
-
-            if (!initialPosition) {
-                console.error(`No position found for card id: ${cardId}`);
-                continue;
-            }
-
-            const cardWidth = 0.126 * window.innerWidth;
-            const cardHeight = 0.365 * window.innerHeight;
-
-            const newPositionX = initialPosition.getX() * window.innerWidth;
-            const newPositionY = initialPosition.getY() * window.innerHeight;
-            console.log(`Card ${cardId}:`, {
-                initialPosition: initialPosition,
-                newPositionX,
-                newPositionY,
-            });
-
-            cardMesh.geometry.dispose();
-            cardMesh.geometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
-            cardMesh.position.set(newPositionX, newPositionY, 0);
         }
-
     }
+
 
     private async createMyDeckCard(cardId: number, position: Vector2d): Promise<MyDeckCard> {
         return await this.myDeckCardRepository.createMyDeckCardScene(cardId, position);
