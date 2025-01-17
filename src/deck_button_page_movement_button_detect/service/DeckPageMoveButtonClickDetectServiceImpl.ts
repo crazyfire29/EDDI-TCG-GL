@@ -15,6 +15,9 @@ import {MyDeckButtonEffect} from "../../my_deck_button_effect/entity/MyDeckButto
 import {MyDeckCardRepositoryImpl} from "../../my_deck_card/repository/MyDeckCardRepositoryImpl";
 import {MyDeckButtonEffectRepositoryImpl} from "../../my_deck_button_effect/repository/MyDeckButtonEffectRepositoryImpl";
 
+import {MyDeckNameText} from "../../my_deck_name_text/entity/MyDeckNameText";
+import {MyDeckNameTextRepositoryImpl} from "../../my_deck_name_text/repository/MyDeckNameTextRepositoryImpl";
+
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
@@ -22,7 +25,7 @@ import {ButtonPageManager} from "../../my_deck_button_manager/ButtonPageManager"
 import {ButtonStateManager} from "../../my_deck_button_manager/ButtonStateManager";
 import {ButtonEffectManager} from "../../my_deck_button_manager/ButtonEffectManager";
 import {CardStateManager} from "../../my_deck_card_manager/CardStateManager";
-
+import {NameTextStateManager} from "../../my_deck_name_text_manager/NameTextStateManager";
 
 import * as THREE from "three";
 
@@ -35,11 +38,13 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
     private myDeckButtonEffectRepository: MyDeckButtonEffectRepositoryImpl;
     private myDeckCardRepository: MyDeckCardRepositoryImpl;
     private myDeckButtonClickDetectRepository: MyDeckButtonClickDetectRepositoryImpl;
+    private myDeckNameTextRepository: MyDeckNameTextRepositoryImpl;
 
     private buttonPageManager: ButtonPageManager;
     private buttonStateManager: ButtonStateManager;
     private buttonEffectManager: ButtonEffectManager;
     private cardStateManager: CardStateManager;
+    private nameTextStateManager: NameTextStateManager;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -56,10 +61,12 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         this.buttonStateManager = ButtonStateManager.getInstance();
         this.buttonEffectManager = ButtonEffectManager.getInstance();
         this.cardStateManager = CardStateManager.getInstance();
+        this.nameTextStateManager = NameTextStateManager.getInstance();
 
         this.myDeckButtonEffectRepository = MyDeckButtonEffectRepositoryImpl.getInstance();
         this.myDeckCardRepository = MyDeckCardRepositoryImpl.getInstance();
         this.myDeckButtonClickDetectRepository = MyDeckButtonClickDetectRepositoryImpl.getInstance();
+        this.myDeckNameTextRepository = MyDeckNameTextRepositoryImpl.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): DeckPageMovementButtonClickDetectServiceImpl {
@@ -94,10 +101,12 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
                 if (this.getCurrentPage() > 1) {
                     this.resetEffectState(this.getCurrentPage());
                     this.resetButtonState(this.getCurrentPage());
+                    this.resetTextState(this.getCurrentPage());
                     this.resetCardState(this.getCurrentPage());
 
                     this.setCurrentDeckButtonPage(this.getCurrentPage() - 1);
                     this.showMyDeckButton(this.getCurrentPage());
+                    this.showDeckNameText(this.getCurrentPage());
                     this.getMyDeckButtonsIdForPage(this.getCurrentPage());
                     this.initialCardState(this.getCurrentPage());
                 }
@@ -107,10 +116,12 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
                 if (this.getCurrentPage() < this.getTotalDeckButtonPage()) {
                     this.resetEffectState(this.getCurrentPage());
                     this.resetButtonState(this.getCurrentPage());
+                    this.resetTextState(this.getCurrentPage());
                     this.resetCardState(this.getCurrentPage());
 
                     this.setCurrentDeckButtonPage(this.getCurrentPage() + 1);
                     this.showMyDeckButton(this.getCurrentPage());
+                    this.showDeckNameText(this.getCurrentPage());
                     this.getMyDeckButtonsIdForPage(this.getCurrentPage());
                     this.initialCardState(this.getCurrentPage());
                 }
@@ -164,12 +175,20 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         return this.myDeckButtonEffectRepository.findById(effectId);
     }
 
+    private getTextMeshByTextId(textId: number): MyDeckNameText | null {
+        return this.myDeckNameTextRepository.findById(textId);
+    }
+
     private setButtonVisibility(buttonId: number, isVisible: boolean): void {
         this.buttonStateManager.setVisibility(buttonId, isVisible);
     }
 
     private setEffectVisibility(effectId: number, isVisible: boolean): void {
         this.buttonEffectManager.setVisibility(effectId, isVisible);
+    }
+
+    private setTextVisibility(textId: number, isVisible: boolean): void {
+        this.nameTextStateManager.setVisibility(textId, isVisible);
     }
 
     private showButtonMesh(buttonId: number): void{
@@ -202,6 +221,29 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         if (effectMesh) {
             effectMesh.getMesh().visible = false;
         }
+    }
+
+    private showTextMesh(textId: number): void {
+        this.setTextVisibility(textId, true);
+        const textMesh = this.getTextMeshByTextId(textId);
+        if (textMesh) {
+            textMesh.getMesh().visible = true;
+        }
+    }
+
+    private hideTextMesh(textId: number): void {
+        this.setTextVisibility(textId, false);
+        const textMesh = this.getTextMeshByTextId(textId);
+        if (textMesh) {
+            textMesh.getMesh().visible = false;
+        }
+    }
+
+    private showDeckNameText(page: number): void {
+        const currentTextIds = this.getMyDeckButtonsIdForPage(page);
+        currentTextIds.forEach((textId) => {
+            this.showTextMesh(textId);
+        });
     }
 
 //     private showMyDeckButton(page: number): void {
@@ -237,6 +279,13 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         const effectIdList = this.getMyDeckButtonsIdForPage(page);
         effectIdList.forEach((effectId) => {
             this.hideEffectMesh(effectId);
+        });
+    }
+
+    private resetTextState(page: number): void {
+        const textIdList = this.getMyDeckButtonsIdForPage(page);
+        textIdList.forEach((textId) => {
+            this.hideTextMesh(textId);
         });
     }
 
