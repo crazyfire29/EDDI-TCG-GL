@@ -8,22 +8,29 @@ export class TextGenerator {
     private textColor: string;
 
     constructor(
-        fontSize: number = 64,
-        fontFamily: string = 'Verdana',
-        textColor: string = '#ffffff',
+        private fontFace?: FontFace,
+        fontSize: number = 60,
+        fontFamily: string = 'CustomFont',
+        textColor: string = '#191007',
     ) {
         this.fontSize = fontSize;
         this.fontFamily = fontFamily;
         this.textColor = textColor;
     }
 
+    public static async loadFont(otfUrl: string): Promise<void> {
+        const font = new FontFace('CustomFont', `url(${otfUrl})`);
+        await font.load();
+        (document.fonts as any).add(font);
+        console.log('Custom font loaded successfully.');
+    }
+
     public static createText(
         text: string,
-        fontSize: number = 64,
-        fontFamily: string = 'Verdana',
-        textColor: string = '#ffffff',)
-        : THREE.CanvasTexture | null
-        {
+        fontSize: number = 60,
+        fontFamily: string = 'CustomFont',
+        textColor: string = '#191007',)
+        : THREE.CanvasTexture | null {
             if (!text) {
                 console.warn('No text content to create a texture.');
                 return null;
