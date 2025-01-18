@@ -24,14 +24,18 @@ export class MyDeckNameTextRepositoryImpl implements MyDeckNameTextRepository {
 
     public async createMyDeckNameText(deckId: number, deckName: string, position: Vector2d): Promise<MyDeckNameText> {
         // To-do pont 종류, 색상 변경 필요
-        const texture = TextGenerator.createText(deckName, 60, 'CustomFont', '#191007');
+        const texture = TextGenerator.createText(deckName, 25, 'CustomFont', '#191007');
 
         if (!texture) {
             throw new Error('MyDeckButton Name not found.');
         }
 
-        const nameWidth = this.NAME_WIDTH * window.innerWidth;
-        const nameHeight = this.NAME_HEIGHT * window.innerHeight;
+        const canvas = texture.image;
+        const textWidth = canvas.width;
+        const textHeight = canvas.height;
+
+        const nameWidth = textWidth;
+        const nameHeight = textHeight;
 
         const namePositionX = position.getX() * window.innerWidth;
         const namePositionY = position.getY() * window.innerHeight;
@@ -39,7 +43,7 @@ export class MyDeckNameTextRepositoryImpl implements MyDeckNameTextRepository {
         const nameTextMesh = MeshGenerator.createMesh(texture, nameWidth, nameHeight, position);
         nameTextMesh.position.set(namePositionX, namePositionY, 0);
 
-        const newNameTextScene = new MyDeckNameText(nameTextMesh, position);
+        const newNameTextScene = new MyDeckNameText(nameTextMesh, position, nameWidth, nameHeight);
         this.nameTextMap.set(newNameTextScene.id, newNameTextScene);
         this.deckToNameTextMap.set(deckId, newNameTextScene.id);
 

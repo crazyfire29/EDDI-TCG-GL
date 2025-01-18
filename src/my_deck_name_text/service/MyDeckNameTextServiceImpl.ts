@@ -83,8 +83,8 @@ export class MyDeckNameTextServiceImpl implements MyDeckNameTextService {
                 continue;
             }
 
-            const textWidth = (180 / 1920) * window.innerWidth;
-            const textHeight = (50 / 1080) * window.innerHeight;
+            const textWidth = text.width;
+            const textHeight = text.height;
 
             const newPositionX = initialPosition.position.getX() * window.innerWidth;
             const newPositionY = initialPosition.position.getY() * window.innerHeight;
