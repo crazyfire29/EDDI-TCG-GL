@@ -222,19 +222,20 @@ export class TCGJustTestMyDeckView {
 
     private async addMyDeckButtonPageMovementButton(): Promise<void> {
         try {
+            const deckSize = this.myDeckButtonMapRepository.getMyDeckMapSize();
             const configList = new MyDeckButtonPageMovementButtonConfigList();
             await Promise.all(configList.buttonConfigs.map(async (config) => {
-                    const button = await this.myDeckButtonPageMovementButtonService.createMyDeckButtonPageMovementButton(
-                        config.id,
-                        config.position
-                    );
+                const button = await this.myDeckButtonPageMovementButtonService.createMyDeckButtonPageMovementButton(
+                    config.id,
+                    config.position
+                );
 
-                    if (button) {
-                        this.scene.add(button);
-                        console.log(`Draw My Deck Button Page Movement Button: ${config.id}`);
-                    }
-                })
-            );
+                if (button) {
+                    this.myDeckButtonPageMovementButtonService.initializeDeckButtonPageMovementButtonState(deckSize);
+                    this.scene.add(button);
+                    console.log(`Draw My Deck Button Page Movement Button: ${config.id}`);
+                }
+            }));
         } catch (error) {
             console.error('Failed to add my deck button page movement buttons:', error);
         }
