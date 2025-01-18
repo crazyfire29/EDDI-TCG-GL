@@ -6,12 +6,15 @@ export class MyDeckNameText {
     id: number;
     mesh: THREE.Mesh;
     private position: Vector2d;
+    width: number;
+    height: number;
 
-
-    constructor(mesh: THREE.Mesh, position: Vector2d) {
+    constructor(mesh: THREE.Mesh, position: Vector2d, width: number, height: number) {
         this.id = IdGenerator.generateId("MyDeckNameText");
         this.mesh = mesh;
         this.position = position;
+        this.width = width;
+        this.height = height;
     }
 
     public getMesh(): THREE.Mesh {
