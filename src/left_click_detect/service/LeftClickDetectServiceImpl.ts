@@ -176,28 +176,38 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         const halfWidth = this.CARD_WIDTH * window.innerWidth / 2;
         const halfHeight = this.CARD_HEIGHT * window.innerWidth / 2;
 
-        const topLeft = new THREE.Vector3(cardPosition.x - halfWidth, cardPosition.y + halfHeight, cardPosition.z);
-        const topRight = new THREE.Vector3(cardPosition.x + halfWidth, cardPosition.y + halfHeight, cardPosition.z);
-        const bottomLeft = new THREE.Vector3(cardPosition.x - halfWidth, cardPosition.y - halfHeight, cardPosition.z);
-        const bottomRight = new THREE.Vector3(cardPosition.x + halfWidth, cardPosition.y - halfHeight, cardPosition.z);
+            // const topLeft = new THREE.Vector3(cardPosition.x - halfWidth, cardPosition.y + halfHeight, cardPosition.z);
+            // const topRight = new THREE.Vector3(cardPosition.x + halfWidth, cardPosition.y + halfHeight, cardPosition.z);
+            // const bottomLeft = new THREE.Vector3(cardPosition.x - halfWidth, cardPosition.y - halfHeight, cardPosition.z);
+            // const bottomRight = new THREE.Vector3(cardPosition.x + halfWidth, cardPosition.y - halfHeight, cardPosition.z);
+            //
+            // const lineWidth = 5
+            // const halfLineWidth = lineWidth / 2.0
+            //
+            // // 네온 경계선을 생성
+            // const neonLinePromises = [
+            //     this.neonShape.addNeonLine(topLeft.x + halfLineWidth, topLeft.y,
+            //                             topRight.x - halfLineWidth, topRight.y, lineWidth), // 상단
+            //     this.neonShape.addNeonLine(topRight.x, topRight.y + halfLineWidth,
+            //                                 bottomRight.x, bottomRight.y + lineWidth, lineWidth), // 우측
+            //     this.neonShape.addNeonLine(bottomRight.x + halfLineWidth, bottomRight.y + halfLineWidth,
+            //                             bottomLeft.x - halfLineWidth, bottomLeft.y + halfLineWidth, lineWidth), // 하단
+            //     this.neonShape.addNeonLine(bottomLeft.x, bottomLeft.y + lineWidth,
+            //                                 topLeft.x, topLeft.y + halfLineWidth, lineWidth) // 좌측
+            // ];
+            //
+            // // Ensure that addNeonLine is returning the neon line objects and each has a uuid
+            // const neonLines = await Promise.all(neonLinePromises);
 
-        const lineWidth = 5
-        const halfLineWidth = lineWidth / 2.0
+        // 카드의 네온 테두리 생성
+        const startX = cardPosition.x - halfWidth;
+        const startY = cardPosition.y - halfHeight;
+        const width = this.CARD_WIDTH * window.innerWidth;
+        const height = this.CARD_HEIGHT * window.innerWidth;
 
-        // 네온 경계선을 생성
-        const neonLinePromises = [
-            this.neonShape.addNeonLine(topLeft.x + halfLineWidth, topLeft.y,
-                                    topRight.x - halfLineWidth, topRight.y, lineWidth), // 상단
-            this.neonShape.addNeonLine(topRight.x, topRight.y + halfLineWidth,
-                                        bottomRight.x, bottomRight.y + lineWidth, lineWidth), // 우측
-            this.neonShape.addNeonLine(bottomRight.x + halfLineWidth, bottomRight.y + halfLineWidth,
-                                    bottomLeft.x - halfLineWidth, bottomLeft.y + halfLineWidth, lineWidth), // 하단
-            this.neonShape.addNeonLine(bottomLeft.x, bottomLeft.y + lineWidth,
-                                        topLeft.x, topLeft.y + halfLineWidth, lineWidth) // 좌측
-        ];
+        // 새로운 `addNeonShaderRectangle` 사용
+        const { lines, neonMaterials } = await this.neonShape.addNeonShaderRectangle(startX, startY, width, height);
 
-        // Ensure that addNeonLine is returning the neon line objects and each has a uuid
-        const neonLines = await Promise.all(neonLinePromises);
 
         // Assuming neonLine contains the neon object with uuid (if not modify this part accordingly)
         // const neonBorder = new NeonBorder(
