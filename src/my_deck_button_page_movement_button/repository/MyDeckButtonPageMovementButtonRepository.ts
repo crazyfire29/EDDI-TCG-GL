@@ -10,4 +10,5 @@ export interface MyDeckButtonPageMovementButtonRepository {
     findAll(): MyDeckButtonPageMovementButton[];
     deleteById(id: number): void;
     deleteAll(): void;
+    findAllButtonIds(): number[];
 }

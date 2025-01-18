@@ -71,4 +71,8 @@ export class MyDeckButtonPageMovementButtonRepositoryImpl implements MyDeckButto
     public deleteAll(): void {
         this.buttonMap.clear();
     }
+
+    public findAllButtonIds(): number[] {
+        return Array.from(this.buttonMap.keys());
+    }
 }

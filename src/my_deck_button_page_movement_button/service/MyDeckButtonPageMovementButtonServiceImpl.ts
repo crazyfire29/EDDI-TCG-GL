@@ -79,4 +79,24 @@ export class MyDeckButtonPageMovementButtonServiceImpl implements MyDeckButtonPa
     public deleteAllMyDeckButtonPageMovementButtons(): void {
         this.myDeckButtonPageMovementButtonRepository.deleteAll();
     }
+
+    public initializeDeckButtonPageMovementButtonState(deckSize: number): void {
+        const buttonIdList = this.myDeckButtonPageMovementButtonRepository.findAllButtonIds();
+
+        if (deckSize > 6) {
+            const buttonMeshList = this.getAllMyDeckButtonPageMovementButtons();
+            if (buttonMeshList) {
+                buttonMeshList.forEach(buttonMesh => {
+                    buttonMesh.getMesh().visible = true;
+                });
+            }
+        } else {
+            const buttonMeshList = this.getAllMyDeckButtonPageMovementButtons();
+            if (buttonMeshList) {
+                buttonMeshList.forEach(buttonMesh => {
+                    buttonMesh.getMesh().visible = false;
+                });
+            }
+        }
+    }
 }
