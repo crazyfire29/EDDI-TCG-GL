@@ -5,6 +5,7 @@ import {TextureManager} from "../../src/texture_manager/TextureManager";
 import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
 import { AudioController } from "../../src/audio/AudioController";
 import {MouseController} from "../../src/mouse/MouseController";
+import {TextGenerator} from "../../src/text/generator";
 
 import {UserWindowSize} from "../../src/window_size/WindowSize"
 import {WindowSceneServiceImpl} from "../../src/window_scene/service/WindowSceneServiceImpl";
@@ -146,8 +147,8 @@ export class TCGJustTestMyDeckView {
 
         console.log('TCGJustTestMyDeckView initialize() operate!!!');
         await this.textureManager.preloadTextures("image-paths.json");
-
         console.log("Textures preloaded. Adding background and buttons...");
+        await TextGenerator.loadFont('../../resource/font/HeirofLightOTFRegular.otf');
 
         await this.addBackground();
         await this.addMyDeckButtonPageMovementButton();
