@@ -22,6 +22,13 @@ import {BattleFieldCardScene} from "../../battle_field_card_scene/entity/BattleF
 import {NeonBorder} from "../../neon_border/entity/NeonBorder";
 import {NeonBorderStatus} from "../../neon_border/entity/NeonBorderStatus";
 import {NeonShape} from "../../neon/NeonShape";
+import {NeonBorderLineSceneRepository} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepository";
+import {NeonBorderLineSceneRepositoryImpl} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepositoryImpl";
+import {NeonBorderLineScene} from "../../neon_border_line_scene/entity/NeonBorderLineScene";
+import {NeonBorderLinePosition} from "../../neon_border_line_position/entity/NeonBorderLinePosition";
+import {Vector2d} from "../../common/math/Vector2d";
+import {NeonBorderLinePositionRepository} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepository";
+import {NeonBorderLinePositionRepositoryImpl} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepositoryImpl";
 
 export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private static instance: LeftClickDetectServiceImpl | null = null;
@@ -41,6 +48,9 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private neonBorderRepository: NeonBorderRepository;
     private neonShape: NeonShape
 
+    private neonBorderLineSceneRepository: NeonBorderLineSceneRepository;
+    private neonBorderLinePositionRepository: NeonBorderLinePositionRepository;
+
     private battleFieldCardAttributeMarkSceneRepository: BattleFieldCardAttributeMarkSceneRepository
     private battleFieldCardAttributeMarkRepository: BattleFieldCardAttributeMarkRepository
     private battleFieldCardSceneRepository: BattleFieldCardSceneRepository;
@@ -56,6 +66,9 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.neonBorderRepository = NeonBorderRepositoryImpl.getInstance();
         this.neonShape = NeonShape.getInstance()
+
+        this.neonBorderLineSceneRepository = NeonBorderLineSceneRepositoryImpl.getInstance()
+        this.neonBorderLinePositionRepository = NeonBorderLinePositionRepositoryImpl.getInstance()
 
         this.battleFieldCardAttributeMarkSceneRepository = BattleFieldCardAttributeMarkSceneRepositoryImpl.getInstance()
         this.battleFieldCardAttributeMarkRepository = BattleFieldCardAttributeMarkRepositoryImpl.getInstance()
@@ -208,6 +221,22 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         // 새로운 `addNeonShaderRectangle` 사용
         const { lines, neonMaterials } = await this.neonShape.addNeonShaderRectangle(startX, startY, width, height);
 
+        // Scene 및 Position 데이터를 수집
+        const lineSceneIds = lines.map((line) => {
+            const scene = new NeonBorderLineScene(line, line.material as THREE.ShaderMaterial);
+            this.neonBorderLineSceneRepository.save(scene); // 저장
+            return scene.getId();
+        });
+
+        const positionIds = lines.map((line) => {
+            const position = new NeonBorderLinePosition(new Vector2d(line.position.x, line.position.y));
+            this.neonBorderLinePositionRepository.save(position); // 저장
+            return position.getId();
+        });
+
+        // NeonBorder 객체 생성 및 저장
+        const neonBorder = new NeonBorder(lineSceneIds, positionIds);
+        this.neonBorderRepository.save(neonBorder);
 
         // Assuming neonLine contains the neon object with uuid (if not modify this part accordingly)
         // const neonBorder = new NeonBorder(
