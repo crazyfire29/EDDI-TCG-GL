@@ -190,15 +190,31 @@ export class NeonShape {
         return shaderMaterial;
     }
 
-    public async addNeonShaderRectangle(startX: number, startY: number, width: number, height: number): Promise<void> {
-        // 사각형의 각 변에 대해 4개의 선을 추가
-        await this.addNeonShaderLine(startX + 5.0, startY, startX + width - 5.0, startY); // 하단
-        await this.addNeonShaderLine(startX + width, startY - 5.0, startX + width, startY + height); // 우측
-        await this.addNeonShaderLine(startX + width + 5.0, startY + height + 5.0, startX - 5.0, startY + height + 5.0); // 상단
-        await this.addNeonShaderLine(startX, startY + height, startX, startY - 5.0); // 좌측
+    public async addNeonShaderRectangle(startX: number, startY: number, width: number, height: number): Promise<{ lines: THREE.Mesh[]; neonMaterials: THREE.ShaderMaterial[] }> {
+        const results = [];
+
+        // 사각형의 각 변에 대해 4개의 선을 추가하고 결과 저장
+        results.push(await this.addNeonShaderLine(startX + 5.0, startY, startX + width - 5.0, startY)); // 하단
+        results.push(await this.addNeonShaderLine(startX + width, startY - 5.0, startX + width, startY + height)); // 좌측
+        results.push(
+            await this.addNeonShaderLine(
+                startX + width + 5.0,
+                startY + height,
+                startX - 5.0,
+                startY + height
+            )
+        ); // 상단
+        results.push(await this.addNeonShaderLine(startX, startY + height, startX, startY - 5.0)); // 우측
+
+        // 결과를 라인과 머티리얼로 분리
+        const lines = results.map((result) => result.line);
+        const neonMaterials = results.map((result) => result.neonMaterial);
+
+        return { lines, neonMaterials };
     }
 
-    private async addNeonShaderLine(startX: number, startY: number, endX: number, endY: number): Promise<void> {
+    private async addNeonShaderLine(startX: number, startY: number, endX: number, endY: number
+            ): Promise<{ line: THREE.Mesh; neonMaterial: THREE.ShaderMaterial }>{
         // 네온 셰이더 머티리얼 생성
         const neonMaterial = this.createNeonShaderMaterial();
 
@@ -218,6 +234,8 @@ export class NeonShape {
 
         this.scene.add(line);
         this.materials.push(neonMaterial);
+
+        return { line, neonMaterial };
     }
 
     // public addMultipleNeonRectangles(): void {
