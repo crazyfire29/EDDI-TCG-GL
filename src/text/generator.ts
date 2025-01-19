@@ -43,16 +43,33 @@ export class TextGenerator {
                 return null;
             }
 
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            const adjustedFontSize = fontSize * devicePixelRatio;
+
             context.font = `${fontSize}px ${fontFamily}`;
-            canvas.width = context.measureText(text).width;
-            canvas.height = fontSize * 1.5;
+            const textWidth = context.measureText(text).width;
+
+            canvas.width = textWidth * devicePixelRatio;
+            canvas.height = adjustedFontSize * 1.5;
+
             context.font = `${fontSize}px ${fontFamily}`;
             context.fillStyle = textColor;
             context.textBaseline = 'middle';
-            context.fillText(text, 0, canvas.height / 2);
+            context.textAlign = 'left';
+
+            context.scale(devicePixelRatio, devicePixelRatio);
+            context.fillText(text, 0, canvas.height / (2 * devicePixelRatio));
+
+            context.strokeStyle = textColor;
+            context.lineWidth = 0.6; //외곽선 두께
+            context.strokeText(text, 0, canvas.height / (2 * devicePixelRatio));
 
             const texture = new THREE.CanvasTexture(canvas);
             texture.needsUpdate = true;
+
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            texture.generateMipmaps = false;
 
             return texture;
     }
