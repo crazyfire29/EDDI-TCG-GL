@@ -31,6 +31,7 @@ import {MyDeckCardMapRepositoryImpl} from "../../src/my_deck_card/repository/MyD
 
 import {MyDeckNameTextServiceImpl} from "../../src/my_deck_name_text/service/MyDeckNameTextServiceImpl";
 import {MyDeckNameTextMapRepositoryImpl} from "../../src/my_deck_name_text/repository/MyDeckNameTextMapRepositoryImpl";
+import {DeckMakeButtonServiceImpl} from "../../src/deck_make_button/service/DeckMakeButtonServiceImpl";
 
 import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
 import {MyDeckButtonClickDetectService} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectService";
@@ -61,6 +62,7 @@ export class TCGJustTestMyDeckView {
     private myDeckButtonEffectService = MyDeckButtonEffectServiceImpl.getInstance();
     private myDeckCardService = MyDeckCardServiceImpl.getInstance();
     private myDeckNameTextService = MyDeckNameTextServiceImpl.getInstance();
+    private deckMakeButtonService = DeckMakeButtonServiceImpl.getInstance();
 
     private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
     private myDeckCardMapRepository = MyDeckCardMapRepositoryImpl.getInstance();
@@ -156,6 +158,7 @@ export class TCGJustTestMyDeckView {
         this.addMyDeckCardPageMovementButton();
         await this.addMyDeckButton();
         this.addMyDeckNameText();
+        this.addDeckMakeButton();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -314,6 +317,20 @@ export class TCGJustTestMyDeckView {
         }
     }
 
+    private async addDeckMakeButton(): Promise<void> {
+        try{
+            const deckMakeButtonMesh = await this.deckMakeButtonService.createDeckMakeButton();
+            if (deckMakeButtonMesh) {
+                this.scene.add(deckMakeButtonMesh);
+            } else {
+                console.warn(`No deckMakeButtonMesh found`);
+                }
+
+        } catch (error) {
+           console.error('Failed to add DeckMakeButton:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -340,6 +357,7 @@ export class TCGJustTestMyDeckView {
             this.myDeckButtonEffectService.adjustMyDeckButtonEffectPosition();
             this.myDeckCardService.adjustMyDeckCardPosition();
             this.myDeckNameTextService.adjustMyDeckNameTextPosition();
+            this.deckMakeButtonService.adjustDeckMakeButtonPosition();
         }
     }
 
