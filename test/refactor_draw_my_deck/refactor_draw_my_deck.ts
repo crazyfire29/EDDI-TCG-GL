@@ -39,6 +39,8 @@ import {DeckPageMovementButtonClickDetectServiceImpl} from "../../src/deck_butto
 import {DeckPageMovementButtonClickDetectService} from "../../src/deck_button_page_movement_button_detect/service/DeckPageMoveButtonClickDetectService";
 import {DeckCardPageMoveButtonClickDetectServiceImpl} from "../../src/deck_card_page_movement_button_detect/service/DeckCardPageMoveButtonClickDetectServiceImpl";
 import {DeckCardPageMoveButtonClickDetectService} from "../../src/deck_card_page_movement_button_detect/service/DeckCardPageMoveButtonClickDetectService";
+import {DeckMakeButtonClickDetectServiceImpl} from "../../src/deck_make_button_click_detect/service/DeckMakeButtonClickDetectServiceImpl";
+import {DeckMakeButtonClickDetectService} from "../../src/deck_make_button_click_detect/service/DeckMakeButtonClickDetectService";
 
 export class TCGJustTestMyDeckView {
     private static instance: TCGJustTestMyDeckView | null = null;
@@ -77,6 +79,7 @@ export class TCGJustTestMyDeckView {
     private myDeckButtonClickDetectService: MyDeckButtonClickDetectService;
     private deckPageMovementButtonClickDetectService: DeckPageMovementButtonClickDetectService;
     private deckCardPageMoveButtonClickDetectService: DeckCardPageMoveButtonClickDetectService;
+    private deckMakeButtonClickDetectService: DeckMakeButtonClickDetectService;
 
     private initialized = false;
     private isAnimating = false;
@@ -122,6 +125,9 @@ export class TCGJustTestMyDeckView {
 
         this.deckCardPageMoveButtonClickDetectService = DeckCardPageMoveButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousedown', (e) => this.deckCardPageMoveButtonClickDetectService.onMouseDown(e), false);
+
+        this.deckMakeButtonClickDetectService = DeckMakeButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.deckMakeButtonClickDetectService.onMouseDown(e), false);
 
     }
 
