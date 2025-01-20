@@ -6,6 +6,9 @@ import {DeckMakeButtonRepositoryImpl} from "../../deck_make_button/repository/De
 import {DeckMakeButtonClickDetectRepository} from "../repository/DeckMakeButtonClickDetectRepository";
 import {DeckMakeButtonClickDetectRepositoryImpl} from "../repository/DeckMakeButtonClickDetectRepositoryImpl";
 
+import {TransparentBackground} from "../../transparent_background/entity/TransparentBackground";
+import {TransparentBackgroundRepositoryImpl} from "../../transparent_background/repository/TransparentBackgroundRepositoryImpl";
+
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
@@ -15,6 +18,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
     private static instance: DeckMakeButtonClickDetectServiceImpl | null = null;
     private deckMakeButtonClickDetectRepository: DeckMakeButtonClickDetectRepositoryImpl;
     private deckMakeButtonRepository: DeckMakeButtonRepositoryImpl;
+    private transparentBackgroundRepository: TransparentBackgroundRepositoryImpl;
 
     private cameraRepository: CameraRepository;
     private leftMouseDown: boolean = false;
@@ -22,6 +26,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.deckMakeButtonClickDetectRepository = DeckMakeButtonClickDetectRepositoryImpl.getInstance();
         this.deckMakeButtonRepository = DeckMakeButtonRepositoryImpl.getInstance();
+        this.transparentBackgroundRepository = TransparentBackgroundRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
     }
 
@@ -55,6 +60,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
 
         if (clickedDeckMakeButton) {
             console.log(`Clicked Deck Make Button`);
+            this.setTransparentBackgroundVisible(true);
 
             return clickedDeckMakeButton;
         }
@@ -71,6 +77,14 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
 
     private getDeckMakeButton(): DeckMakeButton | null {
         return this.deckMakeButtonRepository.findButton();
+    }
+
+    private setTransparentBackgroundVisible(isVisible: boolean): void {
+        if (isVisible == true) {
+            this.transparentBackgroundRepository.showTransparentBackground();
+        } else {
+            this.transparentBackgroundRepository.hideTransparentBackground();
+        }
     }
 
 }
