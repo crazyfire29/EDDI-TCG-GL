@@ -32,6 +32,7 @@ import {MyDeckCardMapRepositoryImpl} from "../../src/my_deck_card/repository/MyD
 import {MyDeckNameTextServiceImpl} from "../../src/my_deck_name_text/service/MyDeckNameTextServiceImpl";
 import {MyDeckNameTextMapRepositoryImpl} from "../../src/my_deck_name_text/repository/MyDeckNameTextMapRepositoryImpl";
 import {DeckMakeButtonServiceImpl} from "../../src/deck_make_button/service/DeckMakeButtonServiceImpl";
+import {TransparentBackgroundServiceImpl} from "../../src/transparent_background/service/TransparentBackgroundServiceImpl";
 
 import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
 import {MyDeckButtonClickDetectService} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectService";
@@ -65,6 +66,7 @@ export class TCGJustTestMyDeckView {
     private myDeckCardService = MyDeckCardServiceImpl.getInstance();
     private myDeckNameTextService = MyDeckNameTextServiceImpl.getInstance();
     private deckMakeButtonService = DeckMakeButtonServiceImpl.getInstance();
+    private transparentBackgroundService = TransparentBackgroundServiceImpl.getInstance();
 
     private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
     private myDeckCardMapRepository = MyDeckCardMapRepositoryImpl.getInstance();
@@ -165,6 +167,7 @@ export class TCGJustTestMyDeckView {
         await this.addMyDeckButton();
         this.addMyDeckNameText();
         this.addDeckMakeButton();
+        this.addTransparentBackground();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -337,6 +340,20 @@ export class TCGJustTestMyDeckView {
         }
     }
 
+    private async addTransparentBackground(): Promise<void> {
+        try{
+            const transparentBackground = await this.transparentBackgroundService.createTransparentBackground();
+            if (transparentBackground) {
+                this.transparentBackgroundService.initialTransparentBackgroundVisible();
+                this.scene.add(transparentBackground);
+            } else {
+                console.warn(`No transparentBackground found`);
+            }
+        } catch (error) {
+            console.error('Failed to add TransparentBackground:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -364,6 +381,7 @@ export class TCGJustTestMyDeckView {
             this.myDeckCardService.adjustMyDeckCardPosition();
             this.myDeckNameTextService.adjustMyDeckNameTextPosition();
             this.deckMakeButtonService.adjustDeckMakeButtonPosition();
+            this.transparentBackgroundService.adjustTransparentBackgroundPosition();
         }
     }
 
