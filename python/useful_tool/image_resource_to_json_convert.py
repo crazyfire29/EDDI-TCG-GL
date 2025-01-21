@@ -30,6 +30,8 @@ class WillBeReferenceImageLocation(Enum):
     DECK_PAGE_MOVEMENT_BUTTONS = "resource/my_deck/deck_page_movement_button/"
     DECK_CARD_PAGE_MOVEMENT_BUTTONS = "resource/my_deck/card_page_movement_button/"
     CARD_KINDS = "resource/card_kinds/"
+    DECK_MAKING_POP_UP_BACKGROUND = "resource/deck_making_pop_up/background/"
+    DECK_MAKING_POP_UP_BUTTONS = "resource/deck_making_pop_up/buttons/"
 
 class RelativeImageLocation(Enum):
     CARD = "../../resource/battle_field_unit/card/"
@@ -56,6 +58,8 @@ class RelativeImageLocation(Enum):
     DECK_PAGE_MOVEMENT_BUTTONS = "../../resource/my_deck/deck_page_movement_button/"
     DECK_CARD_PAGE_MOVEMENT_BUTTONS = "../../resource/my_deck/card_page_movement_button/"
     CARD_KINDS = "../../resource/card_kinds/"
+    DECK_MAKING_POP_UP_BACKGROUND = "../../resource/deck_making_pop_up/background/"
+    DECK_MAKING_POP_UP_BUTTONS = "../../resource/deck_making_pop_up/buttons/"
 
 # 디렉토리 경로 설정
 relative_paths = {
@@ -83,6 +87,8 @@ relative_paths = {
     RelativeImageLocation.DECK_PAGE_MOVEMENT_BUTTONS: RelativeImageLocation.DECK_PAGE_MOVEMENT_BUTTONS.value,
     RelativeImageLocation.DECK_CARD_PAGE_MOVEMENT_BUTTONS: RelativeImageLocation.DECK_CARD_PAGE_MOVEMENT_BUTTONS.value,
     RelativeImageLocation.CARD_KINDS: RelativeImageLocation.CARD_KINDS.value,
+    RelativeImageLocation.DECK_MAKING_POP_UP_BACKGROUND: RelativeImageLocation.DECK_MAKING_POP_UP_BACKGROUND.value,
+    RelativeImageLocation.DECK_MAKING_POP_UP_BUTTONS: RelativeImageLocation.DECK_MAKING_POP_UP_BUTTONS.value,
 }
 
 reference_paths = {
@@ -110,6 +116,8 @@ reference_paths = {
     WillBeReferenceImageLocation.DECK_PAGE_MOVEMENT_BUTTONS: WillBeReferenceImageLocation.DECK_PAGE_MOVEMENT_BUTTONS.value,
     WillBeReferenceImageLocation.DECK_CARD_PAGE_MOVEMENT_BUTTONS: WillBeReferenceImageLocation.DECK_CARD_PAGE_MOVEMENT_BUTTONS.value,
     WillBeReferenceImageLocation.CARD_KINDS: WillBeReferenceImageLocation.CARD_KINDS.value,
+    WillBeReferenceImageLocation.DECK_MAKING_POP_UP_BACKGROUND: WillBeReferenceImageLocation.DECK_MAKING_POP_UP_BACKGROUND.value,
+    WillBeReferenceImageLocation.DECK_MAKING_POP_UP_BUTTONS: WillBeReferenceImageLocation.DECK_MAKING_POP_UP_BUTTONS.value,
 }
 
 image_paths = {
@@ -137,6 +145,8 @@ image_paths = {
     "deck_page_movement_buttons": [],
     "deck_card_page_movement_buttons": [],
     "card_kinds": [],
+    "deck_making_pop_up_background": [],
+    "deck_making_pop_up_buttons": [],
 }
 
 for category, dir_path in relative_paths.items():

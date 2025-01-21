@@ -33,6 +33,7 @@ import {MyDeckNameTextServiceImpl} from "../../src/my_deck_name_text/service/MyD
 import {MyDeckNameTextMapRepositoryImpl} from "../../src/my_deck_name_text/repository/MyDeckNameTextMapRepositoryImpl";
 import {DeckMakeButtonServiceImpl} from "../../src/deck_make_button/service/DeckMakeButtonServiceImpl";
 import {TransparentBackgroundServiceImpl} from "../../src/transparent_background/service/TransparentBackgroundServiceImpl";
+import {DeckMakePopupBackgroundServiceImpl} from "../../src/deck_make_pop_up_background/service/DeckMakePopupBackgroundServiceImpl";
 
 import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
 import {MyDeckButtonClickDetectService} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectService";
@@ -67,6 +68,7 @@ export class TCGJustTestMyDeckView {
     private myDeckNameTextService = MyDeckNameTextServiceImpl.getInstance();
     private deckMakeButtonService = DeckMakeButtonServiceImpl.getInstance();
     private transparentBackgroundService = TransparentBackgroundServiceImpl.getInstance();
+    private decKMakePopupBackgroundService = DeckMakePopupBackgroundServiceImpl.getInstance();
 
     private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
     private myDeckCardMapRepository = MyDeckCardMapRepositoryImpl.getInstance();
@@ -168,6 +170,7 @@ export class TCGJustTestMyDeckView {
         this.addMyDeckNameText();
         this.addDeckMakeButton();
         this.addTransparentBackground();
+        this.addDeckMakePopupBackground();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -354,6 +357,20 @@ export class TCGJustTestMyDeckView {
         }
     }
 
+    private async addDeckMakePopupBackground(): Promise<void> {
+        try {
+            const deckMakePopupBackground = await this.decKMakePopupBackgroundService.createDeckMakePopupBackground();
+            if (deckMakePopupBackground) {
+                this.decKMakePopupBackgroundService.initialDeckMakePopupBackgroundVisible();
+                this.scene.add(deckMakePopupBackground);
+            } else {
+                console.warn(`No deckMakePopupBackground found`);
+            }
+        }catch (error) {
+            console.error('Failed to add DeckMakePopupBackground:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -382,6 +399,7 @@ export class TCGJustTestMyDeckView {
             this.myDeckNameTextService.adjustMyDeckNameTextPosition();
             this.deckMakeButtonService.adjustDeckMakeButtonPosition();
             this.transparentBackgroundService.adjustTransparentBackgroundPosition();
+            this.decKMakePopupBackgroundService.adjustDeckMakePopupBackgroundPosition();
         }
     }
 
