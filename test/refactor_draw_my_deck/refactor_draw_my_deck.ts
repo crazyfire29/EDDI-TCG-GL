@@ -22,6 +22,7 @@ import {MyDeckButtonPageMovementButtonServiceImpl} from "../../src/my_deck_butto
 import {MyDeckButtonPageMovementButtonRepositoryImpl} from "../../src/my_deck_button_page_movement_button/repository/MyDeckButtonPageMovementButtonRepositoryImpl";
 import {MyDeckCardPageMovementButtonConfigList} from "../../src/my_deck_card_page_movement_button/entity/MyDeckCardPageMovementButtonConfigList";
 import {MyDeckButtonPageMovementButtonConfigList} from "../../src/my_deck_button_page_movement_button/entity/MyDeckButtonPageMovementButtonConfigList";
+import {DeckMakePopupButtonsConfigList} from "../../src/deck_make_pop_up_buttons/entity/DeckMakePopupButtonsConfigList";
 
 import {MyDeckButtonServiceImpl} from "../../src/my_deck_button/service/MyDeckButtonServiceImpl";
 import {MyDeckButtonEffectServiceImpl} from "../../src/my_deck_button_effect/service/MyDeckButtonEffectServiceImpl";
@@ -34,6 +35,7 @@ import {MyDeckNameTextMapRepositoryImpl} from "../../src/my_deck_name_text/repos
 import {DeckMakeButtonServiceImpl} from "../../src/deck_make_button/service/DeckMakeButtonServiceImpl";
 import {TransparentBackgroundServiceImpl} from "../../src/transparent_background/service/TransparentBackgroundServiceImpl";
 import {DeckMakePopupBackgroundServiceImpl} from "../../src/deck_make_pop_up_background/service/DeckMakePopupBackgroundServiceImpl";
+import {DeckMakePopupButtonsServiceImpl} from "../../src/deck_make_pop_up_buttons/service/DeckMakePopupButtonsServiceImpl";
 
 import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
 import {MyDeckButtonClickDetectService} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectService";
@@ -69,6 +71,7 @@ export class TCGJustTestMyDeckView {
     private deckMakeButtonService = DeckMakeButtonServiceImpl.getInstance();
     private transparentBackgroundService = TransparentBackgroundServiceImpl.getInstance();
     private decKMakePopupBackgroundService = DeckMakePopupBackgroundServiceImpl.getInstance();
+    private deckMakePopupButtonsService = DeckMakePopupButtonsServiceImpl.getInstance();
 
     private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
     private myDeckCardMapRepository = MyDeckCardMapRepositoryImpl.getInstance();
@@ -171,6 +174,7 @@ export class TCGJustTestMyDeckView {
         this.addDeckMakeButton();
         this.addTransparentBackground();
         this.addDeckMakePopupBackground();
+        this.addDeckMakePopupButtons();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -368,6 +372,26 @@ export class TCGJustTestMyDeckView {
             }
         }catch (error) {
             console.error('Failed to add DeckMakePopupBackground:', error);
+        }
+    }
+
+    private async addDeckMakePopupButtons(): Promise<void> {
+        try {
+            const configList = new DeckMakePopupButtonsConfigList();
+            await Promise.all(configList.buttonConfigs.map(async (config) =>{
+                const button = await this.deckMakePopupButtonsService.createDeckMakePopupButtons(
+                    config.id,
+                    config.position
+                );
+
+                if (button) {
+                    this.deckMakePopupButtonsService.initializeDeckMakePopupButtonsVisible();
+                    this.scene.add(button);
+                    console.log(`Draw Deck Make Pop-up Button ${config.id}`);
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to add DeckMakePopupButtons:', error);
         }
     }
 
