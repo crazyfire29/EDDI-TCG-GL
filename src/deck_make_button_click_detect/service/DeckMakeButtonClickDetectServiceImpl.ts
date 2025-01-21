@@ -9,6 +9,9 @@ import {DeckMakeButtonClickDetectRepositoryImpl} from "../repository/DeckMakeBut
 import {TransparentBackground} from "../../transparent_background/entity/TransparentBackground";
 import {TransparentBackgroundRepositoryImpl} from "../../transparent_background/repository/TransparentBackgroundRepositoryImpl";
 
+import {DeckMakePopupBackground} from "../../deck_make_pop_up_background/entity/DeckMakePopupBackground";
+import {DeckMakePopupBackgroundRepositoryImpl} from "../../deck_make_pop_up_background/repository/DeckMakePopupBackgroundRepositoryImpl";
+
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
@@ -19,6 +22,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
     private deckMakeButtonClickDetectRepository: DeckMakeButtonClickDetectRepositoryImpl;
     private deckMakeButtonRepository: DeckMakeButtonRepositoryImpl;
     private transparentBackgroundRepository: TransparentBackgroundRepositoryImpl;
+    private deckMakePopupBackgroundRepository: DeckMakePopupBackgroundRepositoryImpl;
 
     private cameraRepository: CameraRepository;
     private leftMouseDown: boolean = false;
@@ -27,6 +31,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
         this.deckMakeButtonClickDetectRepository = DeckMakeButtonClickDetectRepositoryImpl.getInstance();
         this.deckMakeButtonRepository = DeckMakeButtonRepositoryImpl.getInstance();
         this.transparentBackgroundRepository = TransparentBackgroundRepositoryImpl.getInstance();
+        this.deckMakePopupBackgroundRepository = DeckMakePopupBackgroundRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
     }
 
@@ -61,6 +66,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
         if (clickedDeckMakeButton) {
             console.log(`Clicked Deck Make Button`);
             this.setTransparentBackgroundVisible(true);
+            this.setDeckMakePopupBackgroundVisible(true);
 
             return clickedDeckMakeButton;
         }
@@ -84,6 +90,14 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
             this.transparentBackgroundRepository.showTransparentBackground();
         } else {
             this.transparentBackgroundRepository.hideTransparentBackground();
+        }
+    }
+
+    private setDeckMakePopupBackgroundVisible(isVisible: boolean): void {
+        if (isVisible == true) {
+            this.deckMakePopupBackgroundRepository.showDeckMakePopupBackground();
+        } else {
+            this.deckMakePopupBackgroundRepository.hideDeckMakePopupBackground();
         }
     }
 
