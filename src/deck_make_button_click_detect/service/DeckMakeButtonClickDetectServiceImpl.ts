@@ -12,6 +12,8 @@ import {TransparentBackgroundRepositoryImpl} from "../../transparent_background/
 import {DeckMakePopupBackground} from "../../deck_make_pop_up_background/entity/DeckMakePopupBackground";
 import {DeckMakePopupBackgroundRepositoryImpl} from "../../deck_make_pop_up_background/repository/DeckMakePopupBackgroundRepositoryImpl";
 
+import {DeckMakePopupButtonsRepositoryImpl} from "../../deck_make_pop_up_buttons/repository/DeckMakePopupButtonsRepositoryImpl";
+
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
@@ -23,6 +25,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
     private deckMakeButtonRepository: DeckMakeButtonRepositoryImpl;
     private transparentBackgroundRepository: TransparentBackgroundRepositoryImpl;
     private deckMakePopupBackgroundRepository: DeckMakePopupBackgroundRepositoryImpl;
+    private deckMakePopupButtonsRepository: DeckMakePopupButtonsRepositoryImpl;
 
     private cameraRepository: CameraRepository;
     private leftMouseDown: boolean = false;
@@ -32,6 +35,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
         this.deckMakeButtonRepository = DeckMakeButtonRepositoryImpl.getInstance();
         this.transparentBackgroundRepository = TransparentBackgroundRepositoryImpl.getInstance();
         this.deckMakePopupBackgroundRepository = DeckMakePopupBackgroundRepositoryImpl.getInstance();
+        this.deckMakePopupButtonsRepository = DeckMakePopupButtonsRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
     }
 
@@ -67,6 +71,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
             console.log(`Clicked Deck Make Button`);
             this.setTransparentBackgroundVisible(true);
             this.setDeckMakePopupBackgroundVisible(true);
+            this.setDeckMakePopupButtonsVisible(true);
 
             return clickedDeckMakeButton;
         }
@@ -98,6 +103,19 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
             this.deckMakePopupBackgroundRepository.showDeckMakePopupBackground();
         } else {
             this.deckMakePopupBackgroundRepository.hideDeckMakePopupBackground();
+        }
+    }
+
+    private setDeckMakePopupButtonsVisible(isVisible: boolean): void {
+        const buttonIds = this.deckMakePopupButtonsRepository.findAllButtonIds();
+        if (isVisible == true){
+           buttonIds.forEach((buttonId) => {
+               this.deckMakePopupButtonsRepository.showDeckMakePopupButton(buttonId);
+           });
+        } else {
+            buttonIds.forEach((buttonId) => {
+                this.deckMakePopupButtonsRepository.hideDeckMakePopupButton(buttonId);
+            });
         }
     }
 
