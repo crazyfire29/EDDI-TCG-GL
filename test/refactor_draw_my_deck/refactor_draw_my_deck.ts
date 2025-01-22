@@ -174,8 +174,9 @@ export class TCGJustTestMyDeckView {
         await this.addBackground();
         await this.addMyDeckButtonPageMovementButton();
         await this.saveMyDeckCard();
-        this.addMyDeckCardPageMovementButton();
+        await this.addMyDeckCardPageMovementButton();
         await this.addMyDeckButton();
+        await this.addMyDeckButtonEffect();
         this.addMyDeckNameText();
         this.addDeckMakeButton();
         this.addTransparentBackground();
@@ -272,13 +273,24 @@ export class TCGJustTestMyDeckView {
 
             myDeckButtonList.forEach(async (deckId, index) => {
                 const buttonGroup = await this.myDeckButtonService.createMyDeckButtonWithPosition(deckId);
-                const buttonEffectGroup = await this.myDeckButtonEffectService.createDeckButtonEffectWithPosition(deckId);
 
                 if (buttonGroup) {
                     this.myDeckButtonService.initializeDeckButton(); // 처음 6개만 visible
                     this.scene.add(buttonGroup);
                 }
+            });
 
+        } catch (error) {
+            console.error('Failed to add my deck buttons:', error);
+        }
+    }
+
+    private async addMyDeckButtonEffect(): Promise<void> {
+        try {
+            const myDeckButtonList = this.myDeckButtonMapRepository.getMyDeckList();
+
+            myDeckButtonList.forEach(async (deckId, index) => {
+                const buttonEffectGroup = await this.myDeckButtonEffectService.createDeckButtonEffectWithPosition(deckId);
                 if (buttonEffectGroup) {
                     this.myDeckButtonEffectService.initializeDeckButtonEffect();
                     this.scene.add(buttonEffectGroup);
@@ -286,7 +298,7 @@ export class TCGJustTestMyDeckView {
             });
 
         } catch (error) {
-            console.error('Failed to add my deck buttons:', error);
+            console.error('Failed to add my deck button effects:', error);
         }
     }
 
