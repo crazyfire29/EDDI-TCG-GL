@@ -254,7 +254,9 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
 
         // NeonBorder 객체 생성 및 저장
         const cardSceneId = clickedHandCard.getId();
+        console.log(`LeftClickDetectServiceImpl -> cardSceneId: ${cardSceneId}`)
         const neonBorder = new NeonBorder(lineSceneIds, positionIds, NeonBorderSceneType.HAND, cardSceneId);
+        console.log(`LeftClickDetectServiceImpl -> neonBorder: ${JSON.stringify(neonBorder, null, 2)}`);
         this.neonBorderRepository.save(neonBorder);
 
         // Assuming neonLine contains the neon object with uuid (if not modify this part accordingly)

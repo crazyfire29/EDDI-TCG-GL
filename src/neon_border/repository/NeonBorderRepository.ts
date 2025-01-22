@@ -6,4 +6,6 @@ export interface NeonBorderRepository {
     findAll(): NeonBorder[];
     deleteById(id: number): void;
     deleteAll(): void;
+
+    findByCardSceneId(cardSceneId: number): NeonBorder | null;
 }

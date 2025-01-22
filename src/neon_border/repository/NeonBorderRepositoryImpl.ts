@@ -35,4 +35,13 @@ export class NeonBorderRepositoryImpl implements NeonBorderRepository {
     deleteAll(): void {
         this.storage.clear();
     }
+
+    findByCardSceneId(cardSceneId: number): NeonBorder | null {
+        for (const neonBorder of this.storage.values()) {
+            if (neonBorder.getNeonBorderSceneId() === cardSceneId) {
+                return neonBorder;
+            }
+        }
+        return null;
+    }
 }
