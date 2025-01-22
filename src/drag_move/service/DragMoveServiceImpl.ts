@@ -4,6 +4,13 @@ import { DragMoveService } from './DragMoveService';
 import {DragMoveRepositoryImpl} from "../repository/DragMoveRepositoryImpl";
 import {DragMoveRepository} from "../repository/DragMoveRepository";
 import {BattleFieldCardScene} from "../../battle_field_card_scene/entity/BattleFieldCardScene";
+import {NeonBorderRepository} from "../../neon_border/repository/NeonBorderRepository";
+import {NeonShape} from "../../neon/NeonShape";
+import {NeonBorderLineSceneRepository} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepository";
+import {NeonBorderLinePositionRepository} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepository";
+import {NeonBorderRepositoryImpl} from "../../neon_border/repository/NeonBorderRepositoryImpl";
+import {NeonBorderLineSceneRepositoryImpl} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepositoryImpl";
+import {NeonBorderLinePositionRepositoryImpl} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepositoryImpl";
 
 export class DragMoveServiceImpl implements DragMoveService {
     private static instance: DragMoveServiceImpl | null = null;
@@ -16,12 +23,20 @@ export class DragMoveServiceImpl implements DragMoveService {
     private lastPosition: THREE.Vector3;
     private dragMoveRepository: DragMoveRepository;
 
+    private neonBorderRepository: NeonBorderRepository;
+    private neonBorderLineSceneRepository: NeonBorderLineSceneRepository;
+    private neonBorderLinePositionRepository: NeonBorderLinePositionRepository;
+
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.raycaster = new THREE.Raycaster();
         this.plane = new THREE.Plane(new THREE.Vector3(0, 0, 1));
         this.offset = new THREE.Vector3();
         this.lastPosition = new THREE.Vector3();
         this.dragMoveRepository = DragMoveRepositoryImpl.getInstance();
+
+        this.neonBorderRepository = NeonBorderRepositoryImpl.getInstance()
+        this.neonBorderLineSceneRepository = NeonBorderLineSceneRepositoryImpl.getInstance()
+        this.neonBorderLinePositionRepository = NeonBorderLinePositionRepositoryImpl.getInstance()
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): DragMoveServiceImpl {
@@ -82,6 +97,48 @@ export class DragMoveServiceImpl implements DragMoveService {
 
         this.cardPositions.set(cardId, newPosition.clone());
         console.log(`Updated card ${cardId} position to: ${newPosition.toArray()}`);
+
+        const selectedObject = this.dragMoveRepository.getSelectedObject();
+        const cardScene = selectedObject as unknown as BattleFieldCardScene;
+        const cardSceneId = cardScene.getId();
+        console.log(`cardSceneId: ${cardSceneId}`)
+
+        if (cardSceneId !== undefined && cardSceneId !== null) {
+            this.updateNeonBorderPosition(cardSceneId, movement);
+        } else {
+            console.warn(`Invalid cardSceneId: ${cardSceneId}`);
+        }
+    }
+
+    private updateNeonBorderPosition(cardSceneId: number, movement: THREE.Vector3): void {
+        // 해당 카드에 연결된 NeonBorder를 가져옴
+        const neonBorder = this.neonBorderRepository.findByCardSceneId(cardSceneId);
+        if (!neonBorder) {
+            console.warn(`No NeonBorder found for card scene ID: ${cardSceneId}`);
+            return;
+        }
+        console.log(`Found NeonBorder for card scene ID: ${cardSceneId}`, neonBorder);
+
+        // NeonBorder와 연결된 라인의 위치를 이동
+        neonBorder.getNeonBorderLineSceneIdList().forEach((lineSceneId) => {
+            const lineScene = this.neonBorderLineSceneRepository.findById(lineSceneId);
+            if (lineScene) {
+                const lineMesh = lineScene.getLine();
+                if (lineMesh) {
+                    lineMesh.position.add(movement);
+                    console.log(`Updated neon border line position to: ${lineMesh.position.toArray()}`);
+                }
+            }
+        });
+
+        // // NeonBorder의 위치 데이터도 이동
+        // neonBorder.getPositionIds().forEach((positionId) => {
+        //     const position = this.neonBorderLinePositionRepository.findById(positionId);
+        //     if (position) {
+        //         position.getVector().add(new THREE.Vector2(movement.x, movement.y));
+        //         console.log(`Updated neon border position to: ${position.getVector().toArray()}`);
+        //     }
+        // });
     }
 
     private updateAttributeMarks(movement: THREE.Vector3): void {
