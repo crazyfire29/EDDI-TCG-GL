@@ -6,6 +6,8 @@ import {DeckMakePopupButtonsClickDetectRepositoryImpl} from "../repository/DeckM
 
 import {DeckMakePopupButtons} from "../../deck_make_pop_up_buttons/entity/DeckMakePopupButtons";
 import {DeckMakePopupButtonsRepositoryImpl} from "../../deck_make_pop_up_buttons/repository/DeckMakePopupButtonsRepositoryImpl";
+import {DeckMakePopupBackgroundRepositoryImpl} from "../../deck_make_pop_up_background/repository/DeckMakePopupBackgroundRepositoryImpl";
+import {TransparentBackgroundRepositoryImpl} from "../../transparent_background/repository/TransparentBackgroundRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -14,6 +16,8 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
     private static instance: DeckMakePopupButtonsClickDetectServiceImpl | null = null;
     private deckMakePopupButtonsClickDetectRepository: DeckMakePopupButtonsClickDetectRepositoryImpl;
     private deckMakePopupButtonsRepository: DeckMakePopupButtonsRepositoryImpl;
+    private deckMakePopupBackgroundRepository: DeckMakePopupBackgroundRepositoryImpl;
+    private transparentBackgroundRepository: TransparentBackgroundRepositoryImpl;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -21,6 +25,8 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.deckMakePopupButtonsClickDetectRepository = DeckMakePopupButtonsClickDetectRepositoryImpl.getInstance();
         this.deckMakePopupButtonsRepository = DeckMakePopupButtonsRepositoryImpl.getInstance();
+        this.deckMakePopupBackgroundRepository = DeckMakePopupBackgroundRepositoryImpl.getInstance();
+        this.transparentBackgroundRepository = TransparentBackgroundRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
     }
 
@@ -53,6 +59,9 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
 
             if (clickedDeckMakePopupButton.id === 0) {
                 console.log(`click cancel button!`);
+                this.setTransparentBackgroundVisible(false);
+                this.setDeckMakePopupBackgroundVisible(false);
+                this.setDeckMakePopupButtonsVisible(false);
             }
 
             if (clickedDeckMakePopupButton.id === 1) {
@@ -75,5 +84,35 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
     private getAllDeckMakePopupButtons(): DeckMakePopupButtons[] {
         return this.deckMakePopupButtonsRepository.findAll();
     }
+
+    private setTransparentBackgroundVisible(isVisible: boolean): void {
+        if (isVisible == true) {
+            this.transparentBackgroundRepository.showTransparentBackground();
+        } else {
+            this.transparentBackgroundRepository.hideTransparentBackground();
+        }
+    }
+
+    private setDeckMakePopupBackgroundVisible(isVisible: boolean): void {
+        if (isVisible == true) {
+            this.deckMakePopupBackgroundRepository.showDeckMakePopupBackground();
+        } else {
+            this.deckMakePopupBackgroundRepository.hideDeckMakePopupBackground();
+        }
+    }
+
+    private setDeckMakePopupButtonsVisible(isVisible: boolean): void {
+        const buttonIds = this.deckMakePopupButtonsRepository.findAllButtonIds();
+        if (isVisible == true){
+            buttonIds.forEach((buttonId) => {
+                this.deckMakePopupButtonsRepository.showDeckMakePopupButton(buttonId);
+            });
+        } else {
+            buttonIds.forEach((buttonId) => {
+                this.deckMakePopupButtonsRepository.hideDeckMakePopupButton(buttonId);
+            });
+        }
+    }
+
 
 }
