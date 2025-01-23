@@ -66,10 +66,15 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
                 this.setDeckMakePopupBackgroundVisible(false);
                 this.setDeckMakePopupButtonsVisible(false);
                 this.setDeckMakePopupInputContainerVisible(false);
+                this.clearUserInput();
             }
 
-            if (clickedDeckMakePopupButton.id === 0) {
+            if (clickedDeckMakePopupButton.id === 2) {
                 console.log(`[DEBUG] click create button!`);
+                this.saveUserInput();
+                this.clearUserInput();
+                this.deckMakePopupInputContainerRepository.findUserInput();
+
             }
             return clickedDeckMakePopupButton;
         }
@@ -126,5 +131,13 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
         }
     }
 
+    private saveUserInput(): void {
+        this.deckMakePopupInputContainerRepository.updateUserInput();
+    }
+
+    // 입력창에 사용자가 입력한 텍스트 지우기
+    private clearUserInput(): void {
+        this.deckMakePopupInputContainerRepository.clearUserInput();
+    }
 
 }

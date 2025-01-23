@@ -6,9 +6,11 @@ import {InputContainerGenerator} from "../../input_container/generator";
 export class DeckMakePopupInputContainerRepositoryImpl implements DeckMakePopupInputContainerRepository {
     private static instance: DeckMakePopupInputContainerRepositoryImpl;
     private inputContainer: DeckMakePopupInputContainer | null;
+    private userInput: string | null;
 
     private constructor() {
         this.inputContainer = null;
+        this.userInput = null;
     }
 
     public static getInstance(): DeckMakePopupInputContainerRepositoryImpl {
@@ -66,6 +68,38 @@ export class DeckMakePopupInputContainerRepositoryImpl implements DeckMakePopupI
         if (inputContainer) {
             InputContainerGenerator.setContainerVisible(inputContainer.container, 'block');
         }
+    }
+
+    public updateUserInput(): void {
+        const inputContainer = this.findDeckMakePopupInputContainer();
+        if (inputContainer){
+            const inputContainerMesh = inputContainer.getContainer();
+            const inputElement = inputContainerMesh.querySelector('input');
+            if (inputElement) {
+                this.userInput = inputElement.value;
+            }
+        }
+        console.log(`user input: ${this.userInput}`);
+    }
+
+    public clearUserInput(): void {
+        const inputContainer = this.findDeckMakePopupInputContainer();
+        if (inputContainer) {
+            const inputContainerMesh = inputContainer.getContainer();
+            const inputElement = inputContainerMesh.querySelector('input');
+            if (inputElement) {
+                inputElement.value = ''; // 입력창의 값을 초기화
+            }
+        }
+    }
+
+    public findUserInput(): string | null {
+        console.log(`Current userInput: ${this.userInput}`);
+        return this.userInput;
+    }
+
+    public deleteUserInput(): void {
+        this.userInput = null;
     }
 
 }
