@@ -8,6 +8,7 @@ import {DeckMakePopupButtons} from "../../deck_make_pop_up_buttons/entity/DeckMa
 import {DeckMakePopupButtonsRepositoryImpl} from "../../deck_make_pop_up_buttons/repository/DeckMakePopupButtonsRepositoryImpl";
 import {DeckMakePopupBackgroundRepositoryImpl} from "../../deck_make_pop_up_background/repository/DeckMakePopupBackgroundRepositoryImpl";
 import {TransparentBackgroundRepositoryImpl} from "../../transparent_background/repository/TransparentBackgroundRepositoryImpl";
+import {DeckMakePopupInputContainerRepositoryImpl} from "../../deck_make_pop_up_input_container/repository/DeckMakePopupInputContainerRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -18,6 +19,7 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
     private deckMakePopupButtonsRepository: DeckMakePopupButtonsRepositoryImpl;
     private deckMakePopupBackgroundRepository: DeckMakePopupBackgroundRepositoryImpl;
     private transparentBackgroundRepository: TransparentBackgroundRepositoryImpl;
+    private deckMakePopupInputContainerRepository: DeckMakePopupInputContainerRepositoryImpl;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -27,6 +29,7 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
         this.deckMakePopupButtonsRepository = DeckMakePopupButtonsRepositoryImpl.getInstance();
         this.deckMakePopupBackgroundRepository = DeckMakePopupBackgroundRepositoryImpl.getInstance();
         this.transparentBackgroundRepository = TransparentBackgroundRepositoryImpl.getInstance();
+        this.deckMakePopupInputContainerRepository = DeckMakePopupInputContainerRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
     }
 
@@ -57,15 +60,16 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
         if (clickedDeckMakePopupButton) {
             console.log(`Clicked Deck Make Pop-up Button ID: ${clickedDeckMakePopupButton.id}`);
 
-            if (clickedDeckMakePopupButton.id === 0) {
-                console.log(`click cancel button!`);
+            if (clickedDeckMakePopupButton.id === 1) {
+                console.log(`[DEBUG] click cancel button!`);
                 this.setTransparentBackgroundVisible(false);
                 this.setDeckMakePopupBackgroundVisible(false);
                 this.setDeckMakePopupButtonsVisible(false);
+                this.setDeckMakePopupInputContainerVisible(false);
             }
 
-            if (clickedDeckMakePopupButton.id === 1) {
-                console.log(`click create button!`);
+            if (clickedDeckMakePopupButton.id === 0) {
+                console.log(`[DEBUG] click create button!`);
             }
             return clickedDeckMakePopupButton;
         }
@@ -111,6 +115,14 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
             buttonIds.forEach((buttonId) => {
                 this.deckMakePopupButtonsRepository.hideDeckMakePopupButton(buttonId);
             });
+        }
+    }
+
+    private setDeckMakePopupInputContainerVisible(isVisible: boolean): void {
+        if (isVisible == true) {
+            this.deckMakePopupInputContainerRepository.showDeckMakePopupInputContainer();
+        } else {
+            this.deckMakePopupInputContainerRepository.hideDeckMakePopupInputContainer();
         }
     }
 
