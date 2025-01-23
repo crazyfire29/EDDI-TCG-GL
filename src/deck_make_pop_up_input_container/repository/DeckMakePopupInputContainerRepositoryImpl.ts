@@ -24,7 +24,7 @@ export class DeckMakePopupInputContainerRepositoryImpl implements DeckMakePopupI
 
         const containerWidth = 0.25 * windowWidth;
         const containerHeight = 0.05 * windowHeight;
-        const containerTop = 0.495 * windowHeight;
+        const containerTop = 0.4975 * windowHeight;
         const containerLeft = 0.387 * windowWidth;
         const containerPosition = { top: containerTop, left: containerLeft };
 
@@ -32,10 +32,13 @@ export class DeckMakePopupInputContainerRepositoryImpl implements DeckMakePopupI
         const inputHeight = 0.017 * windowHeight;
         const inputFontSize = 0.01 * windowWidth;
 
+        const maxLength = 12;
+
         const inputContainerMesh = InputContainerGenerator.createInputContainer(
             'Deck Create', // placeholder
             containerWidth, containerHeight, containerPosition,
-            inputWidth, inputHeight, inputFontSize
+            inputWidth, inputHeight, inputFontSize,
+            maxLength
         );
         const newInputContainer = new DeckMakePopupInputContainer(inputContainerMesh, containerPosition);
         this.inputContainer = newInputContainer;

@@ -42,7 +42,7 @@ export class DeckMakePopupInputContainerServiceImpl implements DeckMakePopupInpu
 
         const containerWidth = 0.25 * windowWidth; // 컨테이너 너비
         const containerHeight = 0.05 * windowHeight; // 컨테이너 높이
-        const containerTop = 0.495 * windowHeight; // 컨테이너 Y 위치
+        const containerTop = 0.4975 * windowHeight; // 컨테이너 Y 위치
         const containerLeft = 0.387 * windowWidth; // 컨테이너 X 위치
         const containerPosition = { top: containerTop, left: containerLeft };
 
