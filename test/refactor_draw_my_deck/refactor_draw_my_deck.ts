@@ -36,6 +36,7 @@ import {DeckMakeButtonServiceImpl} from "../../src/deck_make_button/service/Deck
 import {TransparentBackgroundServiceImpl} from "../../src/transparent_background/service/TransparentBackgroundServiceImpl";
 import {DeckMakePopupBackgroundServiceImpl} from "../../src/deck_make_pop_up_background/service/DeckMakePopupBackgroundServiceImpl";
 import {DeckMakePopupButtonsServiceImpl} from "../../src/deck_make_pop_up_buttons/service/DeckMakePopupButtonsServiceImpl";
+import {DeckMakePopupInputContainerServiceImpl} from "../../src/deck_make_pop_up_input_container/service/DeckMakePopupInputContainerServiceImpl";
 
 import {MyDeckButtonClickDetectServiceImpl} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectServiceImpl";
 import {MyDeckButtonClickDetectService} from "../../src/deck_button_click_detect/service/MyDeckButtonClickDetectService";
@@ -74,6 +75,7 @@ export class TCGJustTestMyDeckView {
     private transparentBackgroundService = TransparentBackgroundServiceImpl.getInstance();
     private decKMakePopupBackgroundService = DeckMakePopupBackgroundServiceImpl.getInstance();
     private deckMakePopupButtonsService = DeckMakePopupButtonsServiceImpl.getInstance();
+    private deckMakePopupInputContainerService = DeckMakePopupInputContainerServiceImpl.getInstance();
 
     private myDeckButtonMapRepository = MyDeckButtonMapRepositoryImpl.getInstance();
     private myDeckCardMapRepository = MyDeckCardMapRepositoryImpl.getInstance();
@@ -182,6 +184,7 @@ export class TCGJustTestMyDeckView {
         this.addTransparentBackground();
         this.addDeckMakePopupBackground();
         this.addDeckMakePopupButtons();
+        this.addDeckMakePopupInputContainer();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -413,6 +416,15 @@ export class TCGJustTestMyDeckView {
         }
     }
 
+    private async addDeckMakePopupInputContainer():  Promise<void> {
+        try {
+            await this.deckMakePopupInputContainerService.createDeckMakePopupInputContainer();
+
+        } catch (error) {
+            console.error('Failed to add DeckMakePopupInputContainer:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -442,6 +454,7 @@ export class TCGJustTestMyDeckView {
             this.deckMakeButtonService.adjustDeckMakeButtonPosition();
             this.transparentBackgroundService.adjustTransparentBackgroundPosition();
             this.decKMakePopupBackgroundService.adjustDeckMakePopupBackgroundPosition();
+            this.deckMakePopupInputContainerService.adjustDeckMakePopupInputContainerPosition();
         }
     }
 
