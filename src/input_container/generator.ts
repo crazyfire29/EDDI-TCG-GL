@@ -3,6 +3,7 @@ export class InputContainerGenerator {
         placeholder: string,
         containerWidth: number, containerHeight: number, containerPosition: { top: number, left: number },
         inputWidth: number, inputHeight: number, inputFontSize: number,
+        maxLength: number
     ): HTMLDivElement {
         // 컨테이너 생성
         const inputContainer = document.createElement('div');
@@ -22,6 +23,8 @@ export class InputContainerGenerator {
         inputElement.style.height = `${inputHeight}px`;
         inputElement.style.fontSize = `${inputFontSize}px`;
         inputElement.style.padding = '12px';
+
+        inputElement.maxLength = maxLength;
 
         // 요소 컨테이너에 추가
         inputContainer.appendChild(inputElement);

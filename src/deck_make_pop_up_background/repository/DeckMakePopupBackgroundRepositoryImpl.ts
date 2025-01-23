@@ -11,7 +11,7 @@ export class DeckMakePopupBackgroundRepositoryImpl implements DeckMakePopupBackg
     private textureManager: TextureManager;
 
     private readonly BACKGROUND_WIDTH: number = 0.425
-    private readonly BACKGROUND_HEIGHT: number = 0.396
+    private readonly BACKGROUND_HEIGHT: number = 0.422
 
     private constructor(textureManager: TextureManager) {
         this.textureManager = textureManager;
