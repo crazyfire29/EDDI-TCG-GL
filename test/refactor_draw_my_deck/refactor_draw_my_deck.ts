@@ -454,6 +454,7 @@ export class TCGJustTestMyDeckView {
             this.deckMakeButtonService.adjustDeckMakeButtonPosition();
             this.transparentBackgroundService.adjustTransparentBackgroundPosition();
             this.decKMakePopupBackgroundService.adjustDeckMakePopupBackgroundPosition();
+            this.deckMakePopupButtonsService.adjustDeckMakePopupButtonsPosition();
             this.deckMakePopupInputContainerService.adjustDeckMakePopupInputContainerPosition();
         }
     }
