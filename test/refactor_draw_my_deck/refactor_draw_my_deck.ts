@@ -96,6 +96,12 @@ export class TCGJustTestMyDeckView {
     private initialized = false;
     private isAnimating = false;
 
+    private isMyDeckButtonEnabled: boolean = true;
+    private isDeckPageMovementButtonEnabled: boolean = true;
+    private isDeckCardPageMovementButtonEnabled: boolean = true;
+    private isDeckMakeButtonEnabled: boolean = true;
+    private isDeckMakePopupButtonsEnabled: boolean = true;
+
     private userWindowSize: UserWindowSize;
 
     constructor(simulationMyDeckContainer: HTMLElement) {
@@ -125,19 +131,53 @@ export class TCGJustTestMyDeckView {
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
 
         this.myDeckButtonClickDetectService = MyDeckButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.myDeckButtonClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.myDeckButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', (e) => {
+            if (this.isMyDeckButtonEnabled) {
+                this.myDeckButtonClickDetectService.onMouseDown(e);
+            }
+        }, false);
 
         this.deckPageMovementButtonClickDetectService = DeckPageMovementButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.deckPageMovementButtonClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.deckPageMovementButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', (e) => {
+            if (this.isDeckPageMovementButtonEnabled) {
+                this.deckPageMovementButtonClickDetectService.onMouseDown(e);
+            }
+        }, false);
 
         this.deckCardPageMoveButtonClickDetectService = DeckCardPageMoveButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.deckCardPageMoveButtonClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.deckCardPageMoveButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', (e) => {
+            if (this.isDeckCardPageMovementButtonEnabled) {
+                this.deckCardPageMoveButtonClickDetectService.onMouseDown(e);
+            }
+        }, false);
 
         this.deckMakeButtonClickDetectService = DeckMakeButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.deckMakeButtonClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.deckMakeButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', (e) => {
+            if (this.isDeckMakeButtonEnabled) {
+                this.deckMakeButtonClickDetectService.onMouseDown(e);
+                this.isMyDeckButtonEnabled = false;
+                this.isDeckPageMovementButtonEnabled = false;
+                this.isDeckCardPageMovementButtonEnabled = false;
+            }
+        }, false);
 
         this.deckMakePopupButtonsClickDetectService = DeckMakePopupButtonsClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.deckMakePopupButtonsClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.deckMakePopupButtonsClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', (e) => {
+            if (this.isDeckMakePopupButtonsEnabled) {
+                this.deckMakePopupButtonsClickDetectService.onMouseDown(e);
+                const currentButtonClickState = this.deckMakePopupButtonsClickDetectService.getCurrentButtonClickState();
+                if (currentButtonClickState) {
+                    this.isMyDeckButtonEnabled = true;
+                    this.isDeckPageMovementButtonEnabled = true;
+                    this.isDeckCardPageMovementButtonEnabled = true;
+                }
+            }
+        }, false);
 
     }
 

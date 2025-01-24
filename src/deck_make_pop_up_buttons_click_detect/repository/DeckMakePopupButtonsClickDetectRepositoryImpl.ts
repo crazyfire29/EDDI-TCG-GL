@@ -5,6 +5,7 @@ import {DeckMakePopupButtons} from "../../deck_make_pop_up_buttons/entity/DeckMa
 
 export class DeckMakePopupButtonsClickDetectRepositoryImpl implements DeckMakePopupButtonsClickDetectRepository {
     private static instance: DeckMakePopupButtonsClickDetectRepositoryImpl;
+    private currentButtonClickState: DeckMakePopupButtons | null = null;
     private raycaster = new THREE.Raycaster();
 
     public static getInstance(): DeckMakePopupButtonsClickDetectRepositoryImpl {
@@ -42,6 +43,14 @@ export class DeckMakePopupButtonsClickDetectRepositoryImpl implements DeckMakePo
         }
 
         return null;
+    }
+
+    saveCurrentButtonClickState(button: DeckMakePopupButtons): void {
+        this.currentButtonClickState = button;
+    }
+
+    getCurrentButtonClickState(): DeckMakePopupButtons | null {
+        return this.currentButtonClickState;
     }
 
 }
