@@ -59,6 +59,7 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
 
         if (clickedDeckMakePopupButton) {
             console.log(`Clicked Deck Make Pop-up Button ID: ${clickedDeckMakePopupButton.id}`);
+            this.saveCurrentButtonClickState(clickedDeckMakePopupButton);
 
             if (clickedDeckMakePopupButton.id === 1) {
                 console.log(`[DEBUG] click cancel button!`);
@@ -138,6 +139,14 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
     // 입력창에 사용자가 입력한 텍스트 지우기
     private clearUserInput(): void {
         this.deckMakePopupInputContainerRepository.clearUserInput();
+    }
+
+    private saveCurrentButtonClickState(button: DeckMakePopupButtons): void {
+        this.deckMakePopupButtonsClickDetectRepository.saveCurrentButtonClickState(button);
+    }
+
+    public getCurrentButtonClickState(): DeckMakePopupButtons | null {
+        return this.deckMakePopupButtonsClickDetectRepository.getCurrentButtonClickState();
     }
 
 }
