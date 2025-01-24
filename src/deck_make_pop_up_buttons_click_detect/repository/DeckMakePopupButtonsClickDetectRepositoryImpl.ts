@@ -53,4 +53,8 @@ export class DeckMakePopupButtonsClickDetectRepositoryImpl implements DeckMakePo
         return this.currentButtonClickState;
     }
 
+    resetCurrentButtonClickState(): void {
+        this.currentButtonClickState = null;
+    }
+
 }

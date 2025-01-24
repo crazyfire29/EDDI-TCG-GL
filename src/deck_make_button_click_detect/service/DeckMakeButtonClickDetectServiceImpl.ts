@@ -72,6 +72,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
 
         if (clickedDeckMakeButton) {
             console.log(`Clicked Deck Make Button`);
+            this.saveCurrentButtonClickState(clickedDeckMakeButton);
             this.setTransparentBackgroundVisible(true);
             this.setDeckMakePopupBackgroundVisible(true);
             this.setDeckMakePopupButtonsVisible(true);
@@ -79,6 +80,7 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
 
             return clickedDeckMakeButton;
         }
+        this.resetCurrentButtonClickState();
 
         return null;
     }
@@ -129,6 +131,18 @@ export class DeckMakeButtonClickDetectServiceImpl implements DeckMakeButtonClick
         } else {
             this.deckMakePopupInputContainerRepository.hideDeckMakePopupInputContainer();
         }
+    }
+
+    private saveCurrentButtonClickState(button: DeckMakeButton): void {
+        this.deckMakeButtonClickDetectRepository.saveCurrentButtonClickState(button);
+    }
+
+    public getCurrentButtonClickState(): DeckMakeButton | null {
+        return this.deckMakeButtonClickDetectRepository.getCurrentButtonClickState();
+    }
+
+    private resetCurrentButtonClickState(): void {
+        this.deckMakeButtonClickDetectRepository.resetCurrentButtonClickState();
     }
 
 }

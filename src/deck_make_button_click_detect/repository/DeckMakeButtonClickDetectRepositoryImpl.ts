@@ -5,6 +5,7 @@ import {DeckMakeButton} from "../../deck_make_button/entity/DeckMakeButton";
 
 export class DeckMakeButtonClickDetectRepositoryImpl implements DeckMakeButtonClickDetectRepository {
     private static instance: DeckMakeButtonClickDetectRepositoryImpl;
+    private currentButtonClickState: DeckMakeButton | null = null;
     private raycaster = new THREE.Raycaster();
 
     public static getInstance(): DeckMakeButtonClickDetectRepositoryImpl {
@@ -35,6 +36,18 @@ export class DeckMakeButtonClickDetectRepositoryImpl implements DeckMakeButtonCl
         }
 
         return null;
+    }
+
+    saveCurrentButtonClickState(button: DeckMakeButton): void {
+        this.currentButtonClickState = button;
+    }
+
+    getCurrentButtonClickState(): DeckMakeButton | null {
+        return this.currentButtonClickState;
+    }
+
+    resetCurrentButtonClickState(): void {
+        this.currentButtonClickState = null;
     }
 
 

@@ -159,9 +159,13 @@ export class TCGJustTestMyDeckView {
         this.renderer.domElement.addEventListener('mousedown', (e) => {
             if (this.isDeckMakeButtonEnabled) {
                 this.deckMakeButtonClickDetectService.onMouseDown(e);
-                this.isMyDeckButtonEnabled = false;
-                this.isDeckPageMovementButtonEnabled = false;
-                this.isDeckCardPageMovementButtonEnabled = false;
+                const currentButtonClickState = this.deckMakeButtonClickDetectService.getCurrentButtonClickState();
+                if (currentButtonClickState) {
+                    this.isMyDeckButtonEnabled = false;
+                    this.isDeckPageMovementButtonEnabled = false;
+                    this.isDeckCardPageMovementButtonEnabled = false;
+                    this.isDeckMakeButtonEnabled = false;
+                }
             }
         }, false);
 
@@ -175,6 +179,7 @@ export class TCGJustTestMyDeckView {
                     this.isMyDeckButtonEnabled = true;
                     this.isDeckPageMovementButtonEnabled = true;
                     this.isDeckCardPageMovementButtonEnabled = true;
+                    this.isDeckMakeButtonEnabled = true;
                 }
             }
         }, false);
