@@ -132,6 +132,13 @@ export class DeckPageMovementButtonClickDetectServiceImpl implements DeckPageMov
         return null;
     }
 
+    public async onMouseDown(event: MouseEvent): Promise<void> {
+        if (event.button === 0) {
+            const clickPoint = { x: event.clientX, y: event.clientY };
+            await this.handleLeftClick(clickPoint);
+        }
+    }
+
     private getAllMovementButton(): MyDeckButtonPageMovementButton[] {
         return this.myDeckButtonPageMovementButtonRepository.findAll();
     }

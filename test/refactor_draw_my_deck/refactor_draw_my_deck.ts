@@ -128,12 +128,7 @@ export class TCGJustTestMyDeckView {
         this.renderer.domElement.addEventListener('mousedown', (e) => this.myDeckButtonClickDetectService.onMouseDown(e), false);
 
         this.deckPageMovementButtonClickDetectService = DeckPageMovementButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', async (e) => {
-            if (e.button === 0) {
-                const clickPoint = { x: e.clientX, y: e.clientY };
-                await this.deckPageMovementButtonClickDetectService.handleLeftClick(clickPoint);
-            }
-        });
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.deckPageMovementButtonClickDetectService.onMouseDown(e), false);
 
         this.deckCardPageMoveButtonClickDetectService = DeckCardPageMoveButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousedown', (e) => this.deckCardPageMoveButtonClickDetectService.onMouseDown(e), false);
