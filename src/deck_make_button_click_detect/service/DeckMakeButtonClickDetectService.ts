@@ -5,4 +5,5 @@ export interface DeckMakeButtonClickDetectService {
         clickPoint: { x: number; y: number },
     ): any | null;
     onMouseDown(event: MouseEvent): Promise<void>;
+    getCurrentButtonClickState(): any | null;
 }

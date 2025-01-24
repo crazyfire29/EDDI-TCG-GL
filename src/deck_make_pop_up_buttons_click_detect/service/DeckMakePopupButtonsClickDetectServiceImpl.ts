@@ -79,6 +79,7 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
             }
             return clickedDeckMakePopupButton;
         }
+        this.resetCurrentButtonClickState();
 
         return null;
     }
@@ -147,6 +148,10 @@ export class DeckMakePopupButtonsClickDetectServiceImpl implements DeckMakePopup
 
     public getCurrentButtonClickState(): DeckMakePopupButtons | null {
         return this.deckMakePopupButtonsClickDetectRepository.getCurrentButtonClickState();
+    }
+
+    public resetCurrentButtonClickState(): void {
+        this.deckMakePopupButtonsClickDetectRepository.resetCurrentButtonClickState();
     }
 
 }
