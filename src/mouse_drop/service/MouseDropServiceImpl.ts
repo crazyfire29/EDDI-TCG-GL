@@ -33,6 +33,12 @@ import {AttributeMarkPositionCalculator} from "../../common/attribute_mark/Attri
 import {YourFieldCardPosition} from "../../your_field_card_position/entity/YourFieldCardPosition";
 import {YourField} from "../../your_field/entity/YourField";
 import {MeshGenerator} from "../../mesh/generator";
+import {NeonBorderRepository} from "../../neon_border/repository/NeonBorderRepository";
+import {NeonBorderLineSceneRepository} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepository";
+import {NeonBorderRepositoryImpl} from "../../neon_border/repository/NeonBorderRepositoryImpl";
+import {NeonBorderLineSceneRepositoryImpl} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepositoryImpl";
+import {NeonBorderLinePositionRepository} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepository";
+import {NeonBorderLinePositionRepositoryImpl} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepositoryImpl";
 
 export class MouseDropServiceImpl implements MouseDropService {
     private static instance: MouseDropServiceImpl | null = null;
@@ -73,6 +79,10 @@ export class MouseDropServiceImpl implements MouseDropService {
     private yourFieldCardSceneRepository: YourFieldCardSceneRepository
     private yourFieldCardPositionRepository: YourFieldCardPositionRepository
 
+    private neonBorderRepository: NeonBorderRepository;
+    private neonBorderLineSceneRepository: NeonBorderLineSceneRepository;
+    private neonBorderLinePositionRepository: NeonBorderLinePositionRepository;
+
     constructor() {
         this.raycaster = new THREE.Raycaster();
         this.mouseDropFieldRepository = MouseDropFieldRepositoryImpl.getInstance();
@@ -89,6 +99,10 @@ export class MouseDropServiceImpl implements MouseDropService {
         this.yourFieldRepository = YourFieldRepositoryImpl.getInstance()
         this.yourFieldCardSceneRepository = YourFieldCardSceneRepositoryImpl.getInstance()
         this.yourFieldCardPositionRepository = YourFieldCardPositionRepositoryImpl.getInstance()
+
+        this.neonBorderRepository = NeonBorderRepositoryImpl.getInstance()
+        this.neonBorderLineSceneRepository = NeonBorderLineSceneRepositoryImpl.getInstance()
+        this.neonBorderLinePositionRepository = NeonBorderLinePositionRepositoryImpl.getInstance()
     }
 
     public static getInstance(): MouseDropServiceImpl {
@@ -223,9 +237,59 @@ export class MouseDropServiceImpl implements MouseDropService {
 
             cardPosition.setPosition(x, y);
             this.battleFieldHandCardPositionRepository.save(cardPosition);
+
+            this.repositionNeonBorder(yourFieldSceneId, x, y);
         } else {
             console.error(`Mesh not found`);
         }
+    }
+
+    private repositionNeonBorder(sceneId: number, x: number, y: number): void {
+        const neonBorder = this.neonBorderRepository.findById(sceneId);
+
+        if (!neonBorder) {
+            console.error(`Neon Border not found for sceneId: ${sceneId}`);
+            return;
+        }
+
+        const halfWidth = (this.CARD_WIDTH * window.innerWidth) / 2;
+        const halfHeight = (this.CARD_HEIGHT * window.innerWidth) / 2;
+
+        const startX = x - halfWidth;
+        const startY = y - halfHeight;
+        const width = this.CARD_WIDTH * window.innerWidth;
+        const height = this.CARD_HEIGHT * window.innerWidth;
+
+        console.log(`Repositioning Neon Border for sceneId: ${sceneId}`);
+        const lineSceneIds = neonBorder.getNeonBorderLineSceneIdList();
+        const positionIds = neonBorder.getNeonBorderLinePositionIdList();
+
+        lineSceneIds.forEach((lineSceneId: number, index: number) => {
+            const lineScene = this.neonBorderLineSceneRepository.findById(lineSceneId);
+            const position = this.neonBorderLinePositionRepository.findById(positionIds[index]);
+
+            if (!lineScene || !position) {
+                console.error(
+                    `Failed to find lineScene or position for lineSceneId: ${lineSceneId}, positionId: ${positionIds[index]}`
+                );
+                return;
+            }
+
+            const line = lineScene.getLine();
+            const newLinePosition = this.calculateLinePosition(index, startX, startY, width, height);
+
+            if (line) {
+                // Update the position of the line in the scene
+                line.position.set(newLinePosition.getX(), newLinePosition.getY(), 0);
+                line.visible = false;
+            }
+
+            // Update the position in the repository
+            position.setPosition(newLinePosition);
+            this.neonBorderLinePositionRepository.save(position);
+        });
+
+        console.log(`Neon Border reposition complete for sceneId: ${sceneId}`);
     }
 
     private calculateYourFieldPositionByIndex(index: number): Vector2d {
@@ -243,10 +307,6 @@ export class MouseDropServiceImpl implements MouseDropService {
             const positionId = handCard.getPositionId();
             const cardSceneId = handCard.getCardSceneId();
 
-            // console.log(`cardSceneId: ${cardSceneId}`);
-            const cardSceneList = this.battleFieldCardSceneRepository.findAll();
-            // console.log(`cardSceneList: ${cardSceneList}`);
-
             const cardPosition = this.battleFieldHandCardPositionRepository.findById(positionId);
             const mainCardScene = await this.battleFieldCardSceneRepository.findById(cardSceneId); // 비동기 처리
 
@@ -260,6 +320,7 @@ export class MouseDropServiceImpl implements MouseDropService {
                 return;
             }
 
+            // 카드 위치 업데이트
             cardPosition.setPosition(calculatedPosition.getX(), calculatedPosition.getY());
             console.log(`Card Scene ID: ${handCard.getCardSceneId()}, New Position: (${calculatedPosition.getX()}, ${calculatedPosition.getY()})`);
 
@@ -272,6 +333,10 @@ export class MouseDropServiceImpl implements MouseDropService {
                 console.error(`Mesh not found for Card Scene ID: ${handCard.getCardSceneId()}`);
             }
 
+            // NeonBorder 위치 재설정 호출
+            this.resetNeonPosition(cardSceneId, mainCardScene, calculatedPosition);
+
+            // Attribute Mark 업데이트
             const attributeMarkList = handCard.getAttributeMarkIdList();
             if (!attributeMarkList) {
                 console.error(`attributeMarkList 없다: ${attributeMarkList}`);
@@ -279,7 +344,7 @@ export class MouseDropServiceImpl implements MouseDropService {
             }
             console.log(`attributeMarkSceneList: ${attributeMarkList}`);
 
-            // 각 attributeMarkSceneId에 대해 비동기 작업을 처리
+            // 각 attributeMarkSceneId에 대해 비동기 작업 처리
             await Promise.all(attributeMarkList.map(async (attributeMarkId) => {
                 try {
                     const attributeMark = await this.battleFieldCardAttributeMarkRepository.findById(attributeMarkId); // 비동기 처리
@@ -328,6 +393,91 @@ export class MouseDropServiceImpl implements MouseDropService {
                 }
             }));
         }));
+    }
+
+    private resetNeonPosition(cardSceneId: number, mainCardScene: any, calculatedPosition: Vector2d): void {
+        const selectedObject = this.dragMoveRepository.getSelectedObject();
+        if (!selectedObject) {
+            console.log("No object selected.");
+            return;
+        }
+
+        if (selectedObject instanceof BattleFieldCardScene) {
+            if (cardSceneId === selectedObject.getId()) {
+                console.log(`CardSceneId ${cardSceneId} is selected. Skipping reset.`);
+                return;
+            }
+        }
+
+        console.log(`Resetting neon position for cardSceneId: ${cardSceneId}`);
+
+        // NeonBorderRepository에서 cardSceneId를 사용해 NeonBorder 찾기
+        const neonBorder = this.neonBorderRepository.findById(cardSceneId);
+
+        if (!neonBorder) {
+            console.log(`NeonBorder not found for cardSceneId: ${cardSceneId}`);
+            return;
+        }
+
+        // mainCardScene과 calculatedPosition으로 새로운 위치 계산
+        const halfWidth = (this.CARD_WIDTH * window.innerWidth) / 2;
+        const halfHeight = (this.CARD_HEIGHT * window.innerWidth) / 2;
+
+        const startX = calculatedPosition.getX() - halfWidth;
+        const startY = calculatedPosition.getY() - halfHeight;
+        const width = this.CARD_WIDTH * window.innerWidth;
+        const height = this.CARD_HEIGHT * window.innerWidth;
+
+        console.log(`Calculated position - StartX: ${startX}, StartY: ${startY}, Width: ${width}, Height: ${height}`);
+
+        // NeonBorder의 각 neonBorderLineSceneIdList와 neonBorderLinePositionIdList를 기반으로 업데이트
+        const lineSceneIds = neonBorder.getNeonBorderLineSceneIdList();
+        const positionIds = neonBorder.getNeonBorderLinePositionIdList();
+
+        lineSceneIds.forEach((sceneId: number, index: number) => {
+            const lineScene = this.neonBorderLineSceneRepository.findById(sceneId);
+            const position = this.neonBorderLinePositionRepository.findById(positionIds[index]);
+
+            if (!lineScene || !position) {
+                console.error(`Failed to find lineScene or position for SceneId: ${sceneId}, PositionId: ${positionIds[index]}`);
+                return;
+            }
+
+            // 새로운 위치 계산
+            const line = lineScene.getLine();
+            const newLinePosition = this.calculateLinePosition(index, startX, startY, width, height);
+
+            if (line) {
+                // Line의 실제 Scene에 위치 적용
+                line.position.set(newLinePosition.getX(), newLinePosition.getY(), 0);
+                console.log(`Updated NeonBorderLine position for SceneId: ${sceneId}`);
+            }
+
+            // Position 데이터에도 위치 정보 업데이트
+            position.setPosition(newLinePosition);
+            this.neonBorderLinePositionRepository.save(position);
+        });
+
+        console.log(`Neon position reset complete for cardSceneId: ${cardSceneId}`);
+    }
+
+    // BorderLine의 새로운 위치 계산 메서드
+    private calculateLinePosition(index: number, startX: number, startY: number, width: number, height: number): Vector2d {
+        const offset = 5.0;
+
+        switch (index) {
+            case 0: // Top line
+                return new Vector2d(startX + width / 2, startY);
+            case 1: // Right line
+                return new Vector2d(startX + width, startY + height / 2 - offset / 2);
+            case 2: // Bottom line
+                return new Vector2d(startX + width / 2, startY + height);
+            case 3: // Left line
+                return new Vector2d(startX, startY + height / 2 - offset / 2);
+            default:
+                console.error(`Invalid line index: ${index}`);
+                return new Vector2d(startX, startY);
+        }
     }
 
     private calculateHandPositionByIndex(index: number): Vector2d {
@@ -428,9 +578,50 @@ export class MouseDropServiceImpl implements MouseDropService {
         const x = cardPositionEntity.getX();
         const y = cardPositionEntity.getY();
         const mainCardSceneMesh = selectedObject.getMesh();
+
+        // Step 1: Restore card position
         if (mainCardSceneMesh) {
             mainCardSceneMesh.position.set(x, y, mainCardSceneMesh.position.z);
             console.log(`Main card mesh restored to position X: ${x}, Y: ${y}`);
+        }
+
+        const cardSceneId = selectedObject.getId();
+        const neonBorder = this.neonBorderRepository.findByCardSceneId(cardSceneId);
+
+        if (neonBorder) {
+            const positionIds = neonBorder.getNeonBorderLinePositionIdList(); // 저장된 위치 ID 리스트
+            const lineSceneIds = neonBorder.getNeonBorderLineSceneIdList(); // 저장된 네온 라인 ID 리스트
+
+            lineSceneIds.forEach((lineSceneId, index) => {
+                const lineScene = this.neonBorderLineSceneRepository.findById(lineSceneId);
+                const positionId = positionIds[index]; // 대응되는 위치 ID
+                const neonBorderLinePosition = this.neonBorderLinePositionRepository.findById(positionId);
+
+                if (lineScene && neonBorderLinePosition) {
+                    const lineMesh = lineScene.getLine();
+                    if (lineMesh) {
+                        // Step 2: Restore neon border line position
+                        const position = neonBorderLinePosition.getPosition();
+                        const restoredX = position.getX()
+                        const restoredY = position.getY();
+                        lineMesh.position.set(restoredX, restoredY, lineMesh.position.z);
+
+                        console.log(
+                            `Neon Border Line (ID: ${lineSceneId}) restored to position X: ${restoredX}, Y: ${restoredY}`
+                        );
+
+                        // Step 3: Hide the neon border
+                        lineMesh.visible = false;
+                        console.log(`Neon Border Line (ID: ${lineSceneId}) visibility set to false.`);
+                    }
+                } else {
+                    console.warn(
+                        `Could not restore position for Neon Border Line (Scene ID: ${lineSceneId}, Position ID: ${positionId}).`
+                    );
+                }
+            });
+        } else {
+            console.warn(`No Neon Border found for card scene ID: ${cardSceneId}`);
         }
     }
 
