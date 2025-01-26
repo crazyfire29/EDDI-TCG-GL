@@ -194,77 +194,59 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     }
 
     private async createNeonBorder(clickedHandCard: BattleFieldCardScene): Promise<void> {
-        // 카드의 위치와 크기를 계산하여 테두리를 생성
         const cardMesh = clickedHandCard.getMesh();
-        cardMesh.renderOrder = 1
-        const cardPosition = cardMesh.position;
+        cardMesh.renderOrder = 1;
 
+        const cardPosition = cardMesh.position;
         this.dragMoveRepository.getSelectedGroup().forEach((obj) => {
             const attributeMesh = obj.getMesh();
-            attributeMesh.renderOrder = 2
+            attributeMesh.renderOrder = 2;
         });
 
         const halfWidth = this.CARD_WIDTH * window.innerWidth / 2;
         const halfHeight = this.CARD_HEIGHT * window.innerWidth / 2;
 
-            // const topLeft = new THREE.Vector3(cardPosition.x - halfWidth, cardPosition.y + halfHeight, cardPosition.z);
-            // const topRight = new THREE.Vector3(cardPosition.x + halfWidth, cardPosition.y + halfHeight, cardPosition.z);
-            // const bottomLeft = new THREE.Vector3(cardPosition.x - halfWidth, cardPosition.y - halfHeight, cardPosition.z);
-            // const bottomRight = new THREE.Vector3(cardPosition.x + halfWidth, cardPosition.y - halfHeight, cardPosition.z);
-            //
-            // const lineWidth = 5
-            // const halfLineWidth = lineWidth / 2.0
-            //
-            // // 네온 경계선을 생성
-            // const neonLinePromises = [
-            //     this.neonShape.addNeonLine(topLeft.x + halfLineWidth, topLeft.y,
-            //                             topRight.x - halfLineWidth, topRight.y, lineWidth), // 상단
-            //     this.neonShape.addNeonLine(topRight.x, topRight.y + halfLineWidth,
-            //                                 bottomRight.x, bottomRight.y + lineWidth, lineWidth), // 우측
-            //     this.neonShape.addNeonLine(bottomRight.x + halfLineWidth, bottomRight.y + halfLineWidth,
-            //                             bottomLeft.x - halfLineWidth, bottomLeft.y + halfLineWidth, lineWidth), // 하단
-            //     this.neonShape.addNeonLine(bottomLeft.x, bottomLeft.y + lineWidth,
-            //                                 topLeft.x, topLeft.y + halfLineWidth, lineWidth) // 좌측
-            // ];
-            //
-            // // Ensure that addNeonLine is returning the neon line objects and each has a uuid
-            // const neonLines = await Promise.all(neonLinePromises);
+        const cardSceneId = clickedHandCard.getId();
 
-        // 카드의 네온 테두리 생성
+        // Step 1: Check for existing NeonBorder
+        const existingNeonBorder = this.neonBorderRepository.findByCardSceneId(cardSceneId);
+        if (existingNeonBorder) {
+            console.log(`NeonBorder already exists for cardSceneId: ${cardSceneId}, enabling visibility.`);
+            existingNeonBorder.getNeonBorderLineSceneIdList().forEach((lineSceneId) => {
+                const lineScene = this.neonBorderLineSceneRepository.findById(lineSceneId);
+                if (lineScene) {
+                    const lineMesh = lineScene.getLine();
+                    if (lineMesh) {
+                        lineMesh.visible = true; // Enable visibility
+                        console.log(`Neon Border Line (ID: ${lineSceneId}) visibility set to true.`);
+                    }
+                }
+            });
+            return; // Exit early as we don't need to create a new border
+        }
+
+        // Step 2: Create new NeonBorder
         const startX = cardPosition.x - halfWidth;
         const startY = cardPosition.y - halfHeight;
         const width = this.CARD_WIDTH * window.innerWidth;
         const height = this.CARD_HEIGHT * window.innerWidth;
 
-        // 새로운 `addNeonShaderRectangle` 사용
         const { lines, neonMaterials } = await this.neonShape.addNeonShaderRectangle(startX, startY, width, height);
 
-        // Scene 및 Position 데이터를 수집
         const lineSceneIds = lines.map((line) => {
             const scene = new NeonBorderLineScene(line, line.material as THREE.ShaderMaterial);
-            this.neonBorderLineSceneRepository.save(scene); // 저장
+            this.neonBorderLineSceneRepository.save(scene);
             return scene.getId();
         });
 
         const positionIds = lines.map((line) => {
             const position = new NeonBorderLinePosition(new Vector2d(line.position.x, line.position.y));
-            this.neonBorderLinePositionRepository.save(position); // 저장
+            this.neonBorderLinePositionRepository.save(position);
             return position.getId();
         });
 
-        // NeonBorder 객체 생성 및 저장
-        const cardSceneId = clickedHandCard.getId();
-        console.log(`LeftClickDetectServiceImpl -> cardSceneId: ${cardSceneId}`)
         const neonBorder = new NeonBorder(lineSceneIds, positionIds, NeonBorderSceneType.HAND, cardSceneId);
-        console.log(`LeftClickDetectServiceImpl -> neonBorder: ${JSON.stringify(neonBorder, null, 2)}`);
+        console.log(`Created new NeonBorder for cardSceneId: ${cardSceneId}`);
         this.neonBorderRepository.save(neonBorder);
-
-        // Assuming neonLine contains the neon object with uuid (if not modify this part accordingly)
-        // const neonBorder = new NeonBorder(
-        //     neonLines.map(line => line.id), // Scene ID로 라인 저장
-        //     [], // Position ID (필요 시 추가)
-        //     NeonBorderStatus.ACTIVE
-        // );
-        // this.neonBorderRepository.save(neonBorder);
     }
 }
