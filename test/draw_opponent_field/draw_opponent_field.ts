@@ -1,39 +1,43 @@
 import * as THREE from 'three';
 import battleFieldMusic from '@resource/music/battle_field/battle-field.mp3';
-
 import {TextureManager} from "../../src/texture_manager/TextureManager";
 import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
 import {AudioController} from "../../src/audio/AudioController";
 import {MouseController} from "../../src/mouse/MouseController";
 import {BattleFieldUnitRepository} from "../../src/battle_field_unit/repository/BattleFieldUnitRepository";
-
 import {BattleFieldUnitScene} from "../../src/battle_field_unit/scene/BattleFieldUnitScene";
 import {ResourceManager} from "../../src/resouce_manager/ResourceManager";
 import {BattleFieldUnitRenderer} from "../../src/battle_field_unit/renderer/BattleFieldUnitRenderer";
-
 import {BattleFieldHandSceneRepository} from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandSceneRepository";
 import {BattleFieldHandPositionRepository} from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandPositionRepository";
 
 import {UserWindowSize} from "../../src/window_size/WindowSize"
 import {UnitCardGenerator} from "../../src/card/unit/generate";
-
 import {SupportCardGenerator} from "../../src/card/support/generate";
 import {ItemCardGenerator} from "../../src/card/item/generate";
 import {EnergyCardGenerator} from "../../src/card/energy/generate";
-import {WindowSceneServiceImpl} from "../../src/window_scene/service/WindowSceneServiceImpl";
-import {WindowSceneRepositoryImpl} from "../../src/window_scene/repository/WindowSceneRepositoryImpl";
-import {CameraServiceImpl} from "../../src/camera/service/CameraServiceImpl";
-import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepositoryImpl";
+import {BattleFieldHandMapRepositoryImpl} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepositoryImpl";
+
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import {MaskPass} from "three/examples/jsm/postprocessing/MaskPass";
 import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServiceImpl";
 import {BattleFieldHandServiceImpl} from "../../src/battle_field_hand/service/BattleFieldHandServiceImpl";
-import {BattleFieldHandMapRepositoryImpl} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepositoryImpl";
-import {LeftClickDetectServiceImpl} from "../../src/left_click_detect/service/LeftClickDetectServiceImpl";
 import {LeftClickDetectService} from "../../src/left_click_detect/service/LeftClickDetectService";
-import {DragMoveServiceImpl} from "../../src/drag_move/service/DragMoveServiceImpl";
 import {DragMoveService} from "../../src/drag_move/service/DragMoveService";
-import {YourFieldAreaServiceImpl} from "../../src/your_field_area/service/YourFieldAreaServiceImpl";
 import {MouseDropService} from "../../src/mouse_drop/service/MouseDropService";
+import {YourFieldAreaServiceImpl} from "../../src/your_field_area/service/YourFieldAreaServiceImpl";
+import {WindowSceneRepositoryImpl} from "../../src/window_scene/repository/WindowSceneRepositoryImpl";
+import {WindowSceneServiceImpl} from "../../src/window_scene/service/WindowSceneServiceImpl";
+import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepositoryImpl";
+import {CameraServiceImpl} from "../../src/camera/service/CameraServiceImpl";
+import {LeftClickDetectServiceImpl} from "../../src/left_click_detect/service/LeftClickDetectServiceImpl";
+import {DragMoveServiceImpl} from "../../src/drag_move/service/DragMoveServiceImpl";
 import {MouseDropServiceImpl} from "../../src/mouse_drop/service/MouseDropServiceImpl";
+import {NeonShape, Shader} from "../../src/neon/NeonShape";
+import {OpponentFieldAreaServiceImpl} from "../../src/opponent_field_area/service/OpponentFieldAreaServiceImpl";
+
 
 export class TCGJustTestBattleFieldView {
     private static instance: TCGJustTestBattleFieldView | null = null;
@@ -64,12 +68,18 @@ export class TCGJustTestBattleFieldView {
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
     private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
-    // private dragAndDropManager: DragAndDropManager;
+    // private lightningGenerator = new LightningGenerator(20)
+    // private lightning: THREE.Mesh[] = [];
+
+    private neonShape: NeonShape
+    private neonMaterial?: Shader
+
     private leftClickDetectService: LeftClickDetectService
     private dragMoveService: DragMoveService
     private mouseDropService: MouseDropService
 
     private yourFieldAreaService = YourFieldAreaServiceImpl.getInstance();
+    private opponentFieldAreaService = OpponentFieldAreaServiceImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -89,7 +99,6 @@ export class TCGJustTestBattleFieldView {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.simulationBattleFieldContainer.appendChild(this.renderer.domElement);
 
-        // this.userWindowSize = new UserWindowSize(window.innerWidth, window.innerHeight);
         this.userWindowSize = UserWindowSize.getInstance()
 
         const aspect = window.innerWidth / window.innerHeight;
@@ -100,12 +109,12 @@ export class TCGJustTestBattleFieldView {
 
         this.cameraService.setCameraPosition(this.cameraId, 0, 0, 5)
         this.cameraService.setCameraLookAt(this.cameraId, 0, 0, 0)
-        // this.camera.position.set(0, 0, 5);
-        // this.camera.lookAt(0, 0, 0);
 
         this.textureManager = TextureManager.getInstance();
         this.audioController = AudioController.getInstance();
         this.audioController.setMusic(battleFieldMusic);
+
+        this.neonShape = NeonShape.getInstance(this.scene, this.renderer, this.camera);
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
 
@@ -120,7 +129,7 @@ export class TCGJustTestBattleFieldView {
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
             if (e.button === 0) { // 좌클릭만 처리
                 const result = await this.leftClickDetectService.handleLeftClick(e);
-                console.log(`result: ${JSON.stringify(result, null, 2)}`)
+                // console.log(`result: ${JSON.stringify(result, null, 2)}`)
                 if (result !== null) {
                     this.leftClickDetectService.setLeftMouseDown(true);
                 }
@@ -170,6 +179,7 @@ export class TCGJustTestBattleFieldView {
 
         await this.addBackground();
         this.addYourField();
+        this.addOpponentField();
         this.addYourHandUnitList()
 
         this.initialized = true;
@@ -207,7 +217,6 @@ export class TCGJustTestBattleFieldView {
             );
 
             this.background = background;
-            // this.dragAndDropManager.setBackground(this.background)
 
             if (this.background instanceof NonBackgroundImage) {
                 this.background.draw(this.scene);
@@ -224,6 +233,13 @@ export class TCGJustTestBattleFieldView {
         this.scene.add(yourFieldAreaMesh);
     }
 
+    private addOpponentField(): void {
+        const opponentField = this.opponentFieldAreaService.createOpponentField()
+        const opponentFieldAreaMesh = opponentField.getArea()
+
+        this.scene.add(opponentFieldAreaMesh);
+    }
+
     private async addYourHandUnitList(): Promise<void> {
         const battleFieldHandList = this.battleFieldHandMapRepository.getBattleFieldHandList()
 
@@ -237,6 +253,118 @@ export class TCGJustTestBattleFieldView {
         }
     }
 
+    private async addBlueNeonLine(startX: number, startY: number, endX: number, endY: number): Promise<void> {
+        const color = 0x3137FD; // 네온 블루 색상
+        const lineWidth = 10; // 선 두께
+
+        // 선의 시작점과 끝점 설정
+        const points = [
+            new THREE.Vector3(startX, startY, 4),
+            new THREE.Vector3(endX, endY, 4)
+        ];
+
+        // 선의 방향과 길이 계산
+        const direction = new THREE.Vector3().subVectors(points[1], points[0]);
+        const length = direction.length();
+        direction.normalize();
+
+        // 선의 재질 설정 (발광 효과를 위해 emissive 사용)
+        const material = new THREE.MeshStandardMaterial({
+            color: color,
+            emissive: color,
+            emissiveIntensity: 1,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        // 선을 나타내는 얇은 사각형 기하학을 생성
+        const geometry = new THREE.PlaneGeometry(length, lineWidth);
+
+        // 선을 생성하고 장면에 추가
+        const line = new THREE.Mesh(geometry, material);
+        const angle = Math.atan2(direction.y, direction.x);
+        line.rotation.z = angle;  // 선의 회전 적용
+
+        // 선의 위치 조정
+        line.position.copy(points[0].clone().add(direction.multiplyScalar(length / 2)));
+
+        this.scene.add(line);
+
+        // 블룸 효과를 적용
+        this.applyGlowEffect(line);
+    }
+
+    private applyGlowEffect(line: THREE.Mesh): void {
+        const composer = new EffectComposer(this.renderer);
+        const renderPass = new RenderPass(this.scene, this.camera);
+        composer.addPass(renderPass);
+
+        // 블룸 효과를 위한 패스 추가
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(this.renderer.domElement.width, this.renderer.domElement.height),
+            1.5,   // 블룸 효과 강도
+            0.4,   // 블룸 반경
+            0.85   // 블룸 임계값
+        );
+        composer.addPass(bloomPass);
+
+        // 마스크 패스를 사용하여 선에만 블룸 효과를 적용
+        const maskPass = new MaskPass(this.scene, this.camera);
+        composer.addPass(maskPass);
+
+        maskPass.enabled = true;
+        this.scene.traverse((object) => {
+            if (object !== line) {
+                object.visible = false; // 선 외의 모든 객체를 숨김
+            }
+        });
+
+        // 두 번째 렌더 패스를 사용하여 블룸 효과가 적용된 선을 렌더링
+        const renderPass2 = new RenderPass(this.scene, this.camera);
+        composer.addPass(renderPass2);
+
+        // 블룸 효과 후 다른 객체의 가시성을 복원
+        maskPass.enabled = false;
+        this.scene.traverse((object) => {
+            object.visible = true;  // 모든 객체의 가시성을 복원
+        });
+
+        // 애니메이션 함수 실행
+        if (this.isAnimating) {
+            requestAnimationFrame(() => this.animate());  // 기존 animate 호출
+            composer.render();
+        }
+    }
+
+    // 사각형을 그리기 위한 메소드
+    public async addBlueNeonRectangle(): Promise<void> {
+        const rectLength = 100;  // 사각형 한 변의 길이
+        const lineWidth = 10;    // 선 두께
+
+        const startX = 50; // 사각형 시작 X 좌표
+        const startY = 50; // 사각형 시작 Y 좌표
+
+        // 상단 선
+        await this.addBlueNeonLine(
+            startX, startY,
+            startX + rectLength, startY);
+
+        // 오른쪽 선 (세로로 수정)
+        await this.addBlueNeonLine(
+            startX + rectLength, startY,
+            startX + rectLength, startY + rectLength);
+
+        // 하단 선
+        await this.addBlueNeonLine(
+            startX + rectLength, startY + rectLength,
+            startX, startY + rectLength);
+
+        // 왼쪽 선 (세로로 수정)
+        await this.addBlueNeonLine(
+            startX, startY + rectLength,
+            startX, startY);
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -245,7 +373,12 @@ export class TCGJustTestBattleFieldView {
         if (newWidth !== this.userWindowSize.getWidth() || newHeight !== this.userWindowSize.getHeight()) {
             const aspect = newWidth / newHeight;
             const viewSize = newHeight;
-            this.cameraService.updateCamera(this.cameraId, aspect, viewSize)
+
+            this.camera.left = -aspect * viewSize / 2;
+            this.camera.right = aspect * viewSize / 2;
+            this.camera.top = viewSize / 2;
+            this.camera.bottom = -viewSize / 2;
+            this.camera.updateProjectionMatrix();
 
             this.renderer.setSize(newWidth, newHeight);
 
@@ -283,9 +416,11 @@ export class TCGJustTestBattleFieldView {
 
     animate(): void {
         if (this.isAnimating) {
-            requestAnimationFrame(() => this.animate());
-            // this.battleFieldHandRenderer?.render(this.renderer, this.camera);
+            this.neonShape.updateNeonEffect();
+
             this.renderer.render(this.scene, this.camera);
+
+            requestAnimationFrame(() => this.animate());
         } else {
             console.log('Animation stopped.');
         }
@@ -298,5 +433,6 @@ if (!rootElement) {
     throw new Error("Cannot find element with id 'app'.");
 }
 
+const userWindowSize = UserWindowSize.getInstance();
 const fieldView = TCGJustTestBattleFieldView.getInstance(rootElement);
 fieldView.initialize();
