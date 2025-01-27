@@ -1,4 +1,5 @@
 import {NeonBorder} from "../entity/NeonBorder";
+import {NeonBorderSceneType} from "../entity/NeonBorderSceneType";
 
 export interface NeonBorderRepository {
     save(neonBorder: NeonBorder): NeonBorder;
@@ -8,4 +9,5 @@ export interface NeonBorderRepository {
     deleteAll(): void;
 
     findByCardSceneId(cardSceneId: number): NeonBorder | null;
+    findByCardSceneIdWithPlacement(sceneId: number, type: NeonBorderSceneType): NeonBorder | null;
 }
