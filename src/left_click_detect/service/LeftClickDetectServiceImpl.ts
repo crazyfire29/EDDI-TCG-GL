@@ -1,7 +1,5 @@
 import {LeftClickDetectService} from "./LeftClickDetectService";
-import {
-    BattleFieldCardSceneRepositoryImpl
-} from "../../battle_field_card_scene/repository/BattleFieldCardSceneRepositoryImpl";
+import {BattleFieldCardSceneRepositoryImpl} from "../../battle_field_card_scene/repository/BattleFieldCardSceneRepositoryImpl";
 import {BattleFieldCardSceneRepository} from "../../battle_field_card_scene/repository/BattleFieldCardSceneRepository";
 import {LeftClickHandDetectRepositoryImpl} from "../repository/LeftClickHandDetectRepositoryImpl";
 import {LeftClickHandDetectRepository} from "../repository/LeftClickHandDetectRepository";
@@ -12,21 +10,11 @@ import {DragMoveRepository} from "../../drag_move/repository/DragMoveRepository"
 import {DragMoveRepositoryImpl} from "../../drag_move/repository/DragMoveRepositoryImpl";
 import {BattleFieldHandRepository} from "../../battle_field_hand/repository/BattleFieldHandRepository";
 import {BattleFieldHandRepositoryImpl} from "../../battle_field_hand/repository/BattleFieldHandRepositoryImpl";
-import {
-    BattleFieldCardAttributeMarkSceneRepository
-} from "../../battle_field_card_attribute_mark_scene/repository/BattleFieldCardAttributeMarkSceneRepository";
-import {
-    BattleFieldCardAttributeMarkSceneRepositoryImpl
-} from "../../battle_field_card_attribute_mark_scene/repository/BattleFieldCardAttributeMarkSceneRepositoryImpl";
-import {
-    BattleFieldCardAttributeMarkScene
-} from "../../battle_field_card_attribute_mark_scene/entity/BattleFieldCardAttributeMarkScene";
-import {
-    BattleFieldCardAttributeMarkRepositoryImpl
-} from "../../battle_field_card_attribute_mark/repository/BattleFieldCardAttributeMarkRepositoryImpl";
-import {
-    BattleFieldCardAttributeMarkRepository
-} from "../../battle_field_card_attribute_mark/repository/BattleFieldCardAttributeMarkRepository";
+import {BattleFieldCardAttributeMarkSceneRepository} from "../../battle_field_card_attribute_mark_scene/repository/BattleFieldCardAttributeMarkSceneRepository";
+import {BattleFieldCardAttributeMarkSceneRepositoryImpl} from "../../battle_field_card_attribute_mark_scene/repository/BattleFieldCardAttributeMarkSceneRepositoryImpl";
+import {BattleFieldCardAttributeMarkScene} from "../../battle_field_card_attribute_mark_scene/entity/BattleFieldCardAttributeMarkScene";
+import {BattleFieldCardAttributeMarkRepositoryImpl} from "../../battle_field_card_attribute_mark/repository/BattleFieldCardAttributeMarkRepositoryImpl";
+import {BattleFieldCardAttributeMarkRepository} from "../../battle_field_card_attribute_mark/repository/BattleFieldCardAttributeMarkRepository";
 import {BattleFieldCardAttributeMark} from "../../battle_field_card_attribute_mark/entity/BattleFieldCardAttributeMark";
 import {NeonBorderRepository} from "../../neon_border/repository/NeonBorderRepository";
 import {NeonBorderRepositoryImpl} from "../../neon_border/repository/NeonBorderRepositoryImpl";
@@ -34,19 +22,14 @@ import {BattleFieldCardScene} from "../../battle_field_card_scene/entity/BattleF
 import {NeonBorder} from "../../neon_border/entity/NeonBorder";
 import {NeonShape} from "../../neon/NeonShape";
 import {NeonBorderLineSceneRepository} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepository";
-import {
-    NeonBorderLineSceneRepositoryImpl
-} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepositoryImpl";
+import {NeonBorderLineSceneRepositoryImpl} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepositoryImpl";
 import {NeonBorderLineScene} from "../../neon_border_line_scene/entity/NeonBorderLineScene";
 import {NeonBorderLinePosition} from "../../neon_border_line_position/entity/NeonBorderLinePosition";
 import {Vector2d} from "../../common/math/Vector2d";
-import {
-    NeonBorderLinePositionRepository
-} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepository";
-import {
-    NeonBorderLinePositionRepositoryImpl
-} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepositoryImpl";
+import {NeonBorderLinePositionRepository} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepository";
+import {NeonBorderLinePositionRepositoryImpl} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepositoryImpl";
 import {NeonBorderSceneType} from "../../neon_border/entity/NeonBorderSceneType";
+import chalk from "chalk";
 
 export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private static instance: LeftClickDetectServiceImpl | null = null;
@@ -209,7 +192,8 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         const cardSceneId = clickedHandCard.getId();
 
         // Step 1: Check for existing NeonBorder
-        const existingNeonBorder = this.neonBorderRepository.findByCardSceneId(cardSceneId);
+        const existingNeonBorder = this.neonBorderRepository.findByCardSceneIdWithPlacement(cardSceneId, NeonBorderSceneType.HAND);
+        console.log(chalk.red.bold(`existingNeonBorder: ${existingNeonBorder}`));
         if (existingNeonBorder) {
             console.log(`NeonBorder already exists for cardSceneId: ${cardSceneId}, enabling visibility.`);
             existingNeonBorder.getNeonBorderLineSceneIdList().forEach((lineSceneId) => {
@@ -246,7 +230,10 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         });
 
         const neonBorder = new NeonBorder(lineSceneIds, positionIds, NeonBorderSceneType.HAND, cardSceneId);
-        console.log(`Created new NeonBorder for cardSceneId: ${cardSceneId}`);
+        console.log(chalk.red.bold(`neonBorderSceneType: ${neonBorder.getNeonBorderSceneType()}`));
+        console.log(chalk.red.bold(`Expected sceneType: ${NeonBorderSceneType.HAND}`));
+        console.log(chalk.red.bold(`Created new NeonBorder for cardSceneId: ${cardSceneId}`));
+        console.log(chalk.red.bold(`chalk.red.bold(Saving NeonBorder: ${JSON.stringify(neonBorder)}`));
         this.neonBorderRepository.save(neonBorder);
     }
 }

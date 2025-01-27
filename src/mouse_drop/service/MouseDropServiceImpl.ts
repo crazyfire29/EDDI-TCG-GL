@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { MouseDropService } from './MouseDropService';
+import {MouseDropService} from './MouseDropService';
 import {MouseDropFieldRepositoryImpl} from "../repository/MouseDropRepositoryImpl";
 import {MouseDropFieldRepository} from "../repository/MouseDropRepository";
 import {DragMoveRepository} from "../../drag_move/repository/DragMoveRepository";
@@ -28,17 +28,16 @@ import {YourFieldCardSceneRepositoryImpl} from "../../your_field_card_scene/repo
 import {YourFieldCardPositionRepository} from "../../your_field_card_position/repository/YourFieldCardPositionRepository";
 import {YourFieldCardPositionRepositoryImpl} from "../../your_field_card_position/repository/YourFieldCardPositionRepositoryImpl";
 import {Vector2d} from "../../common/math/Vector2d";
-import {MarkSceneType} from "../../battle_field_card_attribute_mark_scene/entity/MarkSceneType";
 import {AttributeMarkPositionCalculator} from "../../common/attribute_mark/AttributeMarkPositionCalculator";
-import {YourFieldCardPosition} from "../../your_field_card_position/entity/YourFieldCardPosition";
 import {YourField} from "../../your_field/entity/YourField";
-import {MeshGenerator} from "../../mesh/generator";
 import {NeonBorderRepository} from "../../neon_border/repository/NeonBorderRepository";
 import {NeonBorderLineSceneRepository} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepository";
 import {NeonBorderRepositoryImpl} from "../../neon_border/repository/NeonBorderRepositoryImpl";
 import {NeonBorderLineSceneRepositoryImpl} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepositoryImpl";
 import {NeonBorderLinePositionRepository} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepository";
 import {NeonBorderLinePositionRepositoryImpl} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepositoryImpl";
+import {NeonBorderSceneType} from "../../neon_border/entity/NeonBorderSceneType";
+import chalk from "chalk";
 
 export class MouseDropServiceImpl implements MouseDropService {
     private static instance: MouseDropServiceImpl | null = null;
@@ -190,13 +189,13 @@ export class MouseDropServiceImpl implements MouseDropService {
                 const y = calculatedPosition.getY();
 
                 mesh.position.set(x, y, 0); // mesh의 위치를 업데이트
-                console.log(`mesh의 위치가 업데이트되었습니다. id: ${attributeMarkSceneId}`);
+                // console.log(`mesh의 위치가 업데이트되었습니다. id: ${attributeMarkSceneId}`);
 
                 attributeMarkPosition.setPosition(x, y);
 
                 // 업데이트된 position을 다시 저장
                 await this.battleFieldCardAttributeMarkPositionRepository.save(attributeMarkPosition);
-                console.log(`attributeMarkPosition이 업데이트되었습니다. id: ${attributeMarkPositionId}`);
+                // console.log(`attributeMarkPosition이 업데이트되었습니다. id: ${attributeMarkPositionId}`);
             }
         }
     }
@@ -218,8 +217,8 @@ export class MouseDropServiceImpl implements MouseDropService {
         }
 
         const yourFieldSceneId = createdYourField.getCardSceneId()
-        console.log(`alignYourField() yourFieldSceneId: ${yourFieldSceneId}`)
         const yourFieldScene = this.yourFieldCardSceneRepository.findById(yourFieldSceneId)
+        console.log(chalk.red.bold(`alignYourField() yourFieldScene: ${yourFieldScene}`))
 
         if (!yourFieldScene) {
             console.error(`yourFieldScene: ${yourFieldScene}`);
@@ -238,6 +237,7 @@ export class MouseDropServiceImpl implements MouseDropService {
             cardPosition.setPosition(x, y);
             this.battleFieldHandCardPositionRepository.save(cardPosition);
 
+            // TODO: yourFieldSceneId가 되면서 sceneId로 제어하던 일관성이 깨졌음
             this.repositionNeonBorder(yourFieldSceneId, x, y);
         } else {
             console.error(`Mesh not found`);
@@ -245,10 +245,14 @@ export class MouseDropServiceImpl implements MouseDropService {
     }
 
     private repositionNeonBorder(sceneId: number, x: number, y: number): void {
-        const neonBorder = this.neonBorderRepository.findById(sceneId);
+        const selectedObject = this.dragMoveRepository.getSelectedObject();
+        const cardScene = selectedObject as unknown as BattleFieldCardScene;
+        const cardSceneId = cardScene.getId();
+
+        const neonBorder = this.neonBorderRepository.findByCardSceneIdWithPlacement(cardSceneId, NeonBorderSceneType.HAND);
 
         if (!neonBorder) {
-            console.error(`Neon Border not found for sceneId: ${sceneId}`);
+            console.log(chalk.red.bold(`Neon Border not found for sceneId: ${cardSceneId}`));
             return;
         }
 
@@ -260,7 +264,7 @@ export class MouseDropServiceImpl implements MouseDropService {
         const width = this.CARD_WIDTH * window.innerWidth;
         const height = this.CARD_HEIGHT * window.innerWidth;
 
-        console.log(`Repositioning Neon Border for sceneId: ${sceneId}`);
+        console.log(chalk.red.bold(`Repositioning Neon Border for sceneId: ${sceneId}`));
         const lineSceneIds = neonBorder.getNeonBorderLineSceneIdList();
         const positionIds = neonBorder.getNeonBorderLinePositionIdList();
 
@@ -288,6 +292,8 @@ export class MouseDropServiceImpl implements MouseDropService {
             position.setPosition(newLinePosition);
             this.neonBorderLinePositionRepository.save(position);
         });
+
+        neonBorder.neonBorderSceneType = NeonBorderSceneType.FIELD
 
         console.log(`Neon Border reposition complete for sceneId: ${sceneId}`);
     }
@@ -322,13 +328,13 @@ export class MouseDropServiceImpl implements MouseDropService {
 
             // 카드 위치 업데이트
             cardPosition.setPosition(calculatedPosition.getX(), calculatedPosition.getY());
-            console.log(`Card Scene ID: ${handCard.getCardSceneId()}, New Position: (${calculatedPosition.getX()}, ${calculatedPosition.getY()})`);
+            // console.log(`Card Scene ID: ${handCard.getCardSceneId()}, New Position: (${calculatedPosition.getX()}, ${calculatedPosition.getY()})`);
 
             const mainCardSceneMesh = mainCardScene.getMesh();
             if (mainCardSceneMesh) {
                 mainCardSceneMesh.position.x = calculatedPosition.getX();
                 mainCardSceneMesh.position.y = calculatedPosition.getY();
-                console.log(`Mesh updated for Card Scene ID: ${handCard.getCardSceneId()}, Position: (${mainCardSceneMesh.position.x}, ${mainCardSceneMesh.position.y})`);
+                // console.log(`Mesh updated for Card Scene ID: ${handCard.getCardSceneId()}, Position: (${mainCardSceneMesh.position.x}, ${mainCardSceneMesh.position.y})`);
             } else {
                 console.error(`Mesh not found for Card Scene ID: ${handCard.getCardSceneId()}`);
             }
@@ -384,7 +390,7 @@ export class MouseDropServiceImpl implements MouseDropService {
                         // attributeMarkPosition에 계산된 값 설정
                         attributeMarkPosition.setPosition(calculatedAttributeMarkPosition.getX(), calculatedAttributeMarkPosition.getY());
 
-                        console.log(`Attribute Mark Mesh updated for AttributeMarkScene ID: ${attributeMark.attributeMarkSceneId}`);
+                        // console.log(`Attribute Mark Mesh updated for AttributeMarkScene ID: ${attributeMark.attributeMarkSceneId}`);
                     } else {
                         console.error(`Mesh not found for AttributeMarkScene ID: ${attributeMark.attributeMarkSceneId}`);
                     }
@@ -412,7 +418,8 @@ export class MouseDropServiceImpl implements MouseDropService {
         console.log(`Resetting neon position for cardSceneId: ${cardSceneId}`);
 
         // NeonBorderRepository에서 cardSceneId를 사용해 NeonBorder 찾기
-        const neonBorder = this.neonBorderRepository.findById(cardSceneId);
+        // const neonBorder = this.neonBorderRepository.findById(cardSceneId);
+        const neonBorder = this.neonBorderRepository.findByCardSceneIdWithPlacement(cardSceneId, NeonBorderSceneType.HAND);
 
         if (!neonBorder) {
             console.log(`NeonBorder not found for cardSceneId: ${cardSceneId}`);
@@ -451,6 +458,7 @@ export class MouseDropServiceImpl implements MouseDropService {
                 // Line의 실제 Scene에 위치 적용
                 line.position.set(newLinePosition.getX(), newLinePosition.getY(), 0);
                 console.log(`Updated NeonBorderLine position for SceneId: ${sceneId}`);
+                line.visible = false;
             }
 
             // Position 데이터에도 위치 정보 업데이트
@@ -586,7 +594,8 @@ export class MouseDropServiceImpl implements MouseDropService {
         }
 
         const cardSceneId = selectedObject.getId();
-        const neonBorder = this.neonBorderRepository.findByCardSceneId(cardSceneId);
+        // const neonBorder = this.neonBorderRepository.findByCardSceneId(cardSceneId);
+        const neonBorder = this.neonBorderRepository.findByCardSceneIdWithPlacement(cardSceneId, NeonBorderSceneType.HAND);
 
         if (neonBorder) {
             const positionIds = neonBorder.getNeonBorderLinePositionIdList(); // 저장된 위치 ID 리스트
@@ -606,13 +615,8 @@ export class MouseDropServiceImpl implements MouseDropService {
                         const restoredY = position.getY();
                         lineMesh.position.set(restoredX, restoredY, lineMesh.position.z);
 
-                        console.log(
-                            `Neon Border Line (ID: ${lineSceneId}) restored to position X: ${restoredX}, Y: ${restoredY}`
-                        );
-
                         // Step 3: Hide the neon border
                         lineMesh.visible = false;
-                        console.log(`Neon Border Line (ID: ${lineSceneId}) visibility set to false.`);
                     }
                 } else {
                     console.warn(

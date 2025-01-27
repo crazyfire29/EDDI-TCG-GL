@@ -11,6 +11,7 @@ import {NeonBorderLinePositionRepository} from "../../neon_border_line_position/
 import {NeonBorderRepositoryImpl} from "../../neon_border/repository/NeonBorderRepositoryImpl";
 import {NeonBorderLineSceneRepositoryImpl} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepositoryImpl";
 import {NeonBorderLinePositionRepositoryImpl} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepositoryImpl";
+import {NeonBorderSceneType} from "../../neon_border/entity/NeonBorderSceneType";
 
 export class DragMoveServiceImpl implements DragMoveService {
     private static instance: DragMoveServiceImpl | null = null;
@@ -112,7 +113,7 @@ export class DragMoveServiceImpl implements DragMoveService {
 
     private updateNeonBorderPosition(cardSceneId: number, movement: THREE.Vector3): void {
         // 해당 카드에 연결된 NeonBorder를 가져옴
-        const neonBorder = this.neonBorderRepository.findByCardSceneId(cardSceneId);
+        const neonBorder = this.neonBorderRepository.findByCardSceneIdWithPlacement(cardSceneId, NeonBorderSceneType.HAND);
         if (!neonBorder) {
             console.warn(`No NeonBorder found for card scene ID: ${cardSceneId}`);
             return;
@@ -126,7 +127,7 @@ export class DragMoveServiceImpl implements DragMoveService {
                 const lineMesh = lineScene.getLine();
                 if (lineMesh) {
                     lineMesh.position.add(movement);
-                    console.log(`Updated neon border line position to: ${lineMesh.position.toArray()}`);
+                    // console.log(`Updated neon border line position to: ${lineMesh.position.toArray()}`);
                 }
             }
         });
@@ -146,7 +147,7 @@ export class DragMoveServiceImpl implements DragMoveService {
             const attributeMesh = obj.getMesh();
             if (attributeMesh) {
                 attributeMesh.position.add(movement);
-                console.log(`Updated attribute mark position to: ${attributeMesh.position.toArray()}`);
+                // console.log(`Updated attribute mark position to: ${attributeMesh.position.toArray()}`);
             }
         });
     }

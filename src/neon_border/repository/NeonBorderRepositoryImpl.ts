@@ -1,6 +1,8 @@
 
 import { NeonBorderRepository } from "./NeonBorderRepository";
 import {NeonBorder} from "../entity/NeonBorder";
+import {NeonBorderSceneType} from "../entity/NeonBorderSceneType";
+import chalk from "chalk";
 
 export class NeonBorderRepositoryImpl implements NeonBorderRepository {
     private static instance: NeonBorderRepositoryImpl | null = null;
@@ -16,6 +18,7 @@ export class NeonBorderRepositoryImpl implements NeonBorderRepository {
     }
 
     save(neonBorder: NeonBorder): NeonBorder {
+        console.log(chalk.red.bold(`NeonBorderRepositoryImpl save() neonBorder Id: ${neonBorder.getId()}, type: ${neonBorder.neonBorderSceneType}`));
         this.storage.set(neonBorder.getId(), neonBorder);
         return neonBorder;
     }
@@ -39,6 +42,21 @@ export class NeonBorderRepositoryImpl implements NeonBorderRepository {
     findByCardSceneId(cardSceneId: number): NeonBorder | null {
         for (const neonBorder of this.storage.values()) {
             if (neonBorder.getNeonBorderSceneId() === cardSceneId) {
+                return neonBorder;
+            }
+        }
+        return null;
+    }
+
+    findByCardSceneIdWithPlacement(cardSceneId: number, sceneType: NeonBorderSceneType): NeonBorder | null {
+        for (const neonBorder of this.storage.values()) {
+            console.log(chalk.red.bold(`NeonBorderRepositoryImpl findByCardSceneIdWithPlacement() neonBorder: ${JSON.stringify(neonBorder, null, 2)}`));
+            console.log(chalk.red.bold(`cardSceneId: ${cardSceneId}, sceneType: ${sceneType}`));
+            console.log(chalk.red.bold(`NeonBorderSceneType[sceneType]: ${NeonBorderSceneType[sceneType]}, neonBorder.getNeonBorderSceneType(): ${neonBorder.getNeonBorderSceneType()}`));
+            if (
+                neonBorder.getNeonBorderSceneId() === cardSceneId &&
+                neonBorder.getNeonBorderSceneType() === NeonBorderSceneType[sceneType]
+            ) {
                 return neonBorder;
             }
         }
