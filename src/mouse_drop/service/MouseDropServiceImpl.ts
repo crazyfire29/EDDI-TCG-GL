@@ -124,9 +124,9 @@ export class MouseDropServiceImpl implements MouseDropService {
                 const createdYourField = await this.handleValidDrop(selectedObject);
 
                 if (createdYourField) {
-                    this.alignHandCard();
+                    await this.alignHandCard();
                     this.alignYourField(createdYourField);
-                    this.alignYourFieldAttributeMark(createdYourField)
+                    await this.alignYourFieldAttributeMark(createdYourField)
                 } else {
                     console.log("Failed to create YourField.");
                 }
@@ -402,6 +402,7 @@ export class MouseDropServiceImpl implements MouseDropService {
     }
 
     private resetNeonPosition(cardSceneId: number, mainCardScene: any, calculatedPosition: Vector2d): void {
+        console.log(chalk.red.bold(`resetNeonPosition`))
         const selectedObject = this.dragMoveRepository.getSelectedObject();
         if (!selectedObject) {
             console.log("No object selected.");
@@ -410,7 +411,7 @@ export class MouseDropServiceImpl implements MouseDropService {
 
         if (selectedObject instanceof BattleFieldCardScene) {
             if (cardSceneId === selectedObject.getId()) {
-                console.log(`CardSceneId ${cardSceneId} is selected. Skipping reset.`);
+                console.log(chalk.red.bold(`Current CardSceneId: ${cardSceneId}, selectedObject: ${selectedObject.getId()}`));
                 return;
             }
         }
