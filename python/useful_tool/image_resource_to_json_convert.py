@@ -32,6 +32,7 @@ class WillBeReferenceImageLocation(Enum):
     CARD_KINDS = "resource/card_kinds/"
     DECK_MAKING_POP_UP_BACKGROUND = "resource/deck_making_pop_up/background/"
     DECK_MAKING_POP_UP_BUTTONS = "resource/deck_making_pop_up/buttons/"
+    MAKE_DECK_BACKGROUND = "resource/make_deck/background/"
 
 class RelativeImageLocation(Enum):
     CARD = "../../resource/battle_field_unit/card/"
@@ -60,6 +61,7 @@ class RelativeImageLocation(Enum):
     CARD_KINDS = "../../resource/card_kinds/"
     DECK_MAKING_POP_UP_BACKGROUND = "../../resource/deck_making_pop_up/background/"
     DECK_MAKING_POP_UP_BUTTONS = "../../resource/deck_making_pop_up/buttons/"
+    MAKE_DECK_BACKGROUND = "../../resource/make_deck/background/"
 
 # 디렉토리 경로 설정
 relative_paths = {
@@ -89,6 +91,7 @@ relative_paths = {
     RelativeImageLocation.CARD_KINDS: RelativeImageLocation.CARD_KINDS.value,
     RelativeImageLocation.DECK_MAKING_POP_UP_BACKGROUND: RelativeImageLocation.DECK_MAKING_POP_UP_BACKGROUND.value,
     RelativeImageLocation.DECK_MAKING_POP_UP_BUTTONS: RelativeImageLocation.DECK_MAKING_POP_UP_BUTTONS.value,
+    RelativeImageLocation.MAKE_DECK_BACKGROUND: RelativeImageLocation.MAKE_DECK_BACKGROUND.value,
 }
 
 reference_paths = {
@@ -118,6 +121,7 @@ reference_paths = {
     WillBeReferenceImageLocation.CARD_KINDS: WillBeReferenceImageLocation.CARD_KINDS.value,
     WillBeReferenceImageLocation.DECK_MAKING_POP_UP_BACKGROUND: WillBeReferenceImageLocation.DECK_MAKING_POP_UP_BACKGROUND.value,
     WillBeReferenceImageLocation.DECK_MAKING_POP_UP_BUTTONS: WillBeReferenceImageLocation.DECK_MAKING_POP_UP_BUTTONS.value,
+    WillBeReferenceImageLocation.MAKE_DECK_BACKGROUND: WillBeReferenceImageLocation.MAKE_DECK_BACKGROUND.value,
 }
 
 image_paths = {
@@ -147,6 +151,7 @@ image_paths = {
     "card_kinds": [],
     "deck_making_pop_up_background": [],
     "deck_making_pop_up_buttons": [],
+    "make_deck_background": [],
 }
 
 for category, dir_path in relative_paths.items():

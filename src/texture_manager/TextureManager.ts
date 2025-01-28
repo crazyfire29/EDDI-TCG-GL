@@ -34,6 +34,7 @@ export class TextureManager {
     private cardKindsTextureList: { [id: number]: THREE.Texture } = {};
     private deckMakingPopupBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private deckMakingPopupButtonsTextureList: { [id: number]: THREE.Texture } = {};
+    private makeDeckBackgroundTextureList: { [id: number]: THREE.Texture } = {};
 
     private constructor() {}
 
@@ -81,6 +82,7 @@ export class TextureManager {
                 this.loadTextures(imageData.card_kinds, this.cardKindsTextureList),
                 this.loadTextures(imageData.deck_making_pop_up_background, this.deckMakingPopupBackgroundTextureList),
                 this.loadTextures(imageData.deck_making_pop_up_buttons, this.deckMakingPopupButtonsTextureList),
+                this.loadTextures(imageData.make_deck_background, this.makeDeckBackgroundTextureList),
             ]);
 
             console.log('All textures preloaded from TextureManager.ts');
@@ -210,6 +212,8 @@ export class TextureManager {
                 return this.deckMakingPopupBackgroundTextureList[id]
             case 'deck_making_pop_up_buttons':
                 return this.deckMakingPopupButtonsTextureList[id]
+            case 'make_deck_background':
+                return this.makeDeckBackgroundTextureList[id];
             default:
                 return undefined;
         }
