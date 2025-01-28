@@ -14,6 +14,7 @@ import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepository
 
 import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServiceImpl";
 import {BackgroundRepositoryImpl} from "../../src/background/repository/BackgroundRepositoryImpl";
+import {MakeDeckScreenCardServiceImpl} from "../../src/make_deck_screen_card/service/MakeDeckScreenCardServiceImpl";
 
 
 export class TCGJustTestMakeDeckView {
@@ -31,6 +32,7 @@ export class TCGJustTestMakeDeckView {
 
     private background: NonBackgroundImage | null = null;
     private backgroundService = BackgroundServiceImpl.getInstance();
+    private makeDeckScreenCardService = MakeDeckScreenCardServiceImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -97,6 +99,7 @@ export class TCGJustTestMakeDeckView {
         console.log("Textures preloaded. Adding background and buttons...");
 
         await this.addBackground();
+        await this.addCards();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -138,6 +141,21 @@ export class TCGJustTestMakeDeckView {
             }
         } catch (error) {
             console.error('Failed to add background:', error);
+        }
+    }
+
+    private async addCards(): Promise<void> {
+        try {
+            // To-do:예시 데이터 Map 만들어야 함.
+            const myCardIdList = [2, 8, 9, 17, 19, 20, 25, 26];
+            const cardGroup = await this.makeDeckScreenCardService.createMakeDeckScreenCardWithPosition(myCardIdList);
+
+            if (cardGroup) {
+                this.scene.add(cardGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add cards:', error);
         }
     }
 
