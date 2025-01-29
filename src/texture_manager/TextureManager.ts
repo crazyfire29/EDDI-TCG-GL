@@ -36,6 +36,7 @@ export class TextureManager {
     private deckMakingPopupButtonsTextureList: { [id: number]: THREE.Texture } = {};
     private makeDeckBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private ownedCardTextureList: { [id: number]: THREE.Texture } = {};
+    private raceButtonTextureList: { [id: number]: THREE.Texture } = {};
 
     private constructor() {}
 
@@ -85,6 +86,7 @@ export class TextureManager {
                 this.loadTextures(imageData.deck_making_pop_up_buttons, this.deckMakingPopupButtonsTextureList),
                 this.loadTextures(imageData.make_deck_background, this.makeDeckBackgroundTextureList),
                 this.loadTextures(imageData.owned_card, this.ownedCardTextureList),
+                this.loadTextures(imageData.race_button, this.raceButtonTextureList),
             ]);
 
             console.log('All textures preloaded from TextureManager.ts');
@@ -218,6 +220,8 @@ export class TextureManager {
                 return this.makeDeckBackgroundTextureList[id];
             case 'owned_card':
                 return this.ownedCardTextureList[id];
+            case 'race_button':
+                return this.raceButtonTextureList[id];
             default:
                 return undefined;
         }
