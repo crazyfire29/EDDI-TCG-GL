@@ -15,7 +15,8 @@ import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepository
 import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServiceImpl";
 import {BackgroundRepositoryImpl} from "../../src/background/repository/BackgroundRepositoryImpl";
 import {MakeDeckScreenCardServiceImpl} from "../../src/make_deck_screen_card/service/MakeDeckScreenCardServiceImpl";
-
+import {RaceButtonServiceImpl} from "../../src/race_button/service/RaceButtonServiceImpl";
+import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 
 export class TCGJustTestMakeDeckView {
     private static instance: TCGJustTestMakeDeckView | null = null;
@@ -33,6 +34,7 @@ export class TCGJustTestMakeDeckView {
     private background: NonBackgroundImage | null = null;
     private backgroundService = BackgroundServiceImpl.getInstance();
     private makeDeckScreenCardService = MakeDeckScreenCardServiceImpl.getInstance();
+    private raceButtonService = RaceButtonServiceImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -100,6 +102,7 @@ export class TCGJustTestMakeDeckView {
 
         await this.addBackground();
         await this.addCards();
+        await this.addDeckMakePopupButtons();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -159,6 +162,25 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
+    private async addDeckMakePopupButtons(): Promise<void> {
+        try {
+            const configList = new RaceButtonConfigList();
+            await Promise.all(configList.buttonConfigs.map(async (config) =>{
+                const button = await this.raceButtonService.createRaceButton(
+                    config.id,
+                    config.position
+                );
+
+                if (button) {
+                    this.scene.add(button);
+                    console.log(`Draw Race Button ${config.id}`);
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to add Race Button:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -180,6 +202,7 @@ export class TCGJustTestMakeDeckView {
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
             this.makeDeckScreenCardService.adjustMakeDeckScreenCardPosition();
+            this.raceButtonService.adjustRaceButtonPosition();
         }
     }
 
