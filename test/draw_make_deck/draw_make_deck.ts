@@ -179,6 +179,7 @@ export class TCGJustTestMakeDeckView {
 
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
+            this.makeDeckScreenCardService.adjustMakeDeckScreenCardPosition();
         }
     }
 

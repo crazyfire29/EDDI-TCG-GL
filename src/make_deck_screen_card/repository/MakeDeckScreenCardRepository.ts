@@ -6,6 +6,7 @@ export interface MakeDeckScreenCardRepository {
     createMakeDeckScreenCard(cardId: number, position: Vector2d): Promise<MakeDeckScreenCard>;
     findCardByCardId(cardId: number): MakeDeckScreenCard | null;
     findAllCard(): MakeDeckScreenCard[];
+    findCardIdList(): number[];
     findCardsByRaceId(raceId: string): MakeDeckScreenCard[] | null;
     deleteAllCard(): void;
 }
