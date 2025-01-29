@@ -8,7 +8,7 @@ import {getCardById} from "../../card/utility";
 
 export class MakeDeckScreenCardRepositoryImpl implements MakeDeckScreenCardRepository {
     private static instance: MakeDeckScreenCardRepositoryImpl;
-    private cardMap: Map<number, MakeDeckScreenCard> = new Map();
+    private cardMap: Map<number, MakeDeckScreenCard> = new Map(); // cardId: mesh
     private raceMap: Map<string, number[]> = new Map(); // race: cardIdList
     private cardCountMap: Map<number, number> = new Map(); // card Id: count
     private textureManager: TextureManager;
@@ -51,13 +51,13 @@ export class MakeDeckScreenCardRepositoryImpl implements MakeDeckScreenCardRepos
         cardMesh.position.set(cardPositionX, cardPositionY, 0);
 
         const newCard = new MakeDeckScreenCard(cardMesh, position);
-        this.cardMap.set(newCard.id, newCard);
+        this.cardMap.set(cardId, newCard);
 
         if (!this.raceMap.has(race)) {
             this.raceMap.set(race, []);
         }
         const cardIdList = this.raceMap.get(race)!;
-        cardIdList.push(newCard.id);
+        cardIdList.push(cardId);
         this.raceMap.set(race, cardIdList);
 
         return newCard;
@@ -69,6 +69,10 @@ export class MakeDeckScreenCardRepositoryImpl implements MakeDeckScreenCardRepos
 
     public findAllCard(): MakeDeckScreenCard[] {
         return Array.from(this.cardMap.values());
+    }
+
+    public findCardIdList(): number[] {
+        return Array.from(this.cardMap.keys());
     }
 
     public findCardsByRaceId(raceId: string): MakeDeckScreenCard[] | null {

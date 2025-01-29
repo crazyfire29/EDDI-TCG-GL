@@ -49,6 +49,9 @@ export class MakeDeckScreenCardServiceImpl implements MakeDeckScreenCardService 
                     case "2":
                         raceMap["2"].push(cardId);
                         break;
+                    case "3":
+                        raceMap["3"].push(cardId);
+                        break;
                     default:
                         console.warn(`[WARN] Unknown race "${cardRace}" for cardId: ${cardId}`);
                 }
@@ -72,6 +75,43 @@ export class MakeDeckScreenCardServiceImpl implements MakeDeckScreenCardService 
         return cardGroup;
     }
 
+    public adjustMakeDeckScreenCardPosition(): void {
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        const cardIdList = this.getAllCardIdList();
+        for (const cardId of cardIdList) {
+            const cardMesh = this.getCardMeshByCardId(cardId);
+            if (!cardMesh) {
+                console.warn(`[WARN] cardMesh with card ID ${cardId} not found`);
+                continue;
+            }
+
+            const initialPosition = this.getPositionByCardId(cardId);
+            console.log(`[DEBUG] (adjust) InitialPosition: ${initialPosition}`);
+
+            if (!initialPosition) {
+                console.error(`[DEBUG] (adjust) No position found for card id: ${cardId}`);
+                continue;
+            }
+
+            const cardWidth = 0.115 * window.innerWidth;
+            const cardHeight = 0.345 * window.innerHeight;
+
+            const newPositionX = initialPosition.getX() * windowWidth;
+            const newPositionY = initialPosition.getY() * windowHeight;
+            console.log(`[DEBUG] (adjust) Card ${cardId}:`, {
+                initialPosition: initialPosition,
+                newPositionX,
+                newPositionY,
+            });
+
+            cardMesh.geometry.dispose();
+            cardMesh.geometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
+            cardMesh.position.set(newPositionX, newPositionY, 0);
+        }
+    }
+
     private async createMakeDeckScreenCard(cardId: number, position: Vector2d): Promise<MakeDeckScreenCard> {
         return await this.makeDeckScreenCardRepository.createMakeDeckScreenCard(cardId, position);
     }
@@ -86,8 +126,18 @@ export class MakeDeckScreenCardServiceImpl implements MakeDeckScreenCardService 
         return this.makeDeckScreenCardPositionRepository.findPositionByCardId(cardId);
     }
 
-    public getCardMeshesByCardId(cardId: number): MakeDeckScreenCard | null {
-        return this.makeDeckScreenCardRepository.findCardByCardId(cardId);
+    public getCardMeshByCardId(cardId: number): THREE.Mesh | null {
+        const card = this.makeDeckScreenCardRepository.findCardByCardId(cardId);
+        if (!card) {
+            console.warn(`[WARN] Card with ID ${cardId} not found`);
+            return null;
+        }
+        const cardMesh = card.getMesh();
+        return cardMesh;
+    }
+
+    public getAllCardIdList(): number[] {
+        return this.makeDeckScreenCardRepository.findCardIdList();
     }
 
 }
