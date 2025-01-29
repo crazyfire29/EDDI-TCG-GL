@@ -37,6 +37,8 @@ import {DragMoveServiceImpl} from "../../src/drag_move/service/DragMoveServiceIm
 import {MouseDropServiceImpl} from "../../src/mouse_drop/service/MouseDropServiceImpl";
 import {NeonShape, Shader} from "../../src/neon/NeonShape";
 import {OpponentFieldAreaServiceImpl} from "../../src/opponent_field_area/service/OpponentFieldAreaServiceImpl";
+import {KeyboardService} from "../../src/keyboard/service/KeyboardService";
+import {KeyboardServiceImpl} from "../../src/keyboard/service/KeyboardServiceImpl";
 
 
 export class TCGJustTestBattleFieldView {
@@ -77,6 +79,8 @@ export class TCGJustTestBattleFieldView {
     private leftClickDetectService: LeftClickDetectService
     private dragMoveService: DragMoveService
     private mouseDropService: MouseDropService
+
+    private keyboardService: KeyboardService
 
     private yourFieldAreaService = YourFieldAreaServiceImpl.getInstance();
     private opponentFieldAreaService = OpponentFieldAreaServiceImpl.getInstance();
@@ -148,6 +152,13 @@ export class TCGJustTestBattleFieldView {
                 this.leftClickDetectService.setLeftMouseDown(false); // 드롭 후 상태 초기화
             }
         }, false);
+
+        this.keyboardService = KeyboardServiceImpl.getInstance()
+
+        document.addEventListener("keydown", (event) => {
+            console.log(`Key pressed: ${event.key}`); // 키가 눌릴 때 메시지가 출력되는지 확인
+            this.keyboardService.processKeyboard(event.key);
+        });
     }
 
     public static getInstance(lobbyContainer: HTMLElement): TCGJustTestBattleFieldView {
