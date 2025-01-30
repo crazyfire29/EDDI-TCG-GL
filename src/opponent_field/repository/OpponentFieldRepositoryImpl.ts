@@ -1,6 +1,7 @@
 import {OpponentField} from "../entity/OpponentField";
 import {OpponentFieldRepository} from "./OpponentFieldRepository";
 
+// 31, 32, 26, 27, 19
 export class OpponentFieldRepositoryImpl implements OpponentFieldRepository {
     private static instance: OpponentFieldRepositoryImpl;
     private cardMap: Map<number, OpponentField> = new Map();
