@@ -39,6 +39,8 @@ import {NeonShape, Shader} from "../../src/neon/NeonShape";
 import {OpponentFieldAreaServiceImpl} from "../../src/opponent_field_area/service/OpponentFieldAreaServiceImpl";
 import {KeyboardService} from "../../src/keyboard/service/KeyboardService";
 import {KeyboardServiceImpl} from "../../src/keyboard/service/KeyboardServiceImpl";
+import {OpponentFieldMapRepositoryImpl} from "../../src/opponent_field_map/repository/OpponentFieldMapRepositoryImpl";
+import {OpponentFieldServiceImpl} from "../../src/opponent_field/service/OpponentFieldServiceImpl";
 
 
 export class TCGJustTestBattleFieldView {
@@ -59,22 +61,14 @@ export class TCGJustTestBattleFieldView {
     private background: NonBackgroundImage | null = null;
     private backgroundService = BackgroundServiceImpl.getInstance()
 
-    private battleFieldUnitRepository = BattleFieldUnitRepository.getInstance();
-    private battleFieldUnitScene = new BattleFieldUnitScene();
-    private battleFieldResourceManager = new ResourceManager()
-    private battleFieldUnitRenderer?: BattleFieldUnitRenderer;
-
     private battleFieldHandService = BattleFieldHandServiceImpl.getInstance()
-    // private battleFieldHandRepository = BattleFieldHandRepository.getInstance()
     private battleFieldHandMapRepository = BattleFieldHandMapRepositoryImpl.getInstance()
     private battleFieldHandSceneRepository = BattleFieldHandSceneRepository.getInstance()
-    private battleFieldHandPositionRepository = BattleFieldHandPositionRepository.getInstance()
 
-    // private lightningGenerator = new LightningGenerator(20)
-    // private lightning: THREE.Mesh[] = [];
+    private opponentFieldMapRepository = OpponentFieldMapRepositoryImpl.getInstance()
+    private opponentFieldService = OpponentFieldServiceImpl.getInstance()
 
     private neonShape: NeonShape
-    private neonMaterial?: Shader
 
     private leftClickDetectService: LeftClickDetectService
     private dragMoveService: DragMoveService
@@ -192,6 +186,7 @@ export class TCGJustTestBattleFieldView {
         this.addYourField();
         this.addOpponentField();
         this.addYourHandUnitList()
+        this.addOpponentFieldUnitList()
 
         this.initialized = true;
         this.isAnimating = true;
@@ -261,6 +256,20 @@ export class TCGJustTestBattleFieldView {
                 this.battleFieldHandSceneRepository.addBattleFieldHandScene(createdHand);
                 this.scene.add(createdHand);
             }
+        }
+    }
+
+    private async addOpponentFieldUnitList(): Promise<void> {
+        const opponentFieldUnitList = this.opponentFieldMapRepository.getOpponentFieldList()
+        console.log(`opponentFieldUnitList: ${opponentFieldUnitList}`)
+
+        for (const opponentCardId of opponentFieldUnitList) {
+            const opponentFieldUnit = await this.opponentFieldService.createFieldUnit(opponentCardId)
+
+            // if (opponentFieldUnit) {
+            //     this.opponentFieldSceneRepository.addOpponentFieldScene(opponentFieldUnit);
+            //     this.scene.add(opponentFieldUnit);
+            // }
         }
     }
 
