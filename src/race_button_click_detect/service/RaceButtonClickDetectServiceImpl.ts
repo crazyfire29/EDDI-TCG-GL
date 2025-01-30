@@ -15,6 +15,7 @@ import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl
 import {RaceButtonStateManager} from "../../race_button_manager/RaceButtonStateManager";
 import {RaceButtonEffectStateManager} from "../../race_button_manager/RaceButtonEffectStateManager";
 import {CardStateManager} from "../../make_deck_screen_card_manager/CardStateManager";
+import {CardPageManager} from "../../make_deck_screen_card_manager/CardPageManager";
 
 export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectService {
     private static instance: RaceButtonClickDetectServiceImpl | null = null;
@@ -26,6 +27,7 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
     private raceButtonStateManager: RaceButtonStateManager;
     private raceButtonEffectStateManager: RaceButtonEffectStateManager;
     private cardStateManager: CardStateManager;
+    private cardPageManager: CardPageManager;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -39,6 +41,7 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
         this.raceButtonStateManager = RaceButtonStateManager.getInstance();
         this.raceButtonEffectStateManager = RaceButtonEffectStateManager.getInstance();
         this.cardStateManager = CardStateManager.getInstance();
+        this.cardPageManager = CardPageManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): RaceButtonClickDetectServiceImpl {
@@ -78,7 +81,7 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
                 const cardIdList = this.getCardIdsByRaceId(hiddenButton.id);
                 this.setRaceButtonVisibility(hiddenButton.id, true);
                 this.setRaceButtonEffectVisibility(hiddenButton.id, false);
-                this.setCardsVisibility(cardIdList, false);
+                this.resetCardsVisibility(cardIdList, false);
             }
 
             if (currentClickedButtonId !== null) {
@@ -146,7 +149,17 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
         return this.makeDeckScreenCardRepository.findCardIdsByRaceId(raceId);
     }
 
+    // 현재 페이지에 해당되는 카드만 보여져야 함(종족 버튼을 클릭했을 때는 무조건 첫 페이지)
     private setCardsVisibility(cardIdList: number[], isVisible: boolean): void {
+        const currentCardPage = this.cardPageManager.getCurrentPage();
+        const currentPageCardId = this.cardPageManager.findCardIdsForPage(currentCardPage, cardIdList);
+        currentPageCardId.forEach((cardId) => {
+            this.cardStateManager.setCardVisibility(cardId, isVisible);
+        });
+    }
+
+    // 다른 종족 버튼을 클릭했을 때 이전 종족 버튼 카드가 사라져야 함.
+    private resetCardsVisibility(cardIdList: number[], isVisible: boolean): void {
         cardIdList.forEach((cardId) => {
             this.cardStateManager.setCardVisibility(cardId, isVisible);
         });
