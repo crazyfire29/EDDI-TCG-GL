@@ -4,6 +4,7 @@ import {RaceButtonClickDetectService} from "./RaceButtonClickDetectService";
 import {RaceButton} from "../../race_button/entity/RaceButton";
 import {RaceButtonRepository} from "../../race_button/repository/RaceButtonRepository";
 import {RaceButtonRepositoryImpl} from "../../race_button/repository/RaceButtonRepositoryImpl";
+import {MakeDeckScreenCardRepositoryImpl} from "../../make_deck_screen_card/repository/MakeDeckScreenCardRepositoryImpl";
 
 import {RaceButtonClickDetectRepository} from "../repository/RaceButtonClickDetectRepository";
 import {RaceButtonClickDetectRepositoryImpl} from "../repository/RaceButtonClickDetectRepositoryImpl";
@@ -13,15 +14,18 @@ import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl
 
 import {RaceButtonStateManager} from "../../race_button_manager/RaceButtonStateManager";
 import {RaceButtonEffectStateManager} from "../../race_button_manager/RaceButtonEffectStateManager";
+import {CardStateManager} from "../../make_deck_screen_card_manager/CardStateManager";
 
 export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectService {
     private static instance: RaceButtonClickDetectServiceImpl | null = null;
 
     private raceButtonRepository: RaceButtonRepositoryImpl;
     private raceButtonClickDetectRepository: RaceButtonClickDetectRepositoryImpl;
+    private makeDeckScreenCardRepository: MakeDeckScreenCardRepositoryImpl;
 
     private raceButtonStateManager: RaceButtonStateManager;
     private raceButtonEffectStateManager: RaceButtonEffectStateManager;
+    private cardStateManager: CardStateManager;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -29,10 +33,12 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.raceButtonRepository = RaceButtonRepositoryImpl.getInstance();
         this.raceButtonClickDetectRepository = RaceButtonClickDetectRepositoryImpl.getInstance();
+        this.makeDeckScreenCardRepository = MakeDeckScreenCardRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
         this.raceButtonStateManager = RaceButtonStateManager.getInstance();
         this.raceButtonEffectStateManager = RaceButtonEffectStateManager.getInstance();
+        this.cardStateManager = CardStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): RaceButtonClickDetectServiceImpl {
@@ -60,7 +66,7 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
         );
 
         if (clickedRaceButton) {
-            console.log(`[DEBUG] Clicked Race Button ID: ${clickedRaceButton.id}`);
+            console.log(`[DEBUG] Clicked Race Button ID: ${clickedRaceButton.id}`); // raceButtonList 기준으로 0, 1, 2임.
             this.saveCurrentClickedRaceButtonId(clickedRaceButton.id);
             const currentClickedButtonId = this.getCurrentClickedRaceButtonId();
 
@@ -69,13 +75,17 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
             );
 
             if (hiddenButton && hiddenButton.id !== currentClickedButtonId) {
+                const cardIdList = this.getCardIdsByRaceId(hiddenButton.id);
                 this.setRaceButtonVisibility(hiddenButton.id, true);
                 this.setRaceButtonEffectVisibility(hiddenButton.id, false);
+                this.setCardsVisibility(cardIdList, false);
             }
 
             if (currentClickedButtonId !== null) {
+                const cardIdList = this.getCardIdsByRaceId(currentClickedButtonId);
                 this.setRaceButtonVisibility(currentClickedButtonId, false);
                 this.setRaceButtonEffectVisibility(currentClickedButtonId, true);
+                this.setCardsVisibility(cardIdList, true);
             }
 
 //             switch(currentClickedButtonId) {
@@ -129,6 +139,17 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
 
     public setRaceButtonEffectVisibility(effectId: number, isVisible: boolean): void {
         this.raceButtonEffectStateManager.setVisibility(effectId, isVisible);
+    }
+
+    private getCardIdsByRaceId(buttonId: number): number[] {
+        const raceId = (buttonId + 1).toString();
+        return this.makeDeckScreenCardRepository.findCardIdsByRaceId(raceId);
+    }
+
+    private setCardsVisibility(cardIdList: number[], isVisible: boolean): void {
+        cardIdList.forEach((cardId) => {
+            this.cardStateManager.setCardVisibility(cardId, isVisible);
+        });
     }
 
 }

@@ -23,6 +23,8 @@ import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/Ra
 import {RaceButtonClickDetectService} from "../../src/race_button_click_detect/service/RaceButtonClickDetectService";
 import {RaceButtonClickDetectServiceImpl} from "../../src/race_button_click_detect/service/RaceButtonClickDetectServiceImpl";
 
+import {CardStateManager} from "../../src/make_deck_screen_card_manager/CardStateManager";
+
 export class TCGJustTestMakeDeckView {
     private static instance: TCGJustTestMakeDeckView | null = null;
 
@@ -43,6 +45,8 @@ export class TCGJustTestMakeDeckView {
     private raceButtonEffectService = RaceButtonEffectServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
+
+    private cardStateManager = CardStateManager.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -162,10 +166,11 @@ export class TCGJustTestMakeDeckView {
     private async addCards(): Promise<void> {
         try {
             // To-do:예시 데이터 Map 만들어야 함.
-            const myCardIdList = [2, 8, 9, 17, 19, 20, 25, 26];
+            const myCardIdList = [2, 8, 9, 17, 19, 20, 25, 26, 5, 6, 7, 10, 13, 14];
             const cardGroup = await this.makeDeckScreenCardService.createMakeDeckScreenCardWithPosition(myCardIdList);
 
             if (cardGroup) {
+                this.cardStateManager.initializeCardVisibility(myCardIdList);
                 this.scene.add(cardGroup);
             }
 

@@ -93,11 +93,29 @@ export class MakeDeckScreenCardRepositoryImpl implements MakeDeckScreenCardRepos
         return cardMeshList;
     }
 
+    public findCardIdsByRaceId(raceId: string): number[] {
+        return this.raceMap.get(raceId) || [];
+    }
+
     // 모든 카드 없앰
     public deleteAllCard(): void {
         this.cardMap.clear();
         this.raceMap.clear();
         this.cardCountMap.clear();
+    }
+
+    public hideCard(cardId: number): void {
+        const card = this.findCardByCardId(cardId);
+        if (card) {
+            card.getMesh().visible = false;
+        }
+    }
+
+    public showCard(cardId: number): void {
+        const card = this.findCardByCardId(cardId);
+        if (card) {
+            card.getMesh().visible = true;
+        }
     }
 
 }
