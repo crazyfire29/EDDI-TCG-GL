@@ -1,4 +1,4 @@
-import {RaceButton} from "../../race_buttons/entity/RaceButton";
+import {RaceButton} from "../../race_button/entity/RaceButton";
 
 import * as THREE from "three";
 

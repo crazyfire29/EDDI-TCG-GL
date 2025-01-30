@@ -17,6 +17,8 @@ import {BackgroundRepositoryImpl} from "../../src/background/repository/Backgrou
 import {MakeDeckScreenCardServiceImpl} from "../../src/make_deck_screen_card/service/MakeDeckScreenCardServiceImpl";
 import {RaceButtonServiceImpl} from "../../src/race_button/service/RaceButtonServiceImpl";
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
+import {RaceButtonEffectServiceImpl} from "../../src/race_button_effect/service/RaceButtonEffectServiceImpl";
+import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
 
 import {RaceButtonClickDetectService} from "../../src/race_button_click_detect/service/RaceButtonClickDetectService";
 import {RaceButtonClickDetectServiceImpl} from "../../src/race_button_click_detect/service/RaceButtonClickDetectServiceImpl";
@@ -38,6 +40,7 @@ export class TCGJustTestMakeDeckView {
     private backgroundService = BackgroundServiceImpl.getInstance();
     private makeDeckScreenCardService = MakeDeckScreenCardServiceImpl.getInstance();
     private raceButtonService = RaceButtonServiceImpl.getInstance();
+    private raceButtonEffectService = RaceButtonEffectServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
 
@@ -110,7 +113,8 @@ export class TCGJustTestMakeDeckView {
 
         await this.addBackground();
         await this.addCards();
-        await this.addDeckMakePopupButtons();
+        await this.addRaceButton();
+        await this.addRaceButtonEffect();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -170,7 +174,7 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
-    private async addDeckMakePopupButtons(): Promise<void> {
+    private async addRaceButton(): Promise<void> {
         try {
             const configList = new RaceButtonConfigList();
             await Promise.all(configList.buttonConfigs.map(async (config) =>{
@@ -186,6 +190,26 @@ export class TCGJustTestMakeDeckView {
             }));
         } catch (error) {
             console.error('Failed to add Race Button:', error);
+        }
+    }
+
+    private async addRaceButtonEffect(): Promise<void> {
+        try {
+            const configList = new RaceButtonEffectConfigList();
+            await Promise.all(configList.effectConfigs.map(async (config) =>{
+                const effect = await this.raceButtonEffectService.createRaceButtonEffect(
+                    config.id,
+                    config.position
+                );
+
+                if (effect) {
+                    this.raceButtonEffectService.initializeRaceButtonEffectVisible();
+                    this.scene.add(effect);
+                    console.log(`Draw Race Button Effect: ${config.id}`);
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to add Race Button Effect:', error);
         }
     }
 
@@ -211,6 +235,7 @@ export class TCGJustTestMakeDeckView {
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
             this.makeDeckScreenCardService.adjustMakeDeckScreenCardPosition();
             this.raceButtonService.adjustRaceButtonPosition();
+            this.raceButtonEffectService.adjustRaceButtonEffectPosition();
         }
     }
 
