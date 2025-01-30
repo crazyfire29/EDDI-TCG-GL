@@ -35,6 +35,7 @@ class WillBeReferenceImageLocation(Enum):
     MAKE_DECK_BACKGROUND = "resource/make_deck/background/"
     OWNED_CARD = "resource/my_card/card/"
     RACE_BUTTON = "resource/make_deck/race_button/"
+    RACE_BUTTON_EFFECT = "resource/make_deck/race_button_effect/"
 
 class RelativeImageLocation(Enum):
     CARD = "../../resource/battle_field_unit/card/"
@@ -66,6 +67,7 @@ class RelativeImageLocation(Enum):
     MAKE_DECK_BACKGROUND = "../../resource/make_deck/background/"
     OWNED_CARD = "../../resource/my_card/card/"
     RACE_BUTTON = "../../resource/make_deck/race_button/"
+    RACE_BUTTON_EFFECT = "../../resource/make_deck/race_button_effect/"
 
 # 디렉토리 경로 설정
 relative_paths = {
@@ -98,6 +100,7 @@ relative_paths = {
     RelativeImageLocation.MAKE_DECK_BACKGROUND: RelativeImageLocation.MAKE_DECK_BACKGROUND.value,
     RelativeImageLocation.OWNED_CARD: RelativeImageLocation.OWNED_CARD.value,
     RelativeImageLocation.RACE_BUTTON: RelativeImageLocation.RACE_BUTTON.value,
+    RelativeImageLocation.RACE_BUTTON_EFFECT: RelativeImageLocation.RACE_BUTTON_EFFECT.value,
 }
 
 reference_paths = {
@@ -130,6 +133,7 @@ reference_paths = {
     WillBeReferenceImageLocation.MAKE_DECK_BACKGROUND: WillBeReferenceImageLocation.MAKE_DECK_BACKGROUND.value,
     WillBeReferenceImageLocation.OWNED_CARD: WillBeReferenceImageLocation.OWNED_CARD.value,
     WillBeReferenceImageLocation.RACE_BUTTON: WillBeReferenceImageLocation.RACE_BUTTON.value,
+    WillBeReferenceImageLocation.RACE_BUTTON_EFFECT: WillBeReferenceImageLocation.RACE_BUTTON_EFFECT.value,
 }
 
 image_paths = {
@@ -162,6 +166,7 @@ image_paths = {
     "make_deck_background": [],
     "owned_card": [],
     "race_button": [],
+    "race_button_effect": [],
 }
 
 for category, dir_path in relative_paths.items():
