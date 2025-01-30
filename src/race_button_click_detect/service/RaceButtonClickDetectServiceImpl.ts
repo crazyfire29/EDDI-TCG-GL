@@ -11,12 +11,17 @@ import {RaceButtonClickDetectRepositoryImpl} from "../repository/RaceButtonClick
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
+import {RaceButtonStateManager} from "../../race_button_manager/RaceButtonStateManager";
+import {RaceButtonEffectStateManager} from "../../race_button_manager/RaceButtonEffectStateManager";
 
 export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectService {
     private static instance: RaceButtonClickDetectServiceImpl | null = null;
 
     private raceButtonRepository: RaceButtonRepositoryImpl;
     private raceButtonClickDetectRepository: RaceButtonClickDetectRepositoryImpl;
+
+    private raceButtonStateManager: RaceButtonStateManager;
+    private raceButtonEffectStateManager: RaceButtonEffectStateManager;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -25,6 +30,9 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
         this.raceButtonRepository = RaceButtonRepositoryImpl.getInstance();
         this.raceButtonClickDetectRepository = RaceButtonClickDetectRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
+
+        this.raceButtonStateManager = RaceButtonStateManager.getInstance();
+        this.raceButtonEffectStateManager = RaceButtonEffectStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): RaceButtonClickDetectServiceImpl {
@@ -56,19 +64,33 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
             this.saveCurrentClickedRaceButtonId(clickedRaceButton.id);
             const currentClickedButtonId = this.getCurrentClickedRaceButtonId();
 
-            switch(currentClickedButtonId) {
-                case 0:
-                    console.log(`Clicked Human Button!: ${currentClickedButtonId}`);
-                    break;
-                case 1:
-                    console.log(`Clicked Undead Button!: ${currentClickedButtonId}`);
-                    break;
-                case 2:
-                    console.log(`Clicked Trent Button! ${currentClickedButtonId}`);
-                    break;
-                default:
-                    console.warn(`[WARN] Not Found Race Button Id: ${currentClickedButtonId}`);
+            const hiddenButton = raceButtonList.find(
+                (button) => this.getRaceButtonVisibility(button.id) == false
+            );
+
+            if (hiddenButton && hiddenButton.id !== currentClickedButtonId) {
+                this.setRaceButtonVisibility(hiddenButton.id, true);
+                this.setRaceButtonEffectVisibility(hiddenButton.id, false);
             }
+
+            if (currentClickedButtonId !== null) {
+                this.setRaceButtonVisibility(currentClickedButtonId, false);
+                this.setRaceButtonEffectVisibility(currentClickedButtonId, true);
+            }
+
+//             switch(currentClickedButtonId) {
+//                 case 0:
+//                     console.log(`Clicked Human Button!: ${currentClickedButtonId}`);
+//                     break;
+//                 case 1:
+//                     console.log(`Clicked Undead Button!: ${currentClickedButtonId}`);
+//                     break;
+//                 case 2:
+//                     console.log(`Clicked Trent Button! ${currentClickedButtonId}`);
+//                     break;
+//                 default:
+//                     console.warn(`[WARN] Not Found Race Button Id: ${currentClickedButtonId}`);
+//             }
 
             return clickedRaceButton;
         }
@@ -95,6 +117,18 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
 
     public getCurrentClickedRaceButtonId(): number | null {
         return this.raceButtonClickDetectRepository.findCurrentClickedRaceButtonId();
+    }
+
+    public setRaceButtonVisibility(buttonId: number, isVisible: boolean): void {
+        this.raceButtonStateManager.setVisibility(buttonId, isVisible);
+    }
+
+    public getRaceButtonVisibility(buttonId: number): boolean {
+        return this.raceButtonStateManager.findVisibility(buttonId);
+    }
+
+    public setRaceButtonEffectVisibility(effectId: number, isVisible: boolean): void {
+        this.raceButtonEffectStateManager.setVisibility(effectId, isVisible);
     }
 
 }
