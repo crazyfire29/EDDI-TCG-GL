@@ -18,6 +18,9 @@ import {MakeDeckScreenCardServiceImpl} from "../../src/make_deck_screen_card/ser
 import {RaceButtonServiceImpl} from "../../src/race_button/service/RaceButtonServiceImpl";
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 
+import {RaceButtonClickDetectService} from "../../src/race_button_click_detect/service/RaceButtonClickDetectService";
+import {RaceButtonClickDetectServiceImpl} from "../../src/race_button_click_detect/service/RaceButtonClickDetectServiceImpl";
+
 export class TCGJustTestMakeDeckView {
     private static instance: TCGJustTestMakeDeckView | null = null;
 
@@ -35,6 +38,8 @@ export class TCGJustTestMakeDeckView {
     private backgroundService = BackgroundServiceImpl.getInstance();
     private makeDeckScreenCardService = MakeDeckScreenCardServiceImpl.getInstance();
     private raceButtonService = RaceButtonServiceImpl.getInstance();
+
+    private raceButtonClickDetectService: RaceButtonClickDetectService;
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -72,6 +77,9 @@ export class TCGJustTestMakeDeckView {
         window.addEventListener('resize', this.onWindowResize.bind(this));
         this.mouseController = new MouseController(this.camera, this.scene);
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
+
+        this.raceButtonClickDetectService = RaceButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.raceButtonClickDetectService.onMouseDown(e), false);
     }
 
     public static getInstance(simulationMyDeckContainer: HTMLElement): TCGJustTestMakeDeckView {
