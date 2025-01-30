@@ -7,20 +7,25 @@ import {Vector2d} from "../../common/math/Vector2d";
 import {OpponentFieldCardPositionRepositoryImpl} from "../../opponent_field_crad_position/repository/OpponentFieldCardPositionRepositoryImpl";
 import {OpponentFieldCardPositionRepository} from "../../opponent_field_crad_position/repository/OpponentFieldCardPositionRepository";
 import {OpponentFieldCardPosition} from "../../opponent_field_crad_position/entity/OpponentFieldCardPosition";
+import {OpponentFieldCardSceneRepositoryImpl} from "../../opponent_field_card_scene/repository/OpponentFieldCradSceneRepositoryImpl";
+import {OpponentFieldCardSceneRepository} from "../../opponent_field_card_scene/repository/OpponentFieldCradSceneRepository";
+import {OpponentFieldCardScene} from "../../opponent_field_card_scene/entity/OpponentFieldCardScene";
 
 export class OpponentFieldServiceImpl implements OpponentFieldService {
     private static instance: OpponentFieldServiceImpl;
 
     private opponentFieldCardPositionRepository: OpponentFieldCardPositionRepository
+    private opponentFieldCardSceneRepository: OpponentFieldCardSceneRepository
 
     private textureManager: TextureManager = TextureManager.getInstance();
 
+    // 1848, 949 -> 349, 335
     private readonly HALF: number = 0.5;
     private readonly GAP_OF_EACH_CARD: number = 0.094696
-    private readonly HAND_X_CRITERIA: number = 0.311904
-    private readonly HAND_Y_CRITERIA: number = 0.972107
-    private readonly HAND_INITIAL_X: number = this.HAND_X_CRITERIA - this.HALF;
-    private readonly HAND_INITIAL_Y: number = this.HALF - this.HAND_Y_CRITERIA;
+    private readonly OPPONENT_FIELD_X_CRITERIA: number = 0.186458
+    private readonly OPPONENT_FIELD_Y_CRITERIA: number = 0.44564
+    private readonly OPPONENT_FIELD_INITIAL_X: number = this.OPPONENT_FIELD_X_CRITERIA - this.HALF;
+    private readonly OPPONENT_FIELD_INITIAL_Y: number = this.HALF - this.OPPONENT_FIELD_Y_CRITERIA;
 
     private readonly CARD_WIDTH: number = 0.06493506493
     private readonly CARD_HEIGHT: number = this.CARD_WIDTH * 1.615
@@ -33,6 +38,7 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
 
     private constructor() {
         this.opponentFieldCardPositionRepository = OpponentFieldCardPositionRepositoryImpl.getInstance()
+        this.opponentFieldCardSceneRepository = OpponentFieldCardSceneRepositoryImpl.getInstance()
     }
 
     public static getInstance(): OpponentFieldServiceImpl {
@@ -49,6 +55,10 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
         const opponentFieldPosition = this.calculateOpponentFieldPosition();
         const createdOpponentFieldPosition = this.saveOpponentFieldPosition(opponentFieldPosition);
 
+        const mainCardScene = await this.createMainCardScene(cardId, opponentFieldPosition);
+        const mainCardMesh = mainCardScene.getMesh()
+        cardGroup.add(mainCardMesh)
+
         return cardGroup
     }
 
@@ -61,15 +71,19 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
     }
 
     private calculateOpponentFieldPosition(): Vector2d {
-        const handPositionCount = this.opponentFieldCardPositionRepository.count();
-        const handPositionX = (this.HAND_INITIAL_X + handPositionCount * this.GAP_OF_EACH_CARD) * window.innerWidth;
-        const handPositionY = this.HAND_INITIAL_Y * window.innerHeight
+        const opponentFieldPositionCount = this.opponentFieldCardPositionRepository.count();
+        const opponentFieldPositionX = (this.OPPONENT_FIELD_INITIAL_X + opponentFieldPositionCount * this.GAP_OF_EACH_CARD) * window.innerWidth;
+        const opponentFieldPositionY = this.OPPONENT_FIELD_INITIAL_Y * window.innerHeight
             + (this.CARD_HEIGHT * this.HALF * window.innerWidth);
-        return new Vector2d(handPositionX, handPositionY);
+        return new Vector2d(opponentFieldPositionX, opponentFieldPositionY);
     }
 
     private saveOpponentFieldPosition(position: Vector2d): OpponentFieldCardPosition {
         const cardPosition = new OpponentFieldCardPosition(position.getX(), position.getY());
         return this.opponentFieldCardPositionRepository.save(cardPosition);
+    }
+
+    private async createMainCardScene(cardId: number, position: Vector2d): Promise<OpponentFieldCardScene> {
+        return await this.opponentFieldCardSceneRepository.create(cardId, position);
     }
 }

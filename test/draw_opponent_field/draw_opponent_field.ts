@@ -265,6 +265,7 @@ export class TCGJustTestBattleFieldView {
 
         for (const opponentCardId of opponentFieldUnitList) {
             const opponentFieldUnit = await this.opponentFieldService.createFieldUnit(opponentCardId)
+            this.scene.add(opponentFieldUnit);
 
             // if (opponentFieldUnit) {
             //     this.opponentFieldSceneRepository.addOpponentFieldScene(opponentFieldUnit);
