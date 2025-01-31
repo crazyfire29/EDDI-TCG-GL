@@ -10,12 +10,26 @@ import {OpponentFieldCardPosition} from "../../opponent_field_crad_position/enti
 import {OpponentFieldCardSceneRepositoryImpl} from "../../opponent_field_card_scene/repository/OpponentFieldCradSceneRepositoryImpl";
 import {OpponentFieldCardSceneRepository} from "../../opponent_field_card_scene/repository/OpponentFieldCradSceneRepository";
 import {OpponentFieldCardScene} from "../../opponent_field_card_scene/entity/OpponentFieldCardScene";
+import {CardKind} from "../../card/kind";
+import {BattleFieldCardScene} from "../../battle_field_card_scene/entity/BattleFieldCardScene";
+import {BattleFieldCardPosition} from "../../battle_field_card_position/entity/BattleFieldCardPosition";
+import {Texture} from "three";
+import {BattleFieldCardAttributeMark} from "../../battle_field_card_attribute_mark/entity/BattleFieldCardAttributeMark";
+import {MarkSceneType} from "../../battle_field_card_attribute_mark_scene/entity/MarkSceneType";
+import {MeshGenerator} from "../../mesh/generator";
+import {Card} from "../../card/types";
+import {OpponentFieldRepositoryImpl} from "../repository/OpponentFieldRepositoryImpl";
+import {OpponentFieldRepository} from "../repository/OpponentFieldRepository";
+import {BattleFieldCardAttributeMarkPosition} from "../../battle_field_card_attribute_mark_position/entity/BattleFieldCardAttributeMarkPosition";
+import {BattleFieldCardAttributeMarkScene} from "../../battle_field_card_attribute_mark_scene/entity/BattleFieldCardAttributeMarkScene";
+import {BattleFieldCardAttributeMarkStatus} from "../../battle_field_card_attribute_mark/entity/BattleFieldCardAttributeMarkStatus";
 
 export class OpponentFieldServiceImpl implements OpponentFieldService {
     private static instance: OpponentFieldServiceImpl;
 
     private opponentFieldCardPositionRepository: OpponentFieldCardPositionRepository
     private opponentFieldCardSceneRepository: OpponentFieldCardSceneRepository
+    private opponentFieldRepository: OpponentFieldRepository
 
     private textureManager: TextureManager = TextureManager.getInstance();
 
@@ -39,6 +53,7 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
     private constructor() {
         this.opponentFieldCardPositionRepository = OpponentFieldCardPositionRepositoryImpl.getInstance()
         this.opponentFieldCardSceneRepository = OpponentFieldCardSceneRepositoryImpl.getInstance()
+        this.opponentFieldRepository = OpponentFieldRepositoryImpl.getInstance()
     }
 
     public static getInstance(): OpponentFieldServiceImpl {
@@ -58,6 +73,13 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
         const mainCardScene = await this.createMainCardScene(cardId, opponentFieldPosition);
         const mainCardMesh = mainCardScene.getMesh()
         cardGroup.add(mainCardMesh)
+
+        try {
+            const textures = await this.loadCardTextures(card);
+            await this.addAttributesToCardGroup(mainCardScene, createdOpponentFieldPosition, card, cardGroup, opponentFieldPosition, textures);
+        } catch (error) {
+            console.error("Error loading textures:", error);
+        }
 
         return cardGroup
     }
@@ -85,5 +107,197 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
 
     private async createMainCardScene(cardId: number, position: Vector2d): Promise<OpponentFieldCardScene> {
         return await this.opponentFieldCardSceneRepository.create(cardId, position);
+    }
+
+    private async loadCardTextures(card: any): Promise<(THREE.Texture | null)[]> {
+        const unitJob = parseInt(card.병종, 10) as CardJob;
+        const cardKind = parseInt(card.종류, 10) as CardKind;
+
+        // 공통 텍스처 로드
+        const commonTextures = await Promise.all([
+            this.textureManager.getTexture('race', card.종족),
+            this.textureManager.getTexture('hp', card.체력),
+            this.textureManager.getTexture('energy', 0),
+        ]);
+
+        // CardKind.UNIT인 경우, 직업에 따라 무기 텍스처를 로드
+        let specificTextures: Promise<THREE.Texture | null>[] = [];
+        if (cardKind === CardKind.UNIT) {
+            const weaponTextureName = OpponentFieldServiceImpl.weaponTextureMap[unitJob as CardJob] || 'default_weapon';
+            specificTextures.push(
+                this.textureManager.getTexture(weaponTextureName, card.공격력).then(texture => texture ?? null)
+            );
+        } else {
+            specificTextures.push(
+                this.textureManager.getTexture('card_kinds', card.종류).then(texture => texture ?? null)
+            );
+        }
+
+        const textures = await Promise.all([...specificTextures, ...commonTextures]);
+
+        return textures.map(texture => texture ?? null);
+    }
+
+    private async addAttributesToCardGroup(
+        mainCardScene: BattleFieldCardScene,
+        createdHandPosition: BattleFieldCardPosition,
+        card: Card,
+        cardGroup: THREE.Group,
+        handPosition: Vector2d,
+        textures: (Texture | null)[]
+    ): Promise<void> {
+        const unitJob = parseInt(card.병종, 10) as CardJob;
+        const cardKind = parseInt(card.종류, 10) as CardKind;
+        const cardId = card.카드번호;
+
+        const [kindsOrWeaponTexture, raceTexture, hpTexture, energyTexture] = textures;
+        const attributeMarks: BattleFieldCardAttributeMark[] = [];
+
+        if (cardKind === CardKind.UNIT && unitJob === CardJob.WARRIOR && kindsOrWeaponTexture) {
+            const weaponPosition = this.calculateWeaponPosition(handPosition);
+            const weaponMesh = this.createWeaponMesh(kindsOrWeaponTexture, weaponPosition);
+            cardGroup.add(weaponMesh);
+
+            // const weaponMark = await this.saveCardAttributeMark(weaponMesh, weaponPosition, MarkSceneType.SWORD);
+            // attributeMarks.push(weaponMark)
+        }
+
+        if (cardKind === CardKind.UNIT && unitJob === CardJob.MAGICIAN && kindsOrWeaponTexture) {
+            const staffPosition = this.calculateStaffPosition(handPosition);
+            const staffMesh = this.createStaffMesh(kindsOrWeaponTexture, staffPosition);
+            cardGroup.add(staffMesh);
+
+            // const staffMark = await this.saveCardAttributeMark(staffMesh, staffPosition, MarkSceneType.STAFF);
+            // attributeMarks.push(staffMark)
+        }
+
+        if (cardKind !== CardKind.UNIT && kindsOrWeaponTexture) {
+            const kindsPosition = this.calculateKindsPosition(handPosition);
+            const kinsMesh = this.createKindsMesh(kindsOrWeaponTexture, kindsPosition);
+            cardGroup.add(kinsMesh);
+
+            // const kindsMark = await this.saveCardAttributeMark(kinsMesh, kindsPosition, MarkSceneType.KINDS);
+            // attributeMarks.push(kindsMark)
+        }
+
+        if (raceTexture) {
+            const racePosition = this.calculateRacePosition(handPosition)
+            const raceMesh = this.createRaceMesh(raceTexture, racePosition);
+            cardGroup.add(raceMesh);
+
+            // const raceMark = await this.saveCardAttributeMark(raceMesh, racePosition, MarkSceneType.RACE);
+            // attributeMarks.push(raceMark)
+        }
+
+        if (hpTexture) {
+            const hpPosition = this.calculateHpPosition(handPosition)
+            const hpMesh = this.createHpMesh(hpTexture, hpPosition);
+            cardGroup.add(hpMesh);
+
+            // const hpMark = await this.saveCardAttributeMark(hpMesh, hpPosition, MarkSceneType.HP);
+            // attributeMarks.push(hpMark)
+        }
+
+        if (cardKind === CardKind.UNIT && energyTexture) {
+            const energyPosition = this.calculateEnergyPosition(handPosition)
+            const energyMesh = this.createEnergyMesh(energyTexture, energyPosition);
+            cardGroup.add(energyMesh);
+
+            // const energyMark = await this.saveCardAttributeMark(energyMesh, energyPosition, MarkSceneType.ENERGY);
+            // attributeMarks.push(energyMark)
+        }
+
+        const attributeMarkIdList = attributeMarks.map((mark) => mark.getId())
+        this.opponentFieldRepository.save(mainCardScene.getId(), createdHandPosition.getId(), attributeMarkIdList, cardId)
+    }
+
+    private calculateWeaponPosition(handPosition: Vector2d): Vector2d {
+        const x = handPosition.getX() + this.CARD_WIDTH * 0.44 * window.innerWidth;
+        const y = handPosition.getY() - this.CARD_HEIGHT * 0.45666 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private createWeaponMesh(texture: THREE.Texture, position: Vector2d): THREE.Mesh {
+        return MeshGenerator.createMesh(
+            texture,
+            this.CARD_WIDTH * 0.63 * window.innerWidth,
+            this.CARD_WIDTH * 0.63 * 1.651 * window.innerWidth,
+            position
+        );
+    }
+
+    private calculateStaffPosition(handPosition: Vector2d): Vector2d {
+        const x = handPosition.getX() + this.CARD_WIDTH * 0.54 * window.innerWidth;
+        const y = handPosition.getY() - this.CARD_HEIGHT * 0.30666 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private createStaffMesh(texture: THREE.Texture, position: Vector2d): THREE.Mesh {
+        return MeshGenerator.createMesh(
+            texture,
+            this.CARD_WIDTH * 0.63 * window.innerWidth,
+            this.CARD_WIDTH * 0.63 * 1.9353 * window.innerWidth,
+            position
+        );
+    }
+
+    private calculateKindsPosition(handPosition: Vector2d): Vector2d {
+        const x = handPosition.getX() + this.CARD_WIDTH * 0.5 * window.innerWidth;
+        const y = handPosition.getY() - this.CARD_HEIGHT * 0.5 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private createKindsMesh(texture: THREE.Texture, position: Vector2d): THREE.Mesh {
+        return MeshGenerator.createMesh(
+            texture,
+            this.CARD_WIDTH * 0.4 * window.innerWidth,
+            this.CARD_WIDTH * 0.4 * window.innerWidth,
+            position
+        );
+    }
+
+    private calculateRacePosition(handPosition: Vector2d): Vector2d {
+        const x = handPosition.getX() + this.CARD_WIDTH * 0.5 * window.innerWidth;
+        const y = handPosition.getY() + this.CARD_HEIGHT * 0.5 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private createRaceMesh(texture: THREE.Texture, position: Vector2d): THREE.Mesh {
+        return MeshGenerator.createMesh(
+            texture,
+            this.CARD_WIDTH * 0.4 * window.innerWidth,
+            this.CARD_WIDTH * 0.4 * window.innerWidth,
+            position
+        );
+    }
+
+    private calculateHpPosition(handPosition: Vector2d): Vector2d {
+        const x = handPosition.getX() - this.CARD_WIDTH * 0.5 * window.innerWidth;
+        const y = handPosition.getY() - this.CARD_HEIGHT * 0.43438 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private createHpMesh(texture: THREE.Texture, position: Vector2d): THREE.Mesh {
+        return MeshGenerator.createMesh(
+            texture,
+            this.CARD_WIDTH * 0.31 * window.innerWidth,
+            this.CARD_WIDTH * 0.31 * 1.65454 * window.innerWidth,
+            position
+        );
+    }
+
+    private calculateEnergyPosition(handPosition: Vector2d): Vector2d {
+        const x = handPosition.getX() - this.CARD_WIDTH * 0.5 * window.innerWidth;
+        const y = handPosition.getY() + this.CARD_HEIGHT * 0.5 * window.innerWidth;
+        return new Vector2d(x, y);
+    }
+
+    private createEnergyMesh(texture: THREE.Texture, position: Vector2d): THREE.Mesh {
+        return MeshGenerator.createMesh(
+            texture,
+            this.CARD_WIDTH * 0.39 * window.innerWidth,
+            this.CARD_WIDTH * 0.39 * 1.344907 * window.innerWidth,
+            position
+        );
     }
 }
