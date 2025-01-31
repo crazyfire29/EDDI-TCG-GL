@@ -177,7 +177,9 @@ export class TCGJustTestMakeDeckView {
     private async addCards(): Promise<void> {
         try {
             // To-do:예시 데이터 Map 만들어야 함.
-            const myCardIdList = [2, 8, 9, 17, 19, 20, 25, 26, 5, 6, 7, 10, 13, 14];
+            const myCardIdList = [2, 8, 9, 17, 19, 20, 25, 26, 5, 6,
+                                  7, 10, 13, 14, 15, 16, 23, 27, 30, 33,
+                                  48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
             const cardGroup = await this.makeDeckScreenCardService.createMakeDeckScreenCardWithPosition(myCardIdList);
 
             if (cardGroup) {
