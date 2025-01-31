@@ -38,6 +38,7 @@ export class TextureManager {
     private ownedCardTextureList: { [id: number]: THREE.Texture } = {};
     private raceButtonTextureList: { [id: number]: THREE.Texture } = {};
     private raceButtonEffectTextureList: { [id: number]: THREE.Texture } = {};
+    private makeDeckCardPageMovementButtonsTextureList: { [id: number]: THREE.Texture } = {};
 
     private constructor() {}
 
@@ -89,6 +90,7 @@ export class TextureManager {
                 this.loadTextures(imageData.owned_card, this.ownedCardTextureList),
                 this.loadTextures(imageData.race_button, this.raceButtonTextureList),
                 this.loadTextures(imageData.race_button_effect, this.raceButtonEffectTextureList),
+                this.loadTextures(imageData.make_deck_card_page_movement_buttons, this.makeDeckCardPageMovementButtonsTextureList),
             ]);
 
             console.log('All textures preloaded from TextureManager.ts');
@@ -226,6 +228,8 @@ export class TextureManager {
                 return this.raceButtonTextureList[id];
             case 'race_button_effect':
                 return this.raceButtonEffectTextureList[id];
+            case 'make_deck_card_page_movement_buttons':
+                return this.makeDeckCardPageMovementButtonsTextureList[id];
             default:
                 return undefined;
         }

@@ -16,9 +16,12 @@ import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServ
 import {BackgroundRepositoryImpl} from "../../src/background/repository/BackgroundRepositoryImpl";
 import {MakeDeckScreenCardServiceImpl} from "../../src/make_deck_screen_card/service/MakeDeckScreenCardServiceImpl";
 import {RaceButtonServiceImpl} from "../../src/race_button/service/RaceButtonServiceImpl";
-import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectServiceImpl} from "../../src/race_button_effect/service/RaceButtonEffectServiceImpl";
+import {CardPageMovementButtonServiceImpl} from "../../src/make_deck_card_page_movement_button/service/CardPageMovementButtonServiceImpl";
+
+import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
+import {CardPageMovementButtonConfigList} from "../../src/make_deck_card_page_movement_button/entity/CardPageMovementButtonConfigList";
 
 import {RaceButtonClickDetectService} from "../../src/race_button_click_detect/service/RaceButtonClickDetectService";
 import {RaceButtonClickDetectServiceImpl} from "../../src/race_button_click_detect/service/RaceButtonClickDetectServiceImpl";
@@ -43,6 +46,7 @@ export class TCGJustTestMakeDeckView {
     private makeDeckScreenCardService = MakeDeckScreenCardServiceImpl.getInstance();
     private raceButtonService = RaceButtonServiceImpl.getInstance();
     private raceButtonEffectService = RaceButtonEffectServiceImpl.getInstance();
+    private cardPageMovementButtonService = CardPageMovementButtonServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
 
@@ -119,6 +123,7 @@ export class TCGJustTestMakeDeckView {
         await this.addCards();
         await this.addRaceButton();
         await this.addRaceButtonEffect();
+        await this.addCardPageMovementButton();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -218,6 +223,25 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
+    private async addCardPageMovementButton(): Promise<void> {
+        try {
+            const configList = new CardPageMovementButtonConfigList();
+            await Promise.all(configList.buttonConfigs.map(async (config) =>{
+                const button = await this.cardPageMovementButtonService.createCardPageMovementButton(
+                    config.id,
+                    config.position
+                );
+
+                if (button) {
+                    this.scene.add(button);
+                    console.log(`Draw Race Button ${config.id}`);
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to add Card Page Movement Button:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -241,6 +265,7 @@ export class TCGJustTestMakeDeckView {
             this.makeDeckScreenCardService.adjustMakeDeckScreenCardPosition();
             this.raceButtonService.adjustRaceButtonPosition();
             this.raceButtonEffectService.adjustRaceButtonEffectPosition();
+            this.cardPageMovementButtonService.adjustCardPageMovementButtonPosition();
         }
     }
 
