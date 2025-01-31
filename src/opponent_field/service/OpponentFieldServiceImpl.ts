@@ -11,18 +11,22 @@ import {OpponentFieldCardSceneRepositoryImpl} from "../../opponent_field_card_sc
 import {OpponentFieldCardSceneRepository} from "../../opponent_field_card_scene/repository/OpponentFieldCradSceneRepository";
 import {OpponentFieldCardScene} from "../../opponent_field_card_scene/entity/OpponentFieldCardScene";
 import {CardKind} from "../../card/kind";
-import {BattleFieldCardScene} from "../../battle_field_card_scene/entity/BattleFieldCardScene";
-import {BattleFieldCardPosition} from "../../battle_field_card_position/entity/BattleFieldCardPosition";
 import {Texture} from "three";
-import {BattleFieldCardAttributeMark} from "../../battle_field_card_attribute_mark/entity/BattleFieldCardAttributeMark";
-import {MarkSceneType} from "../../battle_field_card_attribute_mark_scene/entity/MarkSceneType";
 import {MeshGenerator} from "../../mesh/generator";
 import {Card} from "../../card/types";
 import {OpponentFieldRepositoryImpl} from "../repository/OpponentFieldRepositoryImpl";
 import {OpponentFieldRepository} from "../repository/OpponentFieldRepository";
-import {BattleFieldCardAttributeMarkPosition} from "../../battle_field_card_attribute_mark_position/entity/BattleFieldCardAttributeMarkPosition";
-import {BattleFieldCardAttributeMarkScene} from "../../battle_field_card_attribute_mark_scene/entity/BattleFieldCardAttributeMarkScene";
-import {BattleFieldCardAttributeMarkStatus} from "../../battle_field_card_attribute_mark/entity/BattleFieldCardAttributeMarkStatus";
+import {OpponentFieldCardAttributeMarkPositionRepository} from "../../opponent_field_card_attribute_mark_position/repository/OpponentFieldCardAttributeMarkPositionRepository";
+import {OpponentFieldCardAttributeMarkSceneRepository} from "../../opponent_field_card_attribute_mark_scene/repository/OpponentFieldCardAttributeMarkSceneRepository";
+import {OpponentFieldCardAttributeMarkRepository} from "../../opponent_field_card_attribute_mark/repository/OpponentFieldCardAttributeMarkRepository";
+import {OpponentFieldCardAttributeMarkPositionRepositoryImpl} from "../../opponent_field_card_attribute_mark_position/repository/OpponentFieldCardAttributeMarkPositionRepositoryImpl";
+import {OpponentFieldCardAttributeMarkSceneRepositoryImpl} from "../../opponent_field_card_attribute_mark_scene/repository/OpponentFieldCardAttributeMarkSceneRepositoryImpl";
+import {OpponentFieldCardAttributeMarkRepositoryImpl} from "../../opponent_field_card_attribute_mark/repository/OpponentFieldCardAttributeMarkRepositoryImpl";
+import {OpponentFieldCardAttributeMark} from "../../opponent_field_card_attribute_mark/entity/OpponentFieldCardAttributeMark";
+import {OpponentFieldCardAttributeMarkPosition} from "../../opponent_field_card_attribute_mark_position/entity/OpponentFieldCardAttributeMarkPosition";
+import {OpponentFieldCardAttributeMarkScene} from "../../opponent_field_card_attribute_mark_scene/entity/OpponentFieldCardAttributeMarkScene";
+import {OpponentFieldCardAttributeMarkStatus} from "../../opponent_field_card_attribute_mark/entity/OpponentFieldCardAttributeMarkStatus";
+import {MarkSceneType} from "../../opponent_field_card_attribute_mark_scene/entity/MarkSceneType";
 
 export class OpponentFieldServiceImpl implements OpponentFieldService {
     private static instance: OpponentFieldServiceImpl;
@@ -30,6 +34,10 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
     private opponentFieldCardPositionRepository: OpponentFieldCardPositionRepository
     private opponentFieldCardSceneRepository: OpponentFieldCardSceneRepository
     private opponentFieldRepository: OpponentFieldRepository
+
+    private opponentFieldCardAttributeMarkPositionRepository: OpponentFieldCardAttributeMarkPositionRepository
+    private opponentFieldCardAttributeMarkSceneRepository: OpponentFieldCardAttributeMarkSceneRepository
+    private opponentFieldCardAttributeMarkRepository: OpponentFieldCardAttributeMarkRepository
 
     private textureManager: TextureManager = TextureManager.getInstance();
 
@@ -54,6 +62,10 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
         this.opponentFieldCardPositionRepository = OpponentFieldCardPositionRepositoryImpl.getInstance()
         this.opponentFieldCardSceneRepository = OpponentFieldCardSceneRepositoryImpl.getInstance()
         this.opponentFieldRepository = OpponentFieldRepositoryImpl.getInstance()
+
+        this.opponentFieldCardAttributeMarkPositionRepository = OpponentFieldCardAttributeMarkPositionRepositoryImpl.getInstance()
+        this.opponentFieldCardAttributeMarkSceneRepository = OpponentFieldCardAttributeMarkSceneRepositoryImpl.getInstance()
+        this.opponentFieldCardAttributeMarkRepository = OpponentFieldCardAttributeMarkRepositoryImpl.getInstance()
     }
 
     public static getInstance(): OpponentFieldServiceImpl {
@@ -139,8 +151,8 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
     }
 
     private async addAttributesToCardGroup(
-        mainCardScene: BattleFieldCardScene,
-        createdHandPosition: BattleFieldCardPosition,
+        mainCardScene: OpponentFieldCardScene,
+        createdHandPosition: OpponentFieldCardPosition,
         card: Card,
         cardGroup: THREE.Group,
         handPosition: Vector2d,
@@ -151,15 +163,15 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
         const cardId = card.카드번호;
 
         const [kindsOrWeaponTexture, raceTexture, hpTexture, energyTexture] = textures;
-        const attributeMarks: BattleFieldCardAttributeMark[] = [];
+        const attributeMarks: OpponentFieldCardAttributeMark[] = [];
 
         if (cardKind === CardKind.UNIT && unitJob === CardJob.WARRIOR && kindsOrWeaponTexture) {
             const weaponPosition = this.calculateWeaponPosition(handPosition);
             const weaponMesh = this.createWeaponMesh(kindsOrWeaponTexture, weaponPosition);
             cardGroup.add(weaponMesh);
 
-            // const weaponMark = await this.saveCardAttributeMark(weaponMesh, weaponPosition, MarkSceneType.SWORD);
-            // attributeMarks.push(weaponMark)
+            const weaponMark = await this.saveCardAttributeMark(weaponMesh, weaponPosition, MarkSceneType.SWORD);
+            attributeMarks.push(weaponMark)
         }
 
         if (cardKind === CardKind.UNIT && unitJob === CardJob.MAGICIAN && kindsOrWeaponTexture) {
@@ -167,8 +179,8 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
             const staffMesh = this.createStaffMesh(kindsOrWeaponTexture, staffPosition);
             cardGroup.add(staffMesh);
 
-            // const staffMark = await this.saveCardAttributeMark(staffMesh, staffPosition, MarkSceneType.STAFF);
-            // attributeMarks.push(staffMark)
+            const staffMark = await this.saveCardAttributeMark(staffMesh, staffPosition, MarkSceneType.STAFF);
+            attributeMarks.push(staffMark)
         }
 
         if (cardKind !== CardKind.UNIT && kindsOrWeaponTexture) {
@@ -176,8 +188,8 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
             const kinsMesh = this.createKindsMesh(kindsOrWeaponTexture, kindsPosition);
             cardGroup.add(kinsMesh);
 
-            // const kindsMark = await this.saveCardAttributeMark(kinsMesh, kindsPosition, MarkSceneType.KINDS);
-            // attributeMarks.push(kindsMark)
+            const kindsMark = await this.saveCardAttributeMark(kinsMesh, kindsPosition, MarkSceneType.KINDS);
+            attributeMarks.push(kindsMark)
         }
 
         if (raceTexture) {
@@ -185,8 +197,8 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
             const raceMesh = this.createRaceMesh(raceTexture, racePosition);
             cardGroup.add(raceMesh);
 
-            // const raceMark = await this.saveCardAttributeMark(raceMesh, racePosition, MarkSceneType.RACE);
-            // attributeMarks.push(raceMark)
+            const raceMark = await this.saveCardAttributeMark(raceMesh, racePosition, MarkSceneType.RACE);
+            attributeMarks.push(raceMark)
         }
 
         if (hpTexture) {
@@ -194,8 +206,8 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
             const hpMesh = this.createHpMesh(hpTexture, hpPosition);
             cardGroup.add(hpMesh);
 
-            // const hpMark = await this.saveCardAttributeMark(hpMesh, hpPosition, MarkSceneType.HP);
-            // attributeMarks.push(hpMark)
+            const hpMark = await this.saveCardAttributeMark(hpMesh, hpPosition, MarkSceneType.HP);
+            attributeMarks.push(hpMark)
         }
 
         if (cardKind === CardKind.UNIT && energyTexture) {
@@ -203,8 +215,8 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
             const energyMesh = this.createEnergyMesh(energyTexture, energyPosition);
             cardGroup.add(energyMesh);
 
-            // const energyMark = await this.saveCardAttributeMark(energyMesh, energyPosition, MarkSceneType.ENERGY);
-            // attributeMarks.push(energyMark)
+            const energyMark = await this.saveCardAttributeMark(energyMesh, energyPosition, MarkSceneType.ENERGY);
+            attributeMarks.push(energyMark)
         }
 
         const attributeMarkIdList = attributeMarks.map((mark) => mark.getId())
@@ -299,5 +311,20 @@ export class OpponentFieldServiceImpl implements OpponentFieldService {
             this.CARD_WIDTH * 0.39 * 1.344907 * window.innerWidth,
             position
         );
+    }
+
+    private async saveCardAttributeMark(mesh: THREE.Mesh, position: Vector2d, markSceneType: MarkSceneType): Promise<OpponentFieldCardAttributeMark> {
+        const attributeMarkPosition = new OpponentFieldCardAttributeMarkPosition(position.getX(), position.getY());
+        await this.opponentFieldCardAttributeMarkPositionRepository.save(attributeMarkPosition);
+
+        const attributeMarkScene = new OpponentFieldCardAttributeMarkScene(mesh, markSceneType);
+        await this.opponentFieldCardAttributeMarkSceneRepository.save(attributeMarkScene);
+
+        const attributeMark = new OpponentFieldCardAttributeMark(
+            OpponentFieldCardAttributeMarkStatus.HAND,
+            attributeMarkScene.getId(),
+            attributeMarkPosition.getId()
+        );
+        return await this.opponentFieldCardAttributeMarkRepository.save(attributeMark);
     }
 }
