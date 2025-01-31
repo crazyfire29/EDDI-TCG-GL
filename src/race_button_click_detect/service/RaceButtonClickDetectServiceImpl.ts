@@ -82,6 +82,7 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
                 this.setRaceButtonVisibility(hiddenButton.id, true);
                 this.setRaceButtonEffectVisibility(hiddenButton.id, false);
                 this.resetCardsVisibility(cardIdList, false);
+                this.resetCurrentCardPage();
             }
 
             if (currentClickedButtonId !== null) {
@@ -163,6 +164,10 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
         cardIdList.forEach((cardId) => {
             this.cardStateManager.setCardVisibility(cardId, isVisible);
         });
+    }
+
+    private resetCurrentCardPage(): void {
+        this.cardPageManager.resetCurrentPage();
     }
 
 }
