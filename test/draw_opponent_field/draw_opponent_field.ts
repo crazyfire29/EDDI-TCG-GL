@@ -41,6 +41,8 @@ import {KeyboardService} from "../../src/keyboard/service/KeyboardService";
 import {KeyboardServiceImpl} from "../../src/keyboard/service/KeyboardServiceImpl";
 import {OpponentFieldMapRepositoryImpl} from "../../src/opponent_field_map/repository/OpponentFieldMapRepositoryImpl";
 import {OpponentFieldServiceImpl} from "../../src/opponent_field/service/OpponentFieldServiceImpl";
+import {RightClickDetectServiceImpl} from "../../src/right_click_detect/service/RightClickDetectServiceImpl";
+import {RightClickDetectService} from "../../src/right_click_detect/service/RightClickDetectService";
 
 
 export class TCGJustTestBattleFieldView {
@@ -73,6 +75,8 @@ export class TCGJustTestBattleFieldView {
     private leftClickDetectService: LeftClickDetectService
     private dragMoveService: DragMoveService
     private mouseDropService: MouseDropService
+
+    private rightClickDetectService: RightClickDetectService
 
     private keyboardService: KeyboardService
 
@@ -124,12 +128,20 @@ export class TCGJustTestBattleFieldView {
         this.dragMoveService = DragMoveServiceImpl.getInstance(this.camera, this.scene)
         this.mouseDropService = MouseDropServiceImpl.getInstance()
 
+        this.rightClickDetectService = RightClickDetectServiceImpl.getInstance(this.camera)
+
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
             if (e.button === 0) { // 좌클릭만 처리
                 const result = await this.leftClickDetectService.handleLeftClick(e);
                 // console.log(`result: ${JSON.stringify(result, null, 2)}`)
                 if (result !== null) {
                     this.leftClickDetectService.setLeftMouseDown(true);
+                }
+            } else if (e.button === 2) { // 우클릭 처리
+                e.preventDefault();
+                const result = await this.rightClickDetectService.handleRightClick(e);
+                if (result !== null) {
+                    this.rightClickDetectService.setRightMouseDown(true);
                 }
             }
         }, false)
@@ -153,6 +165,10 @@ export class TCGJustTestBattleFieldView {
             console.log(`Key pressed: ${event.key}`); // 키가 눌릴 때 메시지가 출력되는지 확인
             this.keyboardService.processKeyboard(event.key);
         });
+
+        this.renderer.domElement.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        }, false);
     }
 
     public static getInstance(lobbyContainer: HTMLElement): TCGJustTestBattleFieldView {

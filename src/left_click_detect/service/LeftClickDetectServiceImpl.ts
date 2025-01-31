@@ -30,6 +30,11 @@ import {NeonBorderLinePositionRepository} from "../../neon_border_line_position/
 import {NeonBorderLinePositionRepositoryImpl} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepositoryImpl";
 import {NeonBorderSceneType} from "../../neon_border/entity/NeonBorderSceneType";
 import chalk from "chalk";
+import {YourFieldCardSceneRepository} from "../../your_field_card_scene/repository/YourFieldCardSceneRepository";
+import {YourFieldCardSceneRepositoryImpl} from "../../your_field_card_scene/repository/YourFieldCardSceneRepositoryImpl";
+import {LeftClickYourFieldDetectRepository} from "../repository/LeftClickYourFieldDetectRepository";
+import {LeftClickYourFieldDetectRepositoryImpl} from "../repository/LeftClickYourFieldDetectRepositoryImpl";
+import {LeftClickedArea} from "../entity/LeftClickedArea";
 
 export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private static instance: LeftClickDetectServiceImpl | null = null;
@@ -57,12 +62,25 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private battleFieldCardSceneRepository: BattleFieldCardSceneRepository;
     private battleFieldHandRepository: BattleFieldHandRepository;
 
+    private yourFieldCardSceneRepository: YourFieldCardSceneRepository
+
     private leftClickHandDetectRepository: LeftClickHandDetectRepository;
+    private leftClickYourFieldDetectRepository: LeftClickYourFieldDetectRepository;
 
     private cameraRepository: CameraRepository
     private dragMoveRepository: DragMoveRepository;
 
     private leftMouseDown: boolean = false;
+
+    private areaHandlers: Record<LeftClickedArea, (selectedCard: any) => Promise<void>> = {
+        [LeftClickedArea.YOUR_HAND]: this.handleYourHandClick.bind(this),
+        [LeftClickedArea.YOUR_FIELD]: this.handleYourFieldClick.bind(this),
+        [LeftClickedArea.OPPONENT_FIELD]: this.handleOpponentFieldClick.bind(this),
+        [LeftClickedArea.OPPONENT_HAND]: this.handleOpponentHandClick.bind(this),
+        [LeftClickedArea.FIELD_ENERGY]: this.handleFieldEnergyClick.bind(this),
+        [LeftClickedArea.TOMB]: this.handleTombClick.bind(this),
+        [LeftClickedArea.LOSTZONE]: this.handleLostZoneClick.bind(this),
+    };
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.neonBorderRepository = NeonBorderRepositoryImpl.getInstance();
@@ -76,7 +94,10 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         this.battleFieldCardSceneRepository = BattleFieldCardSceneRepositoryImpl.getInstance();
         this.battleFieldHandRepository = BattleFieldHandRepositoryImpl.getInstance()
 
+        this.yourFieldCardSceneRepository = YourFieldCardSceneRepositoryImpl.getInstance()
+
         this.leftClickHandDetectRepository = LeftClickHandDetectRepositoryImpl.getInstance()
+        this.leftClickYourFieldDetectRepository = LeftClickYourFieldDetectRepositoryImpl.getInstance()
 
         this.cameraRepository = CameraRepositoryImpl.getInstance()
         this.dragMoveRepository = DragMoveRepositoryImpl.getInstance();
@@ -97,6 +118,22 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         return this.leftMouseDown;
     }
 
+    private determineClickedArea(x: number, y: number): { object: any; area: LeftClickedArea } | null {
+        const handSceneList = this.battleFieldCardSceneRepository.findAll();
+        const clickedHandCard = this.leftClickHandDetectRepository.isYourHandAreaClicked({ x, y }, handSceneList, this.camera);
+        if (clickedHandCard) {
+            return { object: clickedHandCard, area: LeftClickedArea.YOUR_HAND };
+        }
+
+        const yourFieldSceneList = this.yourFieldCardSceneRepository.findAll();
+        const clickedYourFieldCard = this.leftClickYourFieldDetectRepository.isYourFieldAreaClicked({ x, y }, yourFieldSceneList, this.camera);
+        if (clickedYourFieldCard) {
+            return { object: clickedYourFieldCard, area: LeftClickedArea.YOUR_FIELD };
+        }
+
+        return null;
+    }
+
     async handleLeftClick(clickPoint: { x: number; y: number }): Promise<any | null> {
         const { x, y } = clickPoint;
 
@@ -104,42 +141,51 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         await this.dragMoveRepository.deleteSelectedObject();
         await this.dragMoveRepository.deleteSelectedGroup();
 
-        // 핸드 카드 클릭 감지
-        const handSceneList = this.battleFieldCardSceneRepository.findAll();
-        const clickedHandCard = this.leftClickHandDetectRepository.isYourHandAreaClicked(
-            { x, y },
-            handSceneList,
-            this.camera
-        );
-
-        if (!clickedHandCard) {
+        const selectedObject = this.determineClickedArea(x, y);
+        if (!selectedObject) {
             return null;
         }
+        const selectedCard = selectedObject.object
 
-        // 선택된 카드 설정
-        this.dragMoveRepository.setSelectedObject(clickedHandCard);
+        this.dragMoveRepository.setSelectedObject(selectedCard);
+
+        const selectedArea = selectedObject.area
 
         try {
-            // 속성 마크 ID 목록 가져오기
-            const attributeMarkIdList = this.getAttributeMarkIdList(clickedHandCard.getId());
-
-            if (attributeMarkIdList.length > 0) {
-                // 속성 마크 객체 목록 가져오기
-                const attributeMarkList = await this.getAttributeMarkList(attributeMarkIdList);
-
-                // 유효한 속성 마크 장면 가져오기
-                const validAttributeSceneList = await this.getValidAttributeScenes(attributeMarkList);
-
-                // 선택된 그룹 설정
-                this.dragMoveRepository.setSelectedGroup(validAttributeSceneList);
+            // area에 해당하는 핸들러 실행
+            const handler = this.areaHandlers[selectedArea];
+            if (handler) {
+                await handler(selectedCard);
+            } else {
+                console.warn(`No handler found for area: ${selectedArea}`);
             }
-
-            this.createNeonBorder(clickedHandCard)
         } catch (error) {
-            console.error("Error fetching attribute mark scenes:", error);
+            console.error(`Error handling click event for area: ${selectedArea}`, error);
         }
 
-        return clickedHandCard;
+        return selectedCard;
+
+        // try {
+        //     // 속성 마크 ID 목록 가져오기
+        //     const attributeMarkIdList = this.getAttributeMarkIdList(clickedHandCard.getId());
+        //
+        //     if (attributeMarkIdList.length > 0) {
+        //         // 속성 마크 객체 목록 가져오기
+        //         const attributeMarkList = await this.getAttributeMarkList(attributeMarkIdList);
+        //
+        //         // 유효한 속성 마크 장면 가져오기
+        //         const validAttributeSceneList = await this.getValidAttributeScenes(attributeMarkList);
+        //
+        //         // 선택된 그룹 설정
+        //         this.dragMoveRepository.setSelectedGroup(validAttributeSceneList);
+        //     }
+        //
+        //     this.createNeonBorder(clickedHandCard)
+        // } catch (error) {
+        //     console.error("Error fetching attribute mark scenes:", error);
+        // }
+        //
+        // return clickedHandCard;
     }
 
     // 속성 마크 ID 목록 가져오기
@@ -191,7 +237,6 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
 
         const cardSceneId = clickedHandCard.getId();
 
-        // Step 1: Check for existing NeonBorder
         const existingNeonBorder = this.neonBorderRepository.findByCardSceneIdWithPlacement(cardSceneId, NeonBorderSceneType.HAND);
         console.log(chalk.red.bold(`existingNeonBorder: ${existingNeonBorder}`));
         if (existingNeonBorder) {
@@ -209,7 +254,6 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
             return; // Exit early as we don't need to create a new border
         }
 
-        // Step 2: Create new NeonBorder
         const startX = cardPosition.x - halfWidth;
         const startY = cardPosition.y - halfHeight;
         const width = this.CARD_WIDTH * window.innerWidth;
@@ -235,5 +279,40 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         console.log(chalk.red.bold(`Created new NeonBorder for cardSceneId: ${cardSceneId}`));
         console.log(chalk.red.bold(`chalk.red.bold(Saving NeonBorder: ${JSON.stringify(neonBorder)}`));
         this.neonBorderRepository.save(neonBorder);
+    }
+
+    private async handleYourHandClick(selectedCard: any): Promise<void> {
+        const attributeMarkIdList = this.getAttributeMarkIdList(selectedCard.getId());
+        if (attributeMarkIdList.length > 0) {
+            const attributeMarkList = await this.getAttributeMarkList(attributeMarkIdList);
+            const validAttributeSceneList = await this.getValidAttributeScenes(attributeMarkList);
+            this.dragMoveRepository.setSelectedGroup(validAttributeSceneList);
+        }
+        this.createNeonBorder(selectedCard);
+    }
+
+    private async handleYourFieldClick(selectedCard: any): Promise<void> {
+        console.log("Your field card clicked:", selectedCard);
+        this.createNeonBorder(selectedCard);
+    }
+
+    async handleOpponentFieldClick(selectedCard: any): Promise<void> {
+        // OPPONENT_FIELD 영역에 대한 처리
+    }
+
+    async handleOpponentHandClick(selectedCard: any): Promise<void> {
+        // OPPONENT_HAND 영역에 대한 처리
+    }
+
+    async handleFieldEnergyClick(selectedCard: any): Promise<void> {
+        // FIELD_ENERGY 영역에 대한 처리
+    }
+
+    async handleTombClick(selectedCard: any): Promise<void> {
+        // TOMB 영역에 대한 처리
+    }
+
+    async handleLostZoneClick(selectedCard: any): Promise<void> {
+        // LOSTZONE 영역에 대한 처리
     }
 }
