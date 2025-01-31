@@ -95,7 +95,7 @@ export class MakeDeckScreenCardServiceImpl implements MakeDeckScreenCardService 
                 continue;
             }
 
-            const cardWidth = 0.115 * window.innerWidth;
+            const cardWidth = 0.112 * window.innerWidth;
             const cardHeight = 0.345 * window.innerHeight;
 
             const newPositionX = initialPosition.getX() * windowWidth;

@@ -13,7 +13,7 @@ export class MakeDeckScreenCardRepositoryImpl implements MakeDeckScreenCardRepos
     private cardCountMap: Map<number, number> = new Map(); // card Id: count
     private textureManager: TextureManager;
 
-    private readonly CARD_WIDTH: number = 0.115
+    private readonly CARD_WIDTH: number = 0.112
     private readonly CARD_HEIGHT: number = 0.345
 
     private constructor(textureManager: TextureManager) {

@@ -9,6 +9,7 @@ export class MakeDeckScreenCardPositionRepositoryImpl implements MakeDeckScreenC
 
     private initialX = - 0.3605;
     private incrementX = 0.157;
+    private incrementXPattern = [0.145, 0.182];
     private initialY =  0.1929;
     private incrementY = - 0.401;
     private maxCardsPerRow = 4;
@@ -32,11 +33,21 @@ export class MakeDeckScreenCardPositionRepositoryImpl implements MakeDeckScreenC
         const row = Math.floor(positionInPage / this.maxCardsPerRow);
         const col = (cardIndex - 1) % this.maxCardsPerRow;
 
-        const positionX = this.initialX + col * this.incrementX;
+        const incrementX = this.incrementXPattern[col % this.incrementXPattern.length];
+        const positionX = this.initialX + this.getCumulativeIncrementX(col);
+//         const positionX = this.initialX + col * this.incrementX;
         const positionY = this.initialY + row * this.incrementY;
 
         const position = new MakeDeckScreenCardPosition(positionX, positionY);
         return position;
+    }
+
+    private getCumulativeIncrementX(col: number): number {
+        let totalIncrement = 0;
+        for (let i = 0; i < col; i++) {
+            totalIncrement += this.incrementXPattern[i % this.incrementXPattern.length];
+        }
+        return totalIncrement;
     }
 
     public save(cardId: number, position: MakeDeckScreenCardPosition): void {
