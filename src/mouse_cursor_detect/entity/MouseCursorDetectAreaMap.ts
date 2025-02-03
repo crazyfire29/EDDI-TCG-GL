@@ -18,6 +18,7 @@ export class MouseCursorDetectAreaMap {
             [MouseCursorDetectArea.OPPONENT_LOSTZONE]: { x1: 880, y1: 200, x2: 980, y2: 300 },
             [MouseCursorDetectArea.OPPONENT_CONSTRUCTION]: { x1: 400, y1: 200, x2: 600, y2: 300 },
 
+            [MouseCursorDetectArea.FIELD_ENERGY]: { x1: 10, y1: 10, x2: 10, y2: 10 },
             [MouseCursorDetectArea.ENVIRONMENT]: { x1: 300, y1: 400, x2: 700, y2: 600 },
             [MouseCursorDetectArea.SETTINGS]: { x1: 850, y1: 900, x2: 950, y2: 980 },
             [MouseCursorDetectArea.TURN_END]: { x1: 750, y1: 900, x2: 830, y2: 980 },

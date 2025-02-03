@@ -9,7 +9,8 @@ export enum MouseCursorDetectArea {
     OPPONENT_TOMB = 8,
     OPPONENT_LOSTZONE = 9,
     OPPONENT_CONSTRUCTION = 10,
-    ENVIRONMENT = 11,
-    SETTINGS = 12,
-    TURN_END = 13
+    FIELD_ENERGY = 11,
+    ENVIRONMENT = 12,
+    SETTINGS = 13,
+    TURN_END = 14
 }

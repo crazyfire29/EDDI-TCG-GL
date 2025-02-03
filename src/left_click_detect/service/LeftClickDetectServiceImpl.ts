@@ -80,14 +80,21 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
 
     private leftMouseDown: boolean = false;
 
-    private areaHandlers: Record<LeftClickedArea, (selectedCard: any) => Promise<void>> = {
-        [LeftClickedArea.YOUR_HAND]: this.handleYourHandClick.bind(this),
-        [LeftClickedArea.YOUR_FIELD]: this.handleYourFieldClick.bind(this),
-        [LeftClickedArea.OPPONENT_FIELD]: this.handleOpponentFieldClick.bind(this),
-        [LeftClickedArea.OPPONENT_HAND]: this.handleOpponentHandClick.bind(this),
-        [LeftClickedArea.FIELD_ENERGY]: this.handleFieldEnergyClick.bind(this),
-        [LeftClickedArea.TOMB]: this.handleTombClick.bind(this),
-        [LeftClickedArea.LOSTZONE]: this.handleLostZoneClick.bind(this),
+    private areaHandlers: Record<MouseCursorDetectArea, (x: number, y: number) => Promise<void>> = {
+        [MouseCursorDetectArea.YOUR_HAND]: this.handleYourHandClick.bind(this),
+        [MouseCursorDetectArea.YOUR_FIELD]: this.handleYourFieldClick.bind(this),
+        [MouseCursorDetectArea.OPPONENT_FIELD]: this.handleOpponentFieldClick.bind(this),
+        [MouseCursorDetectArea.OPPONENT_HAND]: this.handleOpponentHandClick.bind(this),
+        [MouseCursorDetectArea.FIELD_ENERGY]: this.handleFieldEnergyClick.bind(this),
+        [MouseCursorDetectArea.YOUR_TOMB]: this.handleTombClick.bind(this),
+        [MouseCursorDetectArea.YOUR_LOSTZONE]: this.handleLostZoneClick.bind(this),
+        [MouseCursorDetectArea.OPPONENT_TOMB]: this.handleOpponentTombClick.bind(this),
+        [MouseCursorDetectArea.OPPONENT_LOSTZONE]: this.handleOpponentLostZoneClick.bind(this),
+        [MouseCursorDetectArea.OPPONENT_CONSTRUCTION]: this.handleOpponentConstructionClick.bind(this),
+        [MouseCursorDetectArea.YOUR_CONSTRUCTION]: this.handleYourConstructionClick.bind(this),
+        [MouseCursorDetectArea.ENVIRONMENT]: this.handleEnvironmentClick.bind(this),
+        [MouseCursorDetectArea.SETTINGS]: this.handleSettingsClick.bind(this),
+        [MouseCursorDetectArea.TURN_END]: this.handleTurnEndClick.bind(this),
     };
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
@@ -156,34 +163,35 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
 
         const detectedArea = this.mouseCursorDetectRepository.detectArea(x, y);
 
-        if (detectedArea === MouseCursorDetectArea.YOUR_HAND) {
-            console.log("YOUR_HAND 영역 클릭 감지됨");
+        if (detectedArea === null) {
+            console.warn("클릭된 영역을 감지할 수 없습니다.");
+            return null; // null인 경우 바로 반환
         }
 
-        const selectedObject = this.determineClickedArea(x, y);
-        if (!selectedObject) {
-            return null;
-        }
+        // const selectedObject = this.determineClickedArea(x, y);
+        // if (!selectedObject) {
+        //     return null;
+        // }
 
-        const selectedCard = selectedObject.object
-        this.dragMoveRepository.setSelectedObject(selectedCard);
+        // const selectedCard = selectedObject.object
+        // this.dragMoveRepository.setSelectedObject(selectedCard);
 
-        const selectedArea = selectedObject.area
-        this.dragMoveRepository.setSelectedArea(selectedArea)
+        // const selectedArea = selectedObject.area
+        // this.dragMoveRepository.setSelectedArea(selectedArea)
 
         try {
             // area에 해당하는 핸들러 실행
-            const handler = this.areaHandlers[selectedArea];
+            const handler = this.areaHandlers[detectedArea];
             if (handler) {
-                await handler(selectedCard);
+                return await handler(x, y);
             } else {
-                console.warn(`No handler found for area: ${selectedArea}`);
+                console.warn(`No handler found for area`);
             }
         } catch (error) {
-            console.error(`Error handling click event for area: ${selectedArea}`, error);
+            console.error(`Error handling click event for area: `, error);
         }
 
-        return selectedCard;
+        return null;
 
         // try {
         //     // 속성 마크 ID 목록 가져오기
@@ -301,17 +309,25 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         this.neonBorderRepository.save(neonBorder);
     }
 
-    private async handleYourHandClick(selectedCard: any): Promise<void> {
+    private async handleYourHandClick(x: number, y: number): Promise<void> {
+        const handSceneList = this.battleFieldCardSceneRepository.findAll();
+        const clickedHandCard = this.leftClickHandDetectRepository.isYourHandAreaClicked({ x, y }, handSceneList, this.camera);
+        if (clickedHandCard === null) {
+            return;
+        }
+
+        this.dragMoveRepository.setSelectedObject(clickedHandCard);
+
         const attributeMarkManager = YourHandAttributeMarkManager.getInstance();
 
-        const attributeMarkIdList = attributeMarkManager.getAttributeMarkIdList(selectedCard.getId());
+        const attributeMarkIdList = attributeMarkManager.getAttributeMarkIdList(clickedHandCard.getId());
         if (attributeMarkIdList.length > 0) {
             const attributeMarkList = await attributeMarkManager.getAttributeMarkList(attributeMarkIdList);
             const validAttributeSceneList = await attributeMarkManager.getValidAttributeScenes(attributeMarkList);
             this.dragMoveRepository.setSelectedGroup(validAttributeSceneList);
         }
 
-        this.createNeonBorder(selectedCard);
+        this.createNeonBorder(clickedHandCard);
     }
 
     private async handleYourFieldClick(selectedCard: any): Promise<void> {
@@ -324,23 +340,51 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         this.createNeonBorder(selectedCard);
     }
 
-    async handleOpponentFieldClick(selectedCard: any): Promise<void> {
+    async handleOpponentFieldClick(x: number, y: number): Promise<void> {
         // OPPONENT_FIELD 영역에 대한 처리
     }
 
-    async handleOpponentHandClick(selectedCard: any): Promise<void> {
+    async handleOpponentHandClick(x: number, y: number): Promise<void> {
         // OPPONENT_HAND 영역에 대한 처리
     }
 
-    async handleFieldEnergyClick(selectedCard: any): Promise<void> {
+    async handleFieldEnergyClick(x: number, y: number): Promise<void> {
         // FIELD_ENERGY 영역에 대한 처리
     }
 
-    async handleTombClick(selectedCard: any): Promise<void> {
+    async handleTombClick(x: number, y: number): Promise<void> {
         // TOMB 영역에 대한 처리
     }
 
-    async handleLostZoneClick(selectedCard: any): Promise<void> {
+    async handleLostZoneClick(x: number, y: number): Promise<void> {
         // LOSTZONE 영역에 대한 처리
+    }
+
+    private async handleOpponentTombClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleOpponentLostZoneClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleOpponentConstructionClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleYourConstructionClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleEnvironmentClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleSettingsClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleTurnEndClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
     }
 }
