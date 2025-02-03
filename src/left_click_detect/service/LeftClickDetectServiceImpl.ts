@@ -35,6 +35,10 @@ import {YourFieldCardSceneRepositoryImpl} from "../../your_field_card_scene/repo
 import {LeftClickYourFieldDetectRepository} from "../repository/LeftClickYourFieldDetectRepository";
 import {LeftClickYourFieldDetectRepositoryImpl} from "../repository/LeftClickYourFieldDetectRepositoryImpl";
 import {LeftClickedArea} from "../entity/LeftClickedArea";
+import {YourHandAttributeMarkManager} from "../handler/your_hand/YourHandAttributeMarkManager";
+import {MouseCursorDetectArea} from "../../mouse_cursor_detect/entity/MouseCursorDetectArea";
+import {MouseCursorDetectRepository} from "../../mouse_cursor_detect/repository/MouseCursorDetectRepository";
+import {MouseCursorDetectRepositoryImpl} from "../../mouse_cursor_detect/repository/MouseCursorDetectRepositoryImpl";
 
 export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private static instance: LeftClickDetectServiceImpl | null = null;
@@ -50,6 +54,8 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
 
     private readonly CARD_WIDTH: number = 0.06493506493
     private readonly CARD_HEIGHT: number = this.CARD_WIDTH * 1.615
+
+    private mouseCursorDetectRepository: MouseCursorDetectRepository
 
     private neonBorderRepository: NeonBorderRepository;
     private neonShape: NeonShape
@@ -70,6 +76,8 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private cameraRepository: CameraRepository
     private dragMoveRepository: DragMoveRepository;
 
+    private yourHandAttributeMarkManager: YourHandAttributeMarkManager
+
     private leftMouseDown: boolean = false;
 
     private areaHandlers: Record<LeftClickedArea, (selectedCard: any) => Promise<void>> = {
@@ -83,6 +91,8 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     };
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
+        this.mouseCursorDetectRepository = MouseCursorDetectRepositoryImpl.getInstance()
+
         this.neonBorderRepository = NeonBorderRepositoryImpl.getInstance();
         this.neonShape = NeonShape.getInstance()
 
@@ -101,6 +111,8 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
 
         this.cameraRepository = CameraRepositoryImpl.getInstance()
         this.dragMoveRepository = DragMoveRepositoryImpl.getInstance();
+
+        this.yourHandAttributeMarkManager = YourHandAttributeMarkManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): LeftClickDetectServiceImpl {
@@ -140,16 +152,24 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         // 선택 상태 초기화
         await this.dragMoveRepository.deleteSelectedObject();
         await this.dragMoveRepository.deleteSelectedGroup();
+        await this.dragMoveRepository.deleteSelectedArea()
+
+        const detectedArea = this.mouseCursorDetectRepository.detectArea(x, y);
+
+        if (detectedArea === MouseCursorDetectArea.YOUR_HAND) {
+            console.log("YOUR_HAND 영역 클릭 감지됨");
+        }
 
         const selectedObject = this.determineClickedArea(x, y);
         if (!selectedObject) {
             return null;
         }
-        const selectedCard = selectedObject.object
 
+        const selectedCard = selectedObject.object
         this.dragMoveRepository.setSelectedObject(selectedCard);
 
         const selectedArea = selectedObject.area
+        this.dragMoveRepository.setSelectedArea(selectedArea)
 
         try {
             // area에 해당하는 핸들러 실행
@@ -282,17 +302,25 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     }
 
     private async handleYourHandClick(selectedCard: any): Promise<void> {
-        const attributeMarkIdList = this.getAttributeMarkIdList(selectedCard.getId());
+        const attributeMarkManager = YourHandAttributeMarkManager.getInstance();
+
+        const attributeMarkIdList = attributeMarkManager.getAttributeMarkIdList(selectedCard.getId());
         if (attributeMarkIdList.length > 0) {
-            const attributeMarkList = await this.getAttributeMarkList(attributeMarkIdList);
-            const validAttributeSceneList = await this.getValidAttributeScenes(attributeMarkList);
+            const attributeMarkList = await attributeMarkManager.getAttributeMarkList(attributeMarkIdList);
+            const validAttributeSceneList = await attributeMarkManager.getValidAttributeScenes(attributeMarkList);
             this.dragMoveRepository.setSelectedGroup(validAttributeSceneList);
         }
+
         this.createNeonBorder(selectedCard);
     }
 
     private async handleYourFieldClick(selectedCard: any): Promise<void> {
-        console.log("Your field card clicked:", selectedCard);
+        // const yourFieldAttributeMarkIdList = this.getYourFieldAttributeMarkIdList(selectedCard.getId())
+        // if (yourFieldAttributeMarkIdList.length > 0) {
+        //     const yourFieldAttributeMarkList = await this.getYourFieldAttributeMarkList(yourFieldAttributeMarkIdList);
+        //     const validYourFieldAttributeSceneList = await this.getYourFieldValidAttributeScenes(yourFieldAttributeMarkList);
+        //     this.dragMoveRepository.setSelectedGroup(validYourFieldAttributeSceneList);
+        // }
         this.createNeonBorder(selectedCard);
     }
 
