@@ -50,7 +50,7 @@ export class RaceButtonClickDetectRepositoryImpl implements RaceButtonClickDetec
     }
 
     findCurrentClickedRaceButtonId(): number | null {
-        console.log(`Current Click Race Button: ${this.currentClickedButtonId}`);
+//         console.log(`Current Click Race Button: ${this.currentClickedButtonId}`);
         return this.currentClickedButtonId;
     }
 
