@@ -5,13 +5,14 @@ import {DragMoveRepositoryImpl} from "../repository/DragMoveRepositoryImpl";
 import {DragMoveRepository} from "../repository/DragMoveRepository";
 import {BattleFieldCardScene} from "../../battle_field_card_scene/entity/BattleFieldCardScene";
 import {NeonBorderRepository} from "../../neon_border/repository/NeonBorderRepository";
-import {NeonShape} from "../../neon/NeonShape";
+
 import {NeonBorderLineSceneRepository} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepository";
 import {NeonBorderLinePositionRepository} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepository";
 import {NeonBorderRepositoryImpl} from "../../neon_border/repository/NeonBorderRepositoryImpl";
 import {NeonBorderLineSceneRepositoryImpl} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepositoryImpl";
 import {NeonBorderLinePositionRepositoryImpl} from "../../neon_border_line_position/repository/NeonBorderLinePositionRepositoryImpl";
 import {NeonBorderSceneType} from "../../neon_border/entity/NeonBorderSceneType";
+import {LeftClickedArea} from "../../left_click_detect/entity/LeftClickedArea";
 
 export class DragMoveServiceImpl implements DragMoveService {
     private static instance: DragMoveServiceImpl | null = null;
@@ -150,5 +151,9 @@ export class DragMoveServiceImpl implements DragMoveService {
                 // console.log(`Updated attribute mark position to: ${attributeMesh.position.toArray()}`);
             }
         });
+    }
+
+    getLeftClickedArea(): LeftClickedArea | null {
+        return this.dragMoveRepository.getSelectedArea()
     }
 }

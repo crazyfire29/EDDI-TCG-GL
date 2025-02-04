@@ -35,6 +35,12 @@ import {YourFieldCardSceneRepositoryImpl} from "../../your_field_card_scene/repo
 import {LeftClickYourFieldDetectRepository} from "../repository/LeftClickYourFieldDetectRepository";
 import {LeftClickYourFieldDetectRepositoryImpl} from "../repository/LeftClickYourFieldDetectRepositoryImpl";
 import {LeftClickedArea} from "../entity/LeftClickedArea";
+import {YourHandAttributeMarkManager} from "../handler/your_hand/YourHandAttributeMarkManager";
+import {MouseCursorDetectArea} from "../../mouse_cursor_detect/entity/MouseCursorDetectArea";
+import {MouseCursorDetectRepository} from "../../mouse_cursor_detect/repository/MouseCursorDetectRepository";
+import {MouseCursorDetectRepositoryImpl} from "../../mouse_cursor_detect/repository/MouseCursorDetectRepositoryImpl";
+import {ClickableCard} from "./ClickableCard";
+import {YourFieldAttributeMarkManager} from "../handler/your_field/YourFieldAttributeMarkManager";
 
 export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private static instance: LeftClickDetectServiceImpl | null = null;
@@ -50,6 +56,8 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
 
     private readonly CARD_WIDTH: number = 0.06493506493
     private readonly CARD_HEIGHT: number = this.CARD_WIDTH * 1.615
+
+    private mouseCursorDetectRepository: MouseCursorDetectRepository
 
     private neonBorderRepository: NeonBorderRepository;
     private neonShape: NeonShape
@@ -70,19 +78,31 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private cameraRepository: CameraRepository
     private dragMoveRepository: DragMoveRepository;
 
+    private yourHandAttributeMarkManager: YourHandAttributeMarkManager
+    private yourFieldAttributeMarkManager: YourFieldAttributeMarkManager
+
     private leftMouseDown: boolean = false;
 
-    private areaHandlers: Record<LeftClickedArea, (selectedCard: any) => Promise<void>> = {
-        [LeftClickedArea.YOUR_HAND]: this.handleYourHandClick.bind(this),
-        [LeftClickedArea.YOUR_FIELD]: this.handleYourFieldClick.bind(this),
-        [LeftClickedArea.OPPONENT_FIELD]: this.handleOpponentFieldClick.bind(this),
-        [LeftClickedArea.OPPONENT_HAND]: this.handleOpponentHandClick.bind(this),
-        [LeftClickedArea.FIELD_ENERGY]: this.handleFieldEnergyClick.bind(this),
-        [LeftClickedArea.TOMB]: this.handleTombClick.bind(this),
-        [LeftClickedArea.LOSTZONE]: this.handleLostZoneClick.bind(this),
+    private areaHandlers: Record<MouseCursorDetectArea, (x: number, y: number) => Promise<void>> = {
+        [MouseCursorDetectArea.YOUR_HAND]: this.handleYourHandClick.bind(this),
+        [MouseCursorDetectArea.YOUR_FIELD]: this.handleYourFieldClick.bind(this),
+        [MouseCursorDetectArea.OPPONENT_FIELD]: this.handleOpponentFieldClick.bind(this),
+        [MouseCursorDetectArea.OPPONENT_HAND]: this.handleOpponentHandClick.bind(this),
+        [MouseCursorDetectArea.FIELD_ENERGY]: this.handleFieldEnergyClick.bind(this),
+        [MouseCursorDetectArea.YOUR_TOMB]: this.handleTombClick.bind(this),
+        [MouseCursorDetectArea.YOUR_LOSTZONE]: this.handleLostZoneClick.bind(this),
+        [MouseCursorDetectArea.OPPONENT_TOMB]: this.handleOpponentTombClick.bind(this),
+        [MouseCursorDetectArea.OPPONENT_LOSTZONE]: this.handleOpponentLostZoneClick.bind(this),
+        [MouseCursorDetectArea.OPPONENT_CONSTRUCTION]: this.handleOpponentConstructionClick.bind(this),
+        [MouseCursorDetectArea.YOUR_CONSTRUCTION]: this.handleYourConstructionClick.bind(this),
+        [MouseCursorDetectArea.ENVIRONMENT]: this.handleEnvironmentClick.bind(this),
+        [MouseCursorDetectArea.SETTINGS]: this.handleSettingsClick.bind(this),
+        [MouseCursorDetectArea.TURN_END]: this.handleTurnEndClick.bind(this),
     };
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
+        this.mouseCursorDetectRepository = MouseCursorDetectRepositoryImpl.getInstance()
+
         this.neonBorderRepository = NeonBorderRepositoryImpl.getInstance();
         this.neonShape = NeonShape.getInstance()
 
@@ -101,6 +121,9 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
 
         this.cameraRepository = CameraRepositoryImpl.getInstance()
         this.dragMoveRepository = DragMoveRepositoryImpl.getInstance();
+
+        this.yourHandAttributeMarkManager = YourHandAttributeMarkManager.getInstance();
+        this.yourFieldAttributeMarkManager = YourFieldAttributeMarkManager.getInstance()
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): LeftClickDetectServiceImpl {
@@ -140,30 +163,39 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         // 선택 상태 초기화
         await this.dragMoveRepository.deleteSelectedObject();
         await this.dragMoveRepository.deleteSelectedGroup();
+        await this.dragMoveRepository.deleteSelectedArea()
 
-        const selectedObject = this.determineClickedArea(x, y);
-        if (!selectedObject) {
-            return null;
+        const detectedArea = this.mouseCursorDetectRepository.detectArea(x, y);
+
+        if (detectedArea === null) {
+            console.warn("클릭된 영역을 감지할 수 없습니다.");
+            return null; // null인 경우 바로 반환
         }
-        const selectedCard = selectedObject.object
 
-        this.dragMoveRepository.setSelectedObject(selectedCard);
+        // const selectedObject = this.determineClickedArea(x, y);
+        // if (!selectedObject) {
+        //     return null;
+        // }
 
-        const selectedArea = selectedObject.area
+        // const selectedCard = selectedObject.object
+        // this.dragMoveRepository.setSelectedObject(selectedCard);
+
+        // const selectedArea = selectedObject.area
+        // this.dragMoveRepository.setSelectedArea(selectedArea)
 
         try {
             // area에 해당하는 핸들러 실행
-            const handler = this.areaHandlers[selectedArea];
+            const handler = this.areaHandlers[detectedArea];
             if (handler) {
-                await handler(selectedCard);
+                return await handler(x, y);
             } else {
-                console.warn(`No handler found for area: ${selectedArea}`);
+                console.warn(`No handler found for area`);
             }
         } catch (error) {
-            console.error(`Error handling click event for area: ${selectedArea}`, error);
+            console.error(`Error handling click event for area: `, error);
         }
 
-        return selectedCard;
+        return null;
 
         // try {
         //     // 속성 마크 ID 목록 가져오기
@@ -222,8 +254,8 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         );
     }
 
-    private async createNeonBorder(clickedHandCard: BattleFieldCardScene): Promise<void> {
-        const cardMesh = clickedHandCard.getMesh();
+    private async createNeonBorder(clickedCard: ClickableCard): Promise<void> {
+        const cardMesh = clickedCard.getMesh();
         cardMesh.renderOrder = 1;
 
         const cardPosition = cardMesh.position;
@@ -235,7 +267,7 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         const halfWidth = this.CARD_WIDTH * window.innerWidth / 2;
         const halfHeight = this.CARD_HEIGHT * window.innerWidth / 2;
 
-        const cardSceneId = clickedHandCard.getId();
+        const cardSceneId = clickedCard.getId();
 
         const existingNeonBorder = this.neonBorderRepository.findByCardSceneIdWithPlacement(cardSceneId, NeonBorderSceneType.HAND);
         console.log(chalk.red.bold(`existingNeonBorder: ${existingNeonBorder}`));
@@ -281,38 +313,91 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         this.neonBorderRepository.save(neonBorder);
     }
 
-    private async handleYourHandClick(selectedCard: any): Promise<void> {
-        const attributeMarkIdList = this.getAttributeMarkIdList(selectedCard.getId());
+    private async handleYourHandClick(x: number, y: number): Promise<void> {
+        const handSceneList = this.battleFieldCardSceneRepository.findAll();
+        const clickedHandCard = this.leftClickHandDetectRepository.isYourHandAreaClicked({ x, y }, handSceneList, this.camera);
+        if (clickedHandCard === null) {
+            return;
+        }
+
+        this.dragMoveRepository.setSelectedObject(clickedHandCard);
+        this.dragMoveRepository.setSelectedArea(LeftClickedArea.YOUR_HAND)
+
+        const attributeMarkIdList = this.yourHandAttributeMarkManager.getAttributeMarkIdList(clickedHandCard.getId());
         if (attributeMarkIdList.length > 0) {
-            const attributeMarkList = await this.getAttributeMarkList(attributeMarkIdList);
-            const validAttributeSceneList = await this.getValidAttributeScenes(attributeMarkList);
+            const attributeMarkList = await this.yourHandAttributeMarkManager.getAttributeMarkList(attributeMarkIdList);
+            const validAttributeSceneList = await this.yourHandAttributeMarkManager.getValidAttributeScenes(attributeMarkList);
             this.dragMoveRepository.setSelectedGroup(validAttributeSceneList);
         }
-        this.createNeonBorder(selectedCard);
+
+        this.createNeonBorder(clickedHandCard);
     }
 
-    private async handleYourFieldClick(selectedCard: any): Promise<void> {
-        console.log("Your field card clicked:", selectedCard);
-        this.createNeonBorder(selectedCard);
+    private async handleYourFieldClick(x: number, y: number): Promise<void> {
+        const yourFieldSceneList = this.yourFieldCardSceneRepository.findAll();
+        const clickedYourFieldCard = this.leftClickHandDetectRepository.isYourHandAreaClicked({ x, y }, yourFieldSceneList, this.camera);
+        if (clickedYourFieldCard === null) {
+            return;
+        }
+
+        this.dragMoveRepository.setSelectedObject(clickedYourFieldCard);
+        this.dragMoveRepository.setSelectedArea(LeftClickedArea.YOUR_FIELD)
+
+        const attributeMarkIdList = this.yourFieldAttributeMarkManager.getAttributeMarkIdList(clickedYourFieldCard.getId())
+        if (attributeMarkIdList.length > 0) {
+            const attributeMarkList = await this.yourFieldAttributeMarkManager.getAttributeMarkList(attributeMarkIdList);
+            const validAttributeSceneList = await this.yourFieldAttributeMarkManager.getValidAttributeScenes(attributeMarkList);
+            this.dragMoveRepository.setSelectedGroup(validAttributeSceneList);
+        }
+
+        this.createNeonBorder(clickedYourFieldCard);
     }
 
-    async handleOpponentFieldClick(selectedCard: any): Promise<void> {
+    async handleOpponentFieldClick(x: number, y: number): Promise<void> {
         // OPPONENT_FIELD 영역에 대한 처리
     }
 
-    async handleOpponentHandClick(selectedCard: any): Promise<void> {
+    async handleOpponentHandClick(x: number, y: number): Promise<void> {
         // OPPONENT_HAND 영역에 대한 처리
     }
 
-    async handleFieldEnergyClick(selectedCard: any): Promise<void> {
+    async handleFieldEnergyClick(x: number, y: number): Promise<void> {
         // FIELD_ENERGY 영역에 대한 처리
     }
 
-    async handleTombClick(selectedCard: any): Promise<void> {
+    async handleTombClick(x: number, y: number): Promise<void> {
         // TOMB 영역에 대한 처리
     }
 
-    async handleLostZoneClick(selectedCard: any): Promise<void> {
+    async handleLostZoneClick(x: number, y: number): Promise<void> {
         // LOSTZONE 영역에 대한 처리
+    }
+
+    private async handleOpponentTombClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleOpponentLostZoneClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleOpponentConstructionClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleYourConstructionClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleEnvironmentClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleSettingsClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
+    }
+
+    private async handleTurnEndClick(x: number, y: number): Promise<void> {
+        // 아무런 내용 없이 기본 폼만 제공
     }
 }

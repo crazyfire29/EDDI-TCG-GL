@@ -1,0 +1,16 @@
+export enum MouseCursorDetectArea {
+    YOUR_HAND = 1,
+    YOUR_FIELD = 2,
+    YOUR_TOMB = 3,
+    YOUR_LOSTZONE = 4,
+    YOUR_CONSTRUCTION = 5,
+    OPPONENT_HAND = 6,
+    OPPONENT_FIELD = 7,
+    OPPONENT_TOMB = 8,
+    OPPONENT_LOSTZONE = 9,
+    OPPONENT_CONSTRUCTION = 10,
+    FIELD_ENERGY = 11,
+    ENVIRONMENT = 12,
+    SETTINGS = 13,
+    TURN_END = 14
+}
