@@ -4,12 +4,7 @@ import {TextureManager} from "../../src/texture_manager/TextureManager";
 import {NonBackgroundImage} from "../../src/shape/image/NonBackgroundImage";
 import {AudioController} from "../../src/audio/AudioController";
 import {MouseController} from "../../src/mouse/MouseController";
-import {BattleFieldUnitRepository} from "../../src/battle_field_unit/repository/BattleFieldUnitRepository";
-import {BattleFieldUnitScene} from "../../src/battle_field_unit/scene/BattleFieldUnitScene";
-import {ResourceManager} from "../../src/resouce_manager/ResourceManager";
-import {BattleFieldUnitRenderer} from "../../src/battle_field_unit/renderer/BattleFieldUnitRenderer";
 import {BattleFieldHandSceneRepository} from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandSceneRepository";
-import {BattleFieldHandPositionRepository} from "../../src/battle_field_hand/deprecated_repository/BattleFieldHandPositionRepository";
 
 import {UserWindowSize} from "../../src/window_size/WindowSize"
 import {UnitCardGenerator} from "../../src/card/unit/generate";
@@ -18,9 +13,9 @@ import {ItemCardGenerator} from "../../src/card/item/generate";
 import {EnergyCardGenerator} from "../../src/card/energy/generate";
 import {BattleFieldHandMapRepositoryImpl} from "../../src/battle_field_hand/repository/BattleFieldHandMapRepositoryImpl";
 
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
+import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
+import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import {MaskPass} from "three/examples/jsm/postprocessing/MaskPass";
 import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServiceImpl";
 import {BattleFieldHandServiceImpl} from "../../src/battle_field_hand/service/BattleFieldHandServiceImpl";
@@ -35,7 +30,7 @@ import {CameraServiceImpl} from "../../src/camera/service/CameraServiceImpl";
 import {LeftClickDetectServiceImpl} from "../../src/left_click_detect/service/LeftClickDetectServiceImpl";
 import {DragMoveServiceImpl} from "../../src/drag_move/service/DragMoveServiceImpl";
 import {MouseDropServiceImpl} from "../../src/mouse_drop/service/MouseDropServiceImpl";
-import {NeonShape, Shader} from "../../src/neon/NeonShape";
+import {NeonShape} from "../../src/neon/NeonShape";
 import {OpponentFieldAreaServiceImpl} from "../../src/opponent_field_area/service/OpponentFieldAreaServiceImpl";
 import {KeyboardService} from "../../src/keyboard/service/KeyboardService";
 import {KeyboardServiceImpl} from "../../src/keyboard/service/KeyboardServiceImpl";
@@ -43,6 +38,7 @@ import {OpponentFieldMapRepositoryImpl} from "../../src/opponent_field_map/repos
 import {OpponentFieldServiceImpl} from "../../src/opponent_field/service/OpponentFieldServiceImpl";
 import {RightClickDetectServiceImpl} from "../../src/right_click_detect/service/RightClickDetectServiceImpl";
 import {RightClickDetectService} from "../../src/right_click_detect/service/RightClickDetectService";
+import {LeftClickedArea} from "../../src/left_click_detect/entity/LeftClickedArea";
 
 
 export class TCGJustTestBattleFieldView {
@@ -147,13 +143,13 @@ export class TCGJustTestBattleFieldView {
         }, false)
 
         this.renderer.domElement.addEventListener('mousemove', (e) => {
-            if (this.leftClickDetectService.isLeftMouseDown()) {
+            if (this.dragMoveService.getLeftClickedArea() === LeftClickedArea.YOUR_HAND && this.leftClickDetectService.isLeftMouseDown()) {
                 this.dragMoveService.onMouseMove(e);
             }
         });
 
         this.renderer.domElement.addEventListener('mouseup', () => {
-            if (this.leftClickDetectService.isLeftMouseDown()) {
+            if (this.dragMoveService.getLeftClickedArea() === LeftClickedArea.YOUR_HAND && this.leftClickDetectService.isLeftMouseDown()) {
                 this.mouseDropService.onMouseUp();
                 this.leftClickDetectService.setLeftMouseDown(false); // 드롭 후 상태 초기화
             }
