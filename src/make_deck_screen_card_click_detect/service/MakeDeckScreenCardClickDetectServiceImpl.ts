@@ -10,6 +10,7 @@ import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
 import {CardPageManager} from "../../make_deck_screen_card_manager/CardPageManager";
+import {CardStateManager} from "../../make_deck_screen_card_manager/CardStateManager";
 
 export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenCardClickDetectService {
     private static instance: MakeDeckScreenCardClickDetectServiceImpl | null = null;
@@ -19,6 +20,7 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
     private raceButtonClickDetectRepository: RaceButtonClickDetectRepositoryImpl;
 
     private cardPageManager: CardPageManager;
+    private cardStateManger: CardStateManager;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -30,6 +32,7 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
         this.cardPageManager = CardPageManager.getInstance();
+        this.cardStateManger = CardStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): MakeDeckScreenCardClickDetectServiceImpl {
@@ -60,9 +63,24 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
         );
 
         if (clickedCard) {
-            console.log(`[DEBUG] Clicked Card ID: ${clickedCard.id}`);
-            this.saveCurrentClickedCardId(clickedCard.id);
+            const cardId = this.getCardIdByCardUniqueId(clickedCard.id);
+            console.log(`[DEBUG] Clicked Card Unique Id: ${clickedCard.id}, Card ID: ${cardId}`);
+            this.saveCurrentClickedCardId(cardId);
+
             const currentClickedCardId = this.getCurrentClickedCardId();
+            const hiddenCardId = currentPageCardIds.find(
+                (cardId) => this.getCardVisibility(cardId) == false
+            );
+            console.log(`Hidden Card Id?: ${hiddenCardId}`);
+
+
+            if (currentClickedCardId !== null) {
+                this.setCardVisibility(currentClickedCardId, false);
+            }
+
+            if (hiddenCardId && hiddenCardId !== currentClickedCardId) {
+                this.setCardVisibility(hiddenCardId, true);
+            }
 
             return clickedCard;
         }
@@ -84,6 +102,10 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
 
     public getAllCardIdList(): number[] {
         return this.makeDeckScreenCardRepository.findCardIdList();
+    }
+
+    public getCardIdByCardUniqueId(cardUniqueId: number): number {
+        return this.makeDeckScreenCardRepository.findCardIdByCardUniqueId(cardUniqueId) ?? -1;
     }
 
     public saveCurrentClickedCardId(cardId: number): void {
@@ -122,6 +144,14 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
     private getCardIdsByRaceId(buttonId: number): number[] {
         const raceId = (buttonId + 1).toString();
         return this.makeDeckScreenCardRepository.findCardIdsByRaceId(raceId);
+    }
+
+    private setCardVisibility(cardId: number, isVisible: boolean): void {
+        this.cardStateManger.setCardVisibility(cardId, isVisible);
+    }
+
+    private getCardVisibility(cardId: number): boolean {
+        return this.cardStateManger.findCardVisibility(cardId);
     }
 
 }
