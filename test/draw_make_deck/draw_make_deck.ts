@@ -18,15 +18,17 @@ import {MakeDeckScreenCardServiceImpl} from "../../src/make_deck_screen_card/ser
 import {RaceButtonServiceImpl} from "../../src/race_button/service/RaceButtonServiceImpl";
 import {RaceButtonEffectServiceImpl} from "../../src/race_button_effect/service/RaceButtonEffectServiceImpl";
 import {CardPageMovementButtonServiceImpl} from "../../src/make_deck_card_page_movement_button/service/CardPageMovementButtonServiceImpl";
+import {MakeDeckScreenDoneButtonServiceImpl} from "../../src/make_deck_screen_done_button/service/MakeDeckScreenDoneButtonServiceImpl";
 
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
 import {CardPageMovementButtonConfigList} from "../../src/make_deck_card_page_movement_button/entity/CardPageMovementButtonConfigList";
+import {MakeDeckScreenDoneButtonConfigList} from "../../src/make_deck_screen_done_button/entity/MakeDeckScreenDoneButtonConfigList";
 
 import {RaceButtonClickDetectService} from "../../src/race_button_click_detect/service/RaceButtonClickDetectService";
 import {RaceButtonClickDetectServiceImpl} from "../../src/race_button_click_detect/service/RaceButtonClickDetectServiceImpl";
-import {PageMovementButtonClickDetectService} from "../../src/deck_make_card_page_movement_button_click_detect/service/PageMovementButtonClickDetectService";
-import {PageMovementButtonClickDetectServiceImpl} from "../../src/deck_make_card_page_movement_button_click_detect/service/PageMovementButtonClickDetectServiceImpl";
+import {PageMovementButtonClickDetectService} from "../../src/make_deck_card_page_movement_button_click_detect/service/PageMovementButtonClickDetectService";
+import {PageMovementButtonClickDetectServiceImpl} from "../../src/make_deck_card_page_movement_button_click_detect/service/PageMovementButtonClickDetectServiceImpl";
 import {MakeDeckScreenCardClickDetectService} from "../../src/make_deck_screen_card_click_detect/service/MakeDeckScreenCardClickDetectService";
 import {MakeDeckScreenCardClickDetectServiceImpl} from "../../src/make_deck_screen_card_click_detect/service/MakeDeckScreenCardClickDetectServiceImpl";
 
@@ -51,6 +53,7 @@ export class TCGJustTestMakeDeckView {
     private raceButtonService = RaceButtonServiceImpl.getInstance();
     private raceButtonEffectService = RaceButtonEffectServiceImpl.getInstance();
     private cardPageMovementButtonService = CardPageMovementButtonServiceImpl.getInstance();
+    private makeDeckScreenDoneButtonService = MakeDeckScreenDoneButtonServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
@@ -136,6 +139,7 @@ export class TCGJustTestMakeDeckView {
         await this.addRaceButton();
         await this.addRaceButtonEffect();
         await this.addCardPageMovementButton();
+        await this.addDoneButton();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -248,11 +252,31 @@ export class TCGJustTestMakeDeckView {
 
                 if (button) {
                     this.scene.add(button);
-                    console.log(`Draw Race Button ${config.id}`);
+                    console.log(`Draw Card Page Movement Button ${config.id}`);
                 }
             }));
         } catch (error) {
             console.error('Failed to add Card Page Movement Button:', error);
+        }
+    }
+
+    private async addDoneButton(): Promise<void> {
+        try {
+            const configList = new MakeDeckScreenDoneButtonConfigList();
+            await Promise.all(configList.buttonConfigs.map(async (config) =>{
+                const button = await this.makeDeckScreenDoneButtonService.createDoneButton(
+                    config.id,
+                    config.position
+                );
+
+                if (button) {
+                    this.makeDeckScreenDoneButtonService.initializeDoneButtonVisible();
+                    this.scene.add(button);
+                    console.log(`Draw Done Button ${config.id}`);
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to add Done Button:', error);
         }
     }
 
@@ -280,6 +304,7 @@ export class TCGJustTestMakeDeckView {
             this.raceButtonService.adjustRaceButtonPosition();
             this.raceButtonEffectService.adjustRaceButtonEffectPosition();
             this.cardPageMovementButtonService.adjustCardPageMovementButtonPosition();
+            this.makeDeckScreenDoneButtonService.adjustDoneButtonPosition();
         }
     }
 
