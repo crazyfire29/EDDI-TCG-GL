@@ -8,7 +8,7 @@ export class SelectedCardBlockPositionRepositoryImpl implements SelectedCardBloc
 
     private initialX = 0.3895;
     private initialY = 0.36;
-    private incrementY = - 0.103;
+    private incrementY = - 0.0706;
     private maxBlocksPerPage = 10; // 스크롤 고려할 것
     private positionIndex = 0;
 

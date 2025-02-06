@@ -107,7 +107,14 @@ export class TCGJustTestMakeDeckView {
         this.renderer.domElement.addEventListener('mousedown', (e) => this.pageMovementButtonClickDetectService.onMouseDown(e), false);
 
         this.makeDeckScreenCardClickDetectService = MakeDeckScreenCardClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.makeDeckScreenCardClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.makeDeckScreenCardClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
+            await this.makeDeckScreenCardClickDetectService.onMouseDown(e);
+            const clickedCardId = this.makeDeckScreenCardClickDetectService.getCurrentClickedCardId();
+            if (clickedCardId) {
+                await this.addBlock(clickedCardId);
+            }
+        }, false);
     }
 
     public static getInstance(simulationMyDeckContainer: HTMLElement): TCGJustTestMakeDeckView {
@@ -142,7 +149,7 @@ export class TCGJustTestMakeDeckView {
         await this.addRaceButtonEffect();
         await this.addCardPageMovementButton();
         await this.addDoneButton();
-        this.addBlock();
+//         this.addBlock();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -283,9 +290,9 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
-    private async addBlock(): Promise<void> {
+    private async addBlock(cardId: number): Promise<void> {
         try {
-            const cardId = 2;
+//             const cardId = 2;
             const blockGroup = await this.selectedCardBlockService.createSelectedCardBlockWithPosition(cardId);
 
             if (blockGroup) {
