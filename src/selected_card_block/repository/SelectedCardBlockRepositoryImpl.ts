@@ -11,7 +11,7 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
     private blockMap: Map<number, { cardId: number, blockMesh: SelectedCardBlock }> = new Map(); // block unique id: {card id: block mesh}
     private textureManager: TextureManager;
 
-    private readonly BLOCK_WIDTH: number = 0.235
+    private readonly BLOCK_WIDTH: number = 0.245
     private readonly BLOCK_HEIGHT: number = 0.145
 
     private constructor(textureManager: TextureManager) {
