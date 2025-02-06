@@ -109,9 +109,9 @@ export class TCGJustTestMakeDeckView {
         this.makeDeckScreenCardClickDetectService = MakeDeckScreenCardClickDetectServiceImpl.getInstance(this.camera, this.scene);
 //         this.renderer.domElement.addEventListener('mousedown', (e) => this.makeDeckScreenCardClickDetectService.onMouseDown(e), false);
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
-            await this.makeDeckScreenCardClickDetectService.onMouseDown(e);
+            const clickCard = await this.makeDeckScreenCardClickDetectService.onMouseDown(e);
             const clickedCardId = this.makeDeckScreenCardClickDetectService.getCurrentClickedCardId();
-            if (clickedCardId) {
+            if (clickCard && clickedCardId) {
                 await this.addBlock(clickedCardId);
             }
         }, false);
