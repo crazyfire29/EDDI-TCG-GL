@@ -19,6 +19,7 @@ import {RaceButtonServiceImpl} from "../../src/race_button/service/RaceButtonSer
 import {RaceButtonEffectServiceImpl} from "../../src/race_button_effect/service/RaceButtonEffectServiceImpl";
 import {CardPageMovementButtonServiceImpl} from "../../src/make_deck_card_page_movement_button/service/CardPageMovementButtonServiceImpl";
 import {MakeDeckScreenDoneButtonServiceImpl} from "../../src/make_deck_screen_done_button/service/MakeDeckScreenDoneButtonServiceImpl";
+import {SelectedCardBlockServiceImpl} from "../../src/selected_card_block/service/SelectedCardBlockServiceImpl";
 
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
@@ -54,6 +55,7 @@ export class TCGJustTestMakeDeckView {
     private raceButtonEffectService = RaceButtonEffectServiceImpl.getInstance();
     private cardPageMovementButtonService = CardPageMovementButtonServiceImpl.getInstance();
     private makeDeckScreenDoneButtonService = MakeDeckScreenDoneButtonServiceImpl.getInstance();
+    private selectedCardBlockService = SelectedCardBlockServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
@@ -140,6 +142,7 @@ export class TCGJustTestMakeDeckView {
         await this.addRaceButtonEffect();
         await this.addCardPageMovementButton();
         await this.addDoneButton();
+        this.addBlock();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -280,6 +283,20 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
+    private async addBlock(): Promise<void> {
+        try {
+            const cardId = 2;
+            const blockGroup = await this.selectedCardBlockService.createSelectedCardBlockWithPosition(cardId);
+
+            if (blockGroup) {
+                this.scene.add(blockGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add Block:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -305,6 +322,7 @@ export class TCGJustTestMakeDeckView {
             this.raceButtonEffectService.adjustRaceButtonEffectPosition();
             this.cardPageMovementButtonService.adjustCardPageMovementButtonPosition();
             this.makeDeckScreenDoneButtonService.adjustDoneButtonPosition();
+            this.selectedCardBlockService.adjustSelectedCardBlockPosition();
         }
     }
 
