@@ -33,6 +33,8 @@ import {PageMovementButtonClickDetectService} from "../../src/make_deck_card_pag
 import {PageMovementButtonClickDetectServiceImpl} from "../../src/make_deck_card_page_movement_button_click_detect/service/PageMovementButtonClickDetectServiceImpl";
 import {MakeDeckScreenCardClickDetectService} from "../../src/make_deck_screen_card_click_detect/service/MakeDeckScreenCardClickDetectService";
 import {MakeDeckScreenCardClickDetectServiceImpl} from "../../src/make_deck_screen_card_click_detect/service/MakeDeckScreenCardClickDetectServiceImpl";
+import {SideScrollService} from "../../src/side_scroll/service/SideScrollService";
+import {SideScrollServiceImpl} from "../../src/side_scroll/service/SideScrollServiceImpl";
 
 import {CardStateManager} from "../../src/make_deck_screen_card_manager/CardStateManager";
 
@@ -62,6 +64,7 @@ export class TCGJustTestMakeDeckView {
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
     private makeDeckScreenCardClickDetectService: MakeDeckScreenCardClickDetectService;
+    private sideScrollService: SideScrollService;
 
     private cardStateManager = CardStateManager.getInstance();
 
@@ -117,6 +120,9 @@ export class TCGJustTestMakeDeckView {
                 await this.addBlock(clickedCardId);
             }
         }, false);
+
+        this.sideScrollService = SideScrollServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollService.onMouseMove(e), false);
     }
 
     public static getInstance(simulationMyDeckContainer: HTMLElement): TCGJustTestMakeDeckView {
