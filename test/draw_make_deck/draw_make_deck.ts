@@ -20,6 +20,7 @@ import {RaceButtonEffectServiceImpl} from "../../src/race_button_effect/service/
 import {CardPageMovementButtonServiceImpl} from "../../src/make_deck_card_page_movement_button/service/CardPageMovementButtonServiceImpl";
 import {MakeDeckScreenDoneButtonServiceImpl} from "../../src/make_deck_screen_done_button/service/MakeDeckScreenDoneButtonServiceImpl";
 import {SelectedCardBlockServiceImpl} from "../../src/selected_card_block/service/SelectedCardBlockServiceImpl";
+import {SideScrollAreaServiceImpl} from "../../src/side_scroll_area/service/SideScrollAreaServiceImpl";
 
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
@@ -56,6 +57,7 @@ export class TCGJustTestMakeDeckView {
     private cardPageMovementButtonService = CardPageMovementButtonServiceImpl.getInstance();
     private makeDeckScreenDoneButtonService = MakeDeckScreenDoneButtonServiceImpl.getInstance();
     private selectedCardBlockService = SelectedCardBlockServiceImpl.getInstance();
+    private sideScrollAreaService = SideScrollAreaServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
@@ -149,6 +151,7 @@ export class TCGJustTestMakeDeckView {
         await this.addRaceButtonEffect();
         await this.addCardPageMovementButton();
         await this.addDoneButton();
+        await this.addSideScrollArea();
 //         this.addBlock();
 
         this.initialized = true;
@@ -304,6 +307,20 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
+    private async addSideScrollArea(): Promise<void> {
+        try{
+            const areaMesh = await this.sideScrollAreaService.createSideScrollArea();
+            if (areaMesh) {
+                this.scene.add(areaMesh);
+            } else {
+                console.warn(`No Side Scroll Area Mesh found`);
+            }
+
+        } catch (error) {
+            console.error('Failed to add Side Scroll Area:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -330,6 +347,7 @@ export class TCGJustTestMakeDeckView {
             this.cardPageMovementButtonService.adjustCardPageMovementButtonPosition();
             this.makeDeckScreenDoneButtonService.adjustDoneButtonPosition();
             this.selectedCardBlockService.adjustSelectedCardBlockPosition();
+            this.sideScrollAreaService.adjustSideScrollAreaPosition();
         }
     }
 
