@@ -28,47 +28,45 @@ export class BattleFieldHandRepositoryImpl implements BattleFieldHandRepository 
     }
 
     findById(id: number): BattleFieldHand | undefined {
-        return this.cardMap.get(id);
+        const hand = this.cardMap.get(id);
+        return hand && hand.cardId !== -1 ? hand : undefined;
     }
 
     findAll(): BattleFieldHand[] {
-        return Array.from(this.cardMap.values());
+        return Array.from(this.cardMap.values()).filter(hand => hand.cardId !== -1);
     }
 
     deleteById(id: number): boolean {
-        return this.cardMap.delete(id);
+        const hand = this.cardMap.get(id);
+        if (hand) {
+            hand.cardId = -1; // 인덱스 유지, cardId를 -1로 설정
+            return true;
+        }
+        return false;
     }
 
     deleteAll(): void {
-        this.cardMap.clear();
+        this.cardMap.forEach(hand => hand.cardId = -1); // 전체 삭제 시 모든 카드의 cardId를 -1로 변경
     }
 
     findByCardSceneId(cardSceneId: number): BattleFieldHand | null {
-        const hand = Array.from(this.cardMap.values()).find(hand => hand.cardSceneId === cardSceneId);
+        const hand = Array.from(this.cardMap.values()).find(hand => hand.cardSceneId === cardSceneId && hand.cardId !== -1);
         return hand || null;
     }
 
     findAttributeMarkIdListByCardSceneId(cardSceneId: number): number[] | null {
         const hand = this.findByCardSceneId(cardSceneId);
-        if (hand instanceof BattleFieldHand) {
-            console.log(`BattleFieldHandRepositoryImpl findAttributeMarkIdListByCardSceneId() -> hand.attributeMarkIdList: ${hand.attributeMarkIdList}`)
-        }
-
         return hand ? hand.attributeMarkIdList : null;
     }
 
     findPositionIdByCardSceneId(cardSceneId: number): number | null {
         const hand = this.findByCardSceneId(cardSceneId);
-        if (hand) {
-            console.log(`BattleFieldHandRepositoryImpl findPositionIdByCardSceneId() -> hand.positionId: ${hand.positionId}`);
-            return hand.positionId;
-        }
-        return null;
+        return hand ? hand.positionId : null;
     }
 
     findCardIndexByCardSceneId(cardSceneId: number): number | null {
-        const cardArray = Array.from(this.cardMap.values());
+        const cardArray = Array.from(this.cardMap.values()).filter(card => card.cardId !== -1);
         const index = cardArray.findIndex(card => card.cardSceneId === cardSceneId);
-        return index !== -1 ? index : null; // 인덱스를 찾으면 반환, 없으면 null 반환
+        return index !== -1 ? index : null;
     }
 }
