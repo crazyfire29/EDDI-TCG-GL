@@ -252,7 +252,7 @@ export class MouseDropServiceImpl implements MouseDropService {
         const neonBorder = this.neonBorderRepository.findByCardSceneIdWithPlacement(cardSceneId, NeonBorderSceneType.HAND);
 
         if (!neonBorder) {
-            console.log(chalk.red.bold(`Neon Border not found for sceneId: ${cardSceneId}`));
+            console.log(chalk.red.bold(`repositionNeonBorder() Neon Border not found for sceneId: ${cardSceneId}`));
             return;
         }
 
@@ -264,7 +264,8 @@ export class MouseDropServiceImpl implements MouseDropService {
         const width = this.CARD_WIDTH * window.innerWidth;
         const height = this.CARD_HEIGHT * window.innerWidth;
 
-        console.log(chalk.red.bold(`Repositioning Neon Border for sceneId: ${sceneId}`));
+        console.log(chalk.red.bold(`repositionNeonBorder() neonBorder: ${JSON.stringify(neonBorder, null, 2)}`));
+        console.log(chalk.red.bold(`repositionNeonBorder() Repositioning Neon Border for sceneId: ${sceneId}`));
         const lineSceneIds = neonBorder.getNeonBorderLineSceneIdList();
         const positionIds = neonBorder.getNeonBorderLinePositionIdList();
 
@@ -294,6 +295,7 @@ export class MouseDropServiceImpl implements MouseDropService {
         });
 
         neonBorder.neonBorderSceneType = NeonBorderSceneType.FIELD
+        neonBorder.setNeonBorderSceneId(sceneId)
 
         console.log(`Neon Border reposition complete for sceneId: ${sceneId}`);
     }
@@ -309,6 +311,8 @@ export class MouseDropServiceImpl implements MouseDropService {
         const currentHandCardList = this.battleFieldHandRepository.findAll();
 
         await Promise.all(currentHandCardList.map(async (handCard, index) => {
+            console.log(`alignHandCard() -> index: ${index}`)
+
             const calculatedPosition = this.calculateHandPositionByIndex(index);
             const positionId = handCard.getPositionId();
             const cardSceneId = handCard.getCardSceneId();
@@ -340,6 +344,7 @@ export class MouseDropServiceImpl implements MouseDropService {
             }
 
             // NeonBorder 위치 재설정 호출
+            console.log(`MouseDropService alignHandCard() -> cardSceneId: ${cardSceneId}`)
             this.resetNeonPosition(cardSceneId, mainCardScene, calculatedPosition);
 
             // Attribute Mark 업데이트
@@ -561,7 +566,7 @@ export class MouseDropServiceImpl implements MouseDropService {
         }
 
         this.battleFieldHandRepository.deleteById(handCardId)
-        console.log(`handCard: ${JSON.stringify(this.battleFieldHandRepository.findAll(), null, 2)}`);
+        console.log(`handleValidDrop() handCard: ${JSON.stringify(this.battleFieldHandRepository.findAll(), null, 2)}`);
 
         return createdYourField
     }

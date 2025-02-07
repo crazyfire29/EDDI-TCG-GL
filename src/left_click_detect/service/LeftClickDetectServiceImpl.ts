@@ -18,7 +18,6 @@ import {BattleFieldCardAttributeMarkRepository} from "../../battle_field_card_at
 import {BattleFieldCardAttributeMark} from "../../battle_field_card_attribute_mark/entity/BattleFieldCardAttributeMark";
 import {NeonBorderRepository} from "../../neon_border/repository/NeonBorderRepository";
 import {NeonBorderRepositoryImpl} from "../../neon_border/repository/NeonBorderRepositoryImpl";
-import {BattleFieldCardScene} from "../../battle_field_card_scene/entity/BattleFieldCardScene";
 import {NeonBorder} from "../../neon_border/entity/NeonBorder";
 import {NeonShape} from "../../neon/NeonShape";
 import {NeonBorderLineSceneRepository} from "../../neon_border_line_scene/repository/NeonBorderLineSceneRepository";
@@ -41,6 +40,8 @@ import {MouseCursorDetectRepository} from "../../mouse_cursor_detect/repository/
 import {MouseCursorDetectRepositoryImpl} from "../../mouse_cursor_detect/repository/MouseCursorDetectRepositoryImpl";
 import {ClickableCard} from "./ClickableCard";
 import {YourFieldAttributeMarkManager} from "../handler/your_field/YourFieldAttributeMarkManager";
+import {YourFieldRepository} from "../../your_field/repository/YourFieldRepository";
+import {YourFieldRepositoryImpl} from "../../your_field/repository/YourFieldRepositoryImpl";
 
 export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private static instance: LeftClickDetectServiceImpl | null = null;
@@ -71,6 +72,7 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
     private battleFieldHandRepository: BattleFieldHandRepository;
 
     private yourFieldCardSceneRepository: YourFieldCardSceneRepository
+    private yourFieldRepository: YourFieldRepository
 
     private leftClickHandDetectRepository: LeftClickHandDetectRepository;
     private leftClickYourFieldDetectRepository: LeftClickYourFieldDetectRepository;
@@ -115,6 +117,7 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         this.battleFieldHandRepository = BattleFieldHandRepositoryImpl.getInstance()
 
         this.yourFieldCardSceneRepository = YourFieldCardSceneRepositoryImpl.getInstance()
+        this.yourFieldRepository = YourFieldRepositoryImpl.getInstance()
 
         this.leftClickHandDetectRepository = LeftClickHandDetectRepositoryImpl.getInstance()
         this.leftClickYourFieldDetectRepository = LeftClickYourFieldDetectRepositoryImpl.getInstance()
@@ -313,6 +316,31 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
         this.neonBorderRepository.save(neonBorder);
     }
 
+    private activateExistNeonBorder(clickedCard: ClickableCard): void {
+        const yourFieldSceneId = clickedCard.getId();
+        console.log(`activateExistNeonBorder() yourFieldSceneId: ${yourFieldSceneId}`)
+        const yourField = this.yourFieldRepository.findByCardSceneId(yourFieldSceneId)
+        console.log("activateExistNeonBorder() yourField (JSON):", JSON.stringify(yourField, null, 2));
+        const existingNeonBorder = this.neonBorderRepository.findByCardSceneIdWithPlacement(yourFieldSceneId, NeonBorderSceneType.FIELD);
+
+        if (!existingNeonBorder) {
+            console.warn(`No existing NeonBorder found for cardSceneId: ${yourFieldSceneId}`);
+            return;
+        }
+
+        console.log(`Activating existing NeonBorder for cardSceneId: ${yourFieldSceneId}`);
+
+        existingNeonBorder.getNeonBorderLineSceneIdList().forEach((lineSceneId) => {
+            const lineScene = this.neonBorderLineSceneRepository.findById(lineSceneId);
+            if (lineScene) {
+                const lineMesh = lineScene.getLine();
+                if (lineMesh) {
+                    lineMesh.visible = true;
+                }
+            }
+        });
+    }
+
     private async handleYourHandClick(x: number, y: number): Promise<void> {
         const handSceneList = this.battleFieldCardSceneRepository.findAll();
         const clickedHandCard = this.leftClickHandDetectRepository.isYourHandAreaClicked({ x, y }, handSceneList, this.camera);
@@ -350,7 +378,8 @@ export class LeftClickDetectServiceImpl implements LeftClickDetectService {
             this.dragMoveRepository.setSelectedGroup(validAttributeSceneList);
         }
 
-        this.createNeonBorder(clickedYourFieldCard);
+        // this.createNeonBorder(clickedYourFieldCard);
+        this.activateExistNeonBorder(clickedYourFieldCard);
     }
 
     async handleOpponentFieldClick(x: number, y: number): Promise<void> {

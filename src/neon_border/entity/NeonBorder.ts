@@ -45,6 +45,10 @@ export class NeonBorder {
         return this.neonBorderSceneId;
     }
 
+    setNeonBorderSceneId(sceneId: number): void {
+        this.neonBorderSceneId = sceneId
+    }
+
     getStatus(): NeonBorderStatus {
         return this.status;
     }
