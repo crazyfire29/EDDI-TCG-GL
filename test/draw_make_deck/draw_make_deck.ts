@@ -33,6 +33,8 @@ import {PageMovementButtonClickDetectService} from "../../src/make_deck_card_pag
 import {PageMovementButtonClickDetectServiceImpl} from "../../src/make_deck_card_page_movement_button_click_detect/service/PageMovementButtonClickDetectServiceImpl";
 import {MakeDeckScreenCardClickDetectService} from "../../src/make_deck_screen_card_click_detect/service/MakeDeckScreenCardClickDetectService";
 import {MakeDeckScreenCardClickDetectServiceImpl} from "../../src/make_deck_screen_card_click_detect/service/MakeDeckScreenCardClickDetectServiceImpl";
+import {SideScrollAreaDetectService} from "../../src/side_scroll_area_detect/service/SideScrollAreaDetectService";
+import {SideScrollAreaDetectServiceImpl} from "../../src/side_scroll_area_detect/service/SideScrollAreaDetectServiceImpl";
 import {SideScrollService} from "../../src/side_scroll/service/SideScrollService";
 import {SideScrollServiceImpl} from "../../src/side_scroll/service/SideScrollServiceImpl";
 
@@ -64,6 +66,7 @@ export class TCGJustTestMakeDeckView {
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
     private makeDeckScreenCardClickDetectService: MakeDeckScreenCardClickDetectService;
+    private sideScrollAreaDetectService: SideScrollAreaDetectService;
     private sideScrollService: SideScrollService;
 
     private cardStateManager = CardStateManager.getInstance();
@@ -76,6 +79,7 @@ export class TCGJustTestMakeDeckView {
 
     private initialized = false;
     private isAnimating = false;
+    private isSideScrollAreaAdded = false;
 
     private userWindowSize: UserWindowSize;
 
@@ -117,12 +121,19 @@ export class TCGJustTestMakeDeckView {
             const clickCard = await this.makeDeckScreenCardClickDetectService.onMouseDown(e);
             const clickedCardId = this.makeDeckScreenCardClickDetectService.getCurrentClickedCardId();
             if (clickCard && clickedCardId) {
+                if (!this.isSideScrollAreaAdded) {
+                    await this.addSideScrollArea();
+                    this.isSideScrollAreaAdded = true;
+                }
                 await this.addBlock(clickedCardId);
             }
         }, false);
 
-        this.sideScrollService = SideScrollServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollService.onMouseMove(e), false);
+        this.sideScrollAreaDetectService = SideScrollAreaDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollAreaDetectService.onMouseMove(e), false);
+
+        this.sideScrollService = SideScrollServiceImpl.getInstance(this.camera, this.scene, this.renderer);
+        this.renderer.domElement.addEventListener('wheel', (e) => this.sideScrollService.onWheelScroll(e), false);
     }
 
     public static getInstance(simulationMyDeckContainer: HTMLElement): TCGJustTestMakeDeckView {
@@ -157,7 +168,7 @@ export class TCGJustTestMakeDeckView {
         await this.addRaceButtonEffect();
         await this.addCardPageMovementButton();
         await this.addDoneButton();
-        await this.addSideScrollArea();
+//         await this.addSideScrollArea();
 //         this.addBlock();
 
         this.initialized = true;
@@ -304,7 +315,22 @@ export class TCGJustTestMakeDeckView {
 //             const cardId = 2;
             const blockGroup = await this.selectedCardBlockService.createSelectedCardBlockWithPosition(cardId);
 
-            if (blockGroup) {
+            if (blockGroup && blockGroup.children.length > 0) {
+                const blockMesh = blockGroup.children[0] as THREE.Mesh;
+                const sideScrollArea = this.sideScrollService.getSideScrollArea();
+                if (sideScrollArea) {
+                    const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
+                    if (Array.isArray(blockMesh.material)) {
+                        blockMesh.material.forEach((material) => {
+                            if (material instanceof THREE.Material) {
+                                material.clippingPlanes = clippingPlanes;
+                            }
+                        });
+                    } else if (blockMesh.material instanceof THREE.Material) {
+                        // 배열이 아니면, 단일 Material로 취급하여 처리
+                        blockMesh.material.clippingPlanes = clippingPlanes;
+                    }
+                }
                 this.scene.add(blockGroup);
             }
 

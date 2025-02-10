@@ -100,4 +100,26 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
         this.blockMap = newBlockMap; // 새로운 맵으로 교체
     }
 
+    public findAllBlockGroups(): THREE.Group {
+        const group = new THREE.Group();
+
+        for (const { blockMesh } of this.blockMap.values()) {
+            group.add(blockMesh.getMesh()); // SelectedCardBlock에서 Mesh를 가져와 추가
+        }
+
+        return group;
+    }
+
+    public blockCount(): number {
+        return this.blockMap.size;
+    }
+
+    public getLastBlockPositionY(): number | null {
+        if (this.blockMap.size === 0) return null; // 블록이 없으면 null 반환
+
+        const lastBlock = Array.from(this.blockMap.values()).at(-1); // 마지막 블록 가져오기
+        return lastBlock ? lastBlock.blockMesh.getMesh().position.y : null;
+    }
+
+
 }

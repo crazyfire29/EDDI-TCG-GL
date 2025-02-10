@@ -1,8 +1,9 @@
+import * as THREE from "three";
+import {SideScrollArea} from "../../side_scroll_area/entity/SideScrollArea";
+
 export interface SideScrollService {
-    setLeftMouseDown(state: boolean): void;
-    isLeftMouseDown(): boolean;
-    detectSideScrollArea(
-        detectPoint: { x: number; y: number },
-    ): any | null;
-    onMouseMove(event: MouseEvent): Promise<void>;
+    onWheelScroll(event: WheelEvent): Promise<void>;
+    getScrollEnabled(): boolean;
+    setClippingPlanes(sideScrollArea: SideScrollArea): THREE.Plane[];
+    getSideScrollArea(): SideScrollArea | null;
 }
