@@ -6,35 +6,43 @@ import {SideScrollArea} from "../../side_scroll_area/entity/SideScrollArea";
 export class SideScrollRepositoryImpl implements SideScrollRepository {
     private static instance: SideScrollRepositoryImpl;
     private raycaster = new THREE.Raycaster();
+    private renderer: THREE.WebGLRenderer;
 
-    public static getInstance(): SideScrollRepositoryImpl {
+    private constructor(renderer: THREE.WebGLRenderer) {
+        this.renderer = renderer;
+    }
+
+    public static getInstance(renderer: THREE.WebGLRenderer): SideScrollRepositoryImpl {
         if (!SideScrollRepositoryImpl.instance) {
-            SideScrollRepositoryImpl.instance = new SideScrollRepositoryImpl();
+            SideScrollRepositoryImpl.instance = new SideScrollRepositoryImpl(renderer);
         }
         return SideScrollRepositoryImpl.instance;
     }
 
-    public isSideScrollAreaDetect(detectPoint: { x: number; y: number },
-                          sideScrollArea: SideScrollArea,
-                          camera: THREE.Camera): any | null {
-        const { x, y } = detectPoint;
+     public setClippingPlanes(sideScrollArea: SideScrollArea): THREE.Plane[] {
+         if (!sideScrollArea) {
+             console.error("SideScrollArea is null. Clipping planes cannot be set.");
+             return [];
+         }
+         const sideScrollAreaX = sideScrollArea.position.x;
+         const sideScrollAreaY = sideScrollArea.position.y;
+         const sideScrollAreaWidth = sideScrollArea.width;
+         const sideScrollAreaHeight = sideScrollArea.height;
 
-        const normalizedMouse = new THREE.Vector2(
-            (x / window.innerWidth) * 2 - 1,
-            -(y / window.innerHeight) * 2 + 1
-        );
+         if (sideScrollAreaWidth !== null && sideScrollAreaHeight !== null) {
+             const clippingPlanes = [
+                 new THREE.Plane(new THREE.Vector3(-1, 0, 0),  sideScrollAreaX + sideScrollAreaWidth / 2), // 왼쪽
+                 new THREE.Plane(new THREE.Vector3(1, 0, 0), - (sideScrollAreaX - sideScrollAreaWidth / 2)),  // 오른쪽
+                 new THREE.Plane(new THREE.Vector3(0, -1, 0), sideScrollAreaY + sideScrollAreaHeight / 2), // 아래쪽
+                 new THREE.Plane(new THREE.Vector3(0, 1, 0), -(sideScrollAreaY - sideScrollAreaHeight / 2)),  // 위쪽
+             ];
 
-        this.raycaster.setFromCamera(normalizedMouse, camera);
+             this.renderer.localClippingEnabled = true;
+//              this.renderer.clippingPlanes = clippingPlanes;
 
-        const mesh = sideScrollArea.getMesh();
-        const intersect = this.raycaster.intersectObject(mesh);
-
-        if (intersect.length > 0) {
-            console.log('detect sideScrollArea!')
-            return mesh;
-        }
-
-        return null;
-    }
+             return clippingPlanes;
+         }
+         return [];
+     }
 
 }

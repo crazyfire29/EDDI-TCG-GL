@@ -39,7 +39,7 @@ export class SideScrollAreaRepositoryImpl implements SideScrollAreaRepository {
         const area = new TransparentRectangle(position, areaWidth, areaHeight, 0x000000, 0.2, id);
         const areaMesh = area.getMesh();
 
-        const newArea = new SideScrollArea(areaMesh, position);
+        const newArea = new SideScrollArea(areaMesh, position, areaWidth, areaHeight);
         this.area = newArea;
 
         return newArea;

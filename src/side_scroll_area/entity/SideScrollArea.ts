@@ -6,11 +6,15 @@ export class SideScrollArea {
     id: number;
     mesh: THREE.Mesh;
     position: THREE.Vector2;
+    width: number;
+    height: number;
 
-    constructor(mesh: THREE.Mesh, position: THREE.Vector2) {
+    constructor(mesh: THREE.Mesh, position: THREE.Vector2, width: number, height: number) {
         this.id = IdGenerator.generateId("SideScrollArea");
         this.mesh = mesh;
         this.position = position;
+        this.width = width;
+        this.height = height;
     }
 
     public getMesh(): THREE.Mesh {

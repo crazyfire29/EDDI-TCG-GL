@@ -26,7 +26,7 @@ export class SelectedCardBlockPositionRepositoryImpl implements SelectedCardBloc
             this.positionIndex++;
         }
         const positionX = this.initialX;
-        const positionY = this.initialY + ((this.positionIndex - 1) % this.maxBlocksPerPage) * this.incrementY;
+        const positionY = this.initialY + (this.positionIndex - 1) * this.incrementY;
 
         const position = new SelectedCardBlockPosition(positionX, positionY);
         this.positionMap.set(position.id, {cardId, position: position});
