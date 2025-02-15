@@ -3,16 +3,28 @@ import * as THREE from "three";
 import {RightClickDetectService} from "./RightClickDetectService";
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
+import {MouseCursorDetectArea} from "../../mouse_cursor_detect/entity/MouseCursorDetectArea";
+import {DragMoveRepository} from "../../drag_move/repository/DragMoveRepository";
+import {DragMoveRepositoryImpl} from "../../drag_move/repository/DragMoveRepositoryImpl";
+import {MouseCursorDetectRepositoryImpl} from "../../mouse_cursor_detect/repository/MouseCursorDetectRepositoryImpl";
+import {MouseCursorDetectRepository} from "../../mouse_cursor_detect/repository/MouseCursorDetectRepository";
+import {LeftClickedArea} from "../../left_click_detect/entity/LeftClickedArea";
 
 export class RightClickDetectServiceImpl implements RightClickDetectService {
     private static instance: RightClickDetectServiceImpl | null = null;
 
     private cameraRepository: CameraRepository
+    private dragMoveRepository: DragMoveRepository
+    private mouseCursorDetectRepository: MouseCursorDetectRepository
+    private activePanelRepository: ActivePanelRepository;
 
     private rightMouseDown: boolean = false;
 
     private constructor(private camera: THREE.Camera) {
         this.cameraRepository = CameraRepositoryImpl.getInstance()
+        this.dragMoveRepository = DragMoveRepositoryImpl.getInstance()
+        this.mouseCursorDetectRepository = MouseCursorDetectRepositoryImpl.getInstance()
+        this.activePanelRepository = ActivePanelRepositoryImpl.getInstance();
     }
 
     static getInstance(camera: THREE.Camera): RightClickDetectServiceImpl {
@@ -24,6 +36,30 @@ export class RightClickDetectServiceImpl implements RightClickDetectService {
 
     handleRightClick(clickPoint: { x: number; y: number }): any {
         console.log(`handleRightClick: (${clickPoint})`)
+
+        const selectedArea = this.dragMoveRepository.getSelectedArea()
+        if (selectedArea !== LeftClickedArea.YOUR_FIELD) {
+            console.log("현재 필드 유닛이 선택되지 않았습니다.");
+            return;
+        }
+
+        const detectedArea = this.mouseCursorDetectRepository.detectArea(clickPoint.x, clickPoint.y);
+        if (detectedArea !== MouseCursorDetectArea.YOUR_FIELD) {
+            console.log("현재 필드 유닛이 선택되지 않았습니다.");
+            return; // YOUR_FIELD가 아니면 즉시 종료
+        }
+
+        console.log('Active Panel 생성 준비')
+
+        if (this.activePanelRepository.exists()) {
+            console.log("기존 Active Panel 삭제");
+            this.activePanelRepository.delete();
+            return;
+        }
+
+        // 새 패널 생성
+        console.log("새로운 Active Panel 생성");
+        this.activePanelRepository.create(clickPoint.x, clickPoint.y);
     }
 
     setRightMouseDown(state: boolean): void {
