@@ -67,6 +67,11 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
             console.log(`[DEBUG] Clicked Card Unique Id: ${clickedCard.id}, Card ID: ${cardId}`);
             this.saveCurrentClickedCardId(cardId);
 
+            let cardClickCount = this.getCardClickCount(cardId) ?? 0;
+            cardClickCount++;
+            console.log(`[DEBUG] Click Count for Card ID ${cardId}: ${cardClickCount}`);
+            this.saveCardClickCount(cardId, cardClickCount);
+
             const currentClickedCardId = this.getCurrentClickedCardId();
             const hiddenCardId = currentPageCardIds.find(
                 (cardId) => this.getCardVisibility(cardId) == false
@@ -152,6 +157,14 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
 
     private getCardVisibility(cardId: number): boolean {
         return this.cardStateManger.findCardVisibility(cardId);
+    }
+
+    public getCardClickCount(cardId: number): number | undefined {
+        return this.makeDeckScreenCardClickDetectRepository.findCardClickCount(cardId);
+    }
+
+    private saveCardClickCount(cardId: number, count: number): void {
+        this.makeDeckScreenCardClickDetectRepository.saveCardClickCount(cardId, count);
     }
 
 }
