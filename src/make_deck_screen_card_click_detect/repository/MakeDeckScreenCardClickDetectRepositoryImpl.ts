@@ -6,6 +6,7 @@ import {MakeDeckScreenCard} from "../../make_deck_screen_card/entity/MakeDeckScr
 export class MakeDeckScreenCardClickDetectRepositoryImpl implements MakeDeckScreenCardClickDetectRepository {
     private static instance: MakeDeckScreenCardClickDetectRepositoryImpl;
     private currentClickCardId: number | null = null;
+    private clickCardCountMap: Map<number, number> = new Map();
     private raycaster = new THREE.Raycaster();
 
     public static getInstance(): MakeDeckScreenCardClickDetectRepositoryImpl {
@@ -52,6 +53,14 @@ export class MakeDeckScreenCardClickDetectRepositoryImpl implements MakeDeckScre
     public findCurrentClickedCardId(): number | null {
 //         console.log(`Current Click Card Id?: ${this.currentClickCardId}`);
         return this.currentClickCardId;
+    }
+
+    public saveCardClickCount(cardId: number, count: number): void {
+        this.clickCardCountMap.set(cardId, count);
+    }
+
+    public findCardClickCount(cardId: number): number | undefined {
+        return this.clickCardCountMap.get(cardId);
     }
 
 }

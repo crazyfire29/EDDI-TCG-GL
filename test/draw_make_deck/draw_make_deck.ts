@@ -121,11 +121,15 @@ export class TCGJustTestMakeDeckView {
             const clickCard = await this.makeDeckScreenCardClickDetectService.onMouseDown(e);
             const clickedCardId = this.makeDeckScreenCardClickDetectService.getCurrentClickedCardId();
             if (clickCard && clickedCardId) {
+                const cardClickCount = this.makeDeckScreenCardClickDetectService.getCardClickCount(clickedCardId);
                 if (!this.isSideScrollAreaAdded) {
                     await this.addSideScrollArea();
                     this.isSideScrollAreaAdded = true;
                 }
-                await this.addBlock(clickedCardId);
+                if (cardClickCount && cardClickCount < 2) {
+                    await this.addBlock(clickedCardId);
+                }
+
             }
         }, false);
 

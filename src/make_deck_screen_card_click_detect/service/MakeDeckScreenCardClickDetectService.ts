@@ -6,4 +6,5 @@ export interface MakeDeckScreenCardClickDetectService {
     ): any | null;
     onMouseDown(event: MouseEvent): Promise<any | null>;
     getCurrentClickedCardId(): number | null;
+    getCardClickCount(cardId: number): number | undefined
 }
