@@ -111,6 +111,7 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
     }
 
     public blockCount(): number {
+        console.log(`Current Block Count? ${this.blockMap.size}`);
         return this.blockMap.size;
     }
 
@@ -121,5 +122,11 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
         return lastBlock ? lastBlock.blockMesh.getMesh().position.y : null;
     }
 
+    public getFirstBlockPositionY(): number | null {
+        if (this.blockMap.size === 0) return null;
+
+        const firstBlock = Array.from(this.blockMap.values()).at(0); // 첫 번째 블록 가져오기
+        return firstBlock ? firstBlock.blockMesh.getMesh().position.y : null;
+    }
 
 }
