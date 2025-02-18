@@ -6,7 +6,7 @@ export class SelectedCardBlockPositionRepositoryImpl implements SelectedCardBloc
     private static instance: SelectedCardBlockPositionRepositoryImpl;
     private positionMap: Map<number, { cardId: number, position: SelectedCardBlockPosition}> = new Map();;
 
-    private initialX = 0.3895;
+    private initialX = 0.3955;
     private initialY = 0.36;
     private incrementY = - 0.0706;
     private maxBlocksPerPage = 10; // 스크롤 고려할 것
