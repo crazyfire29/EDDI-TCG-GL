@@ -21,6 +21,7 @@ import {CardPageMovementButtonServiceImpl} from "../../src/make_deck_card_page_m
 import {MakeDeckScreenDoneButtonServiceImpl} from "../../src/make_deck_screen_done_button/service/MakeDeckScreenDoneButtonServiceImpl";
 import {SelectedCardBlockServiceImpl} from "../../src/selected_card_block/service/SelectedCardBlockServiceImpl";
 import {SideScrollAreaServiceImpl} from "../../src/side_scroll_area/service/SideScrollAreaServiceImpl";
+import {NumberOfSelectedCardsServiceImpl} from  "../../src/number_of_selected_cards/service/NumberOfSelectedCardsServiceImpl";
 
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
@@ -62,6 +63,7 @@ export class TCGJustTestMakeDeckView {
     private makeDeckScreenDoneButtonService = MakeDeckScreenDoneButtonServiceImpl.getInstance();
     private selectedCardBlockService = SelectedCardBlockServiceImpl.getInstance();
     private sideScrollAreaService = SideScrollAreaServiceImpl.getInstance();
+    private numberOfSelectedCardsService = NumberOfSelectedCardsServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
@@ -126,8 +128,11 @@ export class TCGJustTestMakeDeckView {
                     await this.addSideScrollArea();
                     this.isSideScrollAreaAdded = true;
                 }
-                if (cardClickCount && cardClickCount < 2) {
-                    await this.addBlock(clickedCardId);
+                if (cardClickCount) {
+                    if (cardClickCount < 2) {
+                        await this.addBlock(clickedCardId);
+                    }
+                    await this.addNumberOfSelectedCards();
                 }
 
             }
@@ -357,6 +362,20 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
+    // To-do: cardId 수정해야 함.
+    private async addNumberOfSelectedCards(): Promise<void> {
+        try {
+            const cardId = 5; // 테스트용 예시
+            const numberMeshGroup = await this.numberOfSelectedCardsService.createNumberOfSelectedCardsWithPosition(cardId);
+            if (numberMeshGroup) {
+                this.scene.add(numberMeshGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add number of selected cards:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -384,6 +403,7 @@ export class TCGJustTestMakeDeckView {
             this.makeDeckScreenDoneButtonService.adjustDoneButtonPosition();
             this.selectedCardBlockService.adjustSelectedCardBlockPosition();
             this.sideScrollAreaService.adjustSideScrollAreaPosition();
+            this.numberOfSelectedCardsService.adjustNumberOfSelectedCardsPosition();
         }
     }
 
