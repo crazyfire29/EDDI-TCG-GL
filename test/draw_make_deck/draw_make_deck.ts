@@ -320,21 +320,21 @@ export class TCGJustTestMakeDeckView {
             const blockGroup = await this.selectedCardBlockService.createSelectedCardBlockWithPosition(cardId);
 
             if (blockGroup && blockGroup.children.length > 0) {
-                const blockMesh = blockGroup.children[0] as THREE.Mesh;
-                const sideScrollArea = this.sideScrollService.getSideScrollArea();
-                if (sideScrollArea) {
-                    const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
-                    if (Array.isArray(blockMesh.material)) {
-                        blockMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (blockMesh.material instanceof THREE.Material) {
-                        // 배열이 아니면, 단일 Material로 취급하여 처리
-                        blockMesh.material.clippingPlanes = clippingPlanes;
-                    }
-                }
+//                 const blockMesh = blockGroup.children[0] as THREE.Mesh;
+//                 const sideScrollArea = this.sideScrollService.getSideScrollArea();
+//                 if (sideScrollArea) {
+//                     const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
+//                     if (Array.isArray(blockMesh.material)) {
+//                         blockMesh.material.forEach((material) => {
+//                             if (material instanceof THREE.Material) {
+//                                 material.clippingPlanes = clippingPlanes;
+//                             }
+//                         });
+//                     } else if (blockMesh.material instanceof THREE.Material) {
+//                         // 배열이 아니면, 단일 Material로 취급하여 처리
+//                         blockMesh.material.clippingPlanes = clippingPlanes;
+//                     }
+//                 }
                 this.scene.add(blockGroup);
             }
 
