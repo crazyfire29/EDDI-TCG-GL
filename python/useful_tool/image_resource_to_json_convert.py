@@ -39,6 +39,7 @@ class WillBeReferenceImageLocation(Enum):
     MAKE_DECK_CARD_PAGE_MOVEMENT_BUTTONS = "resource/make_deck/card_page_movement_button/"
     DONE_BUTTON = "resource/make_deck/done_button/"
     SELECTED_CARD_BLOCK = "resource/make_deck/selected_card_block/"
+    NUMBER_OF_SELECTED_CARDS = "resource/make_deck/number_of_selected_cards"
 
 class RelativeImageLocation(Enum):
     CARD = "../../resource/battle_field_unit/card/"
@@ -74,6 +75,7 @@ class RelativeImageLocation(Enum):
     MAKE_DECK_CARD_PAGE_MOVEMENT_BUTTONS = "../../resource/make_deck/card_page_movement_button/"
     DONE_BUTTON = "../../resource/make_deck/done_button/"
     SELECTED_CARD_BLOCK = "../../resource/make_deck/selected_card_block/"
+    NUMBER_OF_SELECTED_CARDS = "../../resource/make_deck/number_of_selected_cards"
 
 # 디렉토리 경로 설정
 relative_paths = {
@@ -110,6 +112,7 @@ relative_paths = {
     RelativeImageLocation.MAKE_DECK_CARD_PAGE_MOVEMENT_BUTTONS: RelativeImageLocation.MAKE_DECK_CARD_PAGE_MOVEMENT_BUTTONS.value,
     RelativeImageLocation.DONE_BUTTON: RelativeImageLocation.DONE_BUTTON.value,
     RelativeImageLocation.SELECTED_CARD_BLOCK: RelativeImageLocation.SELECTED_CARD_BLOCK.value,
+    RelativeImageLocation.NUMBER_OF_SELECTED_CARDS: RelativeImageLocation.NUMBER_OF_SELECTED_CARDS.value,
 }
 
 reference_paths = {
@@ -146,6 +149,7 @@ reference_paths = {
     WillBeReferenceImageLocation.MAKE_DECK_CARD_PAGE_MOVEMENT_BUTTONS: WillBeReferenceImageLocation.MAKE_DECK_CARD_PAGE_MOVEMENT_BUTTONS.value,
     WillBeReferenceImageLocation.DONE_BUTTON: WillBeReferenceImageLocation.DONE_BUTTON.value,
     WillBeReferenceImageLocation.SELECTED_CARD_BLOCK: WillBeReferenceImageLocation.SELECTED_CARD_BLOCK.value,
+    WillBeReferenceImageLocation.NUMBER_OF_SELECTED_CARDS: WillBeReferenceImageLocation.NUMBER_OF_SELECTED_CARDS.value,
 }
 
 image_paths = {
@@ -182,6 +186,7 @@ image_paths = {
     "make_deck_card_page_movement_buttons": [],
     "done_button": [],
     "selected_card_block": [],
+    "number_of_selected_cards": [],
 }
 
 for category, dir_path in relative_paths.items():
