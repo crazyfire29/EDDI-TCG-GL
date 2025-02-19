@@ -45,10 +45,19 @@ export class NumberOfSelectedCardsRepositoryImpl implements NumberOfSelectedCard
         const newNumber = new NumberOfSelectedCards(numberMesh, position);
         this.numberUniqueIdMap.set(newNumber.id, cardCount);
 
-        if (!this.numberMap.has(clickedCardId)) {
-            this.numberMap.set(clickedCardId, new Map());
+//         if (!this.numberMap.has(clickedCardId)) {
+//             this.numberMap.set(clickedCardId, new Map());
+//         }
+//         this.numberMap.get(clickedCardId)!.set(cardCount, newNumber);
+
+        if (this.numberMap.has(clickedCardId)) {
+            // 기존 데이터를 삭제
+            this.numberMap.delete(clickedCardId);
         }
-        this.numberMap.get(clickedCardId)!.set(cardCount, newNumber);
+
+        // 새로운 Map을 생성하고 새로운 값만 저장
+        this.numberMap.set(clickedCardId, new Map([[cardCount, newNumber]]));
+
 
         return newNumber;
     }
@@ -65,9 +74,38 @@ export class NumberOfSelectedCardsRepositoryImpl implements NumberOfSelectedCard
         return Array.from(this.numberMap.keys());
     }
 
+    public findCardCountByCardId(clickedCardId: number): number | null {
+        const cardMap = this.numberMap.get(clickedCardId);
+        if (!cardMap || cardMap.size === 0) {
+            return null;
+        }
+
+        // 현재 구조에서는 cardId에 대해 단 하나의 cardCount만 존재하므로 첫 번째 key 반환
+        return Array.from(cardMap.keys())[0];
+    }
+
     public deleteAllNumber(): void {
         this.numberUniqueIdMap.clear();
         this.numberMap.clear();
+    }
+
+    public deleteNumberByCardId(clickedCardId: number): void {
+        this.numberMap.delete(clickedCardId);
+    }
+
+    public hasCardId(clickedCardId: number): boolean {
+        return this.numberMap.has(clickedCardId);
+    }
+
+    public getNumberMeshByCardId(clickedCardId: number): THREE.Mesh | null {
+        const cardMap = this.numberMap.get(clickedCardId);
+        if (!cardMap) {
+            return null; // 해당 cardId가 없을 경우 null 반환
+        }
+
+        // cardMap의 첫 번째 값만 반환
+        const numberObject = cardMap.values().next().value;
+        return numberObject ? numberObject.getMesh() : null;
     }
 
 }

@@ -132,7 +132,7 @@ export class TCGJustTestMakeDeckView {
                     if (cardClickCount < 2) {
                         await this.addBlock(clickedCardId);
                     }
-                    await this.addNumberOfSelectedCards();
+                    await this.addNumberOfSelectedCards(clickedCardId);
                 }
 
             }
@@ -362,13 +362,20 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
-    // To-do: cardId 수정해야 함.
-    private async addNumberOfSelectedCards(): Promise<void> {
+    private async addNumberOfSelectedCards(cardId: number): Promise<void> {
+
         try {
-            const cardId = 5; // 테스트용 예시
-            const numberMeshGroup = await this.numberOfSelectedCardsService.createNumberOfSelectedCardsWithPosition(cardId);
-            if (numberMeshGroup) {
-                this.scene.add(numberMeshGroup);
+            // 기존 Mesh 제거
+            const existingMesh = this.numberOfSelectedCardsService.getExistingNumberObjectMeshByCardId(cardId);
+            if (existingMesh) {
+                console.log(`existing Number Mesh (ID: ${cardId})`);
+                this.scene.remove(existingMesh);
+            }
+
+            await this.numberOfSelectedCardsService.createNumberOfSelectedCardsWithPosition(cardId);
+            const newNumberMesh = this.numberOfSelectedCardsService.getNumberObjectMeshByCardId(cardId);
+            if (newNumberMesh) {
+                this.scene.add(newNumberMesh);
             }
 
         } catch (error) {
