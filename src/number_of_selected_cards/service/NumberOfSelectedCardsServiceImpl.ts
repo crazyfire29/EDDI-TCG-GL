@@ -39,6 +39,7 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
         try {
             const cardCount = this.getCardClickCount(cardId);
             console.log(`card count? ${cardCount}`);
+
             if (cardCount && cardCount >= 2) {
                  const position = this.numberOfSelectedCardsPosition(cardId);
                  console.log(`[DEBUG] number object CardId ${cardId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
@@ -123,8 +124,9 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
         return this.numberOfSelectedCardsRepository.findAllCardIds();
     }
 
-    private getNumberObjectMeshByCardId(cardId: number): THREE.Mesh | null {
+    public getNumberObjectMeshByCardId(cardId: number): THREE.Mesh | null {
         const cardCount = this.getCardClickCount(cardId);
+        console.log(`[DEBUG] card count?: ${cardCount}`);
         if (cardCount === undefined) {
             console.warn(`[WARN] Card click count not found for cardId: ${cardId}`);
             return null;
@@ -142,6 +144,19 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
 
     private getPositionByCardId(cardId: number): NumberOfSelectedCardsPosition | null {
         return this.numberOfSelectedCardsPositionRepository.findPositionByCardId(cardId) || null;
+    }
+
+    public deleteNumberByCardId(cardId: number): void {
+        this.numberOfSelectedCardsRepository.deleteNumberByCardId(cardId);
+    }
+
+    public getExistingNumberObjectMeshByCardId(cardId: number): THREE.Mesh | null {
+        const hasCardId = this.numberOfSelectedCardsRepository.hasCardId(cardId);
+        if (!hasCardId) {
+            console.warn(`[WARN] number object (ID: ${cardId}) not found`);
+            return null;
+        }
+        return this.numberOfSelectedCardsRepository.getNumberMeshByCardId(cardId);
     }
 
 }
