@@ -10,6 +10,7 @@ import {NumberOfSelectedCardsPosition} from "../../number_of_selected_cards_posi
 import {SelectedCardBlockPositionRepositoryImpl} from "../../selected_card_block_position/repository/SelectedCardBlockPositionRepositoryImpl";
 import {SelectedCardBlockPosition} from "../../selected_card_block_position/entity/SelectedCardBlockPosition";
 import {MakeDeckScreenCardClickDetectRepositoryImpl} from "../../make_deck_screen_card_click_detect/repository/MakeDeckScreenCardClickDetectRepositoryImpl";
+import {CardCountManager} from "../../make_deck_screen_card_manager/CardCountManager";
 
 export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsService {
     private static instance: NumberOfSelectedCardsServiceImpl;
@@ -17,12 +18,14 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
     private numberOfSelectedCardsPositionRepository: NumberOfSelectedCardsPositionRepositoryImpl;
     private selectedCardBlockPositionRepository: SelectedCardBlockPositionRepositoryImpl;
     private makeDeckScreenCardClickDetectRepository: MakeDeckScreenCardClickDetectRepositoryImpl;
+    private cardCountManager: CardCountManager;
 
     private constructor() {
         this.numberOfSelectedCardsRepository = NumberOfSelectedCardsRepositoryImpl.getInstance();
         this.numberOfSelectedCardsPositionRepository = NumberOfSelectedCardsPositionRepositoryImpl.getInstance();
         this.selectedCardBlockPositionRepository = SelectedCardBlockPositionRepositoryImpl.getInstance();
         this.makeDeckScreenCardClickDetectRepository = MakeDeckScreenCardClickDetectRepositoryImpl.getInstance();
+        this.cardCountManager = CardCountManager.getInstance();
 
     }
 
@@ -116,7 +119,7 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
     }
 
     private getCardClickCount(clickedCardId: number): number | undefined {
-        return this.makeDeckScreenCardClickDetectRepository.findCardClickCount(clickedCardId);
+        return this.cardCountManager.findCardClickCount(clickedCardId);
     }
 
     // 2개 이상 선택된 모든 카드 id 리스트 반환

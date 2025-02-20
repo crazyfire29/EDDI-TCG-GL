@@ -11,6 +11,7 @@ import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl
 
 import {CardPageManager} from "../../make_deck_screen_card_manager/CardPageManager";
 import {CardStateManager} from "../../make_deck_screen_card_manager/CardStateManager";
+import {CardCountManager} from "../../make_deck_screen_card_manager/CardCountManager";
 
 export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenCardClickDetectService {
     private static instance: MakeDeckScreenCardClickDetectServiceImpl | null = null;
@@ -20,7 +21,8 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
     private raceButtonClickDetectRepository: RaceButtonClickDetectRepositoryImpl;
 
     private cardPageManager: CardPageManager;
-    private cardStateManger: CardStateManager;
+    private cardStateManager: CardStateManager;
+    private cardCountManager: CardCountManager;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -32,7 +34,8 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
         this.cardPageManager = CardPageManager.getInstance();
-        this.cardStateManger = CardStateManager.getInstance();
+        this.cardStateManager = CardStateManager.getInstance();
+        this.cardCountManager = CardCountManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): MakeDeckScreenCardClickDetectServiceImpl {
@@ -67,18 +70,9 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
             console.log(`[DEBUG] Clicked Card Unique Id: ${clickedCard.id}, Card ID: ${cardId}`);
             this.saveCurrentClickedCardId(cardId);
 
-            const userOwnedCardCount = this.getCardCountByCardId(cardId);
-            console.log(`[DEBUG] User Owned Card Count: ${userOwnedCardCount}`);
-
-            // 사용자가 소지한 갯수를 초과할 수 없음. -> 화면에 어떻게 보여주는 게 좋을 지 고민해 볼 것.
-            let cardClickCount = this.getCardClickCount(cardId) ?? 0;
-            if (userOwnedCardCount !== null && cardClickCount < userOwnedCardCount) {
-                cardClickCount++;
-                console.log(`[DEBUG] Click Count for Card ID ${cardId}: ${cardClickCount}`);
-                this.saveCardClickCount(cardId, cardClickCount);
-            } else {
-                console.warn(`[DEBUG] Click Count for Card ID ${cardId} is already at max (${userOwnedCardCount})`);
-            }
+            // 사용자가 소지한 카드 갯수에 따라 제한 카드 클릭 횟수 제한
+            // To-do: 소지한 카드 갯수보다 많이 클릭했을 때 팝업 알림창 만드는 게 좋을 것 같음.
+            this.saveCardClickCount(cardId);
 
             const currentClickedCardId = this.getCurrentClickedCardId();
             const hiddenCardId = currentPageCardIds.find(
@@ -122,11 +116,11 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
     }
 
     public saveCurrentClickedCardId(cardId: number): void {
-        this.makeDeckScreenCardClickDetectRepository.saveCurrentClickedCardId(cardId);
+        this.cardCountManager.saveCurrentClickedCardId(cardId);
     }
 
     public getCurrentClickedCardId(): number | null {
-        return this.makeDeckScreenCardClickDetectRepository.findCurrentClickedCardId();
+        return this.cardCountManager.findCurrentClickedCardId();
     }
 
     private getCardsIdForPage(page: number, cardIdList: number[]): number[] {
@@ -160,24 +154,19 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
     }
 
     private setCardVisibility(cardId: number, isVisible: boolean): void {
-        this.cardStateManger.setCardVisibility(cardId, isVisible);
+        this.cardStateManager.setCardVisibility(cardId, isVisible);
     }
 
     private getCardVisibility(cardId: number): boolean {
-        return this.cardStateManger.findCardVisibility(cardId);
+        return this.cardStateManager.findCardVisibility(cardId);
     }
 
     public getCardClickCount(cardId: number): number | undefined {
-        return this.makeDeckScreenCardClickDetectRepository.findCardClickCount(cardId);
+        return this.cardCountManager.findCardClickCount(cardId);
     }
 
-    private saveCardClickCount(cardId: number, count: number): void {
-        this.makeDeckScreenCardClickDetectRepository.saveCardClickCount(cardId, count);
-    }
-
-    // 사용자가 소지한 카드의 갯수
-    private getCardCountByCardId(cardId: number): number | null {
-        return this.makeDeckScreenCardRepository.findCardCountByCardId(cardId) || null;
+    private saveCardClickCount(cardId: number): void {
+        this.cardCountManager.saveCardClickCount(cardId);
     }
 
 }

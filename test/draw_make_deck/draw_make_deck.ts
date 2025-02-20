@@ -84,6 +84,7 @@ export class TCGJustTestMakeDeckView {
     private initialized = false;
     private isAnimating = false;
     private isSideScrollAreaAdded = false;
+    private blockAddedMap: Map<number, boolean> = new Map();
 
     private userWindowSize: UserWindowSize;
 
@@ -130,13 +131,11 @@ export class TCGJustTestMakeDeckView {
                     await this.addSideScrollArea();
                     this.isSideScrollAreaAdded = true;
                 }
-                if (cardClickCount) {
-                    if (cardClickCount < 2) {
-                        await this.addBlock(clickedCardId);
-                    }
-                    await this.addNumberOfSelectedCards(clickedCardId);
+                if (cardClickCount == 1 && !this.blockAddedMap.get(clickedCardId)) {
+                    await this.addBlock(clickedCardId);
+                    this.blockAddedMap.set(clickedCardId, true);
                 }
-
+                await this.addNumberOfSelectedCards(clickedCardId);
             }
         }, false);
 
