@@ -1,4 +1,5 @@
 import {MakeDeckScreenCardRepositoryImpl} from "../make_deck_screen_card/repository/MakeDeckScreenCardRepositoryImpl";
+import {getCardById} from "../card/utility";
 
 export class CardCountManager {
     private static instance: CardCountManager | null = null;
@@ -30,19 +31,22 @@ export class CardCountManager {
          return this.clickCardCountMap.get(cardId);
      }
 
-     // 사용자가 소지한 카드 갯수에 따라 카드 클릭 횟수 제한
-     public saveCardClickCount(cardId: number): void {
-         const userOwnedCardCount = this.makeDeckScreenCardRepository.findCardCountByCardId(cardId);
-         let cardClickCount = this.findCardClickCount(cardId) ?? 0;
+     public getCardClickCount(cardId: number): number {
+         return this.clickCardCountMap.get(cardId) ?? 0;
+     }
 
-         if (userOwnedCardCount !== null && cardClickCount < userOwnedCardCount) {
-             cardClickCount++;
-             console.log(`[DEBUG] Click Count for Card ID ${cardId}: ${cardClickCount}`);
-             this.clickCardCountMap.set(cardId, cardClickCount);
+     public incrementCardClickCount(cardId: number): void {
+         const currentCount = this.getCardClickCount(cardId);
+         this.clickCardCountMap.set(cardId, currentCount + 1);
+     }
 
-         } else {
-             console.warn(`[DEBUG] Click Count for Card ID ${cardId} is already at max (${userOwnedCardCount})`);
-         }
+     public getGradeClickCount(gradeId: number): number {
+         return this.gradeIdToClickCardCountMap.get(gradeId) ?? 0;
+     }
+
+     public incrementGradeClickCount(gradeId: number): void {
+         const currentCount = this.getGradeClickCount(gradeId);
+         this.gradeIdToClickCardCountMap.set(gradeId, currentCount + 1);
      }
 
 }

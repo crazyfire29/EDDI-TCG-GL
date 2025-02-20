@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import {getCardById} from "../../card/utility";
 
 import {MakeDeckScreenCardClickDetectService} from "./MakeDeckScreenCardClickDetectService";
 import {MakeDeckScreenCardClickDetectRepositoryImpl} from "../repository/MakeDeckScreenCardClickDetectRepositoryImpl";
@@ -70,8 +71,7 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
             console.log(`[DEBUG] Clicked Card Unique Id: ${clickedCard.id}, Card ID: ${cardId}`);
             this.saveCurrentClickedCardId(cardId);
 
-            // 사용자가 소지한 카드 갯수에 따라 제한 카드 클릭 횟수 제한
-            // To-do: 소지한 카드 갯수보다 많이 클릭했을 때 팝업 알림창 만드는 게 좋을 것 같음.
+            // 사용자가 소지한 카드 갯수와 카드 등급에 따라 카드 클릭 횟수 제한
             this.saveCardClickCount(cardId);
 
             const currentClickedCardId = this.getCurrentClickedCardId();
@@ -166,7 +166,52 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
     }
 
     private saveCardClickCount(cardId: number): void {
-        this.cardCountManager.saveCardClickCount(cardId);
+        const userOwnedCardCount = this.makeDeckScreenCardRepository.findCardCountByCardId(cardId);
+        const cardClickCount = this.cardCountManager.getCardClickCount(cardId);
+
+        const card = getCardById(cardId);
+        if (!card) {
+            throw new Error(`Card with ID ${cardId} not found`);
+        }
+        const grade = Number(card.등급);
+        const maxAllowedByGrade = this.getMaxClickCountByGrade(grade);
+        const gradeClickCount = this.cardCountManager.getGradeClickCount(grade);
+
+        // 등급별 제한 검사
+        if (gradeClickCount >= maxAllowedByGrade) {
+            console.warn(`[DEBUG] Grade limit exceeded: ${cardId} (grade: ${grade}, max count: ${maxAllowedByGrade})`);
+            this.showPopupMessage("You can no longer select cards of this grade.");
+            return;
+        }
+
+        // 사용자가 소지한 개수 제한 검사
+        if (userOwnedCardCount !== null && cardClickCount >= userOwnedCardCount) {
+            console.warn(`[DEBUG] User Owned Card Not Enough: ${cardId} (Owned Card Count: ${userOwnedCardCount})`);
+            this.showPopupMessage("You do not have enough cards.");
+            return;
+        }
+
+        //선택 횟수 증가
+        this.cardCountManager.incrementCardClickCount(cardId);
+        this.cardCountManager.incrementGradeClickCount(grade);
+    }
+
+    private showPopupMessage(message: string): void {
+        // 팝업 메시지 처리: 후에 UI에 표현할 예정
+        console.log(`[POPUP] ${message}`);
+    }
+
+    public getMaxClickCountByGrade(grade: number): number {
+        switch (grade) {
+            case 1: return 15;  // 일반 (15장)
+            case 2: return 12;  // 언커먼 (12장)
+            case 3: return 9;   // 영웅 (9장)
+            case 4: return 3;   // 전설 (3장)
+            case 5: return 1;   // 신화 (1장)
+            default:
+                console.warn(`[WARN] Unknown grade "${grade}"`);
+                return 0;
+        }
     }
 
 }
