@@ -67,10 +67,18 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
             console.log(`[DEBUG] Clicked Card Unique Id: ${clickedCard.id}, Card ID: ${cardId}`);
             this.saveCurrentClickedCardId(cardId);
 
+            const userOwnedCardCount = this.getCardCountByCardId(cardId);
+            console.log(`[DEBUG] User Owned Card Count: ${userOwnedCardCount}`);
+
+            // 사용자가 소지한 갯수를 초과할 수 없음. -> 화면에 어떻게 보여주는 게 좋을 지 고민해 볼 것.
             let cardClickCount = this.getCardClickCount(cardId) ?? 0;
-            cardClickCount++;
-            console.log(`[DEBUG] Click Count for Card ID ${cardId}: ${cardClickCount}`);
-            this.saveCardClickCount(cardId, cardClickCount);
+            if (userOwnedCardCount !== null && cardClickCount < userOwnedCardCount) {
+                cardClickCount++;
+                console.log(`[DEBUG] Click Count for Card ID ${cardId}: ${cardClickCount}`);
+                this.saveCardClickCount(cardId, cardClickCount);
+            } else {
+                console.warn(`[DEBUG] Click Count for Card ID ${cardId} is already at max (${userOwnedCardCount})`);
+            }
 
             const currentClickedCardId = this.getCurrentClickedCardId();
             const hiddenCardId = currentPageCardIds.find(
@@ -165,6 +173,11 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
 
     private saveCardClickCount(cardId: number, count: number): void {
         this.makeDeckScreenCardClickDetectRepository.saveCardClickCount(cardId, count);
+    }
+
+    // 사용자가 소지한 카드의 갯수
+    private getCardCountByCardId(cardId: number): number | null {
+        return this.makeDeckScreenCardRepository.findCardCountByCardId(cardId) || null;
     }
 
 }
