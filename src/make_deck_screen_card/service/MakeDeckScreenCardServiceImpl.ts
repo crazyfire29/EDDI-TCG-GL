@@ -26,14 +26,14 @@ export class MakeDeckScreenCardServiceImpl implements MakeDeckScreenCardService 
         return MakeDeckScreenCardServiceImpl.instance;
     }
 
-    public async createMakeDeckScreenCardWithPosition(cardIdList: number[]): Promise<THREE.Group | null> {
+    public async createMakeDeckScreenCardWithPosition(cardIdToCountMap: Map<number, number>): Promise<THREE.Group | null> {
         const cardGroup = new THREE.Group();
-        const cardList = Array.from(new Set(cardIdList));
         const raceMap: Record<string, number[]> = {
             "1": [], // humanCardIdList
             "2": [], // undeadCardIdList
             "3": [], // humanCardIdList
         };
+        const cardIdList = Array.from(cardIdToCountMap.keys());
 
         try {
             cardIdList.forEach((cardId)=>{
@@ -62,7 +62,13 @@ export class MakeDeckScreenCardServiceImpl implements MakeDeckScreenCardService 
                         const position = this.makeDeckScreenCardPosition(cardId, index + 1);
                         console.log(`[DEBUG] CardId ${cardId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
 
-                        const makeDeckScreenCard = await this.createMakeDeckScreenCard(cardId, position.position);
+                        const cardCount = cardIdToCountMap.get(cardId);
+                        if (cardCount === undefined) {
+                            console.warn(`[WARN] Card count not found for cardId: ${cardId}, defaulting to 0`);
+                            return;
+                        }
+                        console.log(`[DEBUG] Card id: ${cardId}, Card count: ${cardCount}`);
+                        const makeDeckScreenCard = await this.createMakeDeckScreenCard(cardId, cardCount, position.position);
                         cardGroup.add(makeDeckScreenCard.getMesh());
                     })
                 );
@@ -74,6 +80,61 @@ export class MakeDeckScreenCardServiceImpl implements MakeDeckScreenCardService 
         }
         return cardGroup;
     }
+
+//     public async createMakeDeckScreenCardWithPosition(cardIdList: number[], cardCountList: number[]): Promise<THREE.Group | null> {
+//         const cardGroup = new THREE.Group();
+//         const cardList = Array.from(new Set(cardIdList));
+//         const raceMap: Record<string, number[]> = {
+//             "1": [], // humanCardIdList
+//             "2": [], // undeadCardIdList
+//             "3": [], // humanCardIdList
+//         };
+//
+//         const cardIdToCountMap: Record<number, number> = {};
+//             cardIdList.forEach((cardId, index) => {
+//                 cardIdToCountMap[cardId] = cardCountList[index]; // 대응하는 cardCount 저장
+//         });
+//
+//         try {
+//             cardIdList.forEach((cardId)=>{
+//                 const card = getCardById(cardId);
+//                 if (!card) {
+//                     throw new Error(`Card with ID ${cardId} not found`);
+//                 }
+//                 const cardRace = card.종족;
+//                 switch (cardRace) {
+//                     case "1":
+//                         raceMap["1"].push(cardId);
+//                         break;
+//                     case "2":
+//                         raceMap["2"].push(cardId);
+//                         break;
+//                     case "3":
+//                         raceMap["3"].push(cardId);
+//                         break;
+//                     default:
+//                         console.warn(`[WARN] Unknown race "${cardRace}" for cardId: ${cardId}`);
+//                 }
+//             });
+//             for (const [race, idList] of Object.entries(raceMap)) {
+//                 await Promise.all(
+//                     idList.map(async (cardId, index) => {
+//                         const position = this.makeDeckScreenCardPosition(cardId, index + 1);
+//                         console.log(`[DEBUG] CardId ${cardId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+//
+//                         const cardCount = cardIdToCountMap[cardId];
+//                         const makeDeckScreenCard = await this.createMakeDeckScreenCard(cardId, cardCount, position.position);
+//                         cardGroup.add(makeDeckScreenCard.getMesh());
+//                     })
+//                 );
+//             }
+//
+//         } catch (error) {
+//             console.error(`[Error] Failed to create MyDeckCardScene: ${error}`);
+//             return null;
+//         }
+//         return cardGroup;
+//     }
 
     public adjustMakeDeckScreenCardPosition(): void {
         const windowWidth = window.innerWidth;
@@ -112,8 +173,8 @@ export class MakeDeckScreenCardServiceImpl implements MakeDeckScreenCardService 
         }
     }
 
-    private async createMakeDeckScreenCard(cardId: number, position: Vector2d): Promise<MakeDeckScreenCard> {
-        return await this.makeDeckScreenCardRepository.createMakeDeckScreenCard(cardId, position);
+    private async createMakeDeckScreenCard(cardId: number, cardCount: number, position: Vector2d): Promise<MakeDeckScreenCard> {
+        return await this.makeDeckScreenCardRepository.createMakeDeckScreenCard(cardId, cardCount, position);
     }
 
     private makeDeckScreenCardPosition(cardId: number, cardIndex: number): MakeDeckScreenCardPosition {
