@@ -29,7 +29,7 @@ export class MakeDeckScreenCardRepositoryImpl implements MakeDeckScreenCardRepos
         return MakeDeckScreenCardRepositoryImpl.instance;
     }
 
-    public async createMakeDeckScreenCard(cardId: number, position: Vector2d): Promise<MakeDeckScreenCard> {
+    public async createMakeDeckScreenCard(cardId: number, cardCount: number, position: Vector2d): Promise<MakeDeckScreenCard> {
         const card = getCardById(cardId);
         if (!card) {
             throw new Error(`Card with ID ${cardId} not found`);
@@ -54,6 +54,7 @@ export class MakeDeckScreenCardRepositoryImpl implements MakeDeckScreenCardRepos
         const newCard = new MakeDeckScreenCard(cardMesh, position);
         this.cardUniqueIdMap.set(newCard.id, cardId);
         this.cardMap.set(cardId, newCard);
+        this.cardCountMap.set(cardId, cardCount);
 
         if (!this.raceMap.has(race)) {
             this.raceMap.set(race, []);
@@ -79,6 +80,10 @@ export class MakeDeckScreenCardRepositoryImpl implements MakeDeckScreenCardRepos
 
     public findCardIdList(): number[] {
         return Array.from(this.cardMap.keys());
+    }
+
+    public findCardCountByCardId(cardId: number): number | null {
+        return this.cardCountMap.get(cardId) || null;
     }
 
     public findCardsByRaceId(raceId: string): MakeDeckScreenCard[] | null {

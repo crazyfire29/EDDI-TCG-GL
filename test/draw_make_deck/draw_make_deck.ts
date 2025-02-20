@@ -11,6 +11,7 @@ import {WindowSceneServiceImpl} from "../../src/window_scene/service/WindowScene
 import {WindowSceneRepositoryImpl} from "../../src/window_scene/repository/WindowSceneRepositoryImpl";
 import {CameraServiceImpl} from "../../src/camera/service/CameraServiceImpl";
 import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepositoryImpl";
+import {MakeDeckScreenCardMapRepositoryImpl} from "../../src/make_deck_screen_card/repository/MakeDeckScreenCardMapRepositoryImpl";
 
 import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServiceImpl";
 import {BackgroundRepositoryImpl} from "../../src/background/repository/BackgroundRepositoryImpl";
@@ -72,6 +73,7 @@ export class TCGJustTestMakeDeckView {
     private sideScrollService: SideScrollService;
 
     private cardStateManager = CardStateManager.getInstance();
+    private makeDeckScreenCardMapRepository = MakeDeckScreenCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -226,13 +228,12 @@ export class TCGJustTestMakeDeckView {
     private async addCards(): Promise<void> {
         try {
             // To-do:예시 데이터 Map 만들어야 함.
-            const myCardIdList = [2, 8, 9, 17, 19, 20, 25, 26, 5, 6,
-                                  7, 10, 13, 14, 15, 16, 23, 27, 30, 33,
-                                  48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
-            const cardGroup = await this.makeDeckScreenCardService.createMakeDeckScreenCardWithPosition(myCardIdList);
+            const cardMap = this.makeDeckScreenCardMapRepository.getCurrentMakeDeckScreenCardMap();
+            const cardIdList = this.makeDeckScreenCardMapRepository.getCardIdList();
+            const cardGroup = await this.makeDeckScreenCardService.createMakeDeckScreenCardWithPosition(cardMap);
 
             if (cardGroup) {
-                this.cardStateManager.initializeCardVisibility(myCardIdList);
+                this.cardStateManager.initializeCardVisibility(cardIdList);
                 this.scene.add(cardGroup);
             }
 
