@@ -80,4 +80,8 @@ export class MakeDeckScreenDoneButtonServiceImpl implements MakeDeckScreenDoneBu
         this.makeDeckScreenDoneButtonRepository.hideButton(1);
     }
 
+    public getAllDoneButtonIds(): number[] {
+        return this.makeDeckScreenDoneButtonRepository.findAllButtonIds();
+    }
+
 }
