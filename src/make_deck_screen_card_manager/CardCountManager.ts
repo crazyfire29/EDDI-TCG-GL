@@ -27,10 +27,6 @@ export class CardCountManager {
          return this.currentClickCardId;
      }
 
-     public findCardClickCount(cardId: number): number | undefined {
-         return this.clickCardCountMap.get(cardId);
-     }
-
      public getCardClickCount(cardId: number): number {
          return this.clickCardCountMap.get(cardId) ?? 0;
      }
@@ -49,4 +45,22 @@ export class CardCountManager {
          this.gradeIdToClickCardCountMap.set(gradeId, currentCount + 1);
      }
 
+     public findTotalSelectedCardCount(): number {
+         const totalCount = Array.from(this.gradeIdToClickCardCountMap.values()).reduce((sum, count) => sum + count, 0);
+         console.log(`Current Total Selected Card Count?: ${totalCount}`);
+         return totalCount;
+     }
+
+     public getMaxClickCountByGrade(grade: number): number {
+         switch (grade) {
+             case 1: return 15;  // 일반 (15장)
+             case 2: return 12;  // 언커먼 (12장)
+             case 3: return 9;   // 영웅 (9장)
+             case 4: return 3;   // 전설 (3장)
+             case 5: return 1;   // 신화 (1장)
+             default:
+                 console.warn(`[WARN] Unknown grade "${grade}"`);
+                 return 0;
+         }
+     }
 }

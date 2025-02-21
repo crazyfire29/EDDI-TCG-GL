@@ -5,7 +5,6 @@ import {MakeDeckScreenDoneButtonClickDetectRepositoryImpl} from "../repository/M
 import {MakeDeckScreenDoneButton} from "../../make_deck_screen_done_button/entity/MakeDeckScreenDoneButton";
 import {MakeDeckScreenDoneButtonRepositoryImpl} from "../../make_deck_screen_done_button/repository/MakeDeckScreenDoneButtonRepositoryImpl";
 
-import {CardCountManager} from "../../make_deck_screen_card_manager/CardCountManager";
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
@@ -13,14 +12,12 @@ export class MakeDeckScreenDoneButtonClickDetectServiceImpl implements MakeDeckS
     private static instance: MakeDeckScreenDoneButtonClickDetectServiceImpl | null = null;
     private makeDeckScreenDoneButtonClickDetectRepository: MakeDeckScreenDoneButtonClickDetectRepositoryImpl;
     private makeDeckScreenDoneButtonRepository: MakeDeckScreenDoneButtonRepositoryImpl;
-    private cardCountManager: CardCountManager;
     private cameraRepository: CameraRepository;
     private leftMouseDown: boolean = false;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.makeDeckScreenDoneButtonClickDetectRepository = MakeDeckScreenDoneButtonClickDetectRepositoryImpl.getInstance();
         this.makeDeckScreenDoneButtonRepository = MakeDeckScreenDoneButtonRepositoryImpl.getInstance();
-        this.cardCountManager = CardCountManager.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
     }
@@ -87,10 +84,6 @@ export class MakeDeckScreenDoneButtonClickDetectServiceImpl implements MakeDeckS
 
     private getCurrentClickedDoneButtonId(): number | null {
         return this.makeDeckScreenDoneButtonClickDetectRepository.findCurrentClickedDoneButtonId();
-    }
-
-    private getTotalSelectedCardCount(): number {
-        return this.cardCountManager.findTotalSelectedCardCount();
     }
 
 }
