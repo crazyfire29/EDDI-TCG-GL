@@ -141,6 +141,7 @@ export class TCGJustTestMakeDeckView {
                     this.blockAddedMap.set(clickedCardId, true);
                 }
                 await this.addNumberOfSelectedCards(clickedCardId);
+                await this.deleteDoneButton();
             }
         }, false);
 
@@ -318,12 +319,27 @@ export class TCGJustTestMakeDeckView {
 
                 if (button) {
                     this.makeDeckScreenDoneButtonService.initializeDoneButtonVisible();
-                    this.scene.add(button);
+                    const allButtons = this.makeDeckScreenDoneButtonService.getAllDoneButtons();
+                    allButtons.forEach((button) => this.scene.add(button.getMesh()));
+//                     this.scene.add(button);
                     console.log(`Draw Done Button ${config.id}`);
                 }
             }));
         } catch (error) {
             console.error('Failed to add Done Button:', error);
+        }
+    }
+
+    private async deleteDoneButton(): Promise<void> {
+        try {
+            const totalSelectedCardCount = this.cardCountManager.findTotalSelectedCardCount();
+            const deactivationDoneButton = this.makeDeckScreenDoneButtonService.getDoneButtonById(0);
+            if (deactivationDoneButton && totalSelectedCardCount == 40) {
+                this.scene.remove(deactivationDoneButton.getMesh());
+                this.makeDeckScreenDoneButtonService.deleteDoneButtonById(0);
+            }
+        } catch (error) {
+            console.error('Failed to delete Done Button:', error);
         }
     }
 
