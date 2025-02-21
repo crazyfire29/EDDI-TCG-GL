@@ -6,6 +6,7 @@ import {MakeDeckScreenCardClickDetectRepositoryImpl} from "../repository/MakeDec
 import {MakeDeckScreenCard} from "../../make_deck_screen_card/entity/MakeDeckScreenCard";
 import {MakeDeckScreenCardRepositoryImpl} from "../../make_deck_screen_card/repository/MakeDeckScreenCardRepositoryImpl";
 import {RaceButtonClickDetectRepositoryImpl} from "../../race_button_click_detect/repository/RaceButtonClickDetectRepositoryImpl";
+import {MakeDeckScreenDoneButtonRepositoryImpl} from "../../make_deck_screen_done_button/repository/MakeDeckScreenDoneButtonRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -20,6 +21,7 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
     private makeDeckScreenCardRepository: MakeDeckScreenCardRepositoryImpl;
     private makeDeckScreenCardClickDetectRepository: MakeDeckScreenCardClickDetectRepositoryImpl;
     private raceButtonClickDetectRepository: RaceButtonClickDetectRepositoryImpl;
+    private makeDeckScreenDoneButtonRepository: MakeDeckScreenDoneButtonRepositoryImpl;
 
     private cardPageManager: CardPageManager;
     private cardStateManager: CardStateManager;
@@ -32,6 +34,7 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
         this.makeDeckScreenCardRepository = MakeDeckScreenCardRepositoryImpl.getInstance();
         this.makeDeckScreenCardClickDetectRepository = MakeDeckScreenCardClickDetectRepositoryImpl.getInstance();
         this.raceButtonClickDetectRepository = RaceButtonClickDetectRepositoryImpl.getInstance();
+        this.makeDeckScreenDoneButtonRepository = MakeDeckScreenDoneButtonRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
         this.cardPageManager = CardPageManager.getInstance();
@@ -87,6 +90,12 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
 
             if (hiddenCardId && hiddenCardId !== currentClickedCardId) {
                 this.setCardVisibility(hiddenCardId, true);
+            }
+
+            const totalSelectedCardCount = this.getTotalSelectedCardCount();
+            if (totalSelectedCardCount == 40) {
+                this.setDoneButtonVisible(0, false);
+                this.setDoneButtonVisible(1, true);
             }
 
             return clickedCard;
@@ -161,10 +170,6 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
         return this.cardStateManager.findCardVisibility(cardId);
     }
 
-    public getCardClickCount(cardId: number): number | undefined {
-        return this.cardCountManager.findCardClickCount(cardId);
-    }
-
     private saveCardClickCount(cardId: number): void {
         const userOwnedCardCount = this.makeDeckScreenCardRepository.findCardCountByCardId(cardId);
         const cardClickCount = this.cardCountManager.getCardClickCount(cardId);
@@ -174,12 +179,12 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
             throw new Error(`Card with ID ${cardId} not found`);
         }
         const grade = Number(card.등급);
-        const maxAllowedByGrade = this.getMaxClickCountByGrade(grade);
+        const maxAllowedByGrade = this.cardCountManager.getMaxClickCountByGrade(grade);
         const gradeClickCount = this.cardCountManager.getGradeClickCount(grade);
 
         // 등급별 제한 검사
         if (gradeClickCount >= maxAllowedByGrade) {
-            console.warn(`[DEBUG] Grade limit exceeded: ${cardId} (grade: ${grade}, max count: ${maxAllowedByGrade})`);
+            console.warn(`[DEBUG] Grade limit exceeded (grade: ${grade}, max count: ${maxAllowedByGrade})`);
             this.showPopupMessage("You can no longer select cards of this grade.");
             return;
         }
@@ -201,16 +206,15 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
         console.log(`[POPUP] ${message}`);
     }
 
-    public getMaxClickCountByGrade(grade: number): number {
-        switch (grade) {
-            case 1: return 15;  // 일반 (15장)
-            case 2: return 12;  // 언커먼 (12장)
-            case 3: return 9;   // 영웅 (9장)
-            case 4: return 3;   // 전설 (3장)
-            case 5: return 1;   // 신화 (1장)
-            default:
-                console.warn(`[WARN] Unknown grade "${grade}"`);
-                return 0;
+    private getTotalSelectedCardCount(): number {
+        return this.cardCountManager.findTotalSelectedCardCount();
+    }
+
+    private setDoneButtonVisible(buttonId: number, isVisible: boolean): void {
+        if (isVisible == true){
+            this.makeDeckScreenDoneButtonRepository.showButton(buttonId);
+        } else {
+            this.makeDeckScreenDoneButtonRepository.hideButton(buttonId);
         }
     }
 

@@ -16,11 +16,11 @@ export class MakeDeckScreenCardMapRepositoryImpl implements MakeDeckScreenCardMa
         this.currentMakeDeckScreenCardMap.set(20, 1);
         this.currentMakeDeckScreenCardMap.set(25, 2);
         this.currentMakeDeckScreenCardMap.set(26, 1);
-        this.currentMakeDeckScreenCardMap.set(5, 4);
-        this.currentMakeDeckScreenCardMap.set(6, 5);
+        this.currentMakeDeckScreenCardMap.set(5, 10);
+        this.currentMakeDeckScreenCardMap.set(6, 15);
         this.currentMakeDeckScreenCardMap.set(7, 3);
         this.currentMakeDeckScreenCardMap.set(10, 1);
-        this.currentMakeDeckScreenCardMap.set(13, 1);
+        this.currentMakeDeckScreenCardMap.set(13, 9);
         this.currentMakeDeckScreenCardMap.set(14, 2);
         this.currentMakeDeckScreenCardMap.set(15, 2);
         this.currentMakeDeckScreenCardMap.set(16, 1);

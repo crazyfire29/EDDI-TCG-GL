@@ -39,8 +39,11 @@ import {SideScrollAreaDetectService} from "../../src/side_scroll_area_detect/ser
 import {SideScrollAreaDetectServiceImpl} from "../../src/side_scroll_area_detect/service/SideScrollAreaDetectServiceImpl";
 import {SideScrollService} from "../../src/side_scroll/service/SideScrollService";
 import {SideScrollServiceImpl} from "../../src/side_scroll/service/SideScrollServiceImpl";
+import {MakeDeckScreenDoneButtonClickDetectService} from "../../src/make_deck_screen_done_button_click_detect/service/MakeDeckScreenDoneButtonClickDetectService";
+import {MakeDeckScreenDoneButtonClickDetectServiceImpl} from "../../src/make_deck_screen_done_button_click_detect/service/MakeDeckScreenDoneButtonClickDetectServiceImpl";
 
 import {CardStateManager} from "../../src/make_deck_screen_card_manager/CardStateManager";
+import {CardCountManager} from "../../src/make_deck_screen_card_manager/CardCountManager";
 
 export class TCGJustTestMakeDeckView {
     private static instance: TCGJustTestMakeDeckView | null = null;
@@ -71,8 +74,10 @@ export class TCGJustTestMakeDeckView {
     private makeDeckScreenCardClickDetectService: MakeDeckScreenCardClickDetectService;
     private sideScrollAreaDetectService: SideScrollAreaDetectService;
     private sideScrollService: SideScrollService;
+    private makeDeckScreenDoneButtonClickDetectService: MakeDeckScreenDoneButtonClickDetectService;
 
     private cardStateManager = CardStateManager.getInstance();
+    private cardCountManager = CardCountManager.getInstance();
     private makeDeckScreenCardMapRepository = MakeDeckScreenCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -126,7 +131,7 @@ export class TCGJustTestMakeDeckView {
             const clickCard = await this.makeDeckScreenCardClickDetectService.onMouseDown(e);
             const clickedCardId = this.makeDeckScreenCardClickDetectService.getCurrentClickedCardId();
             if (clickCard && clickedCardId) {
-                const cardClickCount = this.makeDeckScreenCardClickDetectService.getCardClickCount(clickedCardId);
+                const cardClickCount = this.cardCountManager.getCardClickCount(clickedCardId);
                 if (!this.isSideScrollAreaAdded) {
                     await this.addSideScrollArea();
                     this.isSideScrollAreaAdded = true;
@@ -144,6 +149,9 @@ export class TCGJustTestMakeDeckView {
 
         this.sideScrollService = SideScrollServiceImpl.getInstance(this.camera, this.scene, this.renderer);
         this.renderer.domElement.addEventListener('wheel', (e) => this.sideScrollService.onWheelScroll(e), false);
+
+        this.makeDeckScreenDoneButtonClickDetectService = MakeDeckScreenDoneButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.makeDeckScreenDoneButtonClickDetectService.onMouseDown(e), false);
     }
 
     public static getInstance(simulationMyDeckContainer: HTMLElement): TCGJustTestMakeDeckView {

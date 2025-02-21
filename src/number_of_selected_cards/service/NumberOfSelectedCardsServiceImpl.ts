@@ -118,8 +118,8 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
         return positionY;
     }
 
-    private getCardClickCount(clickedCardId: number): number | undefined {
-        return this.cardCountManager.findCardClickCount(clickedCardId);
+    private getCardClickCount(clickedCardId: number): number {
+        return this.cardCountManager.getCardClickCount(clickedCardId);
     }
 
     // 2개 이상 선택된 모든 카드 id 리스트 반환
@@ -130,10 +130,6 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
     public getNumberObjectMeshByCardId(cardId: number): THREE.Mesh | null {
         const cardCount = this.getCardClickCount(cardId);
         console.log(`[DEBUG] card count?: ${cardCount}`);
-        if (cardCount === undefined) {
-            console.warn(`[WARN] Card click count not found for cardId: ${cardId}`);
-            return null;
-        }
 
         const numberObject = this.numberOfSelectedCardsRepository.findNumberByCardIdAndCardCount(cardId, cardCount);
         if (!numberObject) {
