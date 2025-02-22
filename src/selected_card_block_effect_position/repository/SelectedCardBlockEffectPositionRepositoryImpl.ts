@@ -1,45 +1,45 @@
 import {Vector2d} from "../../common/math/Vector2d";
-import {SelectedCardBlockPosition} from "../entity/SelectedCardBlockPosition";
-import {SelectedCardBlockPositionRepository} from "./SelectedCardBlockPositionRepository";
+import {SelectedCardBlockEffectPosition} from "../entity/SelectedCardBlockEffectPosition";
+import {SelectedCardBlockEffectPositionRepository} from "./SelectedCardBlockEffectPositionRepository";
 
-export class SelectedCardBlockPositionRepositoryImpl implements SelectedCardBlockPositionRepository {
-    private static instance: SelectedCardBlockPositionRepositoryImpl;
-    private positionMap: Map<number, { cardId: number, position: SelectedCardBlockPosition}> = new Map();;
+export class SelectedCardBlockEffectPositionRepositoryImpl implements SelectedCardBlockEffectPositionRepository {
+    private static instance: SelectedCardBlockEffectPositionRepositoryImpl;
+    private positionMap: Map<number, { cardId: number, position: SelectedCardBlockEffectPosition}> = new Map();;
 
     private initialX = 0.3885;
     private initialY = 0.36;
     private incrementY = - 0.0706;
-    private maxBlocksPerPage = 10; // 스크롤 고려할 것
+    private maxEffectsPerPage = 10; // 스크롤 고려할 것
     private positionIndex = 0;
 
     private constructor() {}
 
-    public static getInstance(): SelectedCardBlockPositionRepositoryImpl {
-        if (!SelectedCardBlockPositionRepositoryImpl.instance) {
-            SelectedCardBlockPositionRepositoryImpl.instance = new SelectedCardBlockPositionRepositoryImpl();
+    public static getInstance(): SelectedCardBlockEffectPositionRepositoryImpl {
+        if (!SelectedCardBlockEffectPositionRepositoryImpl.instance) {
+            SelectedCardBlockEffectPositionRepositoryImpl.instance = new SelectedCardBlockEffectPositionRepositoryImpl();
         }
-        return SelectedCardBlockPositionRepositoryImpl.instance;
+        return SelectedCardBlockEffectPositionRepositoryImpl.instance;
     }
 
-    public addSelectedCardBlockPosition(cardId: number): SelectedCardBlockPosition {
+    public addSelectedCardBlockEffectPosition(cardId: number): SelectedCardBlockEffectPosition {
         if (this.containsCardIdInMap(cardId) == false) {
             this.positionIndex++;
         }
         const positionX = this.initialX;
         const positionY = this.initialY + (this.positionIndex - 1) * this.incrementY;
 
-        const position = new SelectedCardBlockPosition(positionX, positionY);
+        const position = new SelectedCardBlockEffectPosition(positionX, positionY);
         this.positionMap.set(position.id, {cardId, position: position});
 
         return position;
     }
 
-    public findPositionById(positionId: number): SelectedCardBlockPosition | undefined {
+    public findPositionById(positionId: number): SelectedCardBlockEffectPosition | undefined {
         const position = this.positionMap.get(positionId);
         return position ? position.position : undefined;
     }
 
-    public findPositionByCardId(cardId: number): SelectedCardBlockPosition | null {
+    public findPositionByCardId(cardId: number): SelectedCardBlockEffectPosition | null {
         for (const { cardId: storedCardId, position } of this.positionMap.values()) {
             if (storedCardId === cardId) {
                 return position;
@@ -48,13 +48,13 @@ export class SelectedCardBlockPositionRepositoryImpl implements SelectedCardBloc
         return null;
     }
 
-    public findAllPosition(): SelectedCardBlockPosition[] {
+    public findAllPosition(): SelectedCardBlockEffectPosition[] {
         return Array.from(this.positionMap.values()).map(({ position }) => position);
     }
 
     public deleteById(positionId: number): void {
         this.positionMap.delete(positionId);
-        const newPositionMap = new Map<number, { cardId: number, position: SelectedCardBlockPosition }>();
+        const newPositionMap = new Map<number, { cardId: number, position: SelectedCardBlockEffectPosition }>();
         let newPositionId = 0;
 
         for (const { cardId, position } of this.positionMap.values()) {
