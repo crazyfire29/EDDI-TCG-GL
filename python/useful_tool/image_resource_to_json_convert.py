@@ -40,6 +40,7 @@ class WillBeReferenceImageLocation(Enum):
     DONE_BUTTON = "resource/make_deck/done_button/"
     SELECTED_CARD_BLOCK = "resource/make_deck/selected_card_block/"
     NUMBER_OF_SELECTED_CARDS = "resource/make_deck/number_of_selected_cards"
+    SELECTED_CARD_BLOCK_EFFECT = "resource/make_deck/selected_card_block_effect/"
 
 class RelativeImageLocation(Enum):
     CARD = "../../resource/battle_field_unit/card/"
@@ -76,6 +77,7 @@ class RelativeImageLocation(Enum):
     DONE_BUTTON = "../../resource/make_deck/done_button/"
     SELECTED_CARD_BLOCK = "../../resource/make_deck/selected_card_block/"
     NUMBER_OF_SELECTED_CARDS = "../../resource/make_deck/number_of_selected_cards"
+    SELECTED_CARD_BLOCK_EFFECT = "../../resource/make_deck/selected_card_block_effect/"
 
 # 디렉토리 경로 설정
 relative_paths = {
@@ -113,6 +115,7 @@ relative_paths = {
     RelativeImageLocation.DONE_BUTTON: RelativeImageLocation.DONE_BUTTON.value,
     RelativeImageLocation.SELECTED_CARD_BLOCK: RelativeImageLocation.SELECTED_CARD_BLOCK.value,
     RelativeImageLocation.NUMBER_OF_SELECTED_CARDS: RelativeImageLocation.NUMBER_OF_SELECTED_CARDS.value,
+    RelativeImageLocation.SELECTED_CARD_BLOCK_EFFECT: RelativeImageLocation.SELECTED_CARD_BLOCK_EFFECT.value,
 }
 
 reference_paths = {
@@ -150,6 +153,7 @@ reference_paths = {
     WillBeReferenceImageLocation.DONE_BUTTON: WillBeReferenceImageLocation.DONE_BUTTON.value,
     WillBeReferenceImageLocation.SELECTED_CARD_BLOCK: WillBeReferenceImageLocation.SELECTED_CARD_BLOCK.value,
     WillBeReferenceImageLocation.NUMBER_OF_SELECTED_CARDS: WillBeReferenceImageLocation.NUMBER_OF_SELECTED_CARDS.value,
+    WillBeReferenceImageLocation.SELECTED_CARD_BLOCK_EFFECT: WillBeReferenceImageLocation.SELECTED_CARD_BLOCK_EFFECT.value,
 }
 
 image_paths = {
@@ -187,6 +191,7 @@ image_paths = {
     "done_button": [],
     "selected_card_block": [],
     "number_of_selected_cards": [],
+    "selected_card_block_effect": [],
 }
 
 for category, dir_path in relative_paths.items():

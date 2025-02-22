@@ -42,6 +42,7 @@ export class TextureManager {
     private doneButtonTextureList: { [id: number]: THREE.Texture } = {};
     private selectedCardBlockTextureList: { [id: number]: THREE.Texture } = {};
     private numberOfSelectedCardsTextureList: { [id: number]: THREE.Texture } = {};
+    private selectedCardBlockEffectTextureList: { [id: number]: THREE.Texture } = {};
 
     private constructor() {}
 
@@ -97,6 +98,7 @@ export class TextureManager {
                 this.loadTextures(imageData.done_button, this.doneButtonTextureList),
                 this.loadTextures(imageData.selected_card_block, this.selectedCardBlockTextureList),
                 this.loadTextures(imageData.number_of_selected_cards, this.numberOfSelectedCardsTextureList),
+                this.loadTextures(imageData.selected_card_block_effect, this.selectedCardBlockEffectTextureList),
             ]);
 
             console.log('All textures preloaded from TextureManager.ts');
@@ -242,6 +244,8 @@ export class TextureManager {
                 return this.selectedCardBlockTextureList[id];
             case 'number_of_selected_cards':
                 return this.numberOfSelectedCardsTextureList[id];
+            case 'selected_card_block_effect':
+                return this.selectedCardBlockEffectTextureList[id];
             default:
                 return undefined;
         }

@@ -23,6 +23,7 @@ import {MakeDeckScreenDoneButtonServiceImpl} from "../../src/make_deck_screen_do
 import {SelectedCardBlockServiceImpl} from "../../src/selected_card_block/service/SelectedCardBlockServiceImpl";
 import {SideScrollAreaServiceImpl} from "../../src/side_scroll_area/service/SideScrollAreaServiceImpl";
 import {NumberOfSelectedCardsServiceImpl} from  "../../src/number_of_selected_cards/service/NumberOfSelectedCardsServiceImpl";
+import {SelectedCardBlockEffectServiceImpl} from "../../src/selected_card_block_effect/service/SelectedCardBlockEffectServiceImpl";
 
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
@@ -68,6 +69,7 @@ export class TCGJustTestMakeDeckView {
     private selectedCardBlockService = SelectedCardBlockServiceImpl.getInstance();
     private sideScrollAreaService = SideScrollAreaServiceImpl.getInstance();
     private numberOfSelectedCardsService = NumberOfSelectedCardsServiceImpl.getInstance();
+    private selectedCardBlockEffectService = SelectedCardBlockEffectServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
@@ -372,6 +374,19 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
+    private async addBlockEffect(cardId: number): Promise<void> {
+        try {
+            const effectGroup = await this.selectedCardBlockEffectService.createSelectedCardBlockEffectWithPosition(cardId);
+
+            if (effectGroup && effectGroup.children.length > 0) {
+                this.scene.add(effectGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add Effect:', error);
+        }
+    }
+
     private async addSideScrollArea(): Promise<void> {
         try{
             const areaMesh = await this.sideScrollAreaService.createSideScrollArea();
@@ -433,6 +448,7 @@ export class TCGJustTestMakeDeckView {
             this.cardPageMovementButtonService.adjustCardPageMovementButtonPosition();
             this.makeDeckScreenDoneButtonService.adjustDoneButtonPosition();
             this.selectedCardBlockService.adjustSelectedCardBlockPosition();
+            this.selectedCardBlockEffectService.adjustSelectedCardBlockEffectPosition();
             this.sideScrollAreaService.adjustSideScrollAreaPosition();
             this.numberOfSelectedCardsService.adjustNumberOfSelectedCardsPosition();
         }
