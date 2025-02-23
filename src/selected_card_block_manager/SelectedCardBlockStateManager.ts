@@ -18,18 +18,18 @@ export class SelectedCardBlockStateManager {
     }
 
     // 특정 block 의 visible 상태 설정
-    public setBlockVisibility(blockUniqueId: number, isVisible: boolean): void {
-        this.blockVisibilityState.set(blockUniqueId, isVisible);
+    public setBlockVisibility(cardId: number, isVisible: boolean): void {
+        this.blockVisibilityState.set(cardId, isVisible);
         if (isVisible == true) {
-            this.selectedCardBlockRepository.showBlock(blockUniqueId);
+            this.selectedCardBlockRepository.showBlock(cardId);
         } else {
-            this.selectedCardBlockRepository.hideBlock(blockUniqueId);
+            this.selectedCardBlockRepository.hideBlock(cardId);
         }
     }
 
     // 특정 block 의 visible 상태 조회
-    public findBlockVisibility(blockUniqueId: number): boolean {
-        return this.blockVisibilityState.get(blockUniqueId) || false;
+    public findBlockVisibility(cardId: number): boolean {
+        return this.blockVisibilityState.get(cardId) || false;
     }
 
     public findAllBlockVisibility(): boolean[] {
@@ -39,7 +39,7 @@ export class SelectedCardBlockStateManager {
     public findHiddenBlockIds(): number[] {
         return Array.from(this.blockVisibilityState.entries())
                 .filter(([_, isVisible]) => isVisible === false)
-                .map(([blockUniqueId, _]) => blockUniqueId);
+                .map(([cardId, _]) => cardId);
     }
 
     // 모든 visible 상태 초기화

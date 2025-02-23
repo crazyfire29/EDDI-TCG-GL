@@ -99,4 +99,18 @@ export class SelectedCardBlockEffectRepositoryImpl implements SelectedCardBlockE
         this.effectMap = newEffectMap;
     }
 
+    public hideEffect(cardId: number): void {
+        const effect = this.findEffectByCardId(cardId);
+        if (effect) {
+            effect.getMesh().visible = false;
+        }
+    }
+
+    public showEffect(cardId: number): void {
+        const effect = this.findEffectByCardId(cardId);
+        if (effect) {
+            effect.getMesh().visible = true;
+        }
+    }
+
 }
