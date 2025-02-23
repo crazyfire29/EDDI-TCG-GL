@@ -47,6 +47,7 @@ import {SelectedCardBlockHoverDetectServiceImpl} from "../../src/selected_card_b
 
 import {CardStateManager} from "../../src/make_deck_screen_card_manager/CardStateManager";
 import {CardCountManager} from "../../src/make_deck_screen_card_manager/CardCountManager";
+import {SelectedCardBlockEffectStateManager} from "../../src/selected_card_block_effect_manager/SelectedCardBlockEffectStateManager";
 
 export class TCGJustTestMakeDeckView {
     private static instance: TCGJustTestMakeDeckView | null = null;
@@ -83,6 +84,7 @@ export class TCGJustTestMakeDeckView {
 
     private cardStateManager = CardStateManager.getInstance();
     private cardCountManager = CardCountManager.getInstance();
+    private selectedCardBlockEffectManager = SelectedCardBlockEffectStateManager.getInstance();
     private makeDeckScreenCardMapRepository = MakeDeckScreenCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -143,6 +145,7 @@ export class TCGJustTestMakeDeckView {
                 }
                 if (cardClickCount == 1 && !this.blockAddedMap.get(clickedCardId)) {
                     await this.addBlock(clickedCardId);
+                    await this.addBlockEffect(clickedCardId);
                     this.blockAddedMap.set(clickedCardId, true);
                 }
                 await this.addNumberOfSelectedCards(clickedCardId);
@@ -385,6 +388,7 @@ export class TCGJustTestMakeDeckView {
             const effectGroup = await this.selectedCardBlockEffectService.createSelectedCardBlockEffectWithPosition(cardId);
 
             if (effectGroup && effectGroup.children.length > 0) {
+                this.selectedCardBlockEffectManager.initializeEffectVisibility(cardId);
                 this.scene.add(effectGroup);
             }
 
