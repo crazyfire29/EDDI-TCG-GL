@@ -73,6 +73,10 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
         return Array.from(this.blockMap.keys());
     }
 
+    public findBlockCardIdList(): number[] {
+        return Array.from(this.blockMap.values()).map(({ cardId }) => cardId);
+    }
+
     public findCardIdByBlockUniqueId(blockUniqueId: number): number | null {
         const block = this.blockMap.get(blockUniqueId);
         if (block) {
@@ -109,15 +113,15 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
         this.blockMap = newBlockMap; // 새로운 맵으로 교체
     }
 
-    public hideBlock(blockId: number): void {
-        const block = this.findBlockByBlockId(blockId);
+    public hideBlock(cardId: number): void {
+        const block = this.findBlockByCardId(cardId);
         if (block) {
             block.getMesh().visible = false;
         }
     }
 
-    public showBlock(blockId: number): void {
-        const block = this.findBlockByBlockId(blockId);
+    public showBlock(cardId: number): void {
+        const block = this.findBlockByCardId(cardId);
         if (block) {
             block.getMesh().visible = true;
         }

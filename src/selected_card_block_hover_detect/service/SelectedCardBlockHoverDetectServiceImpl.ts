@@ -10,6 +10,7 @@ import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
 import {SelectedCardBlockStateManager} from "../../selected_card_block_manager/SelectedCardBlockStateManager";
+import {SelectedCardBlockEffectStateManager} from "../../selected_card_block_effect_manager/SelectedCardBlockEffectStateManager";
 
 export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBlockHoverDetectService {
     private static instance: SelectedCardBlockHoverDetectServiceImpl | null = null;
@@ -17,6 +18,7 @@ export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBloc
     private selectedCardBlockRepository: SelectedCardBlockRepositoryImpl;
     private cameraRepository: CameraRepository;
     private selectedCardBlockStataManager: SelectedCardBlockStateManager;
+    private selectedCardBlockEffectStataManager: SelectedCardBlockEffectStateManager;
     private mouseOver: boolean = false;
 
 
@@ -24,7 +26,9 @@ export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBloc
         this.selectedCardBlockHoverDetectRepository = SelectedCardBlockHoverDetectRepositoryImpl.getInstance();
         this.selectedCardBlockRepository = SelectedCardBlockRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
+
         this.selectedCardBlockStataManager = SelectedCardBlockStateManager.getInstance();
+        this.selectedCardBlockEffectStataManager = SelectedCardBlockEffectStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): SelectedCardBlockHoverDetectServiceImpl {
@@ -45,6 +49,7 @@ export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBloc
     public async handleMouseOver(hoverPoint: { x: number; y: number }): Promise<SelectedCardBlock | null> {
         const { x, y } = hoverPoint;
         const blockList = await this.getAllBlocks();
+        const blockIdList = this.getBlockCardIdList();
         const hoveredBlock = this.selectedCardBlockHoverDetectRepository.isBlockHover(
             { x, y },
             blockList,
@@ -53,27 +58,31 @@ export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBloc
 
         if (hoveredBlock) {
             const blockId = hoveredBlock.id;
-            console.log(`[DEBUG] Hovered Block ID: ${blockId}`);
-            this.saveCurrentHoveredBlockId(blockId);
+            const cardId = this.getCardIdByBlockUniqueId(blockId);
+            console.log(`[DEBUG] Hovered Block ID: ${blockId}, Card ID: ${cardId}`);
+            this.saveCurrentHoveredBlockId(cardId);
 
             const currentHoveredBlockId = this.getCurrentHoveredBlockId();
-            const hiddenBlock = blockList.find(
-                (block) => this.getBlockVisibility(block.id) == false
-            );
+            const hiddenBlockCardId = blockIdList.find((cardId) => this.getBlockVisibility(cardId) == false);
 
-            if (hiddenBlock && hiddenBlock.id !== currentHoveredBlockId) {
-                this.setBlockVisibility(hiddenBlock.id, true);
+            if (hiddenBlockCardId && hiddenBlockCardId !== currentHoveredBlockId) {
+                this.setEffectVisibility(hiddenBlockCardId, false);
+                this.setBlockVisibility(hiddenBlockCardId, true);
             }
 
             if (currentHoveredBlockId !== null) {
                 this.setBlockVisibility(currentHoveredBlockId, false);
+                this.setEffectVisibility(currentHoveredBlockId, true);
             }
 
             return hoveredBlock;
 
         } else {
             const allHiddenBlockIds = this.getHiddenBlockIds();
-            allHiddenBlockIds.forEach((blockId) => this.setBlockVisibility(blockId, true));
+            allHiddenBlockIds.forEach((blockId) => {
+                this.setBlockVisibility(blockId, true)
+                this.setEffectVisibility(blockId, false)
+            });
         }
         return null;
     }
@@ -137,15 +146,23 @@ export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBloc
         this.selectedCardBlockHoverDetectRepository.initialCurrentHoveredBlockId();
     }
 
-    private setBlockVisibility(blockId: number, isVisible: boolean): void {
-        this.selectedCardBlockStataManager.setBlockVisibility(blockId, isVisible);
+    private setBlockVisibility(cardId: number, isVisible: boolean): void {
+        this.selectedCardBlockStataManager.setBlockVisibility(cardId, isVisible);
     }
 
-    public getBlockVisibility(blockId: number): boolean {
-        return this.selectedCardBlockStataManager.findBlockVisibility(blockId);
+    public getBlockVisibility(cardId: number): boolean {
+        return this.selectedCardBlockStataManager.findBlockVisibility(cardId);
     }
 
     private getHiddenBlockIds(): number[] {
         return this.selectedCardBlockStataManager.findHiddenBlockIds();
+    }
+
+    private getBlockCardIdList(): number[] {
+        return this.selectedCardBlockRepository.findBlockCardIdList();
+    }
+
+    private setEffectVisibility(cardId: number, isVisible: boolean): void {
+        this.selectedCardBlockEffectStataManager.setEffectVisibility(cardId, isVisible);
     }
 }
