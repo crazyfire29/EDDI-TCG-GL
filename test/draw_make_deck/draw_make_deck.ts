@@ -42,6 +42,8 @@ import {SideScrollService} from "../../src/side_scroll/service/SideScrollService
 import {SideScrollServiceImpl} from "../../src/side_scroll/service/SideScrollServiceImpl";
 import {MakeDeckScreenDoneButtonClickDetectService} from "../../src/make_deck_screen_done_button_click_detect/service/MakeDeckScreenDoneButtonClickDetectService";
 import {MakeDeckScreenDoneButtonClickDetectServiceImpl} from "../../src/make_deck_screen_done_button_click_detect/service/MakeDeckScreenDoneButtonClickDetectServiceImpl";
+import {SelectedCardBlockHoverDetectService} from "../../src/selected_card_block_hover_detect/service/SelectedCardBlockHoverDetectService";
+import {SelectedCardBlockHoverDetectServiceImpl} from "../../src/selected_card_block_hover_detect/service/SelectedCardBlockHoverDetectServiceImpl";
 
 import {CardStateManager} from "../../src/make_deck_screen_card_manager/CardStateManager";
 import {CardCountManager} from "../../src/make_deck_screen_card_manager/CardCountManager";
@@ -74,9 +76,10 @@ export class TCGJustTestMakeDeckView {
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
     private makeDeckScreenCardClickDetectService: MakeDeckScreenCardClickDetectService;
-    private sideScrollAreaDetectService: SideScrollAreaDetectService;
-    private sideScrollService: SideScrollService;
+//     private sideScrollAreaDetectService: SideScrollAreaDetectService;
+//     private sideScrollService: SideScrollService;
     private makeDeckScreenDoneButtonClickDetectService: MakeDeckScreenDoneButtonClickDetectService;
+    private selectedCardBlockHoverDetectService: SelectedCardBlockHoverDetectService;
 
     private cardStateManager = CardStateManager.getInstance();
     private cardCountManager = CardCountManager.getInstance();
@@ -147,14 +150,17 @@ export class TCGJustTestMakeDeckView {
             }
         }, false);
 
-        this.sideScrollAreaDetectService = SideScrollAreaDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollAreaDetectService.onMouseMove(e), false);
+//         this.sideScrollAreaDetectService = SideScrollAreaDetectServiceImpl.getInstance(this.camera, this.scene);
+//         this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollAreaDetectService.onMouseMove(e), false);
 
-        this.sideScrollService = SideScrollServiceImpl.getInstance(this.camera, this.scene, this.renderer);
-        this.renderer.domElement.addEventListener('wheel', (e) => this.sideScrollService.onWheelScroll(e), false);
+//         this.sideScrollService = SideScrollServiceImpl.getInstance(this.camera, this.scene, this.renderer);
+//         this.renderer.domElement.addEventListener('wheel', (e) => this.sideScrollService.onWheelScroll(e), false);
 
         this.makeDeckScreenDoneButtonClickDetectService = MakeDeckScreenDoneButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousedown', (e) => this.makeDeckScreenDoneButtonClickDetectService.onMouseDown(e), false);
+
+        this.selectedCardBlockHoverDetectService = SelectedCardBlockHoverDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mouseover', (e) => this.selectedCardBlockHoverDetectService.onMouseOver(e), false);
     }
 
     public static getInstance(simulationMyDeckContainer: HTMLElement): TCGJustTestMakeDeckView {
