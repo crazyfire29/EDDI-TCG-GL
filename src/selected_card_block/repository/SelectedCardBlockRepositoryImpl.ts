@@ -109,6 +109,20 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
         this.blockMap = newBlockMap; // 새로운 맵으로 교체
     }
 
+    public hideBlock(blockId: number): void {
+        const block = this.findBlockByBlockId(blockId);
+        if (block) {
+            block.getMesh().visible = false;
+        }
+    }
+
+    public showBlock(blockId: number): void {
+        const block = this.findBlockByBlockId(blockId);
+        if (block) {
+            block.getMesh().visible = true;
+        }
+    }
+
     public findAllBlockGroups(): THREE.Group {
         const group = new THREE.Group();
 
