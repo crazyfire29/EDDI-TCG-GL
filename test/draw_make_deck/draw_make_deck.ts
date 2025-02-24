@@ -50,6 +50,7 @@ import {SelectedCardBlockHoverDetectServiceImpl} from "../../src/selected_card_b
 import {CardStateManager} from "../../src/make_deck_screen_card_manager/CardStateManager";
 import {CardCountManager} from "../../src/make_deck_screen_card_manager/CardCountManager";
 import {SelectedCardBlockEffectStateManager} from "../../src/selected_card_block_effect_manager/SelectedCardBlockEffectStateManager";
+import {AddDeleteButtonStateManager} from "../../src/block_add_delete_button_manager/AddDeleteButtonStateManager";
 
 export class TCGJustTestMakeDeckView {
     private static instance: TCGJustTestMakeDeckView | null = null;
@@ -89,6 +90,7 @@ export class TCGJustTestMakeDeckView {
     private cardStateManager = CardStateManager.getInstance();
     private cardCountManager = CardCountManager.getInstance();
     private selectedCardBlockEffectManager = SelectedCardBlockEffectStateManager.getInstance();
+    private addDeleteButtonStateManager = AddDeleteButtonStateManager.getInstance();
     private makeDeckScreenCardMapRepository = MakeDeckScreenCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -443,6 +445,7 @@ export class TCGJustTestMakeDeckView {
             const buttonGroup = await this.blockAddButtonService.createBlockAddButtonWithPosition(cardId);
 
             if (buttonGroup) {
+                this.addDeleteButtonStateManager.initializeAddButtonVisibility(cardId);
                 this.scene.add(buttonGroup);
             }
 
@@ -456,6 +459,7 @@ export class TCGJustTestMakeDeckView {
             const buttonGroup = await this.blockDeleteButtonService.createBlockDeleteButtonWithPosition(cardId);
 
             if (buttonGroup) {
+                this.addDeleteButtonStateManager.initializeDeleteButtonVisibility(cardId);
                 this.scene.add(buttonGroup);
             }
 
