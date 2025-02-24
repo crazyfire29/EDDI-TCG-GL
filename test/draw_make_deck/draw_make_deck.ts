@@ -24,6 +24,7 @@ import {SelectedCardBlockServiceImpl} from "../../src/selected_card_block/servic
 import {SideScrollAreaServiceImpl} from "../../src/side_scroll_area/service/SideScrollAreaServiceImpl";
 import {NumberOfSelectedCardsServiceImpl} from  "../../src/number_of_selected_cards/service/NumberOfSelectedCardsServiceImpl";
 import {SelectedCardBlockEffectServiceImpl} from "../../src/selected_card_block_effect/service/SelectedCardBlockEffectServiceImpl";
+import {BlockAddButtonServiceImpl} from "../../src/block_add_button/service/BlockAddButtonServiceImpl";
 
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
@@ -73,6 +74,7 @@ export class TCGJustTestMakeDeckView {
     private sideScrollAreaService = SideScrollAreaServiceImpl.getInstance();
     private numberOfSelectedCardsService = NumberOfSelectedCardsServiceImpl.getInstance();
     private selectedCardBlockEffectService = SelectedCardBlockEffectServiceImpl.getInstance();
+    private blockAddButtonService = BlockAddButtonServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
@@ -146,6 +148,7 @@ export class TCGJustTestMakeDeckView {
                 if (cardClickCount == 1 && !this.blockAddedMap.get(clickedCardId)) {
                     await this.addBlock(clickedCardId);
                     await this.addBlockEffect(clickedCardId);
+                    await this.addBlockAddButton(clickedCardId);
                     this.blockAddedMap.set(clickedCardId, true);
                 }
                 await this.addNumberOfSelectedCards(clickedCardId);
@@ -432,6 +435,19 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
+    private async addBlockAddButton(cardId: number): Promise<void> {
+        try {
+            const buttonGroup = await this.blockAddButtonService.createBlockAddButtonWithPosition(cardId);
+
+            if (buttonGroup) {
+                this.scene.add(buttonGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add Block Add Button:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -461,6 +477,7 @@ export class TCGJustTestMakeDeckView {
             this.selectedCardBlockEffectService.adjustSelectedCardBlockEffectPosition();
             this.sideScrollAreaService.adjustSideScrollAreaPosition();
             this.numberOfSelectedCardsService.adjustNumberOfSelectedCardsPosition();
+            this.blockAddButtonService.adjustBlockAddButtonPosition();
         }
     }
 
