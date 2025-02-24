@@ -78,6 +78,15 @@ export class BlockDeleteButtonRepositoryImpl implements BlockDeleteButtonReposit
         return null;
     }
 
+    public findCardIdByButtonId(buttonId: number): number | null {
+        const button = this.buttonMap.get(buttonId);
+        if (button) {
+            return button.cardId;
+        } else {
+            return null;
+        }
+    }
+
     public findCardIdList(): number[] {
         return Array.from(this.buttonMap.values()).map(({ cardId }) => cardId);
     }
