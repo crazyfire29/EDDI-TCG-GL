@@ -25,6 +25,7 @@ import {SideScrollAreaServiceImpl} from "../../src/side_scroll_area/service/Side
 import {NumberOfSelectedCardsServiceImpl} from  "../../src/number_of_selected_cards/service/NumberOfSelectedCardsServiceImpl";
 import {SelectedCardBlockEffectServiceImpl} from "../../src/selected_card_block_effect/service/SelectedCardBlockEffectServiceImpl";
 import {BlockAddButtonServiceImpl} from "../../src/block_add_button/service/BlockAddButtonServiceImpl";
+import {BlockDeleteButtonServiceImpl} from "../../src/block_delete_button/service/BlockDeleteButtonServiceImpl";
 
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
@@ -75,6 +76,7 @@ export class TCGJustTestMakeDeckView {
     private numberOfSelectedCardsService = NumberOfSelectedCardsServiceImpl.getInstance();
     private selectedCardBlockEffectService = SelectedCardBlockEffectServiceImpl.getInstance();
     private blockAddButtonService = BlockAddButtonServiceImpl.getInstance();
+    private blockDeleteButtonService = BlockDeleteButtonServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
@@ -149,6 +151,7 @@ export class TCGJustTestMakeDeckView {
                     await this.addBlock(clickedCardId);
                     await this.addBlockEffect(clickedCardId);
                     await this.addBlockAddButton(clickedCardId);
+                    await this.addBlockDeleteButton(clickedCardId);
                     this.blockAddedMap.set(clickedCardId, true);
                 }
                 await this.addNumberOfSelectedCards(clickedCardId);
@@ -448,6 +451,19 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
+    private async addBlockDeleteButton(cardId: number): Promise<void> {
+        try {
+            const buttonGroup = await this.blockDeleteButtonService.createBlockDeleteButtonWithPosition(cardId);
+
+            if (buttonGroup) {
+                this.scene.add(buttonGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add Block Delete Button:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -478,6 +494,7 @@ export class TCGJustTestMakeDeckView {
             this.sideScrollAreaService.adjustSideScrollAreaPosition();
             this.numberOfSelectedCardsService.adjustNumberOfSelectedCardsPosition();
             this.blockAddButtonService.adjustBlockAddButtonPosition();
+            this.blockDeleteButtonService.adjustBlockDeleteButtonPosition();
         }
     }
 
