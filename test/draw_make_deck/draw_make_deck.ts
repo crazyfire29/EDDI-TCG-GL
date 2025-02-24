@@ -46,6 +46,8 @@ import {MakeDeckScreenDoneButtonClickDetectService} from "../../src/make_deck_sc
 import {MakeDeckScreenDoneButtonClickDetectServiceImpl} from "../../src/make_deck_screen_done_button_click_detect/service/MakeDeckScreenDoneButtonClickDetectServiceImpl";
 import {SelectedCardBlockHoverDetectService} from "../../src/selected_card_block_hover_detect/service/SelectedCardBlockHoverDetectService";
 import {SelectedCardBlockHoverDetectServiceImpl} from "../../src/selected_card_block_hover_detect/service/SelectedCardBlockHoverDetectServiceImpl";
+import {BlockAddButtonClickDetectService} from "../../src/block_add_button_click_detect/service/BlockAddButtonClickDetectService";
+import {BlockAddButtonClickDetectServiceImpl} from "../../src/block_add_button_click_detect/service/BlockAddButtonClickDetectServiceImpl";
 
 import {CardStateManager} from "../../src/make_deck_screen_card_manager/CardStateManager";
 import {CardCountManager} from "../../src/make_deck_screen_card_manager/CardCountManager";
@@ -86,6 +88,7 @@ export class TCGJustTestMakeDeckView {
 //     private sideScrollService: SideScrollService;
     private makeDeckScreenDoneButtonClickDetectService: MakeDeckScreenDoneButtonClickDetectService;
     private selectedCardBlockHoverDetectService: SelectedCardBlockHoverDetectService;
+    private blockAddButtonClickDetectService: BlockAddButtonClickDetectService;
 
     private cardStateManager = CardStateManager.getInstance();
     private cardCountManager = CardCountManager.getInstance();
@@ -172,6 +175,9 @@ export class TCGJustTestMakeDeckView {
 
         this.selectedCardBlockHoverDetectService = SelectedCardBlockHoverDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousemove', (e) => this.selectedCardBlockHoverDetectService.onMouseOver(e), false);
+
+        this.blockAddButtonClickDetectService = BlockAddButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.blockAddButtonClickDetectService.onMouseDown(e), false);
     }
 
     public static getInstance(simulationMyDeckContainer: HTMLElement): TCGJustTestMakeDeckView {
