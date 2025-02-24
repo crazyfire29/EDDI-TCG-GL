@@ -11,16 +11,19 @@ import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl
 
 import {SelectedCardBlockStateManager} from "../../selected_card_block_manager/SelectedCardBlockStateManager";
 import {SelectedCardBlockEffectStateManager} from "../../selected_card_block_effect_manager/SelectedCardBlockEffectStateManager";
+import {AddDeleteButtonStateManager} from "../../block_add_delete_button_manager/AddDeleteButtonStateManager";
 
 export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBlockHoverDetectService {
     private static instance: SelectedCardBlockHoverDetectServiceImpl | null = null;
     private selectedCardBlockHoverDetectRepository: SelectedCardBlockHoverDetectRepositoryImpl;
     private selectedCardBlockRepository: SelectedCardBlockRepositoryImpl;
     private cameraRepository: CameraRepository;
+
     private selectedCardBlockStataManager: SelectedCardBlockStateManager;
     private selectedCardBlockEffectStataManager: SelectedCardBlockEffectStateManager;
-    private mouseOver: boolean = false;
+    private addDeleteButtonStateManager:AddDeleteButtonStateManager;
 
+    private mouseOver: boolean = false;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.selectedCardBlockHoverDetectRepository = SelectedCardBlockHoverDetectRepositoryImpl.getInstance();
@@ -29,6 +32,7 @@ export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBloc
 
         this.selectedCardBlockStataManager = SelectedCardBlockStateManager.getInstance();
         this.selectedCardBlockEffectStataManager = SelectedCardBlockEffectStateManager.getInstance();
+        this.addDeleteButtonStateManager = AddDeleteButtonStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): SelectedCardBlockHoverDetectServiceImpl {
@@ -67,12 +71,14 @@ export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBloc
 
             if (hiddenBlockCardId && hiddenBlockCardId !== currentHoveredBlockId) {
                 this.setEffectVisibility(hiddenBlockCardId, false);
+                this.setAddDeleteButtonVisibility(hiddenBlockCardId, false);
                 this.setBlockVisibility(hiddenBlockCardId, true);
             }
 
             if (currentHoveredBlockId !== null) {
                 this.setBlockVisibility(currentHoveredBlockId, false);
                 this.setEffectVisibility(currentHoveredBlockId, true);
+                this.setAddDeleteButtonVisibility(currentHoveredBlockId, true);
             }
 
             return hoveredBlock;
@@ -82,6 +88,7 @@ export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBloc
             allHiddenBlockIds.forEach((blockId) => {
                 this.setBlockVisibility(blockId, true)
                 this.setEffectVisibility(blockId, false)
+                this.setAddDeleteButtonVisibility(blockId, false)
             });
         }
         return null;
@@ -164,5 +171,10 @@ export class SelectedCardBlockHoverDetectServiceImpl implements SelectedCardBloc
 
     private setEffectVisibility(cardId: number, isVisible: boolean): void {
         this.selectedCardBlockEffectStataManager.setEffectVisibility(cardId, isVisible);
+    }
+
+    private setAddDeleteButtonVisibility(cardId: number, isVisible: boolean): void {
+        this.addDeleteButtonStateManager.setAddButtonVisibility(cardId, isVisible);
+        this.addDeleteButtonStateManager.setDeleteButtonVisibility(cardId, isVisible);
     }
 }
