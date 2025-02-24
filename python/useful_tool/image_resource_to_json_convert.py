@@ -41,6 +41,7 @@ class WillBeReferenceImageLocation(Enum):
     SELECTED_CARD_BLOCK = "resource/make_deck/selected_card_block/"
     NUMBER_OF_SELECTED_CARDS = "resource/make_deck/number_of_selected_cards"
     SELECTED_CARD_BLOCK_EFFECT = "resource/make_deck/selected_card_block_effect/"
+    BLOCK_ADD_DELETE_BUTTON = "resource/make_deck/block_add_delete_button/"
 
 class RelativeImageLocation(Enum):
     CARD = "../../resource/battle_field_unit/card/"
@@ -78,6 +79,7 @@ class RelativeImageLocation(Enum):
     SELECTED_CARD_BLOCK = "../../resource/make_deck/selected_card_block/"
     NUMBER_OF_SELECTED_CARDS = "../../resource/make_deck/number_of_selected_cards"
     SELECTED_CARD_BLOCK_EFFECT = "../../resource/make_deck/selected_card_block_effect/"
+    BLOCK_ADD_DELETE_BUTTON = "../../resource/make_deck/block_add_delete_button/"
 
 # 디렉토리 경로 설정
 relative_paths = {
@@ -116,6 +118,7 @@ relative_paths = {
     RelativeImageLocation.SELECTED_CARD_BLOCK: RelativeImageLocation.SELECTED_CARD_BLOCK.value,
     RelativeImageLocation.NUMBER_OF_SELECTED_CARDS: RelativeImageLocation.NUMBER_OF_SELECTED_CARDS.value,
     RelativeImageLocation.SELECTED_CARD_BLOCK_EFFECT: RelativeImageLocation.SELECTED_CARD_BLOCK_EFFECT.value,
+    RelativeImageLocation.BLOCK_ADD_DELETE_BUTTON: RelativeImageLocation.BLOCK_ADD_DELETE_BUTTON.value,
 }
 
 reference_paths = {
@@ -154,6 +157,7 @@ reference_paths = {
     WillBeReferenceImageLocation.SELECTED_CARD_BLOCK: WillBeReferenceImageLocation.SELECTED_CARD_BLOCK.value,
     WillBeReferenceImageLocation.NUMBER_OF_SELECTED_CARDS: WillBeReferenceImageLocation.NUMBER_OF_SELECTED_CARDS.value,
     WillBeReferenceImageLocation.SELECTED_CARD_BLOCK_EFFECT: WillBeReferenceImageLocation.SELECTED_CARD_BLOCK_EFFECT.value,
+    WillBeReferenceImageLocation.BLOCK_ADD_DELETE_BUTTON: WillBeReferenceImageLocation.BLOCK_ADD_DELETE_BUTTON.value,
 }
 
 image_paths = {
@@ -192,6 +196,7 @@ image_paths = {
     "selected_card_block": [],
     "number_of_selected_cards": [],
     "selected_card_block_effect": [],
+    "block_add_delete_button": [],
 }
 
 for category, dir_path in relative_paths.items():
