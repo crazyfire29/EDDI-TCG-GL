@@ -171,27 +171,27 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
     }
 
     private saveCardClickCount(cardId: number): void {
-        const userOwnedCardCount = this.makeDeckScreenCardRepository.findCardCountByCardId(cardId);
-        const cardClickCount = this.cardCountManager.getCardClickCount(cardId);
+        const ownedCardCount = this.makeDeckScreenCardRepository.findCardCountByCardId(cardId);
+        const currentSelectedCardCount = this.cardCountManager.getCardClickCount(cardId);
 
         const card = getCardById(cardId);
         if (!card) {
             throw new Error(`Card with ID ${cardId} not found`);
         }
         const grade = Number(card.등급);
-        const maxAllowedByGrade = this.cardCountManager.getMaxClickCountByGrade(grade);
-        const gradeClickCount = this.cardCountManager.getGradeClickCount(grade);
+        const maxSelectableCardCountByGrade = this.cardCountManager.getMaxClickCountByGrade(grade);
+        const currentSelectedCardCountByGrade = this.cardCountManager.getGradeClickCount(grade);
 
         // 등급별 제한 검사
-        if (gradeClickCount >= maxAllowedByGrade) {
-            console.warn(`[DEBUG] Grade limit exceeded (grade: ${grade}, max count: ${maxAllowedByGrade})`);
+        if (currentSelectedCardCountByGrade >= maxSelectableCardCountByGrade) {
+            console.warn(`[DEBUG] Grade limit exceeded (grade: ${grade}, max count: ${maxSelectableCardCountByGrade})`);
             this.showPopupMessage("You can no longer select cards of this grade.");
             return;
         }
 
         // 사용자가 소지한 개수 제한 검사
-        if (userOwnedCardCount !== null && cardClickCount >= userOwnedCardCount) {
-            console.warn(`[DEBUG] User Owned Card Not Enough: ${cardId} (Owned Card Count: ${userOwnedCardCount})`);
+        if (ownedCardCount !== null && currentSelectedCardCount >= ownedCardCount) {
+            console.warn(`[DEBUG] User Owned Card Not Enough: ${cardId} (Owned Card Count: ${ownedCardCount})`);
             this.showPopupMessage("You do not have enough cards.");
             return;
         }

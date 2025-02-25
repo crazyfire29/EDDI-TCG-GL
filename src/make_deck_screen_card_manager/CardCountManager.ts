@@ -5,7 +5,7 @@ export class CardCountManager {
     private static instance: CardCountManager | null = null;
     private currentClickCardId: number | null = null;
     private clickCardCountMap: Map<number, number> = new Map(); // cardId: cardClickCount
-    private gradeIdToClickCardCountMap: Map<number, number> = new Map(); // gradId: cardClickCount
+    private gradeIdToClickCardCountMap: Map<number, number> = new Map(); // gradeId: cardClickCount
     private makeDeckScreenCardRepository: MakeDeckScreenCardRepositoryImpl;
 
     private constructor() {
@@ -36,6 +36,11 @@ export class CardCountManager {
          this.clickCardCountMap.set(cardId, currentCount + 1);
      }
 
+     public decrementCardClickCount(cardId: number): void {
+         const currentCount = this.getCardClickCount(cardId);
+         this.clickCardCountMap.set(cardId, currentCount - 1);
+     }
+
      public getGradeClickCount(gradeId: number): number {
          return this.gradeIdToClickCardCountMap.get(gradeId) ?? 0;
      }
@@ -43,6 +48,11 @@ export class CardCountManager {
      public incrementGradeClickCount(gradeId: number): void {
          const currentCount = this.getGradeClickCount(gradeId);
          this.gradeIdToClickCardCountMap.set(gradeId, currentCount + 1);
+     }
+
+     public decrementGradeClickCount(gradeId: number): void {
+         const currentCount = this.getGradeClickCount(gradeId);
+         this.gradeIdToClickCardCountMap.set(gradeId, currentCount - 1);
      }
 
      public findTotalSelectedCardCount(): number {
