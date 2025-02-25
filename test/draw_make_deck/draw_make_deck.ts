@@ -190,7 +190,14 @@ export class TCGJustTestMakeDeckView {
         }, false);
 
         this.blockDeleteButtonClickDetectService = BlockDeleteButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.blockDeleteButtonClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.blockDeleteButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
+            const clickedButton = await this.blockDeleteButtonClickDetectService.onMouseDown(e);
+            const clickedButtonId = this.blockDeleteButtonClickDetectService.getCurrentClickedButtonId();
+            if (clickedButton && clickedButtonId) {
+                await this.addNumberOfSelectedCards(clickedButtonId);
+            }
+        }, false);
     }
 
     public static getInstance(simulationMyDeckContainer: HTMLElement): TCGJustTestMakeDeckView {
