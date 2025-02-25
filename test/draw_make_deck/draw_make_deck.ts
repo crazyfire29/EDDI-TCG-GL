@@ -180,7 +180,14 @@ export class TCGJustTestMakeDeckView {
         this.renderer.domElement.addEventListener('mousemove', (e) => this.selectedCardBlockHoverDetectService.onMouseOver(e), false);
 
         this.blockAddButtonClickDetectService = BlockAddButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.blockAddButtonClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.blockAddButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
+            const clickedButton = await this.blockAddButtonClickDetectService.onMouseDown(e);
+            const clickedButtonId = this.blockAddButtonClickDetectService.getCurrentClickedButtonId();
+            if (clickedButton && clickedButtonId) {
+                await this.addNumberOfSelectedCards(clickedButtonId);
+            }
+        }, false);
 
         this.blockDeleteButtonClickDetectService = BlockDeleteButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousedown', (e) => this.blockDeleteButtonClickDetectService.onMouseDown(e), false);
