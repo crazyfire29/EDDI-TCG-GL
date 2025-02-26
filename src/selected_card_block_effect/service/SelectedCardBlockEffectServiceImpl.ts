@@ -96,6 +96,15 @@ export class SelectedCardBlockEffectServiceImpl implements SelectedCardBlockEffe
         return effectMesh;
     }
 
+    public getEffectMeshByCardId(cardId: number): THREE.Mesh | null {
+        const effect = this.selectedCardBlockEffectRepository.findEffectByCardId(cardId);
+        if (!effect) {
+            console.warn(`[WARN] Effect (ID: ${cardId}) not found`);
+            return null;
+        }
+        return effect.getMesh();
+    }
+
     public getAllEffectIdList(): number[] {
         return this.selectedCardBlockEffectRepository.findEffectIdList();
     }

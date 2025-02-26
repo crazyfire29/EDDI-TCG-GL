@@ -65,6 +65,15 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
         return null;
     }
 
+    public findBlockIdByCardId(cardId: number): number | null {
+        for (const [blockId, { cardId: storedCardId }] of this.blockMap.entries()) {
+            if (storedCardId === cardId) {
+                return blockId;
+            }
+        }
+        return null;
+    }
+
     public findAllBlocks(): SelectedCardBlock[] {
         return Array.from(this.blockMap.values()).map(({ blockMesh }) => blockMesh);
     }

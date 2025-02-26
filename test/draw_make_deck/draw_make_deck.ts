@@ -155,7 +155,7 @@ export class TCGJustTestMakeDeckView {
                     await this.addSideScrollArea();
                     this.isSideScrollAreaAdded = true;
                 }
-                if (cardClickCount == 1 && !this.blockAddedMap.get(clickedCardId)) {
+                if (!this.blockAddedMap.get(clickedCardId)) {
                     await this.addBlock(clickedCardId);
                     await this.addBlockEffect(clickedCardId);
                     await this.addBlockAddButton(clickedCardId);
@@ -196,6 +196,15 @@ export class TCGJustTestMakeDeckView {
             const clickedButtonId = this.blockDeleteButtonClickDetectService.getCurrentClickedButtonId();
             if (clickedButton && clickedButtonId) {
                 await this.addNumberOfSelectedCards(clickedButtonId);
+                const cardClickCount = this.cardCountManager.getCardClickCount(clickedButtonId);
+                if (cardClickCount == 0) {
+                    await this.deleteBlock(clickedButtonId);
+                    await this.deleteEffect(clickedButtonId);
+                    await this.deleteBlockAddButton(clickedButtonId);
+                    await this.deleteBlockDeleteButton(clickedButtonId);
+                    this.blockAddedMap.set(clickedButtonId, false);
+                }
+
             }
         }, false);
     }
@@ -391,9 +400,10 @@ export class TCGJustTestMakeDeckView {
     private async addBlock(cardId: number): Promise<void> {
         try {
 //             const cardId = 2;
-            const blockGroup = await this.selectedCardBlockService.createSelectedCardBlockWithPosition(cardId);
+            await this.selectedCardBlockService.createSelectedCardBlockWithPosition(cardId);
+            const blockMesh = this.selectedCardBlockService.getBlockMeshByCardId(cardId);
 
-            if (blockGroup && blockGroup.children.length > 0) {
+            if (blockMesh) {
 //                 const blockMesh = blockGroup.children[0] as THREE.Mesh;
 //                 const sideScrollArea = this.sideScrollService.getSideScrollArea();
 //                 if (sideScrollArea) {
@@ -409,7 +419,7 @@ export class TCGJustTestMakeDeckView {
 //                         blockMesh.material.clippingPlanes = clippingPlanes;
 //                     }
 //                 }
-                this.scene.add(blockGroup);
+                this.scene.add(blockMesh);
             }
 
         } catch (error) {
@@ -417,17 +427,40 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
+    private async deleteBlock(cardId: number): Promise<void> {
+        try {
+            const blockMesh = this.selectedCardBlockService.getBlockMeshByCardId(cardId);
+            if (blockMesh) {
+                this.scene.remove(blockMesh);
+            }
+        } catch (error) {
+            console.error('Failed to delete Block:', error);
+        }
+    }
+
     private async addBlockEffect(cardId: number): Promise<void> {
         try {
-            const effectGroup = await this.selectedCardBlockEffectService.createSelectedCardBlockEffectWithPosition(cardId);
+            await this.selectedCardBlockEffectService.createSelectedCardBlockEffectWithPosition(cardId);
+            const effectMesh = this.selectedCardBlockEffectService.getEffectMeshByCardId(cardId);
 
-            if (effectGroup && effectGroup.children.length > 0) {
+            if (effectMesh) {
                 this.selectedCardBlockEffectManager.initializeEffectVisibility(cardId);
-                this.scene.add(effectGroup);
+                this.scene.add(effectMesh);
             }
 
         } catch (error) {
             console.error('Failed to add Effect:', error);
+        }
+    }
+
+    private async deleteEffect(cardId: number): Promise<void> {
+        try {
+            const effectMesh = this.selectedCardBlockEffectService.getEffectMeshByCardId(cardId);
+            if (effectMesh) {
+                this.scene.remove(effectMesh);
+            }
+        } catch (error) {
+            console.error('Failed to delete Effect:', error);
         }
     }
 
@@ -468,11 +501,12 @@ export class TCGJustTestMakeDeckView {
 
     private async addBlockAddButton(cardId: number): Promise<void> {
         try {
-            const buttonGroup = await this.blockAddButtonService.createBlockAddButtonWithPosition(cardId);
+            await this.blockAddButtonService.createBlockAddButtonWithPosition(cardId);
+            const buttonMesh = this.blockAddButtonService.getButtonMeshByCardId(cardId);
 
-            if (buttonGroup) {
+            if (buttonMesh) {
                 this.addDeleteButtonStateManager.initializeAddButtonVisibility(cardId);
-                this.scene.add(buttonGroup);
+                this.scene.add(buttonMesh);
             }
 
         } catch (error) {
@@ -482,15 +516,38 @@ export class TCGJustTestMakeDeckView {
 
     private async addBlockDeleteButton(cardId: number): Promise<void> {
         try {
-            const buttonGroup = await this.blockDeleteButtonService.createBlockDeleteButtonWithPosition(cardId);
+            await this.blockDeleteButtonService.createBlockDeleteButtonWithPosition(cardId);
+            const buttonMesh = this.blockDeleteButtonService.getButtonMeshByCardId(cardId);
 
-            if (buttonGroup) {
+            if (buttonMesh) {
                 this.addDeleteButtonStateManager.initializeDeleteButtonVisibility(cardId);
-                this.scene.add(buttonGroup);
+                this.scene.add(buttonMesh);
             }
 
         } catch (error) {
             console.error('Failed to add Block Delete Button:', error);
+        }
+    }
+
+    private async deleteBlockAddButton(cardId: number): Promise<void> {
+        try {
+            const buttonMesh = this.blockAddButtonService.getButtonMeshByCardId(cardId);
+            if (buttonMesh) {
+                this.scene.remove(buttonMesh);
+            }
+        } catch (error) {
+            console.error('Failed to delete Block Add Button:', error);
+        }
+    }
+
+    private async deleteBlockDeleteButton(cardId: number): Promise<void> {
+        try {
+            const buttonMesh = this.blockDeleteButtonService.getButtonMeshByCardId(cardId);
+            if (buttonMesh) {
+                this.scene.remove(buttonMesh);
+            }
+        } catch (error) {
+            console.error('Failed to delete Block Delete Button:', error);
         }
     }
 

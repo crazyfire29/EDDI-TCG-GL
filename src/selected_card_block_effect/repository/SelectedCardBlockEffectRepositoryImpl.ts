@@ -65,6 +65,15 @@ export class SelectedCardBlockEffectRepositoryImpl implements SelectedCardBlockE
         return null;
     }
 
+    public findEffectIdByCardId(cardId: number): number | null {
+        for (const [effectId, { cardId: storedCardId }] of this.effectMap.entries()) {
+            if (storedCardId === cardId) {
+                return effectId;
+            }
+        }
+        return null;
+    }
+
     public findAllEffects(): SelectedCardBlockEffect[] {
         return Array.from(this.effectMap.values()).map(({ effectMesh }) => effectMesh);
     }

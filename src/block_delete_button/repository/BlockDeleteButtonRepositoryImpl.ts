@@ -109,6 +109,32 @@ export class BlockDeleteButtonRepositoryImpl implements BlockDeleteButtonReposit
         this.buttonMap = newButtonMap; // 새로운 맵으로 교체
     }
 
+    public deleteButtonByCardId(clickedCardId: number): void {
+        let buttonIdToDelete: number | null = null;
+
+        // 삭제할 버튼 ID 찾기
+        for (const [buttonId, { cardId }] of this.buttonMap.entries()) {
+            if (cardId === clickedCardId) {
+                buttonIdToDelete = buttonId;
+                break;
+            }
+        }
+
+        if (buttonIdToDelete !== null) {
+            this.buttonMap.delete(buttonIdToDelete);
+
+            // buttonMap 재정렬
+            const newButtonMap = new Map<number, { cardId: number, buttonMesh: BlockDeleteButton }>();
+            let newButtonId = 0;
+
+            for (const { cardId, buttonMesh } of this.buttonMap.values()) {
+                newButtonMap.set(newButtonId++, { cardId, buttonMesh });
+            }
+
+            this.buttonMap = newButtonMap; // 새로운 맵으로 교체
+        }
+    }
+
     public hideButton(cardId: number): void {
         const button = this.findButtonByCardId(cardId);
         if (button) {
