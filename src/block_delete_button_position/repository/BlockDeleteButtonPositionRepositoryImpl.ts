@@ -1,14 +1,18 @@
 import {Vector2d} from "../../common/math/Vector2d";
 import {BlockDeleteButtonPosition} from "../entity/BlockDeleteButtonPosition";
 import {BlockDeleteButtonPositionRepository} from "./BlockDeleteButtonPositionRepository";
+import {SelectedCardBlockPositionRepositoryImpl} from "../../selected_card_block_position/repository/SelectedCardBlockPositionRepositoryImpl";
 
 export class BlockDeleteButtonPositionRepositoryImpl implements BlockDeleteButtonPositionRepository {
     private static instance: BlockDeleteButtonPositionRepositoryImpl;
     private positionMap: Map<number, { cardId: number, position: BlockDeleteButtonPosition }> = new Map(); // position unique id: {card id: mesh}
+    private selectedCardBlockPositionRepository: SelectedCardBlockPositionRepositoryImpl;
 
     private positionX = 0.4682;
 
-    private constructor() {}
+    private constructor() {
+        this.selectedCardBlockPositionRepository = SelectedCardBlockPositionRepositoryImpl.getInstance();
+    }
 
     public static getInstance(): BlockDeleteButtonPositionRepositoryImpl {
         if (!BlockDeleteButtonPositionRepositoryImpl.instance) {
@@ -72,6 +76,40 @@ export class BlockDeleteButtonPositionRepositoryImpl implements BlockDeleteButto
         }
 
         this.positionMap = newPositionMap;
+    }
+
+    public deletePositionByCardId(clickedCardId: number): void {
+        let positionIdToDelete: number | null = null;
+
+        // 삭제할 버튼 ID 찾기
+        for (const [positionId, { cardId }] of this.positionMap.entries()) {
+            if (cardId === clickedCardId) {
+                positionIdToDelete = positionId;
+                break;
+            }
+        }
+
+        if (positionIdToDelete !== null) {
+            this.positionMap.delete(positionIdToDelete);
+
+            // positionMap 재정렬
+            const newPositionMap = new Map<number, { cardId: number, position: BlockDeleteButtonPosition }>();
+            let newPositionId = 0;
+
+            for (const { cardId, position } of this.positionMap.values()) {
+                const newPosition = this.selectedCardBlockPositionRepository.findPositionByCardId(cardId);
+                if (newPosition) {
+                    const newPositionY = newPosition.getY();
+                    if (newPositionY) {
+                        position.setPosition(this.positionX, newPositionY);
+                        newPositionMap.set(newPositionId++, { cardId, position });
+                    }
+                }
+//                 newPositionMap.set(newPositionId++, { cardId, position });
+            }
+
+            this.positionMap = newPositionMap;
+        }
     }
 
     count(): number {

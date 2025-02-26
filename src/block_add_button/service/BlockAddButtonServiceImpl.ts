@@ -108,7 +108,7 @@ export class BlockAddButtonServiceImpl implements BlockAddButtonService {
         return this.blockAddButtonRepository.findCardIdList();
     }
 
-    private getButtonMeshByCardId(cardId: number): THREE.Mesh | null {
+    public getButtonMeshByCardId(cardId: number): THREE.Mesh | null {
         const button = this.blockAddButtonRepository.findButtonByCardId(cardId);
         if (!button) {
             console.warn(`[WARN] button (with card ID: ${cardId}) not found`);

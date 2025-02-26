@@ -48,6 +48,15 @@ export class SelectedCardBlockEffectPositionRepositoryImpl implements SelectedCa
         return null;
     }
 
+    public findPositionIdByCardId(cardId: number): number | null {
+        for (const [positionId, { cardId: storedCardId }] of this.positionMap.entries()) {
+            if (storedCardId === cardId) {
+                return positionId;
+            }
+        }
+        return null;
+    }
+
     public findAllPosition(): SelectedCardBlockEffectPosition[] {
         return Array.from(this.positionMap.values()).map(({ position }) => position);
     }
@@ -58,6 +67,8 @@ export class SelectedCardBlockEffectPositionRepositoryImpl implements SelectedCa
         let newPositionId = 0;
 
         for (const { cardId, position } of this.positionMap.values()) {
+            const newPositionY = this.initialY + (newPositionId * this.incrementY);
+            position.setPosition(this.initialX, newPositionY);
             newPositionMap.set(newPositionId++, { cardId, position });
         }
 

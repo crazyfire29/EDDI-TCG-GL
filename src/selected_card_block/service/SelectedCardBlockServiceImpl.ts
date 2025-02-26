@@ -95,6 +95,15 @@ export class SelectedCardBlockServiceImpl implements SelectedCardBlockService {
         return blockMesh;
     }
 
+    public getBlockMeshByCardId(cardId: number): THREE.Mesh | null {
+        const block = this.selectedCardBlockRepository.findBlockByCardId(cardId);
+        if (!block) {
+            console.warn(`[WARN] Block (ID: ${cardId}) not found`);
+            return null;
+        }
+        return block.getMesh();
+    }
+
     public getAllBlockIdList(): number[] {
         return this.selectedCardBlockRepository.findBlockIdList();
     }

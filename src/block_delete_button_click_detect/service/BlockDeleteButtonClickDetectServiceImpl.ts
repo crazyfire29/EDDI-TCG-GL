@@ -6,7 +6,19 @@ import {BlockDeleteButtonClickDetectRepositoryImpl} from "../repository/BlockDel
 import {BlockDeleteButton} from "../../block_delete_button/entity/BlockDeleteButton";
 import {BlockDeleteButtonRepositoryImpl} from "../../block_delete_button/repository/BlockDeleteButtonRepositoryImpl";
 import {MakeDeckScreenCardRepositoryImpl} from "../../make_deck_screen_card/repository/MakeDeckScreenCardRepositoryImpl";
+import {BlockDeleteButtonPositionRepositoryImpl} from "../../block_delete_button_position/repository/BlockDeleteButtonPositionRepositoryImpl";
+import {BlockAddButtonRepositoryImpl} from "../../block_add_button/repository/BlockAddButtonRepositoryImpl";
+import {BlockAddButtonPositionRepositoryImpl} from "../../block_add_button_position/repository/BlockAddButtonPositionRepositoryImpl";
+
+import {SelectedCardBlockRepositoryImpl} from "../../selected_card_block/repository/SelectedCardBlockRepositoryImpl";
+import {SelectedCardBlockPositionRepositoryImpl} from "../../selected_card_block_position/repository/SelectedCardBlockPositionRepositoryImpl";
+import {SelectedCardBlockEffectRepositoryImpl} from "../../selected_card_block_effect/repository/SelectedCardBlockEffectRepositoryImpl";
+import {SelectedCardBlockEffectPositionRepositoryImpl} from "../../selected_card_block_effect_position/repository/SelectedCardBlockEffectPositionRepositoryImpl";
+
 import {CardCountManager} from "../../make_deck_screen_card_manager/CardCountManager";
+import {SelectedCardBlockStateManager} from "../../selected_card_block_manager/SelectedCardBlockStateManager";
+import {SelectedCardBlockEffectStateManager} from "../../selected_card_block_effect_manager/SelectedCardBlockEffectStateManager";
+import {AddDeleteButtonStateManager} from "../../block_add_delete_button_manager/AddDeleteButtonStateManager";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -16,18 +28,43 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
     private static instance: BlockDeleteButtonClickDetectServiceImpl | null = null;
     private blockDeleteButtonClickDetectRepository: BlockDeleteButtonClickDetectRepositoryImpl;
     private blockDeleteButtonRepository: BlockDeleteButtonRepositoryImpl;
+    private blockDeleteButtonPositionRepository: BlockDeleteButtonPositionRepositoryImpl;
+    private blockAddButtonRepository: BlockAddButtonRepositoryImpl;
+    private blockAddButtonPositionRepository: BlockAddButtonPositionRepositoryImpl;
     private makeDeckScreenCardRepository: MakeDeckScreenCardRepositoryImpl;
-    private cardCountManager: CardCountManager;
     private cameraRepository: CameraRepository;
+
+    private selectedCardBlockRepository: SelectedCardBlockRepositoryImpl;
+    private selectedCardBlockPositionRepository: SelectedCardBlockPositionRepositoryImpl;
+    private selectedCardEffectRepository: SelectedCardBlockEffectRepositoryImpl;
+    private selectedCardEffectPositionRepository: SelectedCardBlockEffectPositionRepositoryImpl;
+
+    private cardCountManager: CardCountManager;
+    private selectedCardBockStateManager: SelectedCardBlockStateManager;
+    private selectedCardEffectStateManager: SelectedCardBlockEffectStateManager;
+    private addDeleteButtonStateManager: AddDeleteButtonStateManager;
 
     private mouseDown: boolean = false;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.blockDeleteButtonClickDetectRepository = BlockDeleteButtonClickDetectRepositoryImpl.getInstance();
         this.blockDeleteButtonRepository = BlockDeleteButtonRepositoryImpl.getInstance();
+        this.blockDeleteButtonPositionRepository = BlockDeleteButtonPositionRepositoryImpl.getInstance();
+        this.blockAddButtonRepository = BlockAddButtonRepositoryImpl.getInstance();
+        this.blockAddButtonPositionRepository = BlockAddButtonPositionRepositoryImpl.getInstance();
         this.makeDeckScreenCardRepository = MakeDeckScreenCardRepositoryImpl.getInstance();
-        this.cardCountManager = CardCountManager.getInstance();
+
+        this.selectedCardBlockRepository = SelectedCardBlockRepositoryImpl.getInstance();
+        this.selectedCardBlockPositionRepository = SelectedCardBlockPositionRepositoryImpl.getInstance();
+        this.selectedCardEffectRepository = SelectedCardBlockEffectRepositoryImpl.getInstance();
+        this.selectedCardEffectPositionRepository = SelectedCardBlockEffectPositionRepositoryImpl.getInstance();
+
         this.cameraRepository = CameraRepositoryImpl.getInstance();
+
+        this.cardCountManager = CardCountManager.getInstance();
+        this.selectedCardBockStateManager = SelectedCardBlockStateManager.getInstance();
+        this.selectedCardEffectStateManager = SelectedCardBlockEffectStateManager.getInstance();
+        this.addDeleteButtonStateManager = AddDeleteButtonStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): BlockDeleteButtonClickDetectServiceImpl {
@@ -60,6 +97,17 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
             console.log(`[DEBUG] Clicked Delete Button ID: ${buttonId}, Card ID: ${cardId}`);
             this.saveCurrentClickedButtonId(cardId);
             this.saveCardClickCount(cardId);
+
+            const currentCardCount = this.cardCountManager.getCardClickCount(cardId);
+            if (currentCardCount == 0) {
+                this.deleteBlockByCardId(cardId);
+                this.deleteEffectByCardId(cardId);
+                this.deleteAddDeleteButtonByCardId(cardId);
+
+                console.log(`[Checking!!!!]`);
+                this.selectedCardBlockRepository.blockCount();
+                this.cardCountManager.findTotalSelectedCardCount();
+            }
 
             return clickedButton;
         }
@@ -111,6 +159,35 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
         // 선택 횟수 감소
         this.cardCountManager.decrementCardClickCount(cardId);
         this.cardCountManager.decrementGradeClickCount(grade);
+    }
+
+    private deleteBlockByCardId(cardId: number): void {
+        this.selectedCardBockStateManager.setBlockVisibility(cardId, false);
+        const blockId = this.selectedCardBlockRepository.findBlockIdByCardId(cardId);
+        const positionId = this.selectedCardBlockPositionRepository.findPositionIdByCardId(cardId);
+        if (blockId && positionId) {
+            this.selectedCardBlockRepository.deleteBlockByBlockId(blockId);
+            this.selectedCardBlockPositionRepository.deleteById(positionId);
+        }
+    }
+
+    private deleteEffectByCardId(cardId: number): void {
+        this.selectedCardEffectStateManager.setEffectVisibility(cardId, false);
+        const effectId = this.selectedCardEffectRepository.findEffectIdByCardId(cardId);
+        const positionId = this.selectedCardEffectPositionRepository.findPositionIdByCardId(cardId);
+        if (effectId && positionId) {
+            this.selectedCardEffectRepository.deleteEffectByEffectId(effectId);
+            this.selectedCardEffectPositionRepository.deleteById(positionId);
+        }
+    }
+
+    private deleteAddDeleteButtonByCardId(cardId: number): void {
+        this.addDeleteButtonStateManager.setAddButtonVisibility(cardId, false);
+        this.addDeleteButtonStateManager.setDeleteButtonVisibility(cardId, false);
+        this.blockDeleteButtonRepository.deleteButtonByCardId(cardId);
+        this.blockDeleteButtonPositionRepository.deletePositionByCardId(cardId);
+        this.blockAddButtonRepository.deleteButtonByCardId(cardId);
+        this.blockAddButtonPositionRepository.deletePositionByCardId(cardId);
     }
 
 }
