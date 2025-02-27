@@ -28,11 +28,28 @@ export class SelectedCardBlockServiceImpl implements SelectedCardBlockService {
         const cardGroup = new THREE.Group();
 
         try {
-            const position = this.makeSelectedCardBlockPosition(cardId);
-            console.log(`[DEBUG] Block Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+            // 덱에서 카드 삭제 후 위치 조정하면 기존 mesh position 다시 저장해야 함.
+            const existingPosition = this.getPositionByCardId(cardId);
+            const existingBlockMesh = this.getBlockMeshByCardId(cardId);
 
-            const selectedCardBlock = await this.createSelectedCardBlock(cardId, position.position);
-            cardGroup.add(selectedCardBlock.getMesh());
+            if (existingPosition && existingBlockMesh) {
+                const positionX = existingPosition.getX() * window.innerWidth;
+                const positionY = existingPosition.getY() * window.innerHeight;
+
+                existingBlockMesh.position.set(positionX, positionY, 0);
+                cardGroup.add(existingBlockMesh);
+            } else {
+                const newPosition = this.makeSelectedCardBlockPosition(cardId);
+                console.log(`[DEBUG] Block Position X=${newPosition.position.getX()}, Y=${newPosition.position.getY()}`);
+
+                const selectedCardBlock = await this.createSelectedCardBlock(cardId, newPosition.position);
+                cardGroup.add(selectedCardBlock.getMesh());
+            }
+//             const newPosition = this.makeSelectedCardBlockPosition(cardId);
+//             console.log(`[DEBUG] Block Position X=${newPosition.position.getX()}, Y=${newPosition.position.getY()}`);
+//
+//             const selectedCardBlock = await this.createSelectedCardBlock(cardId, newPosition.position);
+//             cardGroup.add(selectedCardBlock.getMesh());
 
         } catch (error) {
             console.error(`[Error] Failed to create MyDeckCardScene: ${error}`);
@@ -110,6 +127,18 @@ export class SelectedCardBlockServiceImpl implements SelectedCardBlockService {
 
     public getPositionByBlockId(blockId: number): SelectedCardBlockPosition | undefined {
         return this.selectedCardBlockPositionRepository.findPositionById(blockId);
+    }
+
+    public getAllBlockCardId(): number[] {
+        return this.selectedCardBlockRepository.findBlockCardIdList();
+    }
+
+    public getAllBlockMesh(): SelectedCardBlock[] {
+        return this.selectedCardBlockRepository.findAllBlocks();
+    }
+
+    private getPositionByCardId(cardId: number): SelectedCardBlockPosition | null {
+        return this.selectedCardBlockPositionRepository.findPositionByCardId(cardId);
     }
 
 }

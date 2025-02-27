@@ -33,12 +33,22 @@ export class BlockAddButtonServiceImpl implements BlockAddButtonService {
         const buttonGroup = new THREE.Group();
 
         try {
-            const position = this.blockAddButtonPosition(cardId);
-            console.log(`[DEBUG] Add Button CardId ${cardId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+            const existingPosition = this.getPositionByCardId(cardId);
+            const existingButtonMesh = this.getButtonMeshByCardId(cardId);
 
-            const button = await this.createBlockAddButton(cardId, position.position);
-            buttonGroup.add(button.getMesh());
+            if (existingPosition && existingButtonMesh) {
+                const positionX = existingPosition.getX() * window.innerWidth;
+                const positionY = existingPosition.getY() * window.innerHeight;
 
+                existingButtonMesh.position.set(positionX, positionY, 0);
+                buttonGroup.add(existingButtonMesh);
+            } else {
+                const position = this.blockAddButtonPosition(cardId);
+                console.log(`[DEBUG] Add Button CardId ${cardId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+
+                const button = await this.createBlockAddButton(cardId, position.position);
+                buttonGroup.add(button.getMesh());
+            }
         } catch (error) {
             console.error(`[Error] Failed to create Button: ${error}`);
             return null;
@@ -121,5 +131,12 @@ export class BlockAddButtonServiceImpl implements BlockAddButtonService {
         return this.blockAddButtonPositionRepository.findPositionByCardId(cardId) || null;
     }
 
+    public getAllButtonMesh(): BlockAddButton[] {
+        return this.blockAddButtonRepository.findAllButtons();
+    }
+
+    public getButtonCardIdList(): number[] {
+        return this.blockAddButtonRepository.findCardIdList();
+    }
 
 }

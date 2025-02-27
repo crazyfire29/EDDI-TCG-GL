@@ -39,4 +39,8 @@ export class SelectedCardBlockEffectStateManager {
     public resetEffectVisibility(): void {
         this.effectVisibilityState.clear();
     }
+
+    public deleteEffectVisibilityByCardId(cardId: number): void {
+        this.effectVisibilityState.delete(cardId);
+    }
 }

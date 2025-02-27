@@ -103,6 +103,8 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
                 this.deleteBlockByCardId(cardId);
                 this.deleteEffectByCardId(cardId);
                 this.deleteAddDeleteButtonByCardId(cardId);
+                this.cardCountManager.deleteCardCountByCardId(cardId);
+                this.cardCountManager.resetCurrentClickedCardId();
 
                 console.log(`[Checking!!!!]`);
                 this.selectedCardBlockRepository.blockCount();
@@ -163,6 +165,7 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
 
     private deleteBlockByCardId(cardId: number): void {
         this.selectedCardBockStateManager.setBlockVisibility(cardId, false);
+        this.selectedCardBockStateManager.deleteBlockVisibilityByCardId(cardId);
         const blockId = this.selectedCardBlockRepository.findBlockIdByCardId(cardId);
         const positionId = this.selectedCardBlockPositionRepository.findPositionIdByCardId(cardId);
         if (blockId && positionId) {
@@ -173,6 +176,7 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
 
     private deleteEffectByCardId(cardId: number): void {
         this.selectedCardEffectStateManager.setEffectVisibility(cardId, false);
+        this.selectedCardEffectStateManager.deleteEffectVisibilityByCardId(cardId);
         const effectId = this.selectedCardEffectRepository.findEffectIdByCardId(cardId);
         const positionId = this.selectedCardEffectPositionRepository.findPositionIdByCardId(cardId);
         if (effectId && positionId) {
@@ -184,6 +188,8 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
     private deleteAddDeleteButtonByCardId(cardId: number): void {
         this.addDeleteButtonStateManager.setAddButtonVisibility(cardId, false);
         this.addDeleteButtonStateManager.setDeleteButtonVisibility(cardId, false);
+        this.addDeleteButtonStateManager.removeDeleteButtonVisibilityByCardId(cardId);
+        this.addDeleteButtonStateManager.removeAddButtonVisibilityByCardId(cardId);
         this.blockDeleteButtonRepository.deleteButtonByCardId(cardId);
         this.blockDeleteButtonPositionRepository.deletePositionByCardId(cardId);
         this.blockAddButtonRepository.deleteButtonByCardId(cardId);

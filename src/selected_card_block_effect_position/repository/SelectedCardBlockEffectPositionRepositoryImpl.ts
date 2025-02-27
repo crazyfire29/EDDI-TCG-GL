@@ -61,18 +61,22 @@ export class SelectedCardBlockEffectPositionRepositoryImpl implements SelectedCa
         return Array.from(this.positionMap.values()).map(({ position }) => position);
     }
 
+    // 버튼은 생성될 때마다 고유 아이디가 자동으로 부여되기 때문에 인덱스 번호는 재정렬 필요x
     public deleteById(positionId: number): void {
         this.positionMap.delete(positionId);
-        const newPositionMap = new Map<number, { cardId: number, position: SelectedCardBlockEffectPosition }>();
-        let newPositionId = 0;
 
-        for (const { cardId, position } of this.positionMap.values()) {
-            const newPositionY = this.initialY + (newPositionId * this.incrementY);
+        let newPositionIndex = 0;
+        const updatedPositionMap = new Map<number, { cardId: number, position: SelectedCardBlockEffectPosition }>();
+
+        for (const [key, { cardId, position }] of this.positionMap.entries()) {
+            const newPositionY = this.initialY + (newPositionIndex * this.incrementY);
             position.setPosition(this.initialX, newPositionY);
-            newPositionMap.set(newPositionId++, { cardId, position });
+            updatedPositionMap.set(key, { cardId, position }); // 기존 key 유지하면서 값 업데이트
+            newPositionIndex++;
         }
 
-        this.positionMap = newPositionMap;
+        this.positionMap = updatedPositionMap; // 업데이트된 맵을 적용
+        this.positionIndex = Math.max(0, this.positionIndex - 1); // 인덱스 감소 처리
     }
 
     public deleteAll(): void {

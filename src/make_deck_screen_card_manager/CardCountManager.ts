@@ -31,6 +31,10 @@ export class CardCountManager {
          return this.clickCardCountMap.get(cardId) ?? 0;
      }
 
+     public resetCurrentClickedCardId(): void {
+         this.currentClickCardId = null;
+     }
+
      public incrementCardClickCount(cardId: number): void {
          const currentCount = this.getCardClickCount(cardId);
          this.clickCardCountMap.set(cardId, currentCount + 1);
@@ -59,6 +63,10 @@ export class CardCountManager {
          const totalCount = Array.from(this.gradeIdToClickCardCountMap.values()).reduce((sum, count) => sum + count, 0);
          console.log(`Current Total Selected Card Count?: ${totalCount}`);
          return totalCount;
+     }
+
+     public deleteCardCountByCardId(cardId: number): void {
+         this.clickCardCountMap.delete(cardId);
      }
 
      public getMaxClickCountByGrade(grade: number): number {

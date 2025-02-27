@@ -198,10 +198,14 @@ export class TCGJustTestMakeDeckView {
                 await this.addNumberOfSelectedCards(clickedButtonId);
                 const cardClickCount = this.cardCountManager.getCardClickCount(clickedButtonId);
                 if (cardClickCount == 0) {
-                    await this.deleteBlock(clickedButtonId);
-                    await this.deleteEffect(clickedButtonId);
-                    await this.deleteBlockAddButton(clickedButtonId);
-                    await this.deleteBlockDeleteButton(clickedButtonId);
+                    await this.deleteAllBlocks();
+                    await this.reAddBlock();
+                    await this.deleteAllEffects();
+                    await this.reAddBlockEffect();
+                    await this.deleteAllBlockAddButtons();
+                    await this.reAddBlockAddButton();
+                    await this.deleteAllBlockDeleteButtons();
+                    await this.reAddBlockDeleteButton();
                     this.blockAddedMap.set(clickedButtonId, false);
                 }
 
@@ -427,17 +431,6 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
-    private async deleteBlock(cardId: number): Promise<void> {
-        try {
-            const blockMesh = this.selectedCardBlockService.getBlockMeshByCardId(cardId);
-            if (blockMesh) {
-                this.scene.remove(blockMesh);
-            }
-        } catch (error) {
-            console.error('Failed to delete Block:', error);
-        }
-    }
-
     private async addBlockEffect(cardId: number): Promise<void> {
         try {
             await this.selectedCardBlockEffectService.createSelectedCardBlockEffectWithPosition(cardId);
@@ -450,17 +443,6 @@ export class TCGJustTestMakeDeckView {
 
         } catch (error) {
             console.error('Failed to add Effect:', error);
-        }
-    }
-
-    private async deleteEffect(cardId: number): Promise<void> {
-        try {
-            const effectMesh = this.selectedCardBlockEffectService.getEffectMeshByCardId(cardId);
-            if (effectMesh) {
-                this.scene.remove(effectMesh);
-            }
-        } catch (error) {
-            console.error('Failed to delete Effect:', error);
         }
     }
 
@@ -529,25 +511,111 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
-    private async deleteBlockAddButton(cardId: number): Promise<void> {
+    private async deleteAllBlocks(): Promise<void> {
         try {
-            const buttonMesh = this.blockAddButtonService.getButtonMeshByCardId(cardId);
-            if (buttonMesh) {
-                this.scene.remove(buttonMesh);
-            }
+            const cardIdList = this.selectedCardBlockService.getAllBlockCardId();
+            cardIdList.forEach((cardId) => {
+                const blockMesh = this.selectedCardBlockService.getBlockMeshByCardId(cardId);
+                if (blockMesh) {
+                    this.scene.remove(blockMesh);
+                }
+            });
+        } catch (error) {
+            console.error('Failed to delete Block:', error);
+        }
+    }
+
+     private async deleteAllEffects(): Promise<void> {
+         try {
+             const cardIdList = this.selectedCardBlockEffectService.getAllEffectCardId();
+             cardIdList.forEach((cardId) => {
+                 const effectMesh = this.selectedCardBlockEffectService.getEffectMeshByCardId(cardId);
+                 if (effectMesh) {
+                     this.scene.remove(effectMesh);
+                 }
+             });
+         } catch (error) {
+             console.error('Failed to delete Effect:', error);
+         }
+     }
+
+    private async deleteAllBlockAddButtons(): Promise<void> {
+        try {
+            const cardIdList = this.blockAddButtonService.getButtonCardIdList();
+            cardIdList.forEach((cardId) => {
+                const buttonMesh = this.blockAddButtonService.getButtonMeshByCardId(cardId);
+                if (buttonMesh) {
+                    this.scene.remove(buttonMesh);
+                }
+            });
         } catch (error) {
             console.error('Failed to delete Block Add Button:', error);
         }
     }
 
-    private async deleteBlockDeleteButton(cardId: number): Promise<void> {
+    private async deleteAllBlockDeleteButtons(): Promise<void> {
         try {
-            const buttonMesh = this.blockDeleteButtonService.getButtonMeshByCardId(cardId);
-            if (buttonMesh) {
-                this.scene.remove(buttonMesh);
-            }
+            const cardIdList = this.blockDeleteButtonService.getButtonCardIdList();
+            cardIdList.forEach((cardId) => {
+                const buttonMesh = this.blockDeleteButtonService.getButtonMeshByCardId(cardId);
+                if (buttonMesh) {
+                    this.scene.remove(buttonMesh);
+                }
+            });
         } catch (error) {
             console.error('Failed to delete Block Delete Button:', error);
+        }
+    }
+
+    private async reAddBlock(): Promise<void> {
+        try {
+            const cardIdList = this.selectedCardBlockService.getAllBlockCardId();
+            cardIdList.forEach((cardId) => {
+                this.selectedCardBlockService.createSelectedCardBlockWithPosition(cardId);
+            });
+            const currentAllBlockMesh = this.selectedCardBlockService.getAllBlockMesh();
+            currentAllBlockMesh.forEach((block) => this.scene.add(block.getMesh()));
+        } catch (error) {
+            console.error('Failed to add All Block:', error);
+        }
+    }
+
+    private async reAddBlockEffect(): Promise<void> {
+        try {
+            const cardIdList = this.selectedCardBlockEffectService.getAllEffectCardId();
+            cardIdList.forEach((cardId) => {
+                this.selectedCardBlockEffectService.createSelectedCardBlockEffectWithPosition(cardId);
+            });
+            const currentAllEffectMesh = this.selectedCardBlockEffectService.getAllEffectMesh();
+            currentAllEffectMesh.forEach((effect) => this.scene.add(effect.getMesh()));
+        } catch (error) {
+            console.error('Failed to add All Effect:', error);
+        }
+    }
+
+    private async reAddBlockAddButton(): Promise<void> {
+        try {
+            const cardIdList = this.blockAddButtonService.getButtonCardIdList();
+            cardIdList.forEach((cardId) => {
+                this.blockAddButtonService.createBlockAddButtonWithPosition(cardId);
+            });
+            const currentAllButtonMesh = this.blockAddButtonService.getAllButtonMesh();
+            currentAllButtonMesh.forEach((button) => this.scene.add(button.getMesh()));
+        } catch (error) {
+            console.error('Failed to add All Add Button:', error);
+        }
+    }
+
+    private async reAddBlockDeleteButton(): Promise<void> {
+        try {
+            const cardIdList = this.blockDeleteButtonService.getButtonCardIdList();
+            cardIdList.forEach((cardId) => {
+                this.blockDeleteButtonService.createBlockDeleteButtonWithPosition(cardId);
+            });
+            const currentAllButtonMesh = this.blockDeleteButtonService.getAllButtonMesh();
+            currentAllButtonMesh.forEach((button) => this.scene.add(button.getMesh()));
+        } catch (error) {
+            console.error('Failed to add All Delete Button:', error);
         }
     }
 

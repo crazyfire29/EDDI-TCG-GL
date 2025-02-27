@@ -108,18 +108,23 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
         this.blockMap.clear();
     }
 
+//     public deleteBlockByBlockId(blockId: number): void {
+//         this.blockMap.delete(blockId);
+//
+//         // 기존 데이터를 배열로 변환 후 정렬된 새로운 Map 생성
+//         const newBlockMap = new Map<number, { cardId: number, blockMesh: SelectedCardBlock }>();
+//         let newBlockId = 0;
+//
+//         for (const { cardId, blockMesh } of this.blockMap.values()) {
+//             newBlockMap.set(newBlockId++, { cardId, blockMesh });
+//         }
+//
+//         this.blockMap = newBlockMap; // 새로운 맵으로 교체
+//     }
+
+    // 버튼은 생성될 때마다 고유 아이디가 자동으로 부여되기 때문에 재정렬 필요x
     public deleteBlockByBlockId(blockId: number): void {
         this.blockMap.delete(blockId);
-
-        // 기존 데이터를 배열로 변환 후 정렬된 새로운 Map 생성
-        const newBlockMap = new Map<number, { cardId: number, blockMesh: SelectedCardBlock }>();
-        let newBlockId = 0;
-
-        for (const { cardId, blockMesh } of this.blockMap.values()) {
-            newBlockMap.set(newBlockId++, { cardId, blockMesh });
-        }
-
-        this.blockMap = newBlockMap; // 새로운 맵으로 교체
     }
 
     public hideBlock(cardId: number): void {
