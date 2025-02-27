@@ -29,11 +29,27 @@ export class SelectedCardBlockEffectServiceImpl implements SelectedCardBlockEffe
         const effectGroup = new THREE.Group();
 
         try {
-            const position = this.makeSelectedCardBlockEffectPosition(cardId);
-            console.log(`[DEBUG] Effect Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+            const existingPosition = this.getPositionByCardId(cardId);
+            const existingEffectMesh = this.getEffectMeshByCardId(cardId);
 
-            const selectedCardBlockEffect = await this.createSelectedCardBlockEffect(cardId, position.position);
-            effectGroup.add(selectedCardBlockEffect.getMesh());
+            if (existingPosition && existingEffectMesh) {
+                const positionX = existingPosition.getX() * window.innerWidth;
+                const positionY = existingPosition.getY() * window.innerHeight;
+
+                existingEffectMesh.position.set(positionX, positionY, 0);
+                effectGroup.add(existingEffectMesh);
+            } else {
+                const newPosition = this.makeSelectedCardBlockEffectPosition(cardId);
+                console.log(`[DEBUG] Effect Position X=${newPosition.position.getX()}, Y=${newPosition.position.getY()}`);
+
+                const selectedCardBlockEffect = await this.createSelectedCardBlockEffect(cardId, newPosition.position);
+                effectGroup.add(selectedCardBlockEffect.getMesh());
+            }
+//             const position = this.makeSelectedCardBlockEffectPosition(cardId);
+//             console.log(`[DEBUG] Effect Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+//
+//             const selectedCardBlockEffect = await this.createSelectedCardBlockEffect(cardId, position.position);
+//             effectGroup.add(selectedCardBlockEffect.getMesh());
 
         } catch (error) {
             console.error(`[Error] Failed to create Block Effect: ${error}`);
@@ -111,6 +127,18 @@ export class SelectedCardBlockEffectServiceImpl implements SelectedCardBlockEffe
 
     public getPositionByEffectId(effectId: number): SelectedCardBlockEffectPosition | undefined {
         return this.selectedCardBlockEffectPositionRepository.findPositionById(effectId);
+    }
+
+    public getAllEffectCardId(): number[] {
+        return this.selectedCardBlockEffectRepository.findEffectCardIdList();
+    }
+
+    public getAllEffectMesh(): SelectedCardBlockEffect[] {
+        return this.selectedCardBlockEffectRepository.findAllEffects();
+    }
+
+    private getPositionByCardId(cardId: number): SelectedCardBlockEffectPosition | null {
+        return this.selectedCardBlockEffectPositionRepository.findPositionByCardId(cardId);
     }
 
 }

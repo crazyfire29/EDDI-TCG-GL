@@ -82,6 +82,10 @@ export class SelectedCardBlockEffectRepositoryImpl implements SelectedCardBlockE
         return Array.from(this.effectMap.keys());
     }
 
+    public findEffectCardIdList(): number[] {
+        return Array.from(this.effectMap.values()).map(({ cardId }) => cardId);
+    }
+
     public containsCardIdInMap(cardId: number): boolean {
         for (const { cardId: storedCardId } of this.effectMap.values()) {
             if (storedCardId === cardId) {
@@ -95,17 +99,22 @@ export class SelectedCardBlockEffectRepositoryImpl implements SelectedCardBlockE
         this.effectMap.clear();
     }
 
+//     public deleteEffectByEffectId(effectId: number): void {
+//         this.effectMap.delete(effectId);
+//
+//         const newEffectMap = new Map<number, { cardId: number, effectMesh: SelectedCardBlockEffect }>();
+//         let newEffectId = 0;
+//
+//         for (const { cardId, effectMesh } of this.effectMap.values()) {
+//             newEffectMap.set(newEffectId++, { cardId, effectMesh });
+//         }
+//
+//         this.effectMap = newEffectMap;
+//     }
+
+    // 버튼은 생성될 때마다 고유 아이디가 자동으로 부여되기 때문에 재정렬 필요x
     public deleteEffectByEffectId(effectId: number): void {
         this.effectMap.delete(effectId);
-
-        const newEffectMap = new Map<number, { cardId: number, effectMesh: SelectedCardBlockEffect }>();
-        let newEffectId = 0;
-
-        for (const { cardId, effectMesh } of this.effectMap.values()) {
-            newEffectMap.set(newEffectId++, { cardId, effectMesh });
-        }
-
-        this.effectMap = newEffectMap;
     }
 
     public hideEffect(cardId: number): void {

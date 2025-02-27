@@ -65,4 +65,12 @@ export class AddDeleteButtonStateManager {
     public resetDeleteButtonVisibility(): void {
         this.deleteButtonVisibilityState.clear();
     }
+
+    public removeAddButtonVisibilityByCardId(cardId: number): void {
+        this.addButtonVisibilityState.delete(cardId);
+    }
+
+    public removeDeleteButtonVisibilityByCardId(cardId: number): void {
+        this.deleteButtonVisibilityState.delete(cardId);
+    }
 }

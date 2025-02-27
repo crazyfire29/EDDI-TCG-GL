@@ -78,6 +78,7 @@ export class BlockDeleteButtonPositionRepositoryImpl implements BlockDeleteButto
         this.positionMap = newPositionMap;
     }
 
+    // 버튼은 생성될 때마다 고유 아이디가 자동으로 부여되기 때문에 인덱스 번호는 재정렬 필요x
     public deletePositionByCardId(clickedCardId: number): void {
         let positionIdToDelete: number | null = null;
 
@@ -92,23 +93,21 @@ export class BlockDeleteButtonPositionRepositoryImpl implements BlockDeleteButto
         if (positionIdToDelete !== null) {
             this.positionMap.delete(positionIdToDelete);
 
-            // positionMap 재정렬
+            let newPositionIndex = 0;
             const newPositionMap = new Map<number, { cardId: number, position: BlockDeleteButtonPosition }>();
-            let newPositionId = 0;
 
-            for (const { cardId, position } of this.positionMap.values()) {
+            for (const [key, { cardId, position }] of this.positionMap.entries()) {
                 const newPosition = this.selectedCardBlockPositionRepository.findPositionByCardId(cardId);
                 if (newPosition) {
                     const newPositionY = newPosition.getY();
                     if (newPositionY) {
                         position.setPosition(this.positionX, newPositionY);
-                        newPositionMap.set(newPositionId++, { cardId, position });
+                        newPositionMap.set(key, { cardId, position });
+                        newPositionIndex++;
                     }
                 }
-//                 newPositionMap.set(newPositionId++, { cardId, position });
             }
-
-            this.positionMap = newPositionMap;
+            this.positionMap = newPositionMap; // 업데이트된 맵을 적용
         }
     }
 

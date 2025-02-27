@@ -46,4 +46,8 @@ export class SelectedCardBlockStateManager {
     public resetBlockVisibility(): void {
         this.blockVisibilityState.clear();
     }
+
+    public deleteBlockVisibilityByCardId(cardId: number): void {
+        this.blockVisibilityState.delete(cardId);
+    }
 }
