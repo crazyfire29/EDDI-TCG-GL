@@ -102,13 +102,18 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
             if (currentCardCount == 0) {
                 this.deleteBlockByCardId(cardId);
                 this.deleteEffectByCardId(cardId);
-                this.deleteAddDeleteButtonByCardId(cardId);
+                this.removeAddButtonByCardId(cardId);
+                this.removeDeleteButtonByCardId(cardId);
                 this.cardCountManager.deleteCardCountByCardId(cardId);
                 this.cardCountManager.resetCurrentClickedCardId();
 
-                console.log(`[Checking!!!!]`);
-                this.selectedCardBlockRepository.blockCount();
-                this.cardCountManager.findTotalSelectedCardCount();
+                console.log(`[Delete Checking!!!!]`);
+                const checking = this.selectedCardBlockRepository.containsCardIdInMap(cardId);
+                if (checking == true) {
+                    console.log(`Block Not Delete(card id: ${cardId})`);
+                } else {
+                    console.log(`Block Delete(card id: ${cardId})`);
+                }
             }
 
             return clickedButton;
@@ -168,7 +173,9 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
         this.selectedCardBockStateManager.deleteBlockVisibilityByCardId(cardId);
         const blockId = this.selectedCardBlockRepository.findBlockIdByCardId(cardId);
         const positionId = this.selectedCardBlockPositionRepository.findPositionIdByCardId(cardId);
-        if (blockId && positionId) {
+        console.log(`[DEBUG] cardId: ${cardId}, blockId: ${blockId}, positionId: ${positionId}`);
+
+        if (blockId !== null && positionId !== null) {
             this.selectedCardBlockRepository.deleteBlockByBlockId(blockId);
             this.selectedCardBlockPositionRepository.deleteById(positionId);
         }
@@ -179,21 +186,32 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
         this.selectedCardEffectStateManager.deleteEffectVisibilityByCardId(cardId);
         const effectId = this.selectedCardEffectRepository.findEffectIdByCardId(cardId);
         const positionId = this.selectedCardEffectPositionRepository.findPositionIdByCardId(cardId);
-        if (effectId && positionId) {
+        if (effectId !== null && positionId !== null) {
             this.selectedCardEffectRepository.deleteEffectByEffectId(effectId);
             this.selectedCardEffectPositionRepository.deleteById(positionId);
         }
     }
 
-    private deleteAddDeleteButtonByCardId(cardId: number): void {
+    private removeAddButtonByCardId(cardId: number): void {
         this.addDeleteButtonStateManager.setAddButtonVisibility(cardId, false);
+        this.addDeleteButtonStateManager.removeAddButtonVisibilityByCardId(cardId);
+        const buttonId = this.blockAddButtonRepository.findButtonIdByCardId(cardId);
+        const positionId = this.blockAddButtonPositionRepository.findPositionIdByCardId(cardId);
+        if (buttonId !== null && positionId !== null) {
+            this.blockAddButtonRepository.deleteButtonByButtonId(buttonId);
+            this.blockAddButtonPositionRepository.deleteByPositionId(positionId);
+        }
+    }
+
+    private removeDeleteButtonByCardId(cardId: number): void {
         this.addDeleteButtonStateManager.setDeleteButtonVisibility(cardId, false);
         this.addDeleteButtonStateManager.removeDeleteButtonVisibilityByCardId(cardId);
-        this.addDeleteButtonStateManager.removeAddButtonVisibilityByCardId(cardId);
-        this.blockDeleteButtonRepository.deleteButtonByCardId(cardId);
-        this.blockDeleteButtonPositionRepository.deletePositionByCardId(cardId);
-        this.blockAddButtonRepository.deleteButtonByCardId(cardId);
-        this.blockAddButtonPositionRepository.deletePositionByCardId(cardId);
+        const buttonId = this.blockDeleteButtonRepository.findButtonIdByCardId(cardId);
+        const positionId = this.blockDeleteButtonPositionRepository.findPositionByCardId(cardId);
+        if (buttonId !== null && positionId !== null) {
+            this.blockDeleteButtonRepository.deleteButtonByButtonId(buttonId);
+            this.blockDeleteButtonPositionRepository.deleteByPositionId(buttonId);
+        }
     }
 
 }

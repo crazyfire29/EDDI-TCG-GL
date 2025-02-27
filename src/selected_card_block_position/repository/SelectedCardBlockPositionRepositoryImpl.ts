@@ -76,7 +76,36 @@ export class SelectedCardBlockPositionRepositoryImpl implements SelectedCardBloc
         }
 
         this.positionMap = updatedPositionMap; // 업데이트된 맵을 적용
-        this.positionIndex = Math.max(0, this.positionIndex - 1); // 인덱스 감소 처리
+        this.positionIndex = this.positionMap.size; // 인덱스 감소 처리
+    }
+
+    public deleteByCardId(clickedCardId: number): void {
+        let positionIdToDelete: number | null = null;
+
+        // 삭제할 버튼 ID 찾기
+        for (const [positionId, { cardId }] of this.positionMap.entries()) {
+            if (cardId === clickedCardId) {
+                positionIdToDelete = positionId;
+                break;
+            }
+        }
+
+        if (positionIdToDelete !== null) {
+            this.positionMap.delete(positionIdToDelete);
+
+            let newPositionIndex = 0;
+            const updatedPositionMap = new Map<number, { cardId: number, position: SelectedCardBlockPosition }>();
+
+            for (const [key, { cardId, position }] of this.positionMap.entries()) {
+                const newPositionY = this.initialY + (newPositionIndex * this.incrementY);
+                position.setPosition(this.initialX, newPositionY);
+                updatedPositionMap.set(key, { cardId, position }); // 기존 key 유지하면서 값 업데이트
+                newPositionIndex++;
+            }
+
+            this.positionMap = updatedPositionMap; // 업데이트된 맵을 적용
+            this.positionIndex = this.positionMap.size; // 인덱스 감소 처리
+        }
     }
 
     public deleteAll(): void {

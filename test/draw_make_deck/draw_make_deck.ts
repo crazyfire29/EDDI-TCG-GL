@@ -55,6 +55,7 @@ import {CardStateManager} from "../../src/make_deck_screen_card_manager/CardStat
 import {CardCountManager} from "../../src/make_deck_screen_card_manager/CardCountManager";
 import {SelectedCardBlockEffectStateManager} from "../../src/selected_card_block_effect_manager/SelectedCardBlockEffectStateManager";
 import {AddDeleteButtonStateManager} from "../../src/block_add_delete_button_manager/AddDeleteButtonStateManager";
+import {SelectedCardBlockStateManager} from "../../src/selected_card_block_manager/SelectedCardBlockStateManager";
 
 export class TCGJustTestMakeDeckView {
     private static instance: TCGJustTestMakeDeckView | null = null;
@@ -97,6 +98,7 @@ export class TCGJustTestMakeDeckView {
     private cardCountManager = CardCountManager.getInstance();
     private selectedCardBlockEffectManager = SelectedCardBlockEffectStateManager.getInstance();
     private addDeleteButtonStateManager = AddDeleteButtonStateManager.getInstance();
+    private selectedCadBlockStateManager = SelectedCardBlockStateManager.getInstance();
     private makeDeckScreenCardMapRepository = MakeDeckScreenCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -148,9 +150,8 @@ export class TCGJustTestMakeDeckView {
 //         this.renderer.domElement.addEventListener('mousedown', (e) => this.makeDeckScreenCardClickDetectService.onMouseDown(e), false);
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
             const clickCard = await this.makeDeckScreenCardClickDetectService.onMouseDown(e);
-            const clickedCardId = this.makeDeckScreenCardClickDetectService.getCurrentClickedCardId();
+            const clickedCardId = this.cardCountManager.findCurrentClickedCardId();
             if (clickCard && clickedCardId) {
-                const cardClickCount = this.cardCountManager.getCardClickCount(clickedCardId);
                 if (!this.isSideScrollAreaAdded) {
                     await this.addSideScrollArea();
                     this.isSideScrollAreaAdded = true;
@@ -199,12 +200,12 @@ export class TCGJustTestMakeDeckView {
                 const cardClickCount = this.cardCountManager.getCardClickCount(clickedButtonId);
                 if (cardClickCount == 0) {
                     await this.deleteAllBlocks();
-                    await this.reAddBlock();
                     await this.deleteAllEffects();
-                    await this.reAddBlockEffect();
                     await this.deleteAllBlockAddButtons();
-                    await this.reAddBlockAddButton();
                     await this.deleteAllBlockDeleteButtons();
+                    await this.reAddBlock();
+                    await this.reAddBlockEffect();
+                    await this.reAddBlockAddButton();
                     await this.reAddBlockDeleteButton();
                     this.blockAddedMap.set(clickedButtonId, false);
                 }
@@ -520,6 +521,7 @@ export class TCGJustTestMakeDeckView {
                     this.scene.remove(blockMesh);
                 }
             });
+            this.selectedCadBlockStateManager.resetBlockVisibility();
         } catch (error) {
             console.error('Failed to delete Block:', error);
         }
@@ -534,6 +536,7 @@ export class TCGJustTestMakeDeckView {
                      this.scene.remove(effectMesh);
                  }
              });
+             this.selectedCardBlockEffectManager.resetEffectVisibility();
          } catch (error) {
              console.error('Failed to delete Effect:', error);
          }
@@ -548,6 +551,7 @@ export class TCGJustTestMakeDeckView {
                     this.scene.remove(buttonMesh);
                 }
             });
+            this.addDeleteButtonStateManager.resetAddButtonVisibility();
         } catch (error) {
             console.error('Failed to delete Block Add Button:', error);
         }
@@ -562,6 +566,7 @@ export class TCGJustTestMakeDeckView {
                     this.scene.remove(buttonMesh);
                 }
             });
+            this.addDeleteButtonStateManager.resetDeleteButtonVisibility();
         } catch (error) {
             console.error('Failed to delete Block Delete Button:', error);
         }
@@ -585,6 +590,7 @@ export class TCGJustTestMakeDeckView {
             const cardIdList = this.selectedCardBlockEffectService.getAllEffectCardId();
             cardIdList.forEach((cardId) => {
                 this.selectedCardBlockEffectService.createSelectedCardBlockEffectWithPosition(cardId);
+                this.selectedCardBlockEffectManager.initializeEffectVisibility(cardId);
             });
             const currentAllEffectMesh = this.selectedCardBlockEffectService.getAllEffectMesh();
             currentAllEffectMesh.forEach((effect) => this.scene.add(effect.getMesh()));
@@ -598,6 +604,7 @@ export class TCGJustTestMakeDeckView {
             const cardIdList = this.blockAddButtonService.getButtonCardIdList();
             cardIdList.forEach((cardId) => {
                 this.blockAddButtonService.createBlockAddButtonWithPosition(cardId);
+                this.addDeleteButtonStateManager.initializeAddButtonVisibility(cardId);
             });
             const currentAllButtonMesh = this.blockAddButtonService.getAllButtonMesh();
             currentAllButtonMesh.forEach((button) => this.scene.add(button.getMesh()));
@@ -611,6 +618,7 @@ export class TCGJustTestMakeDeckView {
             const cardIdList = this.blockDeleteButtonService.getButtonCardIdList();
             cardIdList.forEach((cardId) => {
                 this.blockDeleteButtonService.createBlockDeleteButtonWithPosition(cardId);
+                this.addDeleteButtonStateManager.initializeDeleteButtonVisibility(cardId);
             });
             const currentAllButtonMesh = this.blockDeleteButtonService.getAllButtonMesh();
             currentAllButtonMesh.forEach((button) => this.scene.add(button.getMesh()));
