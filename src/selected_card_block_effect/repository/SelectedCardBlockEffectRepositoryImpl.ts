@@ -117,6 +117,22 @@ export class SelectedCardBlockEffectRepositoryImpl implements SelectedCardBlockE
         this.effectMap.delete(effectId);
     }
 
+    public deleteEffectByCardId(clickedCardId: number): void {
+        let effectIdToDelete: number | null = null;
+
+        // 삭제할 버튼 ID 찾기
+        for (const [effectId, { cardId }] of this.effectMap.entries()) {
+            if (effectId === clickedCardId) {
+                effectIdToDelete = effectId;
+                break;
+            }
+        }
+
+        if (effectIdToDelete !== null) {
+            this.effectMap.delete(effectIdToDelete);
+        }
+    }
+
     public hideEffect(cardId: number): void {
         const effect = this.findEffectByCardId(cardId);
         if (effect) {

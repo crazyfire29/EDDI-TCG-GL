@@ -68,14 +68,21 @@ export class BlockAddButtonPositionRepositoryImpl implements BlockAddButtonPosit
     public deleteByPositionId(positionId: number): void {
         this.positionMap.delete(positionId);
 
+        let newPositionIndex = 0;
         const newPositionMap = new Map<number, { cardId: number, position: BlockAddButtonPosition }>();
-        let newPosition = 0;
 
-        for (const { cardId, position } of this.positionMap.values()) {
-            newPositionMap.set(newPosition++, { cardId, position });
+        for (const [key, { cardId, position }] of this.positionMap.entries()) {
+            const newPosition = this.selectedCardBlockPositionRepository.findPositionByCardId(cardId);
+            if (newPosition) {
+                const newPositionY = newPosition.getY();
+                if (newPositionY) {
+                    position.setPosition(this.positionX, newPositionY);
+                    newPositionMap.set(key, { cardId, position });
+                    newPositionIndex++;
+                }
+            }
         }
-
-        this.positionMap = newPositionMap; // 새로운 맵으로 교체
+        this.positionMap = newPositionMap;
     }
 
     // 버튼은 생성될 때마다 고유 아이디가 자동으로 부여되기 때문에 인덱스 번호는 재정렬 필요x

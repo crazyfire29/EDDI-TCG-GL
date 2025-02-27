@@ -97,16 +97,6 @@ export class BlockAddButtonRepositoryImpl implements BlockAddButtonRepository {
 
     public deleteButtonByButtonId(buttonId: number): void {
         this.buttonMap.delete(buttonId);
-
-        // 기존 데이터를 배열로 변환 후 정렬된 새로운 Map 생성
-        const newButtonMap = new Map<number, { cardId: number, buttonMesh: BlockAddButton }>();
-        let newButtonId = 0;
-
-        for (const { cardId, buttonMesh } of this.buttonMap.values()) {
-            newButtonMap.set(newButtonId++, { cardId, buttonMesh });
-        }
-
-        this.buttonMap = newButtonMap; // 새로운 맵으로 교체
     }
 
 //     public deleteButtonByCardId(clickedCardId: number): void {
