@@ -111,6 +111,7 @@ export class TCGJustTestMakeDeckView {
     private isAnimating = false;
     private isSideScrollAreaAdded = false;
     private blockAddedMap: Map<number, boolean> = new Map();
+    private isRaceButtonClick: boolean = false;
 
     private userWindowSize: UserWindowSize;
 
@@ -141,30 +142,43 @@ export class TCGJustTestMakeDeckView {
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
 
         this.raceButtonClickDetectService = RaceButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.raceButtonClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.raceButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
+            const raceButtonClick = await this.raceButtonClickDetectService.onMouseDown(e);
+            if (raceButtonClick) {
+                this.isRaceButtonClick = true;
+            }
+        }, false);
 
         this.pageMovementButtonClickDetectService = PageMovementButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.pageMovementButtonClickDetectService.onMouseDown(e), false);
+//         this.renderer.domElement.addEventListener('mousedown', (e) => this.pageMovementButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
+            if (this.isRaceButtonClick == true) {
+                await this.pageMovementButtonClickDetectService.onMouseDown(e)
+            }
+        }, false);
 
         this.makeDeckScreenCardClickDetectService = MakeDeckScreenCardClickDetectServiceImpl.getInstance(this.camera, this.scene);
 //         this.renderer.domElement.addEventListener('mousedown', (e) => this.makeDeckScreenCardClickDetectService.onMouseDown(e), false);
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
-            const clickCard = await this.makeDeckScreenCardClickDetectService.onMouseDown(e);
-            const clickedCardId = this.cardCountManager.findCurrentClickedCardId();
-            if (clickCard && clickedCardId) {
-                if (!this.isSideScrollAreaAdded) {
-                    await this.addSideScrollArea();
-                    this.isSideScrollAreaAdded = true;
+            if (this.isRaceButtonClick == true) {
+                const clickCard = await this.makeDeckScreenCardClickDetectService.onMouseDown(e);
+                const clickedCardId = this.cardCountManager.findCurrentClickedCardId();
+                if (clickCard && clickedCardId !== null) {
+                    if (!this.isSideScrollAreaAdded) {
+                        await this.addSideScrollArea();
+                        this.isSideScrollAreaAdded = true;
+                    }
+                    if (!this.blockAddedMap.get(clickedCardId)) {
+                        await this.addBlock(clickedCardId);
+                        await this.addBlockEffect(clickedCardId);
+                        await this.addBlockAddButton(clickedCardId);
+                        await this.addBlockDeleteButton(clickedCardId);
+                        this.blockAddedMap.set(clickedCardId, true);
+                    }
+                    await this.addNumberOfSelectedCards(clickedCardId);
+                    await this.deleteDoneButton();
                 }
-                if (!this.blockAddedMap.get(clickedCardId)) {
-                    await this.addBlock(clickedCardId);
-                    await this.addBlockEffect(clickedCardId);
-                    await this.addBlockAddButton(clickedCardId);
-                    await this.addBlockDeleteButton(clickedCardId);
-                    this.blockAddedMap.set(clickedCardId, true);
-                }
-                await this.addNumberOfSelectedCards(clickedCardId);
-                await this.deleteDoneButton();
             }
         }, false);
 
