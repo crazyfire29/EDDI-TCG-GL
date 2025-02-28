@@ -14,6 +14,7 @@ import {SelectedCardBlockRepositoryImpl} from "../../selected_card_block/reposit
 import {SelectedCardBlockPositionRepositoryImpl} from "../../selected_card_block_position/repository/SelectedCardBlockPositionRepositoryImpl";
 import {SelectedCardBlockEffectRepositoryImpl} from "../../selected_card_block_effect/repository/SelectedCardBlockEffectRepositoryImpl";
 import {SelectedCardBlockEffectPositionRepositoryImpl} from "../../selected_card_block_effect_position/repository/SelectedCardBlockEffectPositionRepositoryImpl";
+import {MakeDeckScreenDoneButtonRepositoryImpl} from "../../make_deck_screen_done_button/repository/MakeDeckScreenDoneButtonRepositoryImpl";
 
 import {CardCountManager} from "../../make_deck_screen_card_manager/CardCountManager";
 import {SelectedCardBlockStateManager} from "../../selected_card_block_manager/SelectedCardBlockStateManager";
@@ -32,6 +33,7 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
     private blockAddButtonRepository: BlockAddButtonRepositoryImpl;
     private blockAddButtonPositionRepository: BlockAddButtonPositionRepositoryImpl;
     private makeDeckScreenCardRepository: MakeDeckScreenCardRepositoryImpl;
+    private makeDeckScreenDoneButtonRepository: MakeDeckScreenDoneButtonRepositoryImpl;
     private cameraRepository: CameraRepository;
 
     private selectedCardBlockRepository: SelectedCardBlockRepositoryImpl;
@@ -53,6 +55,7 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
         this.blockAddButtonRepository = BlockAddButtonRepositoryImpl.getInstance();
         this.blockAddButtonPositionRepository = BlockAddButtonPositionRepositoryImpl.getInstance();
         this.makeDeckScreenCardRepository = MakeDeckScreenCardRepositoryImpl.getInstance();
+        this.makeDeckScreenDoneButtonRepository = MakeDeckScreenDoneButtonRepositoryImpl.getInstance();
 
         this.selectedCardBlockRepository = SelectedCardBlockRepositoryImpl.getInstance();
         this.selectedCardBlockPositionRepository = SelectedCardBlockPositionRepositoryImpl.getInstance();
@@ -97,6 +100,12 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
             console.log(`[DEBUG] Clicked Delete Button ID: ${buttonId}, Card ID: ${cardId}`);
             this.saveCurrentClickedButtonId(cardId);
             this.saveCardClickCount(cardId);
+
+            const totalSelectedCardCount = this.getTotalSelectedCardCount();
+            if (totalSelectedCardCount !== 40) {
+                this.setDoneButtonVisible(0, true);
+                this.setDoneButtonVisible(1, false);
+            }
 
             const currentCardCount = this.cardCountManager.getCardClickCount(cardId);
             if (currentCardCount == 0) {
@@ -147,6 +156,18 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
 
     private getButtonCardIdList(): number[] {
         return this.blockDeleteButtonRepository.findCardIdList();
+    }
+
+    private getTotalSelectedCardCount(): number {
+        return this.cardCountManager.findTotalSelectedCardCount();
+    }
+
+    private setDoneButtonVisible(buttonId: number, isVisible: boolean): void {
+        if (isVisible == true){
+            this.makeDeckScreenDoneButtonRepository.showButton(buttonId);
+        } else {
+            this.makeDeckScreenDoneButtonRepository.hideButton(buttonId);
+        }
     }
 
     private saveCardClickCount(cardId: number): void {

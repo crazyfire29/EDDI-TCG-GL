@@ -6,6 +6,7 @@ import {BlockAddButtonClickDetectRepositoryImpl} from "../repository/BlockAddBut
 import {BlockAddButton} from "../../block_add_button/entity/BlockAddButton";
 import {BlockAddButtonRepositoryImpl} from "../../block_add_button/repository/BlockAddButtonRepositoryImpl";
 import {MakeDeckScreenCardRepositoryImpl} from "../../make_deck_screen_card/repository/MakeDeckScreenCardRepositoryImpl";
+import {MakeDeckScreenDoneButtonRepositoryImpl} from "../../make_deck_screen_done_button/repository/MakeDeckScreenDoneButtonRepositoryImpl";
 import {CardCountManager} from "../../make_deck_screen_card_manager/CardCountManager";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
@@ -17,6 +18,7 @@ export class BlockAddButtonClickDetectServiceImpl implements BlockAddButtonClick
     private blockAddButtonClickDetectRepository: BlockAddButtonClickDetectRepositoryImpl;
     private blockAddButtonRepository: BlockAddButtonRepositoryImpl;
     private makeDeckScreenCardRepository: MakeDeckScreenCardRepositoryImpl;
+    private makeDeckScreenDoneButtonRepository: MakeDeckScreenDoneButtonRepositoryImpl;
     private cameraRepository: CameraRepository;
     private cardCountManager: CardCountManager;
 
@@ -26,6 +28,7 @@ export class BlockAddButtonClickDetectServiceImpl implements BlockAddButtonClick
         this.blockAddButtonClickDetectRepository = BlockAddButtonClickDetectRepositoryImpl.getInstance();
         this.blockAddButtonRepository = BlockAddButtonRepositoryImpl.getInstance();
         this.makeDeckScreenCardRepository = MakeDeckScreenCardRepositoryImpl.getInstance();
+        this.makeDeckScreenDoneButtonRepository = MakeDeckScreenDoneButtonRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
         this.cardCountManager = CardCountManager.getInstance();
     }
@@ -64,6 +67,11 @@ export class BlockAddButtonClickDetectServiceImpl implements BlockAddButtonClick
                 return null;
             }
 
+            const totalSelectedCardCount = this.getTotalSelectedCardCount();
+            if (totalSelectedCardCount == 40) {
+                this.setDoneButtonVisible(0, false);
+                this.setDoneButtonVisible(1, true);
+            }
             return clickedButton;
         }
         return null;
@@ -134,6 +142,18 @@ export class BlockAddButtonClickDetectServiceImpl implements BlockAddButtonClick
     // 팝업 메시지 처리: 후에 UI에 표현할 예정
     private showPopupMessage(message: string): void {
         console.log(`[POPUP] ${message}`);
+    }
+
+    private getTotalSelectedCardCount(): number {
+        return this.cardCountManager.findTotalSelectedCardCount();
+    }
+
+    private setDoneButtonVisible(buttonId: number, isVisible: boolean): void {
+        if (isVisible == true){
+            this.makeDeckScreenDoneButtonRepository.showButton(buttonId);
+        } else {
+            this.makeDeckScreenDoneButtonRepository.hideButton(buttonId);
+        }
     }
 
 }
