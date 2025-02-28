@@ -99,7 +99,6 @@ export class MakeDeckScreenCardClickDetectServiceImpl implements MakeDeckScreenC
                 this.setDoneButtonVisible(0, false);
                 this.setDoneButtonVisible(1, true);
             }
-
             return clickedCard;
         }
 
