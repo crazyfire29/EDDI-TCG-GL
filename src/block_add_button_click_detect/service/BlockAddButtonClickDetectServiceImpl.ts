@@ -59,7 +59,10 @@ export class BlockAddButtonClickDetectServiceImpl implements BlockAddButtonClick
             const cardId = this.getCardIdByButtonUniqueId(buttonId);
             console.log(`[DEBUG] Clicked Button ID: ${buttonId}, Card ID: ${cardId}`);
             this.saveCurrentClickedButtonId(cardId);
-            this.saveClickedCardCount(cardId);
+
+            if (!this.saveClickedCardCount(cardId)) {
+                return null;
+            }
 
             return clickedButton;
         }
@@ -95,13 +98,14 @@ export class BlockAddButtonClickDetectServiceImpl implements BlockAddButtonClick
     }
 
     // + 버튼을 클릭해서 카드를 추가하면 개수도 증가해야 함.
-    private saveClickedCardCount(cardId: number): void {
+    private saveClickedCardCount(cardId: number): boolean {
         const ownedCardCount = this.makeDeckScreenCardRepository.findCardCountByCardId(cardId);
         const currentSelectedCardCount = this.cardCountManager.getCardClickCount(cardId);
 
         const card = getCardById(cardId);
         if (!card) {
-            throw new Error(`Card with ID ${cardId} not found`);
+            console.warn(`[WARN] Card with ID ${cardId} not found`);
+            return false;
         }
         const grade = Number(card.등급);
         const maxSelectableCardCountByGrade = this.cardCountManager.getMaxClickCountByGrade(grade);
@@ -111,19 +115,20 @@ export class BlockAddButtonClickDetectServiceImpl implements BlockAddButtonClick
         if (currentSelectedCardCountByGrade >= maxSelectableCardCountByGrade) {
             console.warn(`[DEBUG] Grade limit exceeded (grade: ${grade}, max count: ${maxSelectableCardCountByGrade})`);
             this.showPopupMessage("You can no longer select cards of this grade.");
-            return;
+            return false;
         }
 
         // 사용자가 소지한 개수 제한 검사
         if (ownedCardCount !== null && currentSelectedCardCount >= ownedCardCount) {
             console.warn(`[DEBUG] User Owned Card Not Enough: ${cardId} (Owned Card Count: ${ownedCardCount})`);
             this.showPopupMessage("You do not have enough cards.");
-            return;
+            return false;
         }
 
         // 선택 횟수 증가
         this.cardCountManager.incrementCardClickCount(cardId);
         this.cardCountManager.incrementGradeClickCount(grade);
+        return true;
     }
 
     // 팝업 메시지 처리: 후에 UI에 표현할 예정
