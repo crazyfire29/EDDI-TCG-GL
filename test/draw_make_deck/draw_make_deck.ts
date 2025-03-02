@@ -26,6 +26,7 @@ import {NumberOfSelectedCardsServiceImpl} from  "../../src/number_of_selected_ca
 import {SelectedCardBlockEffectServiceImpl} from "../../src/selected_card_block_effect/service/SelectedCardBlockEffectServiceImpl";
 import {BlockAddButtonServiceImpl} from "../../src/block_add_button/service/BlockAddButtonServiceImpl";
 import {BlockDeleteButtonServiceImpl} from "../../src/block_delete_button/service/BlockDeleteButtonServiceImpl";
+import {NumberOfOwnedCardsServiceImpl} from "../../src/number_of_owned_cards/service/NumberOfOwnedCardsServiceImpl";
 
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
@@ -56,6 +57,7 @@ import {CardCountManager} from "../../src/make_deck_screen_card_manager/CardCoun
 import {SelectedCardBlockEffectStateManager} from "../../src/selected_card_block_effect_manager/SelectedCardBlockEffectStateManager";
 import {AddDeleteButtonStateManager} from "../../src/block_add_delete_button_manager/AddDeleteButtonStateManager";
 import {SelectedCardBlockStateManager} from "../../src/selected_card_block_manager/SelectedCardBlockStateManager";
+import {NumberOfOwnedCardsStateManager} from "../../src/number_of_owned_cards_manager/NumberOfOwnedCardsStateManager";
 
 export class TCGJustTestMakeDeckView {
     private static instance: TCGJustTestMakeDeckView | null = null;
@@ -83,6 +85,7 @@ export class TCGJustTestMakeDeckView {
     private selectedCardBlockEffectService = SelectedCardBlockEffectServiceImpl.getInstance();
     private blockAddButtonService = BlockAddButtonServiceImpl.getInstance();
     private blockDeleteButtonService = BlockDeleteButtonServiceImpl.getInstance();
+    private numberOfOwnedCardsService = NumberOfOwnedCardsServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
@@ -99,6 +102,7 @@ export class TCGJustTestMakeDeckView {
     private selectedCardBlockEffectManager = SelectedCardBlockEffectStateManager.getInstance();
     private addDeleteButtonStateManager = AddDeleteButtonStateManager.getInstance();
     private selectedCadBlockStateManager = SelectedCardBlockStateManager.getInstance();
+    private numberOfOwnedCardsStateManager = NumberOfOwnedCardsStateManager.getInstance();
     private makeDeckScreenCardMapRepository = MakeDeckScreenCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -256,6 +260,7 @@ export class TCGJustTestMakeDeckView {
 
         await this.addBackground();
         await this.addCards();
+        await this.addNumberOfOwnedCards();
         await this.addRaceButton();
         await this.addRaceButtonEffect();
         await this.addCardPageMovementButton();
@@ -641,6 +646,22 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
+    private async addNumberOfOwnedCards(): Promise<void> {
+        try {
+            const cardMap = this.makeDeckScreenCardMapRepository.getCurrentMakeDeckScreenCardMap();
+            const cardIdList = this.makeDeckScreenCardMapRepository.getCardIdList();
+            const numberGroup = await this.numberOfOwnedCardsService.createNumberOfOwnedCardsWithPosition(cardMap);
+
+            if (numberGroup) {
+                this.numberOfOwnedCardsStateManager.initializeNumberVisibility(cardIdList);
+                this.scene.add(numberGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add numbers:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -672,6 +693,7 @@ export class TCGJustTestMakeDeckView {
             this.numberOfSelectedCardsService.adjustNumberOfSelectedCardsPosition();
             this.blockAddButtonService.adjustBlockAddButtonPosition();
             this.blockDeleteButtonService.adjustBlockDeleteButtonPosition();
+            this.numberOfOwnedCardsService.adjustNumberOfOwnedCardsPosition();
         }
     }
 
