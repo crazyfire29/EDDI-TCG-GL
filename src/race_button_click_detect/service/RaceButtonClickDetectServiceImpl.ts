@@ -16,6 +16,7 @@ import {RaceButtonStateManager} from "../../race_button_manager/RaceButtonStateM
 import {RaceButtonEffectStateManager} from "../../race_button_manager/RaceButtonEffectStateManager";
 import {CardStateManager} from "../../make_deck_screen_card_manager/CardStateManager";
 import {CardPageManager} from "../../make_deck_screen_card_manager/CardPageManager";
+import {NumberOfOwnedCardsStateManager} from "../../number_of_owned_cards_manager/NumberOfOwnedCardsStateManager";
 
 export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectService {
     private static instance: RaceButtonClickDetectServiceImpl | null = null;
@@ -28,6 +29,7 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
     private raceButtonEffectStateManager: RaceButtonEffectStateManager;
     private cardStateManager: CardStateManager;
     private cardPageManager: CardPageManager;
+    private numberOfOwnedCardsStateManager: NumberOfOwnedCardsStateManager;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -42,6 +44,7 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
         this.raceButtonEffectStateManager = RaceButtonEffectStateManager.getInstance();
         this.cardStateManager = CardStateManager.getInstance();
         this.cardPageManager = CardPageManager.getInstance();
+        this.numberOfOwnedCardsStateManager = NumberOfOwnedCardsStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): RaceButtonClickDetectServiceImpl {
@@ -82,6 +85,7 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
                 this.setRaceButtonVisibility(hiddenButton.id, true);
                 this.setRaceButtonEffectVisibility(hiddenButton.id, false);
                 this.resetCardsVisibility(cardIdList, false);
+                this.resetNumberVisibility(cardIdList, false);
                 this.resetCurrentCardPage();
             }
 
@@ -90,6 +94,7 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
                 this.setRaceButtonVisibility(currentClickedButtonId, false);
                 this.setRaceButtonEffectVisibility(currentClickedButtonId, true);
                 this.setCardsVisibility(cardIdList, true);
+                this.setNumberVisibility(cardIdList, true);
             }
 
 //             switch(currentClickedButtonId) {
@@ -168,6 +173,20 @@ export class RaceButtonClickDetectServiceImpl implements RaceButtonClickDetectSe
 
     private resetCurrentCardPage(): void {
         this.cardPageManager.resetCurrentPage();
+    }
+
+    private setNumberVisibility(cardIdList: number[], isVisible: boolean): void {
+        const currentCardPage = this.cardPageManager.getCurrentPage();
+        const currentPageCardId = this.cardPageManager.findCardIdsForPage(currentCardPage, cardIdList);
+        currentPageCardId.forEach((cardId) => {
+            this.numberOfOwnedCardsStateManager.setNumberVisibility(cardId, isVisible);
+        });
+    }
+
+    private resetNumberVisibility(cardIdList: number[], isVisible: boolean): void {
+        cardIdList.forEach((cardId) => {
+            this.numberOfOwnedCardsStateManager.setNumberVisibility(cardId, isVisible);
+        });
     }
 
 }
