@@ -13,6 +13,7 @@ import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl
 
 import {CardStateManager} from "../../make_deck_screen_card_manager/CardStateManager";
 import {CardPageManager} from "../../make_deck_screen_card_manager/CardPageManager";
+import {NumberOfOwnedCardsStateManager} from "../../number_of_owned_cards_manager/NumberOfOwnedCardsStateManager";
 
 export class PageMovementButtonClickDetectServiceImpl implements PageMovementButtonClickDetectService {
     private static instance: PageMovementButtonClickDetectServiceImpl | null = null;
@@ -24,6 +25,7 @@ export class PageMovementButtonClickDetectServiceImpl implements PageMovementBut
 
     private cardStateManager: CardStateManager;
     private cardPageManager: CardPageManager;
+    private numberOfOwnedCardsStateManager: NumberOfOwnedCardsStateManager;
 
     private cameraRepository: CameraRepository
     private leftMouseDown: boolean = false;
@@ -37,6 +39,7 @@ export class PageMovementButtonClickDetectServiceImpl implements PageMovementBut
 
         this.cardStateManager = CardStateManager.getInstance();
         this.cardPageManager = CardPageManager.getInstance();
+        this.numberOfOwnedCardsStateManager = NumberOfOwnedCardsStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): PageMovementButtonClickDetectServiceImpl {
@@ -79,16 +82,20 @@ export class PageMovementButtonClickDetectServiceImpl implements PageMovementBut
                     console.log(`Clicked Prev Button!: ${currentClickedButtonId}`);
                     if (this.getCurrentCardPage() > 1) {
                         this.setCardsVisibility(cardIdList, false);
+                        this.setNumbersVisibility(cardIdList, false);
                         this.setCurrentCardPage(this.getCurrentCardPage() - 1);
                         this.setCardsVisibility(cardIdList, true);
+                        this.setNumbersVisibility(cardIdList, true);
                     }
                     break;
                 case 1:
                     console.log(`Clicked Next Button!: ${currentClickedButtonId}`);
                     if (this.getCurrentCardPage() < this.getTotalCardPages(cardIdList)) {
                         this.setCardsVisibility(cardIdList, false);
+                        this.setNumbersVisibility(cardIdList, false);
                         this.setCurrentCardPage(this.getCurrentCardPage() + 1);
                         this.setCardsVisibility(cardIdList, true);
+                        this.setNumbersVisibility(cardIdList, true);
                     }
                     break;
                 default:
@@ -148,6 +155,14 @@ export class PageMovementButtonClickDetectServiceImpl implements PageMovementBut
         const currentPageCardId = this.cardPageManager.findCardIdsForPage(currentCardPage, cardIdList);
         currentPageCardId.forEach((cardId) => {
             this.cardStateManager.setCardVisibility(cardId, isVisible);
+        });
+    }
+
+    private setNumbersVisibility(cardIdList: number[], isVisible: boolean): void {
+        const currentCardPage = this.getCurrentCardPage();
+        const currentPageCardId = this.cardPageManager.findCardIdsForPage(currentCardPage, cardIdList);
+        currentPageCardId.forEach((cardId) => {
+            this.numberOfOwnedCardsStateManager.setNumberVisibility(cardId, isVisible);
         });
     }
 
