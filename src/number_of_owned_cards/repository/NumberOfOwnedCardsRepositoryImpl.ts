@@ -11,7 +11,7 @@ export class NumberOfOwnedCardsRepositoryImpl implements NumberOfOwnedCardsRepos
     private numberMap: Map<number, { cardCount: number,  numberMesh: NumberOfOwnedCards }> = new Map(); // cardId: {cardCount: mesh}
     private textureManager: TextureManager;
 
-    private readonly NUMBER_WIDTH: number = 0.036
+    private readonly NUMBER_WIDTH: number = 0.03
     private readonly NUMBER_HEIGHT: number = 0.034
 
     private constructor(textureManager: TextureManager) {

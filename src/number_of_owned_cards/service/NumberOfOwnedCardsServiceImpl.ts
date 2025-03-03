@@ -103,7 +103,7 @@ export class NumberOfOwnedCardsServiceImpl implements NumberOfOwnedCardsService 
                 continue;
             }
 
-            const numberWidth = 0.036 * window.innerWidth;
+            const numberWidth = 0.03 * window.innerWidth;
             const numberHeight = 0.034 * window.innerHeight;
 
             const newPositionX = initialPosition.getX() * windowWidth;
