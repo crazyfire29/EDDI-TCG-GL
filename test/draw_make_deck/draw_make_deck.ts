@@ -59,6 +59,7 @@ import {SelectedCardBlockEffectStateManager} from "../../src/selected_card_block
 import {AddDeleteButtonStateManager} from "../../src/block_add_delete_button_manager/AddDeleteButtonStateManager";
 import {SelectedCardBlockStateManager} from "../../src/selected_card_block_manager/SelectedCardBlockStateManager";
 import {NumberOfOwnedCardsStateManager} from "../../src/number_of_owned_cards_manager/NumberOfOwnedCardsStateManager";
+import {CardEffectStateManager} from "../../src/make_deck_screen_card_effect_manager/CardEffectStateManager";
 
 export class TCGJustTestMakeDeckView {
     private static instance: TCGJustTestMakeDeckView | null = null;
@@ -105,6 +106,7 @@ export class TCGJustTestMakeDeckView {
     private addDeleteButtonStateManager = AddDeleteButtonStateManager.getInstance();
     private selectedCadBlockStateManager = SelectedCardBlockStateManager.getInstance();
     private numberOfOwnedCardsStateManager = NumberOfOwnedCardsStateManager.getInstance();
+    private cardEffectStateManager = CardEffectStateManager.getInstance();
     private makeDeckScreenCardMapRepository = MakeDeckScreenCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -338,6 +340,7 @@ export class TCGJustTestMakeDeckView {
             const effectGroup = await this.makeDeckScreenCardEffectService.createMakeDeckScreenCardEffectWithPosition(cardMap);
 
             if (effectGroup) {
+                this.cardEffectStateManager.initializeEffectVisibility(cardIdList);
                 this.scene.add(effectGroup);
             }
 
