@@ -27,6 +27,7 @@ import {SelectedCardBlockEffectServiceImpl} from "../../src/selected_card_block_
 import {BlockAddButtonServiceImpl} from "../../src/block_add_button/service/BlockAddButtonServiceImpl";
 import {BlockDeleteButtonServiceImpl} from "../../src/block_delete_button/service/BlockDeleteButtonServiceImpl";
 import {NumberOfOwnedCardsServiceImpl} from "../../src/number_of_owned_cards/service/NumberOfOwnedCardsServiceImpl";
+import {MakeDeckScreenCardEffectServiceImpl} from "../../src/make_deck_screen_card_effect/service/MakeDeckScreenCardEffectServiceImpl";
 
 import {RaceButtonConfigList} from "../../src/race_button/entity/RaceButtonConfigList";
 import {RaceButtonEffectConfigList} from "../../src/race_button_effect/entity/RaceButtonEffectConfigList";
@@ -86,6 +87,7 @@ export class TCGJustTestMakeDeckView {
     private blockAddButtonService = BlockAddButtonServiceImpl.getInstance();
     private blockDeleteButtonService = BlockDeleteButtonServiceImpl.getInstance();
     private numberOfOwnedCardsService = NumberOfOwnedCardsServiceImpl.getInstance();
+    private makeDeckScreenCardEffectService = MakeDeckScreenCardEffectServiceImpl.getInstance();
 
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
@@ -260,6 +262,7 @@ export class TCGJustTestMakeDeckView {
 
         await this.addBackground();
         await this.addCards();
+        await this.addCardEffects();
         await this.addNumberOfOwnedCards();
         await this.addRaceButton();
         await this.addRaceButtonEffect();
@@ -325,6 +328,21 @@ export class TCGJustTestMakeDeckView {
 
         } catch (error) {
             console.error('Failed to add cards:', error);
+        }
+    }
+
+    private async addCardEffects(): Promise<void> {
+        try {
+            const cardMap = this.makeDeckScreenCardMapRepository.getCurrentMakeDeckScreenCardMap();
+            const cardIdList = this.makeDeckScreenCardMapRepository.getCardIdList();
+            const effectGroup = await this.makeDeckScreenCardEffectService.createMakeDeckScreenCardEffectWithPosition(cardMap);
+
+            if (effectGroup) {
+                this.scene.add(effectGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add card effects:', error);
         }
     }
 

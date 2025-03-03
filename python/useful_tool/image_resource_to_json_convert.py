@@ -43,6 +43,7 @@ class WillBeReferenceImageLocation(Enum):
     SELECTED_CARD_BLOCK_EFFECT = "resource/make_deck/selected_card_block_effect/"
     BLOCK_ADD_DELETE_BUTTON = "resource/make_deck/block_add_delete_button/"
     NUMBER_OF_OWNED_CARDS = "resource/make_deck/number_of_owned_cards/"
+    OWNED_CARD_EFFECT = "resource/my_card/card_effect/"
 
 class RelativeImageLocation(Enum):
     CARD = "../../resource/battle_field_unit/card/"
@@ -82,6 +83,7 @@ class RelativeImageLocation(Enum):
     SELECTED_CARD_BLOCK_EFFECT = "../../resource/make_deck/selected_card_block_effect/"
     BLOCK_ADD_DELETE_BUTTON = "../../resource/make_deck/block_add_delete_button/"
     NUMBER_OF_OWNED_CARDS = "../../resource/make_deck/number_of_owned_cards/"
+    OWNED_CARD_EFFECT = "../../resource/my_card/card_effect/"
 
 # 디렉토리 경로 설정
 relative_paths = {
@@ -122,6 +124,7 @@ relative_paths = {
     RelativeImageLocation.SELECTED_CARD_BLOCK_EFFECT: RelativeImageLocation.SELECTED_CARD_BLOCK_EFFECT.value,
     RelativeImageLocation.BLOCK_ADD_DELETE_BUTTON: RelativeImageLocation.BLOCK_ADD_DELETE_BUTTON.value,
     RelativeImageLocation.NUMBER_OF_OWNED_CARDS: RelativeImageLocation.NUMBER_OF_OWNED_CARDS.value,
+    RelativeImageLocation.OWNED_CARD_EFFECT: RelativeImageLocation.OWNED_CARD_EFFECT.value,
 }
 
 reference_paths = {
@@ -162,6 +165,7 @@ reference_paths = {
     WillBeReferenceImageLocation.SELECTED_CARD_BLOCK_EFFECT: WillBeReferenceImageLocation.SELECTED_CARD_BLOCK_EFFECT.value,
     WillBeReferenceImageLocation.BLOCK_ADD_DELETE_BUTTON: WillBeReferenceImageLocation.BLOCK_ADD_DELETE_BUTTON.value,
     WillBeReferenceImageLocation.NUMBER_OF_OWNED_CARDS: WillBeReferenceImageLocation.NUMBER_OF_OWNED_CARDS.value,
+    WillBeReferenceImageLocation.OWNED_CARD_EFFECT: WillBeReferenceImageLocation.OWNED_CARD_EFFECT.value,
 }
 
 image_paths = {
@@ -202,6 +206,7 @@ image_paths = {
     "selected_card_block_effect": [],
     "block_add_delete_button": [],
     "number_of_owned_cards": [],
+    "owned_card_effect": [],
 }
 
 for category, dir_path in relative_paths.items():
