@@ -52,6 +52,8 @@ import {BlockAddButtonClickDetectService} from "../../src/block_add_button_click
 import {BlockAddButtonClickDetectServiceImpl} from "../../src/block_add_button_click_detect/service/BlockAddButtonClickDetectServiceImpl";
 import {BlockDeleteButtonClickDetectService} from "../../src/block_delete_button_click_detect/service/BlockDeleteButtonClickDetectService";
 import {BlockDeleteButtonClickDetectServiceImpl} from "../../src/block_delete_button_click_detect/service/BlockDeleteButtonClickDetectServiceImpl";
+import {MakeDeckScreenCardHoverDetectService} from "../../src/make_deck_screen_card_hover_detect/service/MakeDeckScreenCardHoverDetectService";
+import {MakeDeckScreenCardHoverDetectServiceImpl} from "../../src/make_deck_screen_card_hover_detect/service/MakeDeckScreenCardHoverDetectServiceImpl";
 
 import {CardStateManager} from "../../src/make_deck_screen_card_manager/CardStateManager";
 import {CardCountManager} from "../../src/make_deck_screen_card_manager/CardCountManager";
@@ -99,6 +101,7 @@ export class TCGJustTestMakeDeckView {
     private selectedCardBlockHoverDetectService: SelectedCardBlockHoverDetectService;
     private blockAddButtonClickDetectService: BlockAddButtonClickDetectService;
     private blockDeleteButtonClickDetectService: BlockDeleteButtonClickDetectService;
+    private makeDeckScreenCardHoverDetectService: MakeDeckScreenCardHoverDetectService;
 
     private cardStateManager = CardStateManager.getInstance();
     private cardCountManager = CardCountManager.getInstance();
@@ -187,6 +190,13 @@ export class TCGJustTestMakeDeckView {
                     await this.addNumberOfSelectedCards(clickedCardId);
                     await this.deleteDoneButton();
                 }
+            }
+        }, false);
+
+        this.makeDeckScreenCardHoverDetectService = MakeDeckScreenCardHoverDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousemove', async (e) => {
+            if (this.isRaceButtonClick == true) {
+                await this.makeDeckScreenCardHoverDetectService.onMouseMove(e)
             }
         }, false);
 
@@ -715,6 +725,7 @@ export class TCGJustTestMakeDeckView {
             this.blockAddButtonService.adjustBlockAddButtonPosition();
             this.blockDeleteButtonService.adjustBlockDeleteButtonPosition();
             this.numberOfOwnedCardsService.adjustNumberOfOwnedCardsPosition();
+            this.makeDeckScreenCardEffectService.adjustMakeDeckScreenCardEffectPosition();
         }
     }
 
