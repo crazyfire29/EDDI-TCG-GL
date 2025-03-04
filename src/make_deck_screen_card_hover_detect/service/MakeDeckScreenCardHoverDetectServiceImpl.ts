@@ -95,6 +95,13 @@ export class MakeDeckScreenCardHoverDetectServiceImpl implements MakeDeckScreenC
             }
 
             return hoveredCard;
+
+        } else {
+            const allShownEffectIds = this.getShownEffectIds();
+            allShownEffectIds.forEach((cardId) => {
+                this.setCardVisibility(cardId, true);
+                this.setEffectVisibility(cardId, false);
+            });
         }
 
         return null;
@@ -168,6 +175,10 @@ export class MakeDeckScreenCardHoverDetectServiceImpl implements MakeDeckScreenC
 
     private setEffectVisibility(cardId: number, isVisible: boolean): void {
         this.cardEffectStateManager.setEffectVisibility(cardId, isVisible);
+    }
+
+    private getShownEffectIds(): number[] {
+        return this.cardEffectStateManager.findShownEffectIds();
     }
 
 }

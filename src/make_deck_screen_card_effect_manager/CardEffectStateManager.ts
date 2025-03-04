@@ -40,4 +40,10 @@ export class CardEffectStateManager {
     public resetEffectVisibility(): void {
         this.effectVisibilityState.clear();
     }
+
+    public findShownEffectIds(): number[] {
+        return Array.from(this.effectVisibilityState.entries())
+                   .filter(([_, isVisible]) => isVisible === true)
+                   .map(([cardId, _]) => cardId);
+    }
 }
