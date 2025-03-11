@@ -124,7 +124,7 @@ export class TCGJustTestBattleFieldView {
         this.dragMoveService = DragMoveServiceImpl.getInstance(this.camera, this.scene)
         this.mouseDropService = MouseDropServiceImpl.getInstance()
 
-        this.rightClickDetectService = RightClickDetectServiceImpl.getInstance(this.camera)
+        this.rightClickDetectService = RightClickDetectServiceImpl.getInstance(this.camera, this.scene)
 
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
             if (e.button === 0) { // 좌클릭만 처리

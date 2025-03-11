@@ -9,6 +9,8 @@ import {DragMoveRepositoryImpl} from "../../drag_move/repository/DragMoveReposit
 import {MouseCursorDetectRepositoryImpl} from "../../mouse_cursor_detect/repository/MouseCursorDetectRepositoryImpl";
 import {MouseCursorDetectRepository} from "../../mouse_cursor_detect/repository/MouseCursorDetectRepository";
 import {LeftClickedArea} from "../../left_click_detect/entity/LeftClickedArea";
+import {ActivePanelAreaRepository} from "../../active_panel_area/repository/ActivePanelAreaRepository";
+import {ActivePanelAreaRepositoryImpl} from "../../active_panel_area/repository/ActivePanelAreaRepositoryImpl";
 
 export class RightClickDetectServiceImpl implements RightClickDetectService {
     private static instance: RightClickDetectServiceImpl | null = null;
@@ -16,20 +18,20 @@ export class RightClickDetectServiceImpl implements RightClickDetectService {
     private cameraRepository: CameraRepository
     private dragMoveRepository: DragMoveRepository
     private mouseCursorDetectRepository: MouseCursorDetectRepository
-    private activePanelRepository: ActivePanelRepository;
+    private activePanelAreaRepository: ActivePanelAreaRepository;
 
     private rightMouseDown: boolean = false;
 
-    private constructor(private camera: THREE.Camera) {
+    private constructor(private camera: THREE.Camera, scene: THREE.Scene) {
         this.cameraRepository = CameraRepositoryImpl.getInstance()
         this.dragMoveRepository = DragMoveRepositoryImpl.getInstance()
         this.mouseCursorDetectRepository = MouseCursorDetectRepositoryImpl.getInstance()
-        this.activePanelRepository = ActivePanelRepositoryImpl.getInstance();
+        this.activePanelAreaRepository = ActivePanelAreaRepositoryImpl.getInstance(camera, scene);
     }
 
-    static getInstance(camera: THREE.Camera): RightClickDetectServiceImpl {
+    static getInstance(camera: THREE.Camera, scene: THREE.Scene): RightClickDetectServiceImpl {
         if (!RightClickDetectServiceImpl.instance) {
-            RightClickDetectServiceImpl.instance = new RightClickDetectServiceImpl(camera);
+            RightClickDetectServiceImpl.instance = new RightClickDetectServiceImpl(camera, scene);
         }
         return RightClickDetectServiceImpl.instance;
     }
@@ -51,15 +53,15 @@ export class RightClickDetectServiceImpl implements RightClickDetectService {
 
         console.log('Active Panel 생성 준비')
 
-        if (this.activePanelRepository.exists()) {
+        if (this.activePanelAreaRepository.exists()) {
             console.log("기존 Active Panel 삭제");
-            this.activePanelRepository.delete();
+            this.activePanelAreaRepository.delete();
             return;
         }
 
         // 새 패널 생성
         console.log("새로운 Active Panel 생성");
-        this.activePanelRepository.create(clickPoint.x, clickPoint.y);
+        this.activePanelAreaRepository.create(clickPoint.x, clickPoint.y);
     }
 
     setRightMouseDown(state: boolean): void {
