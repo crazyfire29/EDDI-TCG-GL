@@ -141,4 +141,8 @@ export class SelectedCardBlockServiceImpl implements SelectedCardBlockService {
         return this.selectedCardBlockPositionRepository.findPositionByCardId(cardId);
     }
 
+    public getAllBlockGroups(): THREE.Group {
+        return this.selectedCardBlockRepository.findAllBlockGroups();
+    }
+
 }
