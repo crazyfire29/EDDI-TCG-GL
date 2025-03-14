@@ -95,8 +95,8 @@ export class TCGJustTestMakeDeckView {
     private raceButtonClickDetectService: RaceButtonClickDetectService;
     private pageMovementButtonClickDetectService: PageMovementButtonClickDetectService;
     private makeDeckScreenCardClickDetectService: MakeDeckScreenCardClickDetectService;
-//     private sideScrollAreaDetectService: SideScrollAreaDetectService;
-//     private sideScrollService: SideScrollService;
+    private sideScrollAreaDetectService: SideScrollAreaDetectService;
+    private sideScrollService: SideScrollService;
     private makeDeckScreenDoneButtonClickDetectService: MakeDeckScreenDoneButtonClickDetectService;
     private selectedCardBlockHoverDetectService: SelectedCardBlockHoverDetectService;
     private blockAddButtonClickDetectService: BlockAddButtonClickDetectService;
@@ -200,11 +200,15 @@ export class TCGJustTestMakeDeckView {
             }
         }, false);
 
-//         this.sideScrollAreaDetectService = SideScrollAreaDetectServiceImpl.getInstance(this.camera, this.scene);
-//         this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollAreaDetectService.onMouseMove(e), false);
+        this.sideScrollAreaDetectService = SideScrollAreaDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollAreaDetectService.onMouseMove(e), false);
 
-//         this.sideScrollService = SideScrollServiceImpl.getInstance(this.camera, this.scene, this.renderer);
-//         this.renderer.domElement.addEventListener('wheel', (e) => this.sideScrollService.onWheelScroll(e), false);
+        this.sideScrollService = SideScrollServiceImpl.getInstance(this.camera, this.scene, this.renderer);
+        this.renderer.domElement.addEventListener('wheel', async (e) => {
+            if (this.sideScrollService.getBlockCount() > 10) {
+                this.sideScrollService.onWheelScroll(e)
+            }
+        }, false);
 
         this.makeDeckScreenDoneButtonClickDetectService = MakeDeckScreenDoneButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousedown', (e) => this.makeDeckScreenDoneButtonClickDetectService.onMouseDown(e), false);
@@ -459,22 +463,27 @@ export class TCGJustTestMakeDeckView {
             const blockMesh = this.selectedCardBlockService.getBlockMeshByCardId(cardId);
 
             if (blockMesh) {
-//                 const blockMesh = blockGroup.children[0] as THREE.Mesh;
-//                 const sideScrollArea = this.sideScrollService.getSideScrollArea();
-//                 if (sideScrollArea) {
-//                     const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
-//                     if (Array.isArray(blockMesh.material)) {
-//                         blockMesh.material.forEach((material) => {
-//                             if (material instanceof THREE.Material) {
-//                                 material.clippingPlanes = clippingPlanes;
-//                             }
-//                         });
-//                     } else if (blockMesh.material instanceof THREE.Material) {
-//                         // 배열이 아니면, 단일 Material로 취급하여 처리
-//                         blockMesh.material.clippingPlanes = clippingPlanes;
-//                     }
-//                 }
-                this.scene.add(blockMesh);
+                const sideScrollArea = this.sideScrollService.getSideScrollArea();
+                if (sideScrollArea) {
+                    const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
+                    if (Array.isArray(blockMesh.material)) {
+                        blockMesh.material.forEach((material) => {
+                            if (material instanceof THREE.Material) {
+                                material.clippingPlanes = clippingPlanes;
+                            }
+                        });
+                    } else if (blockMesh.material instanceof THREE.Material) {
+                        // 배열이 아니면, 단일 Material로 취급하여 처리
+                        blockMesh.material.clippingPlanes = clippingPlanes;
+                    }
+                }
+                const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
+                blockGroup.add(blockMesh);
+
+                if (!this.scene.children.includes(blockGroup)) {
+                    this.scene.add(blockGroup);
+                }
+//                 this.scene.add(blockMesh);
             }
 
         } catch (error) {

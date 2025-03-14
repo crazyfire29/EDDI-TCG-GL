@@ -10,6 +10,7 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
     private static instance: SelectedCardBlockRepositoryImpl;
     private blockMap: Map<number, { cardId: number, blockMesh: SelectedCardBlock }> = new Map(); // block unique id: {card id: block mesh}
     private textureManager: TextureManager;
+    private blockGroup: THREE.Group | null = null;
 
     private readonly BLOCK_WIDTH: number = 0.235
     private readonly BLOCK_HEIGHT: number = 0.145
@@ -130,32 +131,18 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
     }
 
     public findAllBlockGroups(): THREE.Group {
-        const group = new THREE.Group();
-
-        for (const { blockMesh } of this.blockMap.values()) {
-            group.add(blockMesh.getMesh()); // SelectedCardBlock에서 Mesh를 가져와 추가
+        if (!this.blockGroup) {
+            this.blockGroup = new THREE.Group();
+            for (const { blockMesh } of this.blockMap.values()) {
+                this.blockGroup.add(blockMesh.getMesh());
+            }
         }
-
-        return group;
+        return this.blockGroup;
     }
 
     public blockCount(): number {
         console.log(`Current Block Count? ${this.blockMap.size}`);
         return this.blockMap.size;
-    }
-
-    public getLastBlockPositionY(): number | null {
-        if (this.blockMap.size === 0) return null; // 블록이 없으면 null 반환
-
-        const lastBlock = Array.from(this.blockMap.values()).at(-1); // 마지막 블록 가져오기
-        return lastBlock ? lastBlock.blockMesh.getMesh().position.y : null;
-    }
-
-    public getFirstBlockPositionY(): number | null {
-        if (this.blockMap.size === 0) return null;
-
-        const firstBlock = Array.from(this.blockMap.values()).at(0); // 첫 번째 블록 가져오기
-        return firstBlock ? firstBlock.blockMesh.getMesh().position.y : null;
     }
 
 }
