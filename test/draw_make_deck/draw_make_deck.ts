@@ -483,6 +483,7 @@ export class TCGJustTestMakeDeckView {
                 if (!this.scene.children.includes(blockGroup)) {
                     this.scene.add(blockGroup);
                 }
+                blockGroup.position.y = 0;
 //                 this.scene.add(blockMesh);
             }
 
