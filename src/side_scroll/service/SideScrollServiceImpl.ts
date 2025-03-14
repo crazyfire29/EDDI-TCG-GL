@@ -52,7 +52,6 @@ export class SideScrollServiceImpl implements SideScrollService {
         if (!scrollTarget || !sideScrollArea) return;
 
         const blockPositions = this.getAllBlockPosition().map(pos => pos.getY());
-        const averageBlockY = blockPositions.reduce((sum, y) => sum + y, 0) / blockPositions.length;
         console.log(`Block Position? ${blockPositions}`);
 
         console.log(`Before Scroll- scrollTarget.position: ${scrollTarget.position.y}`);
@@ -64,11 +63,12 @@ export class SideScrollServiceImpl implements SideScrollService {
             scrollTarget.position.y += event.deltaY * scrollSpeed;
 
             const maxScroll = 0.0706 * window.innerHeight * (totalBlockCounts - 2);
-//             const upperLimit = averageBlockY * window.innerHeight;
-            const upperLimit = 0.36 * window.innerHeight;
-            const lowerLimit = -maxScroll;
+            const lowerLimit = 0.0706 * window.innerHeight * (totalBlockCounts - 10); // 보이지 않는 블록들이 차지하는 전체 높이
+            const upperLimit = 0;
+            console.log(`upperLimit: ${upperLimit}`); // 최대로 올릴 수 있는 범위
+            console.log(`lowerLimit: ${lowerLimit}`); // 최대로 내릴 수 있는 범위
 
-            scrollTarget.position.y = Math.max(Math.min(scrollTarget.position.y, upperLimit), lowerLimit);
+            scrollTarget.position.y = Math.max(Math.min(scrollTarget.position.y, lowerLimit), upperLimit);
             console.log('After Scroll- scrollTarget.position.y', scrollTarget.position.y);
 
             // 스크롤할 때 클리핑 업데이트
