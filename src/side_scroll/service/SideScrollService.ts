@@ -4,8 +4,6 @@ import {SelectedCardBlockPosition} from "../../selected_card_block_position/enti
 
 export interface SideScrollService {
     onWheelScroll(event: WheelEvent): Promise<void>;
-    getScrollEnabled(): boolean;
     setClippingPlanes(sideScrollArea: SideScrollArea): THREE.Plane[];
-    getSideScrollArea(): SideScrollArea | null;
     getBlockCount(): number;
 }

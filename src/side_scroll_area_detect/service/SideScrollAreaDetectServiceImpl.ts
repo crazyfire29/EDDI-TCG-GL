@@ -58,7 +58,11 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
 //             console.log(`Detect Side Scroll Area!`);
 
             return detectSideScrollArea;
+
+        } else {
+            this.setScrollEnabled(false);
         }
+
         return null;
     }
 
@@ -71,6 +75,10 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
 
     public setScrollEnabled(enable: boolean): void {
         this.sideScrollAreaDetectRepository.setScrollEnabled(enable);
+    }
+
+    public getScrollEnabled(): boolean {
+        return this.sideScrollAreaDetectRepository.findScrollEnabled();
     }
 
     private getSideScrollArea(): SideScrollArea | null {

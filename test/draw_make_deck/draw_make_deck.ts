@@ -205,7 +205,8 @@ export class TCGJustTestMakeDeckView {
 
         this.sideScrollService = SideScrollServiceImpl.getInstance(this.camera, this.scene, this.renderer);
         this.renderer.domElement.addEventListener('wheel', async (e) => {
-            if (this.sideScrollService.getBlockCount() > 10) {
+            const scrollAreaDetect = this.sideScrollAreaDetectService.getScrollEnabled();
+            if (scrollAreaDetect == true && this.sideScrollService.getBlockCount() > 10) {
                 this.sideScrollService.onWheelScroll(e)
             }
         }, false);
@@ -463,7 +464,7 @@ export class TCGJustTestMakeDeckView {
             const blockMesh = this.selectedCardBlockService.getBlockMeshByCardId(cardId);
 
             if (blockMesh) {
-                const sideScrollArea = this.sideScrollService.getSideScrollArea();
+                const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
                 if (sideScrollArea) {
                     const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
                     if (Array.isArray(blockMesh.material)) {
