@@ -576,12 +576,18 @@ export class TCGJustTestMakeDeckView {
     private async deleteAllBlocks(): Promise<void> {
         try {
             const cardIdList = this.selectedCardBlockService.getAllBlockCardId();
+            const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
             cardIdList.forEach((cardId) => {
                 const blockMesh = this.selectedCardBlockService.getBlockMeshByCardId(cardId);
                 if (blockMesh) {
                     this.scene.remove(blockMesh);
                 }
             });
+            if (blockGroup) {
+                this.scene.remove(blockGroup);
+                blockGroup.clear();
+                this.selectedCardBlockService.resetBlockGroups();
+            }
             this.selectedCadBlockStateManager.resetBlockVisibility();
         } catch (error) {
             console.error('Failed to delete Block:', error);
@@ -639,8 +645,39 @@ export class TCGJustTestMakeDeckView {
             cardIdList.forEach((cardId) => {
                 this.selectedCardBlockService.createSelectedCardBlockWithPosition(cardId);
             });
+
             const currentAllBlockMesh = this.selectedCardBlockService.getAllBlockMesh();
-            currentAllBlockMesh.forEach((block) => this.scene.add(block.getMesh()));
+            const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
+            const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+            let clippingPlanes: THREE.Plane[] = [];
+
+            if (sideScrollArea) {
+                clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
+            }
+
+            currentAllBlockMesh.forEach((block) => {
+                const blockMesh = block.getMesh();
+
+                if (clippingPlanes.length > 0) {
+                    if (Array.isArray(blockMesh.material)) {
+                        blockMesh.material.forEach((material) => {
+                            if (material instanceof THREE.Material) {
+                                material.clippingPlanes = clippingPlanes;
+                            }
+                        });
+                    } else if (blockMesh.material instanceof THREE.Material) {
+                        blockMesh.material.clippingPlanes = clippingPlanes;
+                    }
+                }
+                blockGroup.add(blockMesh);
+            });
+
+            if (!this.scene.children.includes(blockGroup)) {
+                this.scene.add(blockGroup);
+            }
+            blockGroup.position.y = 0;
+
+//             currentAllBlockMesh.forEach((block) => this.scene.add(block.getMesh()));
         } catch (error) {
             console.error('Failed to add All Block:', error);
         }
