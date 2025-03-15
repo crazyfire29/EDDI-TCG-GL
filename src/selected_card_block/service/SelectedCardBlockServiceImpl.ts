@@ -145,4 +145,8 @@ export class SelectedCardBlockServiceImpl implements SelectedCardBlockService {
         return this.selectedCardBlockRepository.findAllBlockGroups();
     }
 
+    public resetBlockGroups(): void {
+        this.selectedCardBlockRepository.resetBlockGroups();
+    }
+
 }

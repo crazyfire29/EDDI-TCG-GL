@@ -140,6 +140,10 @@ export class SelectedCardBlockRepositoryImpl implements SelectedCardBlockReposit
         return this.blockGroup;
     }
 
+    public resetBlockGroups(): void {
+        this.blockGroup = null;
+    }
+
     public blockCount(): number {
         console.log(`Current Block Count? ${this.blockMap.size}`);
         return this.blockMap.size;
