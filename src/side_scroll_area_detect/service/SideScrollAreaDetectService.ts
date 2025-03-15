@@ -5,4 +5,5 @@ export interface SideScrollAreaDetectService {
         detectPoint: { x: number; y: number },
     ): any | null;
     onMouseMove(event: MouseEvent): Promise<void>;
+    getScrollEnabled(): boolean;
 }
