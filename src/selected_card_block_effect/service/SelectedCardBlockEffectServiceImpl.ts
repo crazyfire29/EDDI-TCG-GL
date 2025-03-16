@@ -141,4 +141,12 @@ export class SelectedCardBlockEffectServiceImpl implements SelectedCardBlockEffe
         return this.selectedCardBlockEffectPositionRepository.findPositionByCardId(cardId);
     }
 
+    public getEffectGroup(): THREE.Group {
+        return this.selectedCardBlockEffectRepository.findAllEffectGroup();
+    }
+
+    public resetEffectGroup(): void {
+        this.selectedCardBlockEffectRepository.resetEffectGroup();
+    }
+
 }

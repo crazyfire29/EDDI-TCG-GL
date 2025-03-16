@@ -10,6 +10,7 @@ export class NumberOfSelectedCardsRepositoryImpl implements NumberOfSelectedCard
     private numberUniqueIdMap: Map<number, number> = new Map(); // numberUniqueId: cardCount
     private numberMap: Map<number, Map<number, NumberOfSelectedCards>> = new Map(); // cardId: {cardCount: mesh}
     private textureManager: TextureManager;
+    private numberGroup: THREE.Group | null = null;
 
     private readonly NUMBER_WIDTH: number = 0.028
     private readonly NUMBER_HEIGHT: number = 0.034
@@ -82,6 +83,22 @@ export class NumberOfSelectedCardsRepositoryImpl implements NumberOfSelectedCard
 
         // 현재 구조에서는 cardId에 대해 단 하나의 cardCount만 존재하므로 첫 번째 key 반환
         return Array.from(cardMap.keys())[0];
+    }
+
+    public findNumberGroup(): THREE.Group {
+        if (!this.numberGroup) {
+            this.numberGroup = new THREE.Group();
+            for (const cardMap of this.numberMap.values()) {
+                for (const numberObject of cardMap.values()) {
+                    this.numberGroup.add(numberObject.getMesh());
+                }
+            }
+        }
+        return this.numberGroup;
+    }
+
+    public resetNumberGroup(): void {
+        this.numberGroup = null;
     }
 
     public deleteAllNumber(): void {

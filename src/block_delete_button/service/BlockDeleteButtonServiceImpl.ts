@@ -139,4 +139,12 @@ export class BlockDeleteButtonServiceImpl implements BlockDeleteButtonService {
         return this.blockDeleteButtonRepository.findCardIdList();
     }
 
+    public getButtonGroup(): THREE.Group {
+        return this.blockDeleteButtonRepository.findButtonGroup();
+    }
+
+    public resetButtonGroup(): void {
+        this.blockDeleteButtonRepository.resetButtonGroup();
+    }
+
 }

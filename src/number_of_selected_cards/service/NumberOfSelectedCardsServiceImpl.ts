@@ -158,4 +158,12 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
         return this.numberOfSelectedCardsRepository.getNumberMeshByCardId(cardId);
     }
 
+    public getNumberGroup(): THREE.Group {
+        return this.numberOfSelectedCardsRepository.findNumberGroup();
+    }
+
+    public resetNumberGroup(): void {
+        this.numberOfSelectedCardsRepository.resetNumberGroup();
+    }
+
 }

@@ -139,4 +139,12 @@ export class BlockAddButtonServiceImpl implements BlockAddButtonService {
         return this.blockAddButtonRepository.findCardIdList();
     }
 
+    public getButtonGroup(): THREE.Group {
+        return this.blockAddButtonRepository.findButtonGroup();
+    }
+
+    public resetButtonGroup(): void {
+        this.blockAddButtonRepository.resetButtonGroup();
+    }
+
 }

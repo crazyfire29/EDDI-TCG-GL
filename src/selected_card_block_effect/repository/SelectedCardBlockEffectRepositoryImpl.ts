@@ -10,6 +10,7 @@ export class SelectedCardBlockEffectRepositoryImpl implements SelectedCardBlockE
     private static instance: SelectedCardBlockEffectRepositoryImpl;
     private effectMap: Map<number, { cardId: number, effectMesh: SelectedCardBlockEffect }> = new Map(); // effect unique id: {card id: effect mesh}
     private textureManager: TextureManager;
+    private effectGroup: THREE.Group | null = null;
 
     private readonly EFFECT_WIDTH: number = 0.235
     private readonly EFFECT_HEIGHT: number = 0.145
@@ -97,6 +98,20 @@ export class SelectedCardBlockEffectRepositoryImpl implements SelectedCardBlockE
 
     public deleteAllEffect(): void {
         this.effectMap.clear();
+    }
+
+    public findAllEffectGroup(): THREE.Group {
+        if (!this.effectGroup) {
+            this.effectGroup = new THREE.Group();
+            for (const { effectMesh } of this.effectMap.values()) {
+                this.effectGroup.add(effectMesh.getMesh());
+            }
+        }
+        return this.effectGroup;
+    }
+
+    public resetEffectGroup(): void {
+        this.effectGroup = null;
     }
 
 //     public deleteEffectByEffectId(effectId: number): void {
