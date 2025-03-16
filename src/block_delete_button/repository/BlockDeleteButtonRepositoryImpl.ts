@@ -9,6 +9,7 @@ export class BlockDeleteButtonRepositoryImpl implements BlockDeleteButtonReposit
     private static instance: BlockDeleteButtonRepositoryImpl;
     private buttonMap: Map<number, { cardId: number, buttonMesh: BlockDeleteButton }> = new Map(); // button unique id: {card id: mesh}
     private textureManager: TextureManager;
+    private buttonGroup: THREE.Group | null = null; // 얘는 다르게 관리 필요
 
     private readonly BUTTON_WIDTH: number = 0.045
     private readonly BUTTON_HEIGHT: number = 0.07
@@ -97,6 +98,20 @@ export class BlockDeleteButtonRepositoryImpl implements BlockDeleteButtonReposit
 
     public deleteButtonByButtonId(buttonId: number): void {
         this.buttonMap.delete(buttonId);
+    }
+
+    public findButtonGroup(): THREE.Group {
+        if (!this.buttonGroup) {
+            this.buttonGroup = new THREE.Group();
+            for (const { buttonMesh } of this.buttonMap.values()) {
+                this.buttonGroup.add(buttonMesh.getMesh());
+            }
+        }
+        return this.buttonGroup;
+    }
+
+    public resetButtonGroup(): void {
+        this.buttonGroup = null;
     }
 
 //     public deleteButtonByCardId(clickedCardId: number): void {
