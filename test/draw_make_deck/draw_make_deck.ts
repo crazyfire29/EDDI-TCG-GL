@@ -188,6 +188,9 @@ export class TCGJustTestMakeDeckView {
                         this.blockAddedMap.set(clickedCardId, true);
                     }
                     await this.addNumberOfSelectedCards(clickedCardId);
+                    const numberGroup = this.numberOfSelectedCardsService.getNumberGroup();
+                    const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
+                    numberGroup.position.y = blockGroup.position.y;
                     await this.deleteDoneButton();
                 }
             }
@@ -224,6 +227,9 @@ export class TCGJustTestMakeDeckView {
             const clickedButtonId = this.blockAddButtonClickDetectService.getCurrentClickedButtonId();
             if (clickedButton && clickedButtonId) {
                 await this.addNumberOfSelectedCards(clickedButtonId);
+                const numberGroup = this.numberOfSelectedCardsService.getNumberGroup();
+                const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
+                numberGroup.position.y = blockGroup.position.y;
             }
         }, false);
 
@@ -234,13 +240,19 @@ export class TCGJustTestMakeDeckView {
             const clickedButtonId = this.blockDeleteButtonClickDetectService.getCurrentClickedButtonId();
             if (clickedButton && clickedButtonId) {
                 await this.addNumberOfSelectedCards(clickedButtonId);
+                const numberGroup = this.numberOfSelectedCardsService.getNumberGroup();
+                const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
+                numberGroup.position.y = blockGroup.position.y;
                 const cardClickCount = this.cardCountManager.getCardClickCount(clickedButtonId);
                 if (cardClickCount == 0) {
                     await this.deleteAllBlocks();
                     await this.deleteAllEffects();
                     await this.deleteAllBlockAddButtons();
                     await this.deleteAllBlockDeleteButtons();
+                    await this.deleteAllNumbers();
+
                     await this.reAddBlock();
+                    await this.reAddNumberOfSelectedCards();
                     await this.reAddBlockEffect();
                     await this.reAddBlockAddButton();
                     await this.reAddBlockDeleteButton();
@@ -552,9 +564,9 @@ export class TCGJustTestMakeDeckView {
             if (existingMesh) {
                 console.log(`existing Number Mesh (ID: ${cardId})`);
                 this.scene.remove(existingMesh);
-                this.scene.remove(numberGroup);
-                numberGroup.clear();
-                this.numberOfSelectedCardsService.resetNumberGroup();
+                numberGroup.remove(existingMesh);
+//                 numberGroup.clear();
+//                 this.numberOfSelectedCardsService.resetNumberGroup();
             }
 
             await this.numberOfSelectedCardsService.createNumberOfSelectedCardsWithPosition(cardId);
@@ -615,7 +627,7 @@ export class TCGJustTestMakeDeckView {
                 if (!this.scene.children.includes(buttonGroup)) {
                     this.scene.add(buttonGroup);
                 }
-                buttonGroup.position.y = 0;
+//                 buttonGroup.position.y = 0;
 //                 this.scene.add(buttonMesh);
             }
 
@@ -744,6 +756,27 @@ export class TCGJustTestMakeDeckView {
             this.addDeleteButtonStateManager.resetDeleteButtonVisibility();
         } catch (error) {
             console.error('Failed to delete Block Delete Button:', error);
+        }
+    }
+
+    private async deleteAllNumbers(): Promise<void> {
+        try {
+            const cardIdList = this.numberOfSelectedCardsService.getNumberCardIdList();
+            const numberGroup = this.numberOfSelectedCardsService.getNumberGroup();
+            cardIdList.forEach((cardId) => {
+                const numberMesh = this.numberOfSelectedCardsService.getNumberObjectMeshByCardId(cardId);
+                if (numberMesh) {
+                    this.scene.remove(numberMesh);
+                }
+            });
+            if (numberGroup) {
+                this.scene.remove(numberGroup);
+                numberGroup.clear();
+                this.numberOfSelectedCardsService.resetNumberGroup();
+            }
+
+        } catch (error) {
+            console.error('Failed to delete Number:', error);
         }
     }
 
@@ -918,6 +951,47 @@ export class TCGJustTestMakeDeckView {
             }
             buttonGroup.position.y = 0;
 //             currentAllButtonMesh.forEach((button) => this.scene.add(button.getMesh()));
+        } catch (error) {
+            console.error('Failed to add All Delete Button:', error);
+        }
+    }
+
+    private async reAddNumberOfSelectedCards(): Promise<void> {
+        try {
+            const cardIdList = this.numberOfSelectedCardsService.getNumberCardIdList();
+            cardIdList.forEach((cardId) => {
+                this.numberOfSelectedCardsService.createNumberOfSelectedCardsWithPosition(cardId);
+            });
+            const currentNumberMesh = this.numberOfSelectedCardsService.getAllNumber();
+            const numberGroup = this.numberOfSelectedCardsService.getNumberGroup();
+            const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+            let clippingPlanes: THREE.Plane[] = [];
+
+            if (sideScrollArea) {
+                clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
+            }
+
+            currentNumberMesh.forEach((number) => {
+                const numberMesh = number.getMesh();
+
+                if (clippingPlanes.length > 0) {
+                    if (Array.isArray(numberMesh.material)) {
+                        numberMesh.material.forEach((material) => {
+                            if (material instanceof THREE.Material) {
+                                material.clippingPlanes = clippingPlanes;
+                            }
+                        });
+                    } else if (numberMesh.material instanceof THREE.Material) {
+                        numberMesh.material.clippingPlanes = clippingPlanes;
+                    }
+                }
+                numberGroup.add(numberMesh);
+            });
+
+            if (!this.scene.children.includes(numberGroup)) {
+                this.scene.add(numberGroup);
+            }
+            numberGroup.position.y = 0;
         } catch (error) {
             console.error('Failed to add All Delete Button:', error);
         }

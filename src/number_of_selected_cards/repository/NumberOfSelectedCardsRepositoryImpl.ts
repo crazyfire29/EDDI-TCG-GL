@@ -28,6 +28,17 @@ export class NumberOfSelectedCardsRepositoryImpl implements NumberOfSelectedCard
     }
 
     public async createNumberOfSelectedCards(clickedCardId: number, cardCount: number, position: Vector2d): Promise<NumberOfSelectedCards> {
+        const existingCard = this.numberMap.get(clickedCardId);
+        if (existingCard) {
+            for (const existingNumber of existingCard.values()) {
+                this.numberUniqueIdMap.delete(existingNumber.id); // 기존 ID 삭제
+            }
+        }
+
+        if (this.numberMap.has(clickedCardId)) {
+            // 기존 데이터를 삭제
+            this.numberMap.delete(clickedCardId);
+        }
 
         const texture = await this.textureManager.getTexture('number_of_selected_cards', cardCount);
         if (!texture) {
@@ -46,19 +57,8 @@ export class NumberOfSelectedCardsRepositoryImpl implements NumberOfSelectedCard
         const newNumber = new NumberOfSelectedCards(numberMesh, position);
         this.numberUniqueIdMap.set(newNumber.id, cardCount);
 
-//         if (!this.numberMap.has(clickedCardId)) {
-//             this.numberMap.set(clickedCardId, new Map());
-//         }
-//         this.numberMap.get(clickedCardId)!.set(cardCount, newNumber);
-
-        if (this.numberMap.has(clickedCardId)) {
-            // 기존 데이터를 삭제
-            this.numberMap.delete(clickedCardId);
-        }
-
         // 새로운 Map을 생성하고 새로운 값만 저장
         this.numberMap.set(clickedCardId, new Map([[cardCount, newNumber]]));
-
 
         return newNumber;
     }
@@ -107,6 +107,12 @@ export class NumberOfSelectedCardsRepositoryImpl implements NumberOfSelectedCard
     }
 
     public deleteNumberByCardId(clickedCardId: number): void {
+        const existingCard = this.numberMap.get(clickedCardId);
+        if (existingCard) {
+            for (const existingNumber of existingCard.values()) {
+                this.numberUniqueIdMap.delete(existingNumber.id); // 연결된 ID 삭제
+            }
+        }
         this.numberMap.delete(clickedCardId);
     }
 

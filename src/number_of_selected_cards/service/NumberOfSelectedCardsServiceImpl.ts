@@ -43,13 +43,31 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
             const cardCount = this.getCardClickCount(cardId);
             console.log(`card count? ${cardCount}`);
 
-            if (cardCount && cardCount >= 2) {
-                 const position = this.numberOfSelectedCardsPosition(cardId);
-                 console.log(`[DEBUG] number object CardId ${cardId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+            const existingPosition = this.getPositionByCardId(cardId);
+            const existingNumberMesh = this.getNumberObjectMeshByCardId(cardId);
+            if (existingPosition && existingNumberMesh) {
+                const positionX = existingPosition.getX() * window.innerWidth;
+                const positionY = existingPosition.getY() * window.innerHeight;
 
-                 const numberObject = await this.createNumberOfSelectedCards(cardId, cardCount, position.position);
-                 numberObjectGroup.add(numberObject.getMesh());
+                existingNumberMesh.position.set(positionX, positionY, 0);
+                console.log(`카드 ${cardId}의 Number position: ${positionY}`);
+                numberObjectGroup.add(existingNumberMesh);
+
+            } else {
+                if (cardCount && cardCount >= 2) {
+                    const position = this.numberOfSelectedCardsPosition(cardId);
+                    console.log(`[DEBUG] number object CardId ${cardId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+
+                    const numberObject = await this.createNumberOfSelectedCards(cardId, cardCount, position.position);
+                    numberObjectGroup.add(numberObject.getMesh());
+                }
             }
+
+//                 const position = this.numberOfSelectedCardsPosition(cardId);
+//                 console.log(`[DEBUG] number object CardId ${cardId}: Position X=${position.position.getX()}, Y=${position.position.getY()}`);
+//
+//                 const numberObject = await this.createNumberOfSelectedCards(cardId, cardCount, position.position);
+//                 numberObjectGroup.add(numberObject.getMesh());
 
         } catch (error) {
             console.error(`[Error] Failed to create Number Object: ${error}`);
@@ -107,7 +125,6 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
         throw new Error(`No valid position found for cardId: ${cardId}`);
     }
 
-
     private getSelectedCardBlockPositionY(clickedCardId: number): number | null {
         const blockPosition = this.selectedCardBlockPositionRepository.findPositionByCardId(clickedCardId);
         if(!blockPosition) {
@@ -164,6 +181,14 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
 
     public resetNumberGroup(): void {
         this.numberOfSelectedCardsRepository.resetNumberGroup();
+    }
+
+    public getNumberCardIdList(): number[] {
+        return this.numberOfSelectedCardsRepository.findAllCardIds();
+    }
+
+    public getAllNumber(): NumberOfSelectedCards[] {
+        return this.numberOfSelectedCardsRepository.findAllNumber();
     }
 
 }
