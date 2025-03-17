@@ -15,6 +15,8 @@ export class TextureManager {
     private battleFieldUnitHpTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitEnergyTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitRaceTextureList: { [id: number]: THREE.Texture } = {};
+    private battleFieldActivePanelGeneralTextureList: { [id: number]: THREE.Texture } = {};
+    private battleFieldActivePanelDetailsTextureList: { [id: number]: THREE.Texture } = {};
     private mainLobbyBackgroundTextureList: { [id: number]: THREE.Texture } = {};
     private mainLobbyButtonsTextureList: { [id: number]: THREE.Texture } = {};
     private shopBackgroundTextureList: { [id: number]: THREE.Texture } = {};
@@ -74,6 +76,8 @@ export class TextureManager {
                 this.loadTextures(imageData.hp, this.battleFieldUnitHpTextureList),
                 this.loadTextures(imageData.energy, this.battleFieldUnitEnergyTextureList),
                 this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList),
+                this.loadTextures(imageData.active_panel_general, this.battleFieldActivePanelGeneralTextureList),
+                this.loadTextures(imageData.active_panel_details, this.battleFieldActivePanelDetailsTextureList),
                 this.loadTextures(imageData.main_lobby_background, this.mainLobbyBackgroundTextureList),
                 this.loadTextures(imageData.main_lobby_buttons, this.mainLobbyButtonsTextureList),
                 this.loadTextures(imageData.shop_background, this.shopBackgroundTextureList),
@@ -196,6 +200,10 @@ export class TextureManager {
                 return this.battleFieldUnitEnergyTextureList[id];
             case 'race':
                 return this.battleFieldUnitRaceTextureList[id];
+            case 'active_panel_general':
+                return this.battleFieldActivePanelGeneralTextureList[id];
+            case 'active_panel_details':
+                return this.battleFieldActivePanelDetailsTextureList[id];
             case 'main_lobby_background':
                 return this.mainLobbyBackgroundTextureList[id];
             case 'main_lobby_buttons':
