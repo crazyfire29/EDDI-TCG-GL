@@ -13,6 +13,9 @@ class WillBeReferenceImageLocation(Enum):
     ENERGY = "resource/battle_field_unit/energy/"
     RACE = "resource/card_race/"
     BACKGROUND = "resource/background/"
+    ACTIVE_PANEL_SKILL = "resource/active_panel/skill/"
+    ACTIVE_PANEL_GENERAL = "resource/active_panel/general/"
+    ACTIVE_PANEL_DETAILS = "resource/active_panel/details/"
     MAIN_LOBBY_BACKGROUND = "resource/main_lobby/"
     MAIN_LOBBY_BUTTONS = "resource/main_lobby/buttons/"
     SHOP_BACKGROUND = "resource/shop/"
@@ -48,6 +51,9 @@ class RelativeImageLocation(Enum):
     ENERGY = "../../resource/battle_field_unit/energy/"
     RACE = "../../resource/card_race/"
     BACKGROUND = "../../resource/background/"
+    ACTIVE_PANEL_SKILL = "../../resource/active_panel/skill/"
+    ACTIVE_PANEL_GENERAL = "../../resource/active_panel/general/"
+    ACTIVE_PANEL_DETAILS = "../../resource/active_panel/details/"
     MAIN_LOBBY_BACKGROUND = "../../resource/main_lobby/"
     MAIN_LOBBY_BUTTONS = "../../resource/main_lobby/buttons/"
     SHOP_BACKGROUND = "../../resource/shop/"
@@ -84,6 +90,9 @@ relative_paths = {
     RelativeImageLocation.ENERGY: RelativeImageLocation.ENERGY.value,
     RelativeImageLocation.RACE: RelativeImageLocation.RACE.value,
     RelativeImageLocation.BACKGROUND: RelativeImageLocation.BACKGROUND.value,
+    RelativeImageLocation.ACTIVE_PANEL_SKILL: RelativeImageLocation.ACTIVE_PANEL_SKILL.value,
+    RelativeImageLocation.ACTIVE_PANEL_GENERAL: RelativeImageLocation.ACTIVE_PANEL_GENERAL.value,
+    RelativeImageLocation.ACTIVE_PANEL_DETAILS: RelativeImageLocation.ACTIVE_PANEL_DETAILS.value,
     RelativeImageLocation.MAIN_LOBBY_BACKGROUND: RelativeImageLocation.MAIN_LOBBY_BACKGROUND.value,
     RelativeImageLocation.MAIN_LOBBY_BUTTONS: RelativeImageLocation.MAIN_LOBBY_BUTTONS.value,
     RelativeImageLocation.SHOP_BACKGROUND: RelativeImageLocation.SHOP_BACKGROUND.value,
@@ -120,6 +129,9 @@ reference_paths = {
     WillBeReferenceImageLocation.ENERGY: WillBeReferenceImageLocation.ENERGY.value,
     WillBeReferenceImageLocation.RACE: WillBeReferenceImageLocation.RACE.value,
     WillBeReferenceImageLocation.BACKGROUND: WillBeReferenceImageLocation.BACKGROUND.value,
+    WillBeReferenceImageLocation.ACTIVE_PANEL_SKILL: WillBeReferenceImageLocation.ACTIVE_PANEL_SKILL.value,
+    WillBeReferenceImageLocation.ACTIVE_PANEL_GENERAL: WillBeReferenceImageLocation.ACTIVE_PANEL_GENERAL.value,
+    WillBeReferenceImageLocation.ACTIVE_PANEL_DETAILS: WillBeReferenceImageLocation.ACTIVE_PANEL_DETAILS.value,
     WillBeReferenceImageLocation.MAIN_LOBBY_BACKGROUND: WillBeReferenceImageLocation.MAIN_LOBBY_BACKGROUND.value,
     WillBeReferenceImageLocation.MAIN_LOBBY_BUTTONS: WillBeReferenceImageLocation.MAIN_LOBBY_BUTTONS.value,
     WillBeReferenceImageLocation.SHOP_BACKGROUND: WillBeReferenceImageLocation.SHOP_BACKGROUND.value,
@@ -156,6 +168,9 @@ image_paths = {
     "energy": [],
     "race": [],
     "background": [],
+    "active_panel_skill": [],
+    "active_panel_general": [],
+    "active_panel_details": [],
     "main_lobby_background": [],
     "main_lobby_buttons": [],
     "shop_background": [],
@@ -184,12 +199,54 @@ image_paths = {
     "selected_card_block": [],
 }
 
+####### active_panel_skill은 실험 중 -> 문제 발생하면 이 부분 주석하고 생성 #######
+def clean_path(path):
+    # Remove ../../ if present at the start of the path
+    path = path.replace("\\", "/")  # Ensure all paths use forward slashes
+    if path.startswith("../../"):
+        path = path[6:]  # Remove the ../../
+    return path
+
+# Get skill images
+def get_active_panel_skill_images(base_path):
+    skill_images = {}
+    for unit_folder in os.listdir(base_path):
+        unit_path = os.path.join(base_path, unit_folder)
+        if os.path.isdir(unit_path):
+            skill_images[unit_folder] = []
+            for sub_folder in os.listdir(unit_path):
+                sub_folder_path = os.path.join(unit_path, sub_folder)
+                if os.path.isdir(sub_folder_path):
+                    for file_name in os.listdir(sub_folder_path):
+                        if file_name.endswith(".png"):
+                            file_path = os.path.join(sub_folder_path, file_name)
+                            skill_images[unit_folder].append(clean_path(file_path))
+    return skill_images
+
+# Initialize paths
+image_paths = {category.name.lower(): [] for category in RelativeImageLocation}
+
+# Populate paths
+image_paths["active_panel_skill"] = get_active_panel_skill_images(relative_paths[RelativeImageLocation.ACTIVE_PANEL_SKILL])
+####### active_panel_skill은 실험 중 -> 문제 발생하면 이 부분 주석하고 생성 ####### 여기까지
+
 for category, dir_path in relative_paths.items():
-    reference_path_category = WillBeReferenceImageLocation[category.name].value
+    if category == RelativeImageLocation.ACTIVE_PANEL_SKILL:
+        continue
+
     for file_name in os.listdir(dir_path):
         if file_name.endswith(".png"):
-            reference_path = os.path.join(reference_path_category, file_name)
-            image_paths[category.name.lower()].append(reference_path)
+            file_path = os.path.join(dir_path, file_name)
+            image_paths[category.name.lower()].append(clean_path(file_path))
+
+##### Legacy #####
+# for category, dir_path in relative_paths.items():
+#     reference_path_category = WillBeReferenceImageLocation[category.name].value
+#     for file_name in os.listdir(dir_path):
+#         if file_name.endswith(".png"):
+#             reference_path = os.path.join(reference_path_category, file_name)
+#             image_paths[category.name.lower()].append(reference_path)
+##################
 
 # JSON 파일로 저장
 with open('image-paths.json', 'w', encoding='utf-8') as json_file:

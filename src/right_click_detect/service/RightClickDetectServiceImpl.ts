@@ -36,7 +36,7 @@ export class RightClickDetectServiceImpl implements RightClickDetectService {
         return RightClickDetectServiceImpl.instance;
     }
 
-    handleRightClick(clickPoint: { x: number; y: number }): any {
+    async handleRightClick(clickPoint: { x: number; y: number }): Promise<any> {
         console.log(`handleRightClick: (${clickPoint})`)
 
         const selectedArea = this.dragMoveRepository.getSelectedArea()
@@ -61,7 +61,7 @@ export class RightClickDetectServiceImpl implements RightClickDetectService {
 
         // 새 패널 생성
         console.log("새로운 Active Panel 생성");
-        this.activePanelAreaRepository.create(clickPoint.x, clickPoint.y);
+        await this.activePanelAreaRepository.create(clickPoint.x, clickPoint.y);
     }
 
     setRightMouseDown(state: boolean): void {
