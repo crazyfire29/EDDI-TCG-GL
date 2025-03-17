@@ -9,12 +9,14 @@ import {MakeDeckScreenCardRepositoryImpl} from "../../make_deck_screen_card/repo
 import {BlockDeleteButtonPositionRepositoryImpl} from "../../block_delete_button_position/repository/BlockDeleteButtonPositionRepositoryImpl";
 import {BlockAddButtonRepositoryImpl} from "../../block_add_button/repository/BlockAddButtonRepositoryImpl";
 import {BlockAddButtonPositionRepositoryImpl} from "../../block_add_button_position/repository/BlockAddButtonPositionRepositoryImpl";
+import {NumberOfSelectedCardsRepositoryImpl} from "../../number_of_selected_cards/repository/NumberOfSelectedCardsRepositoryImpl";
 
 import {SelectedCardBlockRepositoryImpl} from "../../selected_card_block/repository/SelectedCardBlockRepositoryImpl";
 import {SelectedCardBlockPositionRepositoryImpl} from "../../selected_card_block_position/repository/SelectedCardBlockPositionRepositoryImpl";
 import {SelectedCardBlockEffectRepositoryImpl} from "../../selected_card_block_effect/repository/SelectedCardBlockEffectRepositoryImpl";
 import {SelectedCardBlockEffectPositionRepositoryImpl} from "../../selected_card_block_effect_position/repository/SelectedCardBlockEffectPositionRepositoryImpl";
 import {MakeDeckScreenDoneButtonRepositoryImpl} from "../../make_deck_screen_done_button/repository/MakeDeckScreenDoneButtonRepositoryImpl";
+import {NumberOfSelectedCardsPositionRepositoryImpl} from "../../number_of_selected_cards_position/repository/NumberOfSelectedCardsPositionRepositoryImpl";
 
 import {CardCountManager} from "../../make_deck_screen_card_manager/CardCountManager";
 import {SelectedCardBlockStateManager} from "../../selected_card_block_manager/SelectedCardBlockStateManager";
@@ -34,12 +36,14 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
     private blockAddButtonPositionRepository: BlockAddButtonPositionRepositoryImpl;
     private makeDeckScreenCardRepository: MakeDeckScreenCardRepositoryImpl;
     private makeDeckScreenDoneButtonRepository: MakeDeckScreenDoneButtonRepositoryImpl;
+    private numberOfSelectedCardsRepository: NumberOfSelectedCardsRepositoryImpl;
     private cameraRepository: CameraRepository;
 
     private selectedCardBlockRepository: SelectedCardBlockRepositoryImpl;
     private selectedCardBlockPositionRepository: SelectedCardBlockPositionRepositoryImpl;
     private selectedCardEffectRepository: SelectedCardBlockEffectRepositoryImpl;
     private selectedCardEffectPositionRepository: SelectedCardBlockEffectPositionRepositoryImpl;
+    private numberOfSelectedCardsPositionRepository: NumberOfSelectedCardsPositionRepositoryImpl;
 
     private cardCountManager: CardCountManager;
     private selectedCardBockStateManager: SelectedCardBlockStateManager;
@@ -56,11 +60,13 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
         this.blockAddButtonPositionRepository = BlockAddButtonPositionRepositoryImpl.getInstance();
         this.makeDeckScreenCardRepository = MakeDeckScreenCardRepositoryImpl.getInstance();
         this.makeDeckScreenDoneButtonRepository = MakeDeckScreenDoneButtonRepositoryImpl.getInstance();
+        this.numberOfSelectedCardsRepository = NumberOfSelectedCardsRepositoryImpl.getInstance();
 
         this.selectedCardBlockRepository = SelectedCardBlockRepositoryImpl.getInstance();
         this.selectedCardBlockPositionRepository = SelectedCardBlockPositionRepositoryImpl.getInstance();
         this.selectedCardEffectRepository = SelectedCardBlockEffectRepositoryImpl.getInstance();
         this.selectedCardEffectPositionRepository = SelectedCardBlockEffectPositionRepositoryImpl.getInstance();
+        this.numberOfSelectedCardsPositionRepository = NumberOfSelectedCardsPositionRepositoryImpl.getInstance();
 
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
@@ -113,6 +119,7 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
                 this.deleteEffectByCardId(cardId);
                 this.removeAddButtonByCardId(cardId);
                 this.removeDeleteButtonByCardId(cardId);
+                this.deleteNumberMesh(cardId);
                 this.cardCountManager.deleteCardCountByCardId(cardId);
                 this.cardCountManager.resetCurrentClickedCardId();
 
@@ -235,4 +242,37 @@ export class BlockDeleteButtonClickDetectServiceImpl implements BlockDeleteButto
         }
     }
 
+    private deleteNumberByCardId(cardId: number): void {
+        const cardIdList = this.numberOfSelectedCardsRepository.findAllCardIds();
+        console.log(`지우기 전 카드는? ${cardIdList}`);
+
+        const positionId = this.numberOfSelectedCardsPositionRepository.findPositionIdByCardId(cardId);
+        if (positionId !== null) {
+            this.numberOfSelectedCardsRepository.deleteNumberByCardId(cardId);
+            this.numberOfSelectedCardsPositionRepository.deleteById(positionId);
+        }
+
+        const newList = this.numberOfSelectedCardsRepository.findAllCardIds();
+
+        // 제대로 지워졌나 확인용
+        console.log(`현재 남은 카드는? ${newList}`);
+    }
+
+    private updateNumberPosition(): void {
+        this.numberOfSelectedCardsPositionRepository.updateAllPositions();
+    }
+
+    private deleteNumberMesh(cardId: number): void {
+        const cardIdList = this.numberOfSelectedCardsRepository.findAllCardIds();
+        if (cardIdList.includes(cardId)) {
+            this.deleteNumberByCardId(cardId);
+            console.log(`Card ID ${cardId} exists in the list.`);
+
+        } else {
+            // number mesh 의 경우 선택된 카드가 여러 개인 것들만 position 관리를 해서
+            // delete 를 할 때 지우려는 카드가 여러 개인 경우와 아닌 경우 나누어야 함.
+            this.updateNumberPosition();
+            console.log(`Card ID ${cardId} does not exist in the list.`);
+        }
+    }
 }

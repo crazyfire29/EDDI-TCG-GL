@@ -77,7 +77,6 @@ export class SideScrollServiceImpl implements SideScrollService {
         blockDeleteButton.position.y += event.deltaY * scrollSpeed;
         numberGroup.position.y += event.deltaY * scrollSpeed;
 
-        const maxScroll = 0.0706 * window.innerHeight * (totalBlockCounts - 2);
         const lowerLimit = 0.0706 * window.innerHeight * (totalBlockCounts - 10); // 보이지 않는 블록들이 차지하는 전체 높이
         const upperLimit = 0;
         console.log(`upperLimit: ${upperLimit}`); // 최대로 올릴 수 있는 범위
