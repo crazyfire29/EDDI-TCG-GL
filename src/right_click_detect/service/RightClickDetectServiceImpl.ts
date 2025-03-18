@@ -11,6 +11,16 @@ import {MouseCursorDetectRepository} from "../../mouse_cursor_detect/repository/
 import {LeftClickedArea} from "../../left_click_detect/entity/LeftClickedArea";
 import {ActivePanelAreaRepository} from "../../active_panel_area/repository/ActivePanelAreaRepository";
 import {ActivePanelAreaRepositoryImpl} from "../../active_panel_area/repository/ActivePanelAreaRepositoryImpl";
+import {BattleFieldCardScene} from "../../battle_field_card_scene/entity/BattleFieldCardScene";
+import {getCardById} from "../../card/utility";
+import {YourFieldRepository} from "../../your_field/repository/YourFieldRepository";
+import {YourFieldRepositoryImpl} from "../../your_field/repository/YourFieldRepositoryImpl";
+import {YourFieldMapRepository} from "../../your_field_map/repository/YourFieldMapRepository";
+import {YourFieldMapRepositoryImpl} from "../../your_field_map/repository/YourFieldMapRepositoryImpl";
+import {
+    YourFieldCardSceneRepositoryImpl
+} from "../../your_field_card_scene/repository/YourFieldCardSceneRepositoryImpl";
+import {YourFieldCardSceneRepository} from "../../your_field_card_scene/repository/YourFieldCardSceneRepository";
 
 export class RightClickDetectServiceImpl implements RightClickDetectService {
     private static instance: RightClickDetectServiceImpl | null = null;
@@ -19,12 +29,16 @@ export class RightClickDetectServiceImpl implements RightClickDetectService {
     private dragMoveRepository: DragMoveRepository
     private mouseCursorDetectRepository: MouseCursorDetectRepository
     private activePanelAreaRepository: ActivePanelAreaRepository;
+    private yourFieldRepository: YourFieldRepository;
+    private yourFieldCardSceneRepository: YourFieldCardSceneRepository;
 
     private rightMouseDown: boolean = false;
 
     private constructor(private camera: THREE.Camera, scene: THREE.Scene) {
         this.cameraRepository = CameraRepositoryImpl.getInstance()
         this.dragMoveRepository = DragMoveRepositoryImpl.getInstance()
+        this.yourFieldRepository = YourFieldRepositoryImpl.getInstance()
+        this.yourFieldCardSceneRepository = YourFieldCardSceneRepositoryImpl.getInstance()
         this.mouseCursorDetectRepository = MouseCursorDetectRepositoryImpl.getInstance()
         this.activePanelAreaRepository = ActivePanelAreaRepositoryImpl.getInstance(camera, scene);
     }
@@ -37,7 +51,7 @@ export class RightClickDetectServiceImpl implements RightClickDetectService {
     }
 
     async handleRightClick(clickPoint: { x: number; y: number }): Promise<any> {
-        console.log(`handleRightClick: (${clickPoint})`)
+        // console.log(`handleRightClick: (${clickPoint})`)
 
         const selectedArea = this.dragMoveRepository.getSelectedArea()
         if (selectedArea !== LeftClickedArea.YOUR_FIELD) {
@@ -51,7 +65,7 @@ export class RightClickDetectServiceImpl implements RightClickDetectService {
             return; // YOUR_FIELD가 아니면 즉시 종료
         }
 
-        console.log('Active Panel 생성 준비')
+        // console.log('Active Panel 생성 준비')
 
         if (this.activePanelAreaRepository.exists()) {
             console.log("기존 Active Panel 삭제");
@@ -59,9 +73,28 @@ export class RightClickDetectServiceImpl implements RightClickDetectService {
             return;
         }
 
+        const selectedObject = this.dragMoveRepository.getSelectedObject()
+        if (!selectedObject) return;
+
+        const cardScene = selectedObject as unknown as BattleFieldCardScene;
+        // const mesh = cardScene.getMesh();
+        // if (!mesh) return;
+        //
+        // const meshId = mesh.id;
+        // console.log(`meshId: ${meshId}`);
+
+        // const yourFieldCardScene = this.yourFieldCardSceneRepository.findIndexByCardMeshId(meshId)
+
+        const yourFieldCard = this.yourFieldRepository.findByCardSceneId(cardScene.getId())
+        // console.log(`yourFieldCard: ${JSON.stringify(yourFieldCard, null, 2)}`);
+
+        if (!yourFieldCard) return;
+
+        const cardId = yourFieldCard.getCardId()
+
         // 새 패널 생성
-        console.log("새로운 Active Panel 생성");
-        await this.activePanelAreaRepository.create(clickPoint.x, clickPoint.y);
+        // console.log("새로운 Active Panel 생성");
+        await this.activePanelAreaRepository.create(clickPoint.x, clickPoint.y, cardId);
     }
 
     setRightMouseDown(state: boolean): void {
