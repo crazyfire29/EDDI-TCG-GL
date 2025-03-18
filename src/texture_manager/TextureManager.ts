@@ -15,6 +15,8 @@ export class TextureManager {
     private battleFieldUnitHpTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitEnergyTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldUnitRaceTextureList: { [id: number]: THREE.Texture } = {};
+    private battleFieldActivePanelSkillTextureList: { [unitId: number]: { [skillId: number]: THREE.Texture } } = {};
+
     private battleFieldActivePanelGeneralTextureList: { [id: number]: THREE.Texture } = {};
     private battleFieldActivePanelDetailsTextureList: { [id: number]: THREE.Texture } = {};
     private mainLobbyBackgroundTextureList: { [id: number]: THREE.Texture } = {};
@@ -73,6 +75,8 @@ export class TextureManager {
                 this.loadTextures(imageData.race, this.battleFieldUnitRaceTextureList),
                 this.loadTextures(imageData.active_panel_general, this.battleFieldActivePanelGeneralTextureList),
                 this.loadTextures(imageData.active_panel_details, this.battleFieldActivePanelDetailsTextureList),
+                this.loadSkillTextures(imageData.active_panel_skill, this.battleFieldActivePanelSkillTextureList),
+
                 this.loadTextures(imageData.main_lobby_background, this.mainLobbyBackgroundTextureList),
                 this.loadTextures(imageData.main_lobby_buttons, this.mainLobbyButtonsTextureList),
                 this.loadTextures(imageData.shop_background, this.shopBackgroundTextureList),
@@ -249,6 +253,47 @@ export class TextureManager {
             default:
                 return undefined;
         }
+    }
+
+    private loadSkillTextures(skillImages: { [unitId: number]: string[] }, skillTextureList: { [unitId: number]: { [skillId: number]: THREE.Texture } }): Promise<void> {
+        const texturePromises: Promise<void>[] = [];
+
+        Object.entries(skillImages).forEach(([unitId, skillPaths]) => {
+            if (!skillTextureList[+unitId]) {
+                skillTextureList[+unitId] = {};
+            }
+
+            skillPaths.forEach((path, skillId) => {
+                texturePromises.push(new Promise<void>((resolve, reject) => {
+                    const textureLoader = new THREE.TextureLoader();
+
+                    textureLoader.load(
+                        path,
+                        (texture) => {
+                            texture.colorSpace = THREE.SRGBColorSpace;
+                            texture.magFilter = THREE.LinearFilter;
+                            texture.minFilter = THREE.LinearFilter;
+                            texture.generateMipmaps = false;
+                            skillTextureList[+unitId][skillId + 1] = texture;
+                            resolve();
+                        },
+                        undefined,
+                        (error) => {
+                            console.error(`Error loading skill texture for path: ${path}`, error);
+                            reject(error);
+                        }
+                    );
+                }));
+            });
+        });
+
+        return Promise.all(texturePromises).then(() => {
+            console.log(`Loaded skill textures.`);
+        });
+    }
+
+    public getSkillButtonTexture(unitId: number, skillId: number): THREE.Texture | undefined {
+        return this.battleFieldActivePanelSkillTextureList[unitId]?.[skillId];
     }
 }
 
