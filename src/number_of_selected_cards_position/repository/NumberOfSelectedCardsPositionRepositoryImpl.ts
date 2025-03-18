@@ -5,8 +5,6 @@ import {SelectedCardBlockPositionRepositoryImpl} from "../../selected_card_block
 
 export class NumberOfSelectedCardsPositionRepositoryImpl implements NumberOfSelectedCardsPositionRepository {
     private static instance: NumberOfSelectedCardsPositionRepositoryImpl;
-//     private positionMap: Map<number, NumberOfSelectedCardsPosition>; //positionId: position
-//     private cardIdToPositionMap: Map<number, number>; //clickedCardId: positionId
     private positionMap: Map<number, { cardId: number, position: NumberOfSelectedCardsPosition}> = new Map();
     private selectedCardBlockPositionRepository: SelectedCardBlockPositionRepositoryImpl;
 
@@ -14,8 +12,6 @@ export class NumberOfSelectedCardsPositionRepositoryImpl implements NumberOfSele
 
     private constructor() {
         this.selectedCardBlockPositionRepository = SelectedCardBlockPositionRepositoryImpl.getInstance();
-//         this.positionMap = new Map<number, NumberOfSelectedCardsPosition>();
-//         this.cardIdToPositionMap = new Map<number, number>();
     }
 
     public static getInstance(): NumberOfSelectedCardsPositionRepositoryImpl {
@@ -30,8 +26,6 @@ export class NumberOfSelectedCardsPositionRepositoryImpl implements NumberOfSele
         const positionY = blockPositionY;
         const position = new NumberOfSelectedCardsPosition(positionX, positionY);
 
-//         this.positionMap.set(position.id, position);
-//         this.cardIdToPositionMap.set(cardId, position.id);
         this.positionMap.set(position.id, {cardId, position: position});
 
         return position;

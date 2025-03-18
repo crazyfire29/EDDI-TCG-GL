@@ -1,8 +1,6 @@
 import * as THREE from "three";
 
 import {SideScrollService} from "./SideScrollService";
-import {SideScrollRepositoryImpl} from "../repository/SideScrollRepositoryImpl";
-
 import {SideScrollArea} from "../../side_scroll_area/entity/SideScrollArea";
 import {SideScrollAreaRepositoryImpl} from "../../side_scroll_area/repository/SideScrollAreaRepositoryImpl";
 import {SelectedCardBlockRepositoryImpl} from "../../selected_card_block/repository/SelectedCardBlockRepositoryImpl";
@@ -19,7 +17,6 @@ import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl
 
 export class SideScrollServiceImpl implements SideScrollService {
     private static instance: SideScrollServiceImpl | null = null;
-    private sideScrollRepository: SideScrollRepositoryImpl;
     private sideScrollAreaRepository: SideScrollAreaRepositoryImpl;
     private selectedCardBlockRepository: SelectedCardBlockRepositoryImpl;
     private sideScrollAreaDetectRepository: SideScrollAreaDetectRepositoryImpl;
@@ -36,7 +33,6 @@ export class SideScrollServiceImpl implements SideScrollService {
     private constructor(camera: THREE.Camera, scene: THREE.Scene, renderer: THREE.WebGLRenderer) {
         this.renderer = renderer;
         this.cameraRepository = CameraRepositoryImpl.getInstance();
-        this.sideScrollRepository = SideScrollRepositoryImpl.getInstance(renderer);
         this.sideScrollAreaRepository = SideScrollAreaRepositoryImpl.getInstance();
         this.selectedCardBlockRepository = SelectedCardBlockRepositoryImpl.getInstance();
         this.sideScrollAreaDetectRepository = SideScrollAreaDetectRepositoryImpl.getInstance();
@@ -88,10 +84,6 @@ export class SideScrollServiceImpl implements SideScrollService {
         blockAddButton.position.y = Math.max(Math.min(blockAddButton.position.y, lowerLimit), upperLimit);
         blockDeleteButton.position.y = Math.max(Math.min(blockDeleteButton.position.y, lowerLimit), upperLimit);
         numberGroup.position.y = Math.max(Math.min(numberGroup.position.y, lowerLimit), upperLimit);
-    }
-
-    public setClippingPlanes(sideScrollArea: SideScrollArea): THREE.Plane[] {
-        return this.sideScrollRepository.setClippingPlanes(sideScrollArea);
     }
 
     private getAllBlockGroups(): THREE.Group {

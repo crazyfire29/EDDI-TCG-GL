@@ -62,6 +62,7 @@ import {AddDeleteButtonStateManager} from "../../src/block_add_delete_button_man
 import {SelectedCardBlockStateManager} from "../../src/selected_card_block_manager/SelectedCardBlockStateManager";
 import {NumberOfOwnedCardsStateManager} from "../../src/number_of_owned_cards_manager/NumberOfOwnedCardsStateManager";
 import {CardEffectStateManager} from "../../src/make_deck_screen_card_effect_manager/CardEffectStateManager";
+import {ClippingMaskManager} from "../../src/clipping_mask_manager/ClippingMaskManager";
 
 export class TCGJustTestMakeDeckView {
     private static instance: TCGJustTestMakeDeckView | null = null;
@@ -110,6 +111,7 @@ export class TCGJustTestMakeDeckView {
     private selectedCadBlockStateManager = SelectedCardBlockStateManager.getInstance();
     private numberOfOwnedCardsStateManager = NumberOfOwnedCardsStateManager.getInstance();
     private cardEffectStateManager = CardEffectStateManager.getInstance();
+    private clippingMaskManager = ClippingMaskManager.getInstance();
     private makeDeckScreenCardMapRepository = MakeDeckScreenCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
@@ -132,6 +134,7 @@ export class TCGJustTestMakeDeckView {
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.simulationMyDeckContainer.appendChild(this.renderer.domElement);
+        this.clippingMaskManager.setRenderer(this.renderer);
 
         this.userWindowSize = UserWindowSize.getInstance()
 
@@ -447,7 +450,6 @@ export class TCGJustTestMakeDeckView {
                     this.makeDeckScreenDoneButtonService.initializeDoneButtonVisible();
                     const allButtons = this.makeDeckScreenDoneButtonService.getAllDoneButtons();
                     allButtons.forEach((button) => this.scene.add(button.getMesh()));
-//                     this.scene.add(button);
                     console.log(`Draw Done Button ${config.id}`);
                 }
             }));
@@ -471,24 +473,14 @@ export class TCGJustTestMakeDeckView {
 
     private async addBlock(cardId: number): Promise<void> {
         try {
-//             const cardId = 2;
             await this.selectedCardBlockService.createSelectedCardBlockWithPosition(cardId);
             const blockMesh = this.selectedCardBlockService.getBlockMeshByCardId(cardId);
 
             if (blockMesh) {
                 const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
                 if (sideScrollArea) {
-                    const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
-                    if (Array.isArray(blockMesh.material)) {
-                        blockMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (blockMesh.material instanceof THREE.Material) {
-                        // 배열이 아니면, 단일 Material로 취급하여 처리
-                        blockMesh.material.clippingPlanes = clippingPlanes;
-                    }
+                    const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
+                    this.clippingMaskManager.applyClippingPlanesToMesh(blockMesh, clippingPlanes);
                 }
                 const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
                 blockGroup.add(blockMesh);
@@ -497,7 +489,6 @@ export class TCGJustTestMakeDeckView {
                     this.scene.add(blockGroup);
                 }
                 blockGroup.position.y = 0;
-//                 this.scene.add(blockMesh);
             }
 
         } catch (error) {
@@ -513,16 +504,8 @@ export class TCGJustTestMakeDeckView {
             if (effectMesh) {
                 const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
                 if (sideScrollArea) {
-                    const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
-                    if (Array.isArray(effectMesh.material)) {
-                        effectMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (effectMesh.material instanceof THREE.Material) {
-                        effectMesh.material.clippingPlanes = clippingPlanes;
-                    }
+                    const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
+                    this.clippingMaskManager.applyClippingPlanesToMesh(effectMesh, clippingPlanes);
                 }
                 this.selectedCardBlockEffectManager.initializeEffectVisibility(cardId);
 
@@ -533,7 +516,6 @@ export class TCGJustTestMakeDeckView {
                     this.scene.add(effectGroup);
                 }
                 effectGroup.position.y = 0;
-//                 this.scene.add(effectMesh);
             }
 
         } catch (error) {
@@ -574,16 +556,8 @@ export class TCGJustTestMakeDeckView {
             if (newNumberMesh) {
                 const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
                 if (sideScrollArea) {
-                    const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
-                    if (Array.isArray(newNumberMesh.material)) {
-                        newNumberMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (newNumberMesh.material instanceof THREE.Material) {
-                        newNumberMesh.material.clippingPlanes = clippingPlanes;
-                    }
+                    const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
+                    this.clippingMaskManager.applyClippingPlanesToMesh(newNumberMesh, clippingPlanes);
                 }
                 const numberGroup = this.numberOfSelectedCardsService.getNumberGroup();
                 numberGroup.add(newNumberMesh);
@@ -592,7 +566,6 @@ export class TCGJustTestMakeDeckView {
                     this.scene.add(numberGroup);
                 }
                 numberGroup.position.y = 0;
-//                 this.scene.add(newNumberMesh);
             }
 
         } catch (error) {
@@ -608,16 +581,8 @@ export class TCGJustTestMakeDeckView {
             if (buttonMesh) {
                 const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
                 if (sideScrollArea) {
-                    const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
-                    if (Array.isArray(buttonMesh.material)) {
-                        buttonMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (buttonMesh.material instanceof THREE.Material) {
-                        buttonMesh.material.clippingPlanes = clippingPlanes;
-                    }
+                    const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
+                    this.clippingMaskManager.applyClippingPlanesToMesh(buttonMesh, clippingPlanes);
                 }
                 this.addDeleteButtonStateManager.initializeAddButtonVisibility(cardId);
 
@@ -627,8 +592,7 @@ export class TCGJustTestMakeDeckView {
                 if (!this.scene.children.includes(buttonGroup)) {
                     this.scene.add(buttonGroup);
                 }
-//                 buttonGroup.position.y = 0;
-//                 this.scene.add(buttonMesh);
+                buttonGroup.position.y = 0;
             }
 
         } catch (error) {
@@ -644,16 +608,8 @@ export class TCGJustTestMakeDeckView {
             if (buttonMesh) {
                 const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
                 if (sideScrollArea) {
-                    const clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
-                    if (Array.isArray(buttonMesh.material)) {
-                        buttonMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (buttonMesh.material instanceof THREE.Material) {
-                        buttonMesh.material.clippingPlanes = clippingPlanes;
-                    }
+                    const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
+                    this.clippingMaskManager.applyClippingPlanesToMesh(buttonMesh, clippingPlanes);
                 }
                 this.addDeleteButtonStateManager.initializeDeleteButtonVisibility(cardId);
 
@@ -664,7 +620,6 @@ export class TCGJustTestMakeDeckView {
                     this.scene.add(buttonGroup);
                 }
                 buttonGroup.position.y = 0;
-//                 this.scene.add(buttonMesh);
             }
 
         } catch (error) {
@@ -793,22 +748,14 @@ export class TCGJustTestMakeDeckView {
             let clippingPlanes: THREE.Plane[] = [];
 
             if (sideScrollArea) {
-                clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
+                clippingPlanes = this.clippingMaskManager.getClippingPlanes(0);
             }
 
             currentAllBlockMesh.forEach((block) => {
                 const blockMesh = block.getMesh();
 
                 if (clippingPlanes.length > 0) {
-                    if (Array.isArray(blockMesh.material)) {
-                        blockMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (blockMesh.material instanceof THREE.Material) {
-                        blockMesh.material.clippingPlanes = clippingPlanes;
-                    }
+                    this.clippingMaskManager.applyClippingPlanesToMesh(blockMesh, clippingPlanes);
                 }
                 blockGroup.add(blockMesh);
             });
@@ -816,9 +763,9 @@ export class TCGJustTestMakeDeckView {
             if (!this.scene.children.includes(blockGroup)) {
                 this.scene.add(blockGroup);
             }
+
             blockGroup.position.y = 0;
 
-//             currentAllBlockMesh.forEach((block) => this.scene.add(block.getMesh()));
         } catch (error) {
             console.error('Failed to add All Block:', error);
         }
@@ -838,22 +785,14 @@ export class TCGJustTestMakeDeckView {
             let clippingPlanes: THREE.Plane[] = [];
 
             if (sideScrollArea) {
-                clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
+                clippingPlanes = this.clippingMaskManager.getClippingPlanes(0);
             }
 
             currentAllEffectMesh.forEach((effect) => {
                 const effectMesh = effect.getMesh();
 
                 if (clippingPlanes.length > 0) {
-                    if (Array.isArray(effectMesh.material)) {
-                        effectMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (effectMesh.material instanceof THREE.Material) {
-                        effectMesh.material.clippingPlanes = clippingPlanes;
-                    }
+                    this.clippingMaskManager.applyClippingPlanesToMesh(effectMesh, clippingPlanes);
                 }
                 effectGroup.add(effectMesh);
             });
@@ -861,9 +800,9 @@ export class TCGJustTestMakeDeckView {
             if (!this.scene.children.includes(effectGroup)) {
                 this.scene.add(effectGroup);
             }
+
             effectGroup.position.y = 0;
 
-//             currentAllEffectMesh.forEach((effect) => this.scene.add(effect.getMesh()));
         } catch (error) {
             console.error('Failed to add All Effect:', error);
         }
@@ -883,22 +822,14 @@ export class TCGJustTestMakeDeckView {
             let clippingPlanes: THREE.Plane[] = [];
 
             if (sideScrollArea) {
-                clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
+                clippingPlanes = this.clippingMaskManager.getClippingPlanes(0);
             }
 
             currentAllButtonMesh.forEach((button) => {
                 const buttonMesh = button.getMesh();
 
                 if (clippingPlanes.length > 0) {
-                    if (Array.isArray(buttonMesh.material)) {
-                        buttonMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (buttonMesh.material instanceof THREE.Material) {
-                        buttonMesh.material.clippingPlanes = clippingPlanes;
-                    }
+                    this.clippingMaskManager.applyClippingPlanesToMesh(buttonMesh, clippingPlanes);
                 }
                 buttonGroup.add(buttonMesh);
             });
@@ -906,8 +837,9 @@ export class TCGJustTestMakeDeckView {
             if (!this.scene.children.includes(buttonGroup)) {
                 this.scene.add(buttonGroup);
             }
+
             buttonGroup.position.y = 0;
-//             currentAllButtonMesh.forEach((button) => this.scene.add(button.getMesh()));
+
         } catch (error) {
             console.error('Failed to add All Add Button:', error);
         }
@@ -926,22 +858,14 @@ export class TCGJustTestMakeDeckView {
             let clippingPlanes: THREE.Plane[] = [];
 
             if (sideScrollArea) {
-                clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
+                clippingPlanes = this.clippingMaskManager.getClippingPlanes(0);
             }
 
             currentAllButtonMesh.forEach((button) => {
                 const buttonMesh = button.getMesh();
 
                 if (clippingPlanes.length > 0) {
-                    if (Array.isArray(buttonMesh.material)) {
-                        buttonMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (buttonMesh.material instanceof THREE.Material) {
-                        buttonMesh.material.clippingPlanes = clippingPlanes;
-                    }
+                    this.clippingMaskManager.applyClippingPlanesToMesh(buttonMesh, clippingPlanes);
                 }
                 buttonGroup.add(buttonMesh);
             });
@@ -949,8 +873,9 @@ export class TCGJustTestMakeDeckView {
             if (!this.scene.children.includes(buttonGroup)) {
                 this.scene.add(buttonGroup);
             }
+
             buttonGroup.position.y = 0;
-//             currentAllButtonMesh.forEach((button) => this.scene.add(button.getMesh()));
+
         } catch (error) {
             console.error('Failed to add All Delete Button:', error);
         }
@@ -968,22 +893,14 @@ export class TCGJustTestMakeDeckView {
             let clippingPlanes: THREE.Plane[] = [];
 
             if (sideScrollArea) {
-                clippingPlanes = this.sideScrollService.setClippingPlanes(sideScrollArea);
+                clippingPlanes = this.clippingMaskManager.getClippingPlanes(0);
             }
 
             currentNumberMesh.forEach((number) => {
                 const numberMesh = number.getMesh();
 
                 if (clippingPlanes.length > 0) {
-                    if (Array.isArray(numberMesh.material)) {
-                        numberMesh.material.forEach((material) => {
-                            if (material instanceof THREE.Material) {
-                                material.clippingPlanes = clippingPlanes;
-                            }
-                        });
-                    } else if (numberMesh.material instanceof THREE.Material) {
-                        numberMesh.material.clippingPlanes = clippingPlanes;
-                    }
+                    this.clippingMaskManager.applyClippingPlanesToMesh(numberMesh, clippingPlanes);
                 }
                 numberGroup.add(numberMesh);
             });
