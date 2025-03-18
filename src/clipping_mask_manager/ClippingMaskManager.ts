@@ -28,10 +28,10 @@ export class ClippingMaskManager {
         }
 
         // 이미 존재하면 새로 추가하지 않음
-        if (this.clippingPlanesMap.has(id)) {
-            console.warn(`Clipping planes for id ${id} already exist. Skipping update.`);
-            return this.clippingPlanesMap.get(id) || [];
-        }
+//         if (this.clippingPlanesMap.has(id)) {
+//             console.warn(`Clipping planes for id ${id} already exist. Skipping update.`);
+//             return this.clippingPlanesMap.get(id) || [];
+//         }
 
         const sideScrollAreaX = sideScrollArea.position.x;
         const sideScrollAreaY = sideScrollArea.position.y;

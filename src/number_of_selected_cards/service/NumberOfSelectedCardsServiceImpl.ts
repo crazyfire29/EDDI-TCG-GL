@@ -12,12 +12,18 @@ import {SelectedCardBlockPosition} from "../../selected_card_block_position/enti
 import {MakeDeckScreenCardClickDetectRepositoryImpl} from "../../make_deck_screen_card_click_detect/repository/MakeDeckScreenCardClickDetectRepositoryImpl";
 import {CardCountManager} from "../../make_deck_screen_card_manager/CardCountManager";
 
+import {SideScrollAreaRepositoryImpl} from "../../side_scroll_area/repository/SideScrollAreaRepositoryImpl";
+import {SideScrollArea} from "../../side_scroll_area/entity/SideScrollArea";
+import {ClippingMaskManager} from "../../clipping_mask_manager/ClippingMaskManager";
+
 export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsService {
     private static instance: NumberOfSelectedCardsServiceImpl;
     private numberOfSelectedCardsRepository: NumberOfSelectedCardsRepositoryImpl;
     private numberOfSelectedCardsPositionRepository: NumberOfSelectedCardsPositionRepositoryImpl;
     private selectedCardBlockPositionRepository: SelectedCardBlockPositionRepositoryImpl;
     private makeDeckScreenCardClickDetectRepository: MakeDeckScreenCardClickDetectRepositoryImpl;
+    private sideScrollAreaRepository: SideScrollAreaRepositoryImpl;
+    private clippingMaskManager: ClippingMaskManager;
     private cardCountManager: CardCountManager;
 
     private constructor() {
@@ -25,6 +31,8 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
         this.numberOfSelectedCardsPositionRepository = NumberOfSelectedCardsPositionRepositoryImpl.getInstance();
         this.selectedCardBlockPositionRepository = SelectedCardBlockPositionRepositoryImpl.getInstance();
         this.makeDeckScreenCardClickDetectRepository = MakeDeckScreenCardClickDetectRepositoryImpl.getInstance();
+        this.sideScrollAreaRepository = SideScrollAreaRepositoryImpl.getInstance();
+        this.clippingMaskManager = ClippingMaskManager.getInstance();
         this.cardCountManager = CardCountManager.getInstance();
 
     }
@@ -109,6 +117,12 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
             numberObjectMesh.geometry.dispose();
             numberObjectMesh.geometry = new THREE.PlaneGeometry(numberObjectWidth, numberObjectHeight);
             numberObjectMesh.position.set(newPositionX, newPositionY, 0);
+
+            const sideScrollArea = this.getSideScrollArea();
+            if (sideScrollArea) {
+                const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
+                this.applyClippingPlanesToMesh(numberObjectMesh, clippingPlanes);
+            }
         }
     }
 
@@ -189,6 +203,18 @@ export class NumberOfSelectedCardsServiceImpl implements NumberOfSelectedCardsSe
 
     public getAllNumber(): NumberOfSelectedCards[] {
         return this.numberOfSelectedCardsRepository.findAllNumber();
+    }
+
+    private getSideScrollArea(): SideScrollArea | null {
+        return this.sideScrollAreaRepository.findArea();
+    }
+
+    private getClippingPlanes(id: number): THREE.Plane[] {
+        return this.clippingMaskManager.getClippingPlanes(id);
+    }
+
+    private applyClippingPlanesToMesh(mesh: THREE.Mesh, clippingPlanes: THREE.Plane[]): void {
+        this.clippingMaskManager.applyClippingPlanesToMesh(mesh, clippingPlanes);
     }
 
 }

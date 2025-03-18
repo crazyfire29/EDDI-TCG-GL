@@ -10,16 +10,24 @@ import {BlockAddButtonPosition} from "../../block_add_button_position/entity/Blo
 import {SelectedCardBlockPositionRepositoryImpl} from "../../selected_card_block_position/repository/SelectedCardBlockPositionRepositoryImpl";
 import {SelectedCardBlockPosition} from "../../selected_card_block_position/entity/SelectedCardBlockPosition";
 
+import {SideScrollAreaRepositoryImpl} from "../../side_scroll_area/repository/SideScrollAreaRepositoryImpl";
+import {SideScrollArea} from "../../side_scroll_area/entity/SideScrollArea";
+import {ClippingMaskManager} from "../../clipping_mask_manager/ClippingMaskManager";
+
 export class BlockAddButtonServiceImpl implements BlockAddButtonService {
     private static instance: BlockAddButtonServiceImpl;
     private blockAddButtonRepository: BlockAddButtonRepositoryImpl;
     private blockAddButtonPositionRepository: BlockAddButtonPositionRepositoryImpl;
     private selectedCardBlockPositionRepository: SelectedCardBlockPositionRepositoryImpl;
+    private sideScrollAreaRepository: SideScrollAreaRepositoryImpl;
+    private clippingMaskManager: ClippingMaskManager;
 
     private constructor() {
         this.blockAddButtonRepository = BlockAddButtonRepositoryImpl.getInstance();
         this.blockAddButtonPositionRepository = BlockAddButtonPositionRepositoryImpl.getInstance();
         this.selectedCardBlockPositionRepository = SelectedCardBlockPositionRepositoryImpl.getInstance();
+        this.sideScrollAreaRepository = SideScrollAreaRepositoryImpl.getInstance();
+        this.clippingMaskManager = ClippingMaskManager.getInstance();
     }
 
     public static getInstance(): BlockAddButtonServiceImpl {
@@ -89,6 +97,12 @@ export class BlockAddButtonServiceImpl implements BlockAddButtonService {
             buttonMesh.geometry.dispose();
             buttonMesh.geometry = new THREE.PlaneGeometry(buttonWidth, buttonHeight);
             buttonMesh.position.set(newPositionX, newPositionY, 0);
+
+            const sideScrollArea = this.getSideScrollArea();
+            if (sideScrollArea) {
+                const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
+                this.applyClippingPlanesToMesh(buttonMesh, clippingPlanes);
+            }
         }
     }
 
@@ -145,6 +159,18 @@ export class BlockAddButtonServiceImpl implements BlockAddButtonService {
 
     public resetButtonGroup(): void {
         this.blockAddButtonRepository.resetButtonGroup();
+    }
+
+    private getSideScrollArea(): SideScrollArea | null {
+        return this.sideScrollAreaRepository.findArea();
+    }
+
+    private getClippingPlanes(id: number): THREE.Plane[] {
+        return this.clippingMaskManager.getClippingPlanes(id);
+    }
+
+    private applyClippingPlanesToMesh(mesh: THREE.Mesh, clippingPlanes: THREE.Plane[]): void {
+        this.clippingMaskManager.applyClippingPlanesToMesh(mesh, clippingPlanes);
     }
 
 }

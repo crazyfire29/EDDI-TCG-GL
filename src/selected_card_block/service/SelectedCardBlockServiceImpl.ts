@@ -6,15 +6,22 @@ import {SelectedCardBlock} from "../../selected_card_block/entity/SelectedCardBl
 import {SelectedCardBlockRepositoryImpl} from "../../selected_card_block/repository/SelectedCardBlockRepositoryImpl";
 import {SelectedCardBlockPosition} from "../../selected_card_block_position/entity/SelectedCardBlockPosition";
 import {SelectedCardBlockPositionRepositoryImpl} from "../../selected_card_block_position/repository/SelectedCardBlockPositionRepositoryImpl";
+import {SideScrollAreaRepositoryImpl} from "../../side_scroll_area/repository/SideScrollAreaRepositoryImpl";
+import {SideScrollArea} from "../../side_scroll_area/entity/SideScrollArea";
+import {ClippingMaskManager} from "../../clipping_mask_manager/ClippingMaskManager";
 
 export class SelectedCardBlockServiceImpl implements SelectedCardBlockService {
     private static instance: SelectedCardBlockServiceImpl;
     private selectedCardBlockRepository: SelectedCardBlockRepositoryImpl;
     private selectedCardBlockPositionRepository: SelectedCardBlockPositionRepositoryImpl;
+    private sideScrollAreaRepository: SideScrollAreaRepositoryImpl;
+    private clippingMaskManager: ClippingMaskManager;
 
     private constructor() {
         this.selectedCardBlockRepository = SelectedCardBlockRepositoryImpl.getInstance();
         this.selectedCardBlockPositionRepository = SelectedCardBlockPositionRepositoryImpl.getInstance();
+        this.sideScrollAreaRepository = SideScrollAreaRepositoryImpl.getInstance();
+        this.clippingMaskManager = ClippingMaskManager.getInstance();
     }
 
     public static getInstance(): SelectedCardBlockServiceImpl {
@@ -91,6 +98,15 @@ export class SelectedCardBlockServiceImpl implements SelectedCardBlockService {
             blockMesh.geometry.dispose();
             blockMesh.geometry = new THREE.PlaneGeometry(blockWidth, blockHeight);
             blockMesh.position.set(newPositionX, newPositionY, 0);
+
+            const sideScrollArea = this.getSideScrollArea();
+            if (sideScrollArea) {
+                sideScrollArea.width = 0.255 * windowWidth;
+                sideScrollArea.height = 0.735 * windowHeight;
+                sideScrollArea.position.set(0.3895 * window.innerWidth, 0.04 * window.innerHeight);
+                const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
+                this.applyClippingPlanesToMesh(blockMesh, clippingPlanes);
+            }
         }
     }
 
@@ -147,6 +163,18 @@ export class SelectedCardBlockServiceImpl implements SelectedCardBlockService {
 
     public resetBlockGroups(): void {
         this.selectedCardBlockRepository.resetBlockGroups();
+    }
+
+    private getSideScrollArea(): SideScrollArea | null {
+        return this.sideScrollAreaRepository.findArea();
+    }
+
+    private getClippingPlanes(id: number): THREE.Plane[] {
+        return this.clippingMaskManager.getClippingPlanes(id);
+    }
+
+    private applyClippingPlanesToMesh(mesh: THREE.Mesh, clippingPlanes: THREE.Plane[]): void {
+        this.clippingMaskManager.applyClippingPlanesToMesh(mesh, clippingPlanes);
     }
 
 }
