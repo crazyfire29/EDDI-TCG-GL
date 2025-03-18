@@ -8,14 +8,22 @@ import {SelectedCardBlockEffectRepositoryImpl} from "../../selected_card_block_e
 import {SelectedCardBlockEffectPosition} from "../../selected_card_block_effect_position/entity/SelectedCardBlockEffectPosition";
 import {SelectedCardBlockEffectPositionRepositoryImpl} from "../../selected_card_block_effect_position/repository/SelectedCardBlockEffectPositionRepositoryImpl";
 
+import {SideScrollAreaRepositoryImpl} from "../../side_scroll_area/repository/SideScrollAreaRepositoryImpl";
+import {SideScrollArea} from "../../side_scroll_area/entity/SideScrollArea";
+import {ClippingMaskManager} from "../../clipping_mask_manager/ClippingMaskManager";
+
 export class SelectedCardBlockEffectServiceImpl implements SelectedCardBlockEffectService {
     private static instance: SelectedCardBlockEffectServiceImpl;
     private selectedCardBlockEffectRepository: SelectedCardBlockEffectRepositoryImpl;
     private selectedCardBlockEffectPositionRepository: SelectedCardBlockEffectPositionRepositoryImpl;
+    private sideScrollAreaRepository: SideScrollAreaRepositoryImpl;
+    private clippingMaskManager: ClippingMaskManager;
 
     private constructor() {
         this.selectedCardBlockEffectRepository = SelectedCardBlockEffectRepositoryImpl.getInstance();
         this.selectedCardBlockEffectPositionRepository = SelectedCardBlockEffectPositionRepositoryImpl.getInstance();
+        this.sideScrollAreaRepository = SideScrollAreaRepositoryImpl.getInstance();
+        this.clippingMaskManager = ClippingMaskManager.getInstance();
     }
 
     public static getInstance(): SelectedCardBlockEffectServiceImpl {
@@ -91,6 +99,12 @@ export class SelectedCardBlockEffectServiceImpl implements SelectedCardBlockEffe
             effectMesh.geometry.dispose();
             effectMesh.geometry = new THREE.PlaneGeometry(effectWidth, effectHeight);
             effectMesh.position.set(newPositionX, newPositionY, 0);
+
+            const sideScrollArea = this.getSideScrollArea();
+            if (sideScrollArea) {
+                const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
+                this.applyClippingPlanesToMesh(effectMesh, clippingPlanes);
+            }
         }
     }
 
@@ -147,6 +161,18 @@ export class SelectedCardBlockEffectServiceImpl implements SelectedCardBlockEffe
 
     public resetEffectGroup(): void {
         this.selectedCardBlockEffectRepository.resetEffectGroup();
+    }
+
+    private getSideScrollArea(): SideScrollArea | null {
+        return this.sideScrollAreaRepository.findArea();
+    }
+
+    private getClippingPlanes(id: number): THREE.Plane[] {
+        return this.clippingMaskManager.getClippingPlanes(id);
+    }
+
+    private applyClippingPlanesToMesh(mesh: THREE.Mesh, clippingPlanes: THREE.Plane[]): void {
+        this.clippingMaskManager.applyClippingPlanesToMesh(mesh, clippingPlanes);
     }
 
 }
