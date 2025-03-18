@@ -27,6 +27,8 @@ export class YourFieldCardSceneRepositoryImpl implements YourFieldCardSceneRepos
         const yourFieldCardScene = new YourFieldCardScene(cardMesh);
         this.cardSceneMap.set(index, yourFieldCardScene);
 
+        console.log(`YourFieldCardSceneRepositoryImpl index: ${index}, cardMeshId: ${cardMesh.id}`);
+
         return yourFieldCardScene;
     }
 
@@ -42,6 +44,15 @@ export class YourFieldCardSceneRepositoryImpl implements YourFieldCardSceneRepos
         }
         return undefined; // id에 해당하는 카드가 없을 경우
     }
+
+    // findIndexByCardMeshId(cardMeshId: number): number | undefined {
+    //     for (const [index, cardScene] of this.cardSceneMap.entries()) {
+    //         if (cardScene && cardScene.getId() === cardMeshId) {
+    //             return index;
+    //         }
+    //     }
+    //     return undefined; // 해당하는 카드가 없을 경우
+    // }
 
     findAll(): YourFieldCardScene[] {
         return Array.from(this.cardSceneMap.values()).filter(scene => scene !== null);

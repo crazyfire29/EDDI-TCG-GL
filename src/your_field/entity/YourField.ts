@@ -32,4 +32,8 @@ export class YourField {
     getAttributeMarkIdList(): number[] {
         return this.attributeMarkIdList;
     }
+
+    getCardId(): number {
+        return this.cardId;
+    }
 }
