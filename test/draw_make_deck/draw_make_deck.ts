@@ -125,6 +125,7 @@ export class TCGJustTestMakeDeckView {
     private isSideScrollAreaAdded = false;
     private blockAddedMap: Map<number, boolean> = new Map();
     private isRaceButtonClick: boolean = false;
+    private isReAddDeactivationDoneButton: boolean = false;
 
     private userWindowSize: UserWindowSize;
 
@@ -194,7 +195,8 @@ export class TCGJustTestMakeDeckView {
                     const numberGroup = this.numberOfSelectedCardsService.getNumberGroup();
                     const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
                     numberGroup.position.y = blockGroup.position.y;
-                    await this.deleteDoneButton();
+                    await this.deleteDeactivationDoneButton();
+                    this.isReAddDeactivationDoneButton = false;
                 }
             }
         }, false);
@@ -233,6 +235,8 @@ export class TCGJustTestMakeDeckView {
                 const numberGroup = this.numberOfSelectedCardsService.getNumberGroup();
                 const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
                 numberGroup.position.y = blockGroup.position.y;
+                await this.deleteDeactivationDoneButton();
+                this.isReAddDeactivationDoneButton = false;
             }
         }, false);
 
@@ -247,6 +251,12 @@ export class TCGJustTestMakeDeckView {
                 const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
                 numberGroup.position.y = blockGroup.position.y;
                 const cardClickCount = this.cardCountManager.getCardClickCount(clickedButtonId);
+                if (this.isReAddDeactivationDoneButton == false) {
+                    await this.reAddDeactivationDoneButton();
+                    this.isReAddDeactivationDoneButton = true;
+                }
+                await this.deleteActivationDoneButton();
+                await this.reAddActivationDoneButton();
                 if (cardClickCount == 0) {
                     await this.deleteAllBlocks();
                     await this.deleteAllEffects();
@@ -458,7 +468,7 @@ export class TCGJustTestMakeDeckView {
         }
     }
 
-    private async deleteDoneButton(): Promise<void> {
+    private async deleteDeactivationDoneButton(): Promise<void> {
         try {
             const totalSelectedCardCount = this.cardCountManager.findTotalSelectedCardCount();
             const deactivationDoneButton = this.makeDeckScreenDoneButtonService.getDoneButtonById(0);
@@ -467,7 +477,74 @@ export class TCGJustTestMakeDeckView {
                 this.makeDeckScreenDoneButtonService.deleteDoneButtonById(0);
             }
         } catch (error) {
-            console.error('Failed to delete Done Button:', error);
+            console.error('Failed to delete Deactivation Done Button:', error);
+        }
+    }
+
+    private async deleteActivationDoneButton(): Promise<void> {
+        try {
+            const totalSelectedCardCount = this.cardCountManager.findTotalSelectedCardCount();
+            const activationDoneButton = this.makeDeckScreenDoneButtonService.getDoneButtonById(1);
+            if (activationDoneButton && totalSelectedCardCount !== 40) {
+                this.scene.remove(activationDoneButton.getMesh());
+                    this.makeDeckScreenDoneButtonService.deleteDoneButtonById(1);
+                }
+        } catch (error) {
+            console.error('Failed to delete Activation Done Button:', error);
+        }
+    }
+
+    private async reAddDeactivationDoneButton(): Promise<void> {
+        try {
+            const totalSelectedCardCount = this.cardCountManager.findTotalSelectedCardCount();
+            if (totalSelectedCardCount !== 40) {
+                const configList = new MakeDeckScreenDoneButtonConfigList();
+                await Promise.all(configList.buttonConfigs
+                    .filter(config => config.id === 1)
+                    .map(async (config) => {
+                        const button = await this.makeDeckScreenDoneButtonService.createDoneButton(
+                            config.id,
+                            config.position);
+
+                        if (button) {
+                            this.makeDeckScreenDoneButtonService.initializeDoneButtonVisible();
+                            const deactivationDoneButton = this.makeDeckScreenDoneButtonService.getDoneButtonById(0);
+                            if (deactivationDoneButton) {
+                                this.scene.add(deactivationDoneButton.getMesh());
+                                console.log(`Draw Deactivation Done Button`);
+                            }
+                        }
+                    }));
+            }
+
+        } catch (error) {
+            console.error('Failed to Deactivation ReAdd Done Button:', error);
+        }
+    }
+
+    private async reAddActivationDoneButton(): Promise<void> {
+        try {
+            const configList = new MakeDeckScreenDoneButtonConfigList();
+            await Promise.all(configList.buttonConfigs
+                .filter(config => config.id === 2)
+                .map(async (config) => {
+                    const button = await this.makeDeckScreenDoneButtonService.createDoneButton(
+                        config.id,
+                        config.position);
+
+                    if (button) {
+                        this.makeDeckScreenDoneButtonService.initializeDoneButtonVisible();
+                        const activationDoneButton = this.makeDeckScreenDoneButtonService.getDoneButtonById(1);
+                        if (activationDoneButton) {
+                            this.scene.add(activationDoneButton.getMesh());
+                            console.log(`Draw Activation Done Button`);
+                        }
+                    }
+                })
+            );
+
+        } catch (error) {
+            console.error('Failed to Activation Done Button:', error);
         }
     }
 
