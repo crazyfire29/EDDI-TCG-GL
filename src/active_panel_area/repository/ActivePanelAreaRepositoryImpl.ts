@@ -44,6 +44,7 @@ export class ActivePanelAreaRepositoryImpl implements ActivePanelAreaRepository 
         buttonHeight: number,
         buttonPosition: Vector2d,
         height: number,
+        heightMargin: number,
         skillCount: number,
         buttonType: 'general' | 'details' | 'firstSkill' | 'secondSkill'
     ): Promise<THREE.Mesh | null> { // null 반환을 가능하게 함
@@ -82,16 +83,18 @@ export class ActivePanelAreaRepositoryImpl implements ActivePanelAreaRepository 
 
             switch (buttonType) {
                 case 'general':
-                    offsetY = height * 0.5 - buttonHeight * 0.5 - (height * 0.05);
+                    // offsetY = height * 0.5 - buttonHeight * 0.5 - heightMargin;
+                    offsetY = height * 0.5 - buttonHeight * 0.5 - heightMargin * 0.5;
                     break;
                 case 'details':
-                    offsetY = height * 0.5 - buttonHeight * (1.5 + skillCount) - (height * 0.05);
+                    // offsetY = height * 0.5 - buttonHeight * (1.5 + skillCount) - heightMargin;
+                    offsetY = height * 0.5 - buttonHeight * (1.5 + skillCount) - heightMargin * (skillCount + 1.75);
                     break;
                 case 'firstSkill':
-                    offsetY = height * 0.5 - buttonHeight * (0.5 + this.FIRST_SKILL) - (height * 0.05);
+                    offsetY = height * 0.5 - buttonHeight * (0.5 + this.FIRST_SKILL) - heightMargin * 1.5;
                     break;
                 case 'secondSkill':
-                    offsetY = height * 0.5 - buttonHeight * (0.5 + this.SECOND_SKILL) - (height * 0.05);
+                    offsetY = height * 0.5 - buttonHeight * (0.5 + this.SECOND_SKILL) - heightMargin * 2.5;
                     break;
             }
 
@@ -127,9 +130,11 @@ export class ActivePanelAreaRepositoryImpl implements ActivePanelAreaRepository 
         const width = this.ACTIVE_PANEL_WIDTH_RATIO * window.innerWidth;
         const height = this.ACTIVE_PANEL_HEIGHT_RATIO * window.innerWidth * (skillCount + 2);
 
+        const heightMargin = (this. ACTIVE_PANEL_HEIGHT_RATIO - this.ACTIVE_PANEL_BUTTON_HEIGHT_RATIO) * window.innerWidth
+
         console.log(`width: ${width}, height: ${height}`);
 
-        const geometry = new THREE.PlaneGeometry(width, height);
+        const geometry = new THREE.PlaneGeometry(width, height + heightMargin);
         const material = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             transparent: true,
@@ -155,29 +160,30 @@ export class ActivePanelAreaRepositoryImpl implements ActivePanelAreaRepository 
         const buttonHeight = this.ACTIVE_PANEL_BUTTON_HEIGHT_RATIO * window.innerWidth;
         const buttonPosition = new Vector2d(mouse.x, mouse.y);
 
+
         // General Attack Button
-        const attackButtonMesh = await this.createButton("active_panel_general", cardId, buttonWidth, buttonHeight, buttonPosition, height, skillCount, 'general');
+        const attackButtonMesh = await this.createButton("active_panel_general", cardId, buttonWidth, buttonHeight, buttonPosition, height, heightMargin, skillCount, 'general');
         if (attackButtonMesh) {
             this.scene.add(attackButtonMesh);
             console.log("Attack Button 추가 완료", attackButtonMesh.position);
         }
 
         // Details Button
-        const detailsButtonMesh = await this.createButton("active_panel_details", cardId, buttonWidth, buttonHeight, buttonPosition, height, skillCount, 'details');
+        const detailsButtonMesh = await this.createButton("active_panel_details", cardId, buttonWidth, buttonHeight, buttonPosition, height, heightMargin, skillCount, 'details');
         if (detailsButtonMesh) {
             this.scene.add(detailsButtonMesh);
             console.log("상세 보기 Button 추가 완료", detailsButtonMesh.position);
         }
 
         // First Skill Button
-        const firstSkillButtonMesh = await this.createButton("active_panel_first_skill", cardId, buttonWidth, buttonHeight, buttonPosition, height, skillCount, 'firstSkill');
+        const firstSkillButtonMesh = await this.createButton("active_panel_first_skill", cardId, buttonWidth, buttonHeight, buttonPosition, height, heightMargin, skillCount, 'firstSkill');
         if (firstSkillButtonMesh) {
             this.scene.add(firstSkillButtonMesh);
             console.log("첫 번째 스킬 Button 추가 완료", firstSkillButtonMesh.position);
         }
 
         // Second Skill Button
-        const secondSkillButtonMesh = await this.createButton("active_panel_second_skill", cardId, buttonWidth, buttonHeight, buttonPosition, height, skillCount, 'secondSkill');
+        const secondSkillButtonMesh = await this.createButton("active_panel_second_skill", cardId, buttonWidth, buttonHeight, buttonPosition, height, heightMargin, skillCount, 'secondSkill');
         if (secondSkillButtonMesh) {
             this.scene.add(secondSkillButtonMesh);
             console.log("두 번째 스킬 Button 추가 완료", secondSkillButtonMesh.position);
