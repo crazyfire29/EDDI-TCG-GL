@@ -46,11 +46,11 @@ export class MakeDeckScreenDoneButtonRepositoryImpl implements MakeDeckScreenDon
         const newButton = new MakeDeckScreenDoneButton(type, buttonWidth, buttonHeight, buttonMesh, position);
 
         // 버튼을 새로 생성할 때마다 고유 번호를 자동으로 부여하고 있는데, 완료 버튼의 경우 2개로만 계속 관리되므로 0, 1으로만 고유 번호 부여
-        if (type == 1) {
-            newButton.id = 0;
-        } else {
-            newButton.id = 1;
-        }
+//         if (type == 1) {
+//             newButton.id = 0;
+//         } else {
+//             newButton.id = 1;
+//         }
         this.buttonMap.set(newButton.id, newButton);
 
         return newButton;

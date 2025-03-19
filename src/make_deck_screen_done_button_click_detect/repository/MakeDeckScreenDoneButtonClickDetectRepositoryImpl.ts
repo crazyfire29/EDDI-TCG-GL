@@ -15,11 +15,40 @@ export class MakeDeckScreenDoneButtonClickDetectRepositoryImpl implements MakeDe
         return MakeDeckScreenDoneButtonClickDetectRepositoryImpl.instance;
     }
 
+//     public isDoneButtonClicked(clickPoint: { x: number; y: number },
+//         buttonList: MakeDeckScreenDoneButton[],
+//         camera: THREE.Camera): any | null {
+//             const { x, y } = clickPoint;
+//
+//             const normalizedMouse = new THREE.Vector2(
+//                 (x / window.innerWidth) * 2 - 1,
+//                 -(y / window.innerHeight) * 2 + 1
+//             );
+//
+//             this.raycaster.setFromCamera(normalizedMouse, camera);
+//
+//             const meshes = buttonList.map(button => button.getMesh());
+//             const intersects = this.raycaster.intersectObjects(meshes);
+//
+//             if (intersects.length > 0) {
+//                 const intersectedMesh = intersects[0].object;
+//                 const clickedButton = buttonList.find(
+//                     button => button.getMesh().uuid === intersectedMesh.uuid
+//                 );
+//
+//                 if (clickedButton) {
+//                     console.log('Detect Clicked Button!', clickedButton);
+//                     return clickedButton;
+//                 }
+//             }
+//
+//             return null;
+//         }
+
     public isDoneButtonClicked(clickPoint: { x: number; y: number },
-        buttonList: MakeDeckScreenDoneButton[],
+        button: MakeDeckScreenDoneButton,
         camera: THREE.Camera): any | null {
             const { x, y } = clickPoint;
-
             const normalizedMouse = new THREE.Vector2(
                 (x / window.innerWidth) * 2 - 1,
                 -(y / window.innerHeight) * 2 + 1
@@ -27,22 +56,15 @@ export class MakeDeckScreenDoneButtonClickDetectRepositoryImpl implements MakeDe
 
             this.raycaster.setFromCamera(normalizedMouse, camera);
 
-            const meshes = buttonList.map(button => button.getMesh());
-            const intersects = this.raycaster.intersectObjects(meshes);
+            const mesh = button.getMesh();
+            const intersects = this.raycaster.intersectObject(mesh);
 
             if (intersects.length > 0) {
-                const intersectedMesh = intersects[0].object;
-                const clickedButton = buttonList.find(
-                    button => button.getMesh() === intersectedMesh
-                );
-
-                if (clickedButton) {
-                    console.log('Detect Clicked Button!')
-                    return clickedButton;
-                }
+                return button;
+            } else {
+                return null;
             }
 
-            return null;
         }
 
     public saveCurrentClickedDoneButtonId(id: number): void {
