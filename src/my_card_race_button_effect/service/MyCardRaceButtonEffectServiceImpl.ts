@@ -4,13 +4,16 @@ import {MyCardRaceButtonEffect} from "../entity/MyCardRaceButtonEffect";
 import {MyCardRaceButtonEffectRepositoryImpl} from "../repository/MyCardRaceButtonEffectRepositoryImpl";
 import {CardRace} from "../../card/race";
 import {Vector2d} from "../../common/math/Vector2d";
+import {MyCardRaceButtonEffectStateManager} from "../../my_card_race_button_manager/MyCardRaceButtonEffectStateManager";
 
 export class MyCardRaceButtonEffectServiceImpl implements MyCardRaceButtonEffectService {
     private static instance: MyCardRaceButtonEffectServiceImpl;
     private myCardRaceButtonEffectRepository: MyCardRaceButtonEffectRepositoryImpl;
+    private raceButtonEffectStateManager: MyCardRaceButtonEffectStateManager;
 
     private constructor() {
         this.myCardRaceButtonEffectRepository = MyCardRaceButtonEffectRepositoryImpl.getInstance();
+        this.raceButtonEffectStateManager = MyCardRaceButtonEffectStateManager.getInstance();
     }
 
     public static getInstance(): MyCardRaceButtonEffectServiceImpl {
@@ -71,6 +74,13 @@ export class MyCardRaceButtonEffectServiceImpl implements MyCardRaceButtonEffect
 
     public deleteAllRaceButtonEffect(): void {
         this.myCardRaceButtonEffectRepository.deleteAll();
+    }
+
+    public initializeRaceButtonEffectVisible(): void {
+        const allEffectIds = this.myCardRaceButtonEffectRepository.findAllEffectIds();
+        allEffectIds.forEach(
+            (effectId) => this.raceButtonEffectStateManager.setVisibility(effectId, false)
+        );
     }
 
 }
