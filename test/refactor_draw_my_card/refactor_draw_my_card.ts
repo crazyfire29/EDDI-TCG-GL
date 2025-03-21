@@ -104,7 +104,7 @@ export class TCGJustTestMyCardView {
 
         await this.addBackground();
         await this.addRaceButton();
-//         await this.addRaceButtonEffect();
+        await this.addRaceButtonEffect();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -172,6 +172,7 @@ export class TCGJustTestMyCardView {
                 const effect = await this.myCardRaceButtonEffectService.createRaceButtonEffect(config.id,config.position);
 
                 if (effect) {
+                    this.myCardRaceButtonEffectService.initializeRaceButtonEffectVisible();
                     this.scene.add(effect);
                     console.log(`Draw Race Button Effect ${config.id}`);
                 }
