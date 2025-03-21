@@ -170,6 +170,7 @@ export class TCGJustTestMyCardView {
             const cardGroup = await this.myCardScreenCardService.createMyCardScreenCardWithPosition(cardMap);
 
             if (cardGroup) {
+                this.myCardScreenCardService.initializeCardVisibility(cardIdList);
                 this.scene.add(cardGroup);
             }
 
@@ -233,6 +234,7 @@ export class TCGJustTestMyCardView {
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
             this.myCardRaceButtonService.adjustRaceButtonPosition();
             this.myCardRaceButtonEffectService.adjustRaceButtonEffectPosition();
+            this.myCardScreenCardService.adjustMyCardScreenCardPosition();
 
         }
     }

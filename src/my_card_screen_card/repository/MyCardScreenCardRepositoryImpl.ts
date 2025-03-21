@@ -13,8 +13,8 @@ export class MyCardScreenCardRepositoryImpl implements MyCardScreenCardRepositor
     private cardCountMap: Map<number, number> = new Map(); // card Id: count
     private textureManager: TextureManager;
 
-    private readonly CARD_WIDTH: number = 0.112
-    private readonly CARD_HEIGHT: number = 0.345
+    private readonly CARD_WIDTH: number = 0.109 // 0.112
+    private readonly CARD_HEIGHT: number = 0.3471 // 0.36
 
     private constructor(textureManager: TextureManager) {
         this.textureManager = textureManager;

@@ -4,31 +4,37 @@ import {MyCardRaceButtonClickDetectService} from "./MyCardRaceButtonClickDetectS
 import {MyCardRaceButton} from "../../my_card_race_button/entity/MyCardRaceButton";
 import {MyCardRaceButtonRepositoryImpl} from "../../my_card_race_button/repository/MyCardRaceButtonRepositoryImpl"
 import {MyCardRaceButtonClickDetectRepositoryImpl} from "../repository/MyCardRaceButtonClickDetectRepositoryImpl";
+import {MyCardScreenCardRepositoryImpl} from "../../my_card_screen_card/repository/MyCardScreenCardRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
 import {MyCardRaceButtonStateManager} from "../../my_card_race_button_manager/MyCardRaceButtonStateManager";
 import {MyCardRaceButtonEffectStateManager} from "../../my_card_race_button_manager/MyCardRaceButtonEffectStateManager";
+import {CardStateManager} from "../../my_card_screen_card_manager/CardStateManager";
 
 export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonClickDetectService {
     private static instance: MyCardRaceButtonClickDetectServiceImpl | null = null;
     private raceButtonRepository: MyCardRaceButtonRepositoryImpl;
     private raceButtonClickDetectRepository: MyCardRaceButtonClickDetectRepositoryImpl;
+    private cardRepository: MyCardScreenCardRepositoryImpl;
     private cameraRepository: CameraRepository;
 
     private raceButtonStateManager: MyCardRaceButtonStateManager;
     private raceButtonEffectStateManager: MyCardRaceButtonEffectStateManager;
+    private cardStateManager: CardStateManager;
 
     private leftMouseDown: boolean = false;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.raceButtonRepository = MyCardRaceButtonRepositoryImpl.getInstance();
         this.raceButtonClickDetectRepository = MyCardRaceButtonClickDetectRepositoryImpl.getInstance();
+        this.cardRepository = MyCardScreenCardRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
         this.raceButtonStateManager = MyCardRaceButtonStateManager.getInstance();
         this.raceButtonEffectStateManager = MyCardRaceButtonEffectStateManager.getInstance();
+        this.cardStateManager = CardStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): MyCardRaceButtonClickDetectServiceImpl {
@@ -65,11 +71,15 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
             );
 
             if (hiddenRaceButton && hiddenRaceButton.id !== currentClickedButtonId) {
+                const cardIdList = this.getCardIdListByRaceId(hiddenRaceButton.id);
+                this.setCardsVisibility(cardIdList, false);
                 this.setRaceButtonVisibility(hiddenRaceButton.id, true);
                 this.setRaceButtonEffectVisibility(hiddenRaceButton.id, false);
             }
 
             if (currentClickedButtonId !== null) {
+                const cardIdList = this.getCardIdListByRaceId(currentClickedButtonId);
+                this.setCardsVisibility(cardIdList, true);
                 this.setRaceButtonVisibility(currentClickedButtonId, false);
                 this.setRaceButtonEffectVisibility(currentClickedButtonId, true);
             }
@@ -110,6 +120,17 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
 
     public setRaceButtonEffectVisibility(effectId: number, visible: boolean): void {
         this.raceButtonEffectStateManager.setVisibility(effectId, visible);
+    }
+
+    private getCardIdListByRaceId(buttonId: number): number[] {
+        const raceId = (buttonId + 1).toString();
+        return this.cardRepository.findCardIdsByRaceId(raceId);
+    }
+
+    private setCardsVisibility(cardIdList: number[], isVisible: boolean): void {
+        cardIdList.forEach((cardId) => {
+            this.cardStateManager.setCardVisibility(cardId, isVisible)
+        });
     }
 
 }
