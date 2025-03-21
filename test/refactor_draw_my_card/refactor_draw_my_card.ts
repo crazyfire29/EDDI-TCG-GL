@@ -20,6 +20,9 @@ import {MyCardRaceButtonEffectServiceImpl} from "../../src/my_card_race_button_e
 import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
 import {MyCardRaceButtonEffectConfigList} from "../../src/my_card_race_button_effect/entity/MyCardRaceButtonEffectConfigList";
 
+import {MyCardRaceButtonClickDetectService} from "../../src/my_card_race_button_click_detect/service/MyCardRaceButtonClickDetectService";
+import {MyCardRaceButtonClickDetectServiceImpl} from "../../src/my_card_race_button_click_detect/service/MyCardRaceButtonClickDetectServiceImpl";
+
 export class TCGJustTestMyCardView {
     private static instance: TCGJustTestMyCardView | null = null;
 
@@ -38,6 +41,8 @@ export class TCGJustTestMyCardView {
 
     private myCardRaceButtonService = MyCardRaceButtonServiceImpl.getInstance();
     private myCardRaceButtonEffectService = MyCardRaceButtonEffectServiceImpl.getInstance();
+
+    private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -74,6 +79,9 @@ export class TCGJustTestMyCardView {
         window.addEventListener('resize', this.onWindowResize.bind(this));
         this.mouseController = new MouseController(this.camera, this.scene);
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
+
+        this.myCardRaceButtonClickDetectService = MyCardRaceButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.myCardRaceButtonClickDetectService.onMouseDown(e), false);
     }
 
     public static getInstance(simulationMyCardContainer: HTMLElement): TCGJustTestMyCardView {
