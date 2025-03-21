@@ -15,8 +15,10 @@ import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepository
 import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServiceImpl";
 import {BackgroundRepositoryImpl} from "../../src/background/repository/BackgroundRepositoryImpl";
 import {MyCardRaceButtonServiceImpl} from "../../src/my_card_race_button/service/MyCardRaceButtonServiceImpl";
+import {MyCardRaceButtonEffectServiceImpl} from "../../src/my_card_race_button_effect/service/MyCardRaceButtonEffectServiceImpl";
 
 import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
+import {MyCardRaceButtonEffectConfigList} from "../../src/my_card_race_button_effect/entity/MyCardRaceButtonEffectConfigList";
 
 export class TCGJustTestMyCardView {
     private static instance: TCGJustTestMyCardView | null = null;
@@ -35,6 +37,7 @@ export class TCGJustTestMyCardView {
     private backgroundService = BackgroundServiceImpl.getInstance();
 
     private myCardRaceButtonService = MyCardRaceButtonServiceImpl.getInstance();
+    private myCardRaceButtonEffectService = MyCardRaceButtonEffectServiceImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -101,6 +104,7 @@ export class TCGJustTestMyCardView {
 
         await this.addBackground();
         await this.addRaceButton();
+//         await this.addRaceButtonEffect();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -161,6 +165,22 @@ export class TCGJustTestMyCardView {
         }
     }
 
+    private async addRaceButtonEffect(): Promise<void> {
+        try {
+            const configList = new MyCardRaceButtonEffectConfigList();
+            await Promise.all(configList.buttonConfigs.map(async (config) => {
+                const effect = await this.myCardRaceButtonEffectService.createRaceButtonEffect(config.id,config.position);
+
+                if (effect) {
+                    this.scene.add(effect);
+                    console.log(`Draw Race Button Effect ${config.id}`);
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to add Race Button Effect:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -182,6 +202,7 @@ export class TCGJustTestMyCardView {
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
             this.myCardRaceButtonService.adjustRaceButtonPosition();
+            this.myCardRaceButtonEffectService.adjustRaceButtonEffectPosition();
 
         }
     }
