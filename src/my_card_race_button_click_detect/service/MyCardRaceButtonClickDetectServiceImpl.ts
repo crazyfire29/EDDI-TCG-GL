@@ -8,18 +8,27 @@ import {MyCardRaceButtonClickDetectRepositoryImpl} from "../repository/MyCardRac
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
 
+import {MyCardRaceButtonStateManager} from "../../my_card_race_button_manager/MyCardRaceButtonStateManager";
+import {MyCardRaceButtonEffectStateManager} from "../../my_card_race_button_manager/MyCardRaceButtonEffectStateManager";
+
 export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonClickDetectService {
     private static instance: MyCardRaceButtonClickDetectServiceImpl | null = null;
     private raceButtonRepository: MyCardRaceButtonRepositoryImpl;
     private raceButtonClickDetectRepository: MyCardRaceButtonClickDetectRepositoryImpl;
+    private cameraRepository: CameraRepository;
 
-    private cameraRepository: CameraRepository
+    private raceButtonStateManager: MyCardRaceButtonStateManager;
+    private raceButtonEffectStateManager: MyCardRaceButtonEffectStateManager;
+
     private leftMouseDown: boolean = false;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.raceButtonRepository = MyCardRaceButtonRepositoryImpl.getInstance();
         this.raceButtonClickDetectRepository = MyCardRaceButtonClickDetectRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
+
+        this.raceButtonStateManager = MyCardRaceButtonStateManager.getInstance();
+        this.raceButtonEffectStateManager = MyCardRaceButtonEffectStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): MyCardRaceButtonClickDetectServiceImpl {
@@ -51,18 +60,18 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
             this.saveCurrentClickedRaceButtonId(clickedRaceButton.id);
             const currentClickedButtonId = this.getCurrentClickedRaceButtonId();
 
-            switch(currentClickedButtonId) {
-                case 0:
-                    console.log(`Clicked Human Button!: ${currentClickedButtonId}`);
-                    break;
-                case 1:
-                    console.log(`Clicked Undead Button!: ${currentClickedButtonId}`);
-                    break;
-                case 2:
-                    console.log(`Clicked Trent Button! ${currentClickedButtonId}`);
-                    break;
-                default:
-                    console.warn(`[WARN] Not Found Race Button Id: ${currentClickedButtonId}`);
+            const hiddenRaceButton = raceButtonList.find(
+                (button) => this.getRaceButtonVisibility(button.id) == false
+            );
+
+            if (hiddenRaceButton && hiddenRaceButton.id !== currentClickedButtonId) {
+                this.setRaceButtonVisibility(hiddenRaceButton.id, true);
+                this.setRaceButtonEffectVisibility(hiddenRaceButton.id, false);
+            }
+
+            if (currentClickedButtonId !== null) {
+                this.setRaceButtonVisibility(currentClickedButtonId, false);
+                this.setRaceButtonEffectVisibility(currentClickedButtonId, true);
             }
 
             return clickedRaceButton;
@@ -89,6 +98,18 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
 
     public getCurrentClickedRaceButtonId(): number | null {
         return this.raceButtonClickDetectRepository.findCurrentClickedRaceButtonId();
+    }
+
+    public getRaceButtonVisibility(buttonId: number): boolean {
+        return this.raceButtonStateManager.findVisibility(buttonId);
+    }
+
+    public setRaceButtonVisibility(buttonId: number, visible: boolean): void {
+        this.raceButtonStateManager.setVisibility(buttonId, visible);
+    }
+
+    public setRaceButtonEffectVisibility(effectId: number, visible: boolean): void {
+        this.raceButtonEffectStateManager.setVisibility(effectId, visible);
     }
 
 }
