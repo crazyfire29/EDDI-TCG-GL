@@ -14,7 +14,9 @@ import {CameraRepositoryImpl} from "../../src/camera/repository/CameraRepository
 
 import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServiceImpl";
 import {BackgroundRepositoryImpl} from "../../src/background/repository/BackgroundRepositoryImpl";
+import {MyCardRaceButtonServiceImpl} from "../../src/my_card_race_button/service/MyCardRaceButtonServiceImpl";
 
+import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
 
 export class TCGJustTestMyCardView {
     private static instance: TCGJustTestMyCardView | null = null;
@@ -31,6 +33,8 @@ export class TCGJustTestMyCardView {
 
     private background: NonBackgroundImage | null = null;
     private backgroundService = BackgroundServiceImpl.getInstance();
+
+    private myCardRaceButtonService = MyCardRaceButtonServiceImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -96,6 +100,7 @@ export class TCGJustTestMyCardView {
         console.log("Textures preloaded. Adding background and buttons...");
 
         await this.addBackground();
+        await this.addRaceButton();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -140,6 +145,22 @@ export class TCGJustTestMyCardView {
         }
     }
 
+    private async addRaceButton(): Promise<void> {
+        try {
+            const configList = new MyCardRaceButtonConfigList();
+            await Promise.all(configList.buttonConfigs.map(async (config) => {
+                const button = await this.myCardRaceButtonService.createRaceButton(config.id,config.position);
+
+                if (button) {
+                    this.scene.add(button);
+                    console.log(`Draw Race Button ${config.id}`);
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to add Race Button:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -160,6 +181,7 @@ export class TCGJustTestMyCardView {
 
             this.userWindowSize.calculateScaleFactors(newWidth, newHeight);
             const { scaleX, scaleY } = this.userWindowSize.getScaleFactors();
+            this.myCardRaceButtonService.adjustRaceButtonPosition();
 
         }
     }
