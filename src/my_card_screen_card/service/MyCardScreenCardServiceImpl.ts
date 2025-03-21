@@ -6,15 +6,18 @@ import {MyCardScreenCard} from "../../my_card_screen_card/entity/MyCardScreenCar
 import {MyCardScreenCardRepositoryImpl} from "../../my_card_screen_card/repository/MyCardScreenCardRepositoryImpl";
 import {MyCardScreenCardPositionRepositoryImpl} from "../../my_card_screen_card_position/repository/MyCardScreenCardPositionRepositoryImpl";
 import {MyCardScreenCardPosition} from "../../my_card_screen_card_position/entity/MyCardScreenCardPosition";
+import {CardStateManager} from "../../my_card_screen_card_manager/CardStateManager";
 
 export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
     private static instance: MyCardScreenCardServiceImpl;
     private myCardScreenCardRepository: MyCardScreenCardRepositoryImpl;
     private myCardScreenCardPositionRepository: MyCardScreenCardPositionRepositoryImpl;
+    private cardStateManager: CardStateManager;
 
     private constructor() {
         this.myCardScreenCardRepository = MyCardScreenCardRepositoryImpl.getInstance();
         this.myCardScreenCardPositionRepository = MyCardScreenCardPositionRepositoryImpl.getInstance();
+        this.cardStateManager = CardStateManager.getInstance();
     }
 
     public static getInstance(): MyCardScreenCardServiceImpl {
@@ -100,8 +103,8 @@ export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
                 continue;
             }
 
-            const cardWidth = 0.112 * window.innerWidth;
-            const cardHeight = 0.345 * window.innerHeight;
+            const cardWidth = 0.109 * window.innerWidth;
+            const cardHeight = 0.3471 * window.innerHeight;
 
             const newPositionX = initialPosition.getX() * windowWidth;
             const newPositionY = initialPosition.getY() * windowHeight;
@@ -141,6 +144,10 @@ export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
 
     public getAllCardIdList(): number[] {
         return this.myCardScreenCardRepository.findAllCardIdList();
+    }
+
+    public initializeCardVisibility(cardIdList: number[]): void {
+        this.cardStateManager.initializeCardVisibility(cardIdList);
     }
 
 }
