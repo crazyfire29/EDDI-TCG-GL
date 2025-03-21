@@ -228,7 +228,7 @@ export class TCGJustTestMakeDeckView {
 
         this.sideScrollService = SideScrollServiceImpl.getInstance(this.camera, this.scene, this.renderer);
         this.renderer.domElement.addEventListener('wheel', async (e) => {
-            const scrollAreaDetect = this.sideScrollAreaDetectService.getScrollEnabled();
+            const scrollAreaDetect = this.sideScrollAreaDetectService.getMakeDeckScrollEnabledById(0);
             if (scrollAreaDetect == true && this.sideScrollService.getBlockCount() > 10) {
                 this.sideScrollService.onWheelScroll(e)
             }
@@ -489,7 +489,7 @@ export class TCGJustTestMakeDeckView {
             const blockMesh = this.selectedCardBlockService.getBlockMeshByCardId(cardId);
 
             if (blockMesh) {
-                const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+                const sideScrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(1, 0);
                 if (sideScrollArea) {
                     const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
                     this.clippingMaskManager.applyClippingPlanesToMesh(blockMesh, clippingPlanes);
@@ -514,7 +514,7 @@ export class TCGJustTestMakeDeckView {
             const effectMesh = this.selectedCardBlockEffectService.getEffectMeshByCardId(cardId);
 
             if (effectMesh) {
-                const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+                const sideScrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(1, 0);
                 if (sideScrollArea) {
                     const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
                     this.clippingMaskManager.applyClippingPlanesToMesh(effectMesh, clippingPlanes);
@@ -537,7 +537,7 @@ export class TCGJustTestMakeDeckView {
 
     private async addSideScrollArea(): Promise<void> {
         try{
-            const areaMesh = await this.sideScrollAreaService.createSideScrollArea();
+            const areaMesh = await this.sideScrollAreaService.createSideScrollArea('makeDeckSideScrollArea',1, 0.255, 0.735, 0.3895, 0.04);
             if (areaMesh) {
                 this.scene.add(areaMesh);
             } else {
@@ -566,7 +566,7 @@ export class TCGJustTestMakeDeckView {
             await this.numberOfSelectedCardsService.createNumberOfSelectedCardsWithPosition(cardId);
             const newNumberMesh = this.numberOfSelectedCardsService.getNumberObjectMeshByCardId(cardId);
             if (newNumberMesh) {
-                const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+                const sideScrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(1, 0);
                 if (sideScrollArea) {
                     const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
                     this.clippingMaskManager.applyClippingPlanesToMesh(newNumberMesh, clippingPlanes);
@@ -591,7 +591,7 @@ export class TCGJustTestMakeDeckView {
             const buttonMesh = this.blockAddButtonService.getButtonMeshByCardId(cardId);
 
             if (buttonMesh) {
-                const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+                const sideScrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(1, 0);
                 if (sideScrollArea) {
                     const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
                     this.clippingMaskManager.applyClippingPlanesToMesh(buttonMesh, clippingPlanes);
@@ -618,7 +618,7 @@ export class TCGJustTestMakeDeckView {
             const buttonMesh = this.blockDeleteButtonService.getButtonMeshByCardId(cardId);
 
             if (buttonMesh) {
-                const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+                const sideScrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(1, 0);
                 if (sideScrollArea) {
                     const clippingPlanes = this.clippingMaskManager.setClippingPlanes(0, sideScrollArea);
                     this.clippingMaskManager.applyClippingPlanesToMesh(buttonMesh, clippingPlanes);
@@ -756,7 +756,7 @@ export class TCGJustTestMakeDeckView {
 
             const currentAllBlockMesh = this.selectedCardBlockService.getAllBlockMesh();
             const blockGroup = this.selectedCardBlockService.getAllBlockGroups();
-            const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+            const sideScrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(1, 0);
             let clippingPlanes: THREE.Plane[] = [];
 
             if (sideScrollArea) {
@@ -793,7 +793,7 @@ export class TCGJustTestMakeDeckView {
 
             const currentAllEffectMesh = this.selectedCardBlockEffectService.getAllEffectMesh();
             const effectGroup = this.selectedCardBlockEffectService.getEffectGroup();
-            const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+            const sideScrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(1, 0);
             let clippingPlanes: THREE.Plane[] = [];
 
             if (sideScrollArea) {
@@ -830,7 +830,7 @@ export class TCGJustTestMakeDeckView {
 
             const currentAllButtonMesh = this.blockAddButtonService.getAllButtonMesh();
             const buttonGroup = this.blockAddButtonService.getButtonGroup();
-            const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+            const sideScrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(1, 0);
             let clippingPlanes: THREE.Plane[] = [];
 
             if (sideScrollArea) {
@@ -866,7 +866,7 @@ export class TCGJustTestMakeDeckView {
             });
             const currentAllButtonMesh = this.blockDeleteButtonService.getAllButtonMesh();
             const buttonGroup = this.blockDeleteButtonService.getButtonGroup();
-            const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+            const sideScrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(1, 0);
             let clippingPlanes: THREE.Plane[] = [];
 
             if (sideScrollArea) {
@@ -901,7 +901,7 @@ export class TCGJustTestMakeDeckView {
             });
             const currentNumberMesh = this.numberOfSelectedCardsService.getAllNumber();
             const numberGroup = this.numberOfSelectedCardsService.getNumberGroup();
-            const sideScrollArea = this.sideScrollAreaService.getSideScrollArea();
+            const sideScrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(1, 0);
             let clippingPlanes: THREE.Plane[] = [];
 
             if (sideScrollArea) {
@@ -969,7 +969,7 @@ export class TCGJustTestMakeDeckView {
             this.makeDeckScreenDoneButtonService.adjustDoneButtonPosition();
             this.selectedCardBlockService.adjustSelectedCardBlockPosition();
             this.selectedCardBlockEffectService.adjustSelectedCardBlockEffectPosition();
-            this.sideScrollAreaService.adjustSideScrollAreaPosition();
+            this.sideScrollAreaService.adjustMakeDeckSideScrollAreaPosition();
             this.numberOfSelectedCardsService.adjustNumberOfSelectedCardsPosition();
             this.blockAddButtonService.adjustBlockAddButtonPosition();
             this.blockDeleteButtonService.adjustBlockDeleteButtonPosition();
