@@ -5,6 +5,7 @@ import {SideScrollArea} from "../../side_scroll_area/entity/SideScrollArea";
 import {SideScrollAreaRepositoryImpl} from "../../side_scroll_area/repository/SideScrollAreaRepositoryImpl";
 import {SideScrollAreaDetectRepositoryImpl} from "../repository/SideScrollAreaDetectRepositoryImpl";
 import {SelectedCardBlockRepositoryImpl} from "../../selected_card_block/repository/SelectedCardBlockRepositoryImpl";
+import {SideScrollAreaType} from "../../side_scroll_area/entity/SideScrollAreaType";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -40,9 +41,9 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
         return this.leftMouseDown;
     }
 
-    async detectSideScrollArea(detectPoint: { x: number; y: number }): Promise<SideScrollArea | null> {
+    async detectMakeDeckSideScrollArea(detectPoint: { x: number; y: number }): Promise<SideScrollArea | null> {
         const { x, y } = detectPoint;
-        const sideScrollArea = this.getSideScrollArea();
+        const sideScrollArea = this.getSideScrollAreasByType(1);
         if (sideScrollArea == null) {
             console.error("Side Scroll Area is null.");
             return null;
@@ -54,13 +55,17 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
         );
 
         if (detectSideScrollArea) {
-            this.setScrollEnabled(true);
-//             console.log(`Detect Side Scroll Area!`);
+            console.log(`[DEBUG] Detected Side Scroll Area ID: ${detectSideScrollArea.id}`);
 
-            return detectSideScrollArea;
+            if (detectSideScrollArea.id == 0) {
+                this.setMakeDeckScrollEnabled(detectSideScrollArea.id, true);
 
-        } else {
-            this.setScrollEnabled(false);
+                return detectSideScrollArea;
+
+            } else {
+                this.setMakeDeckScrollEnabled(detectSideScrollArea.id, false);
+            }
+
         }
 
         return null;
@@ -69,7 +74,7 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
     public async onMouseMove(event: MouseEvent): Promise<void> {
         if (event.button === 0) {
             const detectPoint = { x: event.clientX, y: event.clientY };
-            await this.detectSideScrollArea(detectPoint);
+            await this.detectMakeDeckSideScrollArea(detectPoint);
         }
     }
 
@@ -77,12 +82,20 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
         this.sideScrollAreaDetectRepository.setScrollEnabled(enable);
     }
 
+    public setMakeDeckScrollEnabled(areaId: number, enable: boolean): void {
+        this.sideScrollAreaDetectRepository.setMakeDeckScrollEnabled(areaId, enable);
+    }
+
     public getScrollEnabled(): boolean {
         return this.sideScrollAreaDetectRepository.findScrollEnabled();
     }
 
-    private getSideScrollArea(): SideScrollArea | null {
-        return this.sideScrollAreaRepository.findArea();
+    public getMakeDeckScrollEnabledById(areaId: number): boolean {
+        return this.sideScrollAreaDetectRepository.findMakeDeckScrollEnabledById(areaId);
+    }
+
+    private getSideScrollAreasByType(type: SideScrollAreaType): SideScrollArea[] | null {
+        return this.sideScrollAreaRepository.findAreasByType(type);
     }
 
 }

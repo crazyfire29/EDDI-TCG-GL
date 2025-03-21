@@ -162,7 +162,7 @@ export class BlockDeleteButtonServiceImpl implements BlockDeleteButtonService {
     }
 
     private getSideScrollArea(): SideScrollArea | null {
-        return this.sideScrollAreaRepository.findArea();
+        return this.sideScrollAreaRepository.findAreaByTypeAndId(1, 0);
     }
 
     private getClippingPlanes(id: number): THREE.Plane[] {

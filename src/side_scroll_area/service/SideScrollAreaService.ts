@@ -1,5 +1,8 @@
 import * as THREE from 'three';
+import {SideScrollAreaType} from "../entity/SideScrollAreaType";
 
 export interface SideScrollAreaService {
-    createSideScrollArea(): Promise<THREE.Mesh | null>;
+    createSideScrollArea(
+        id: string, type: SideScrollAreaType, width: number, height: number, positionX: number, positionY: number
+    ): Promise<THREE.Mesh | null>;
 }

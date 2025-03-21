@@ -4,19 +4,18 @@ import {Vector2d} from "../../common/math/Vector2d";
 import {SideScrollAreaRepository} from './SideScrollAreaRepository';
 import {SideScrollArea} from "../entity/SideScrollArea";
 import {TransparentRectangle} from "../../shape/TransparentRectangle";
+import {SideScrollAreaType} from "../entity/SideScrollAreaType";
 
 export class SideScrollAreaRepositoryImpl implements SideScrollAreaRepository {
     private static instance: SideScrollAreaRepositoryImpl;
-    private area: SideScrollArea | null;
+    private areaMap: Map<SideScrollAreaType, { areaId: number, area: SideScrollArea }[]> = new Map();
 
     private readonly AREA_WIDTH: number = 0.255
     private readonly AREA_HEIGHT: number = 0.735
     private readonly POSITION_X: number = 0.3895
     private readonly POSITION_Y: number = 0.04
 
-    private constructor() {
-        this.area = null;
-    }
+    private constructor() {}
 
     public static getInstance(): SideScrollAreaRepositoryImpl {
         if (!SideScrollAreaRepositoryImpl.instance) {
@@ -26,31 +25,55 @@ export class SideScrollAreaRepositoryImpl implements SideScrollAreaRepository {
     }
 
     public async createSideScrollArea(
-        id: string,
+        id: string, type: SideScrollAreaType, width: number, height: number, positionX: number, positionY: number
     ): Promise<SideScrollArea> {
+        const areaWidth = width * window.innerWidth;
+        const areaHeight = height * window.innerHeight;
 
-        const areaWidth = this.AREA_WIDTH * window.innerWidth;
-        const areaHeight = this.AREA_HEIGHT * window.innerHeight;
-
-        const positionX = this.POSITION_X * window.innerWidth;
-        const positionY = this.POSITION_Y * window.innerHeight;
-        const position = new THREE.Vector2(positionX, positionY);
+        const areaPositionX = positionX * window.innerWidth;
+        const areaPositionY = positionY * window.innerHeight;
+        const position = new THREE.Vector2(areaPositionX, areaPositionY);
 
         const area = new TransparentRectangle(position, areaWidth, areaHeight, 0x000000, 0.2, id);
         const areaMesh = area.getMesh();
 
-        const newArea = new SideScrollArea(areaMesh, position, areaWidth, areaHeight);
-        this.area = newArea;
+        const newArea = new SideScrollArea(type, areaMesh, position, areaWidth, areaHeight);
+
+        // areaMap에서 해당 타입의 배열을 가져옴 (없으면 빈 배열 생성)
+        if (!this.areaMap.has(type)) {
+            this.areaMap.set(type, []);
+        }
+
+        this.areaMap.get(type)!.push({ areaId: newArea.id, area: newArea });
 
         return newArea;
     }
 
-
-    public findArea(): SideScrollArea | null {
-        return this.area;
+    public findAreaById(id: number): SideScrollArea | null {
+        for (const areas of this.areaMap.values()) {
+            const found = areas.find(entry => entry.areaId === id);
+            if (found) return found.area;
+        }
+        return null;
     }
 
-    public deleteArea(): void {
-        this.area = null;
+    public findAreasByType(type: SideScrollAreaType): SideScrollArea[] {
+        return this.areaMap.get(type)?.map(entry => entry.area) || [];
+    }
+
+    public findAreaByTypeAndId(type: SideScrollAreaType, areaId: number): SideScrollArea | null {
+        const areas = this.areaMap.get(type);
+        if (!areas) return null;
+
+        const found = areas.find(entry => entry.areaId === areaId);
+        return found ? found.area : null;
+    }
+
+    public deleteAllArea(): void {
+        this.areaMap.clear();
+    }
+
+    public deleteAreasByType(type: SideScrollAreaType): void {
+        this.areaMap.delete(type);
     }
 }

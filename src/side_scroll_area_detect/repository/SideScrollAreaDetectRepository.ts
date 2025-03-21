@@ -4,6 +4,6 @@ import * as THREE from "three";
 
 export interface SideScrollAreaDetectRepository {
     isSideScrollAreaDetect(detectPoint: { x: number; y: number },
-                          sideScrollArea: SideScrollArea,
+                          sideScrollArea: SideScrollArea[],
                           camera: THREE.Camera): any | null;
 }
