@@ -16,9 +16,11 @@ import {BackgroundServiceImpl} from "../../src/background/service/BackgroundServ
 import {BackgroundRepositoryImpl} from "../../src/background/repository/BackgroundRepositoryImpl";
 import {MyCardRaceButtonServiceImpl} from "../../src/my_card_race_button/service/MyCardRaceButtonServiceImpl";
 import {MyCardRaceButtonEffectServiceImpl} from "../../src/my_card_race_button_effect/service/MyCardRaceButtonEffectServiceImpl";
+import {MyCardScreenCardServiceImpl} from "../../src/my_card_screen_card/service/MyCardScreenCardServiceImpl";
 
 import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
 import {MyCardRaceButtonEffectConfigList} from "../../src/my_card_race_button_effect/entity/MyCardRaceButtonEffectConfigList";
+import {MyCardScreenCardMapRepositoryImpl} from "../../src/my_card_screen_card/repository/MyCardScreenCardMapRepositoryImpl";
 
 import {MyCardRaceButtonClickDetectService} from "../../src/my_card_race_button_click_detect/service/MyCardRaceButtonClickDetectService";
 import {MyCardRaceButtonClickDetectServiceImpl} from "../../src/my_card_race_button_click_detect/service/MyCardRaceButtonClickDetectServiceImpl";
@@ -41,8 +43,11 @@ export class TCGJustTestMyCardView {
 
     private myCardRaceButtonService = MyCardRaceButtonServiceImpl.getInstance();
     private myCardRaceButtonEffectService = MyCardRaceButtonEffectServiceImpl.getInstance();
+    private myCardScreenCardService = MyCardScreenCardServiceImpl.getInstance();
 
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
+
+    private myCardScreenCardMapRepository = MyCardScreenCardMapRepositoryImpl.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -113,6 +118,7 @@ export class TCGJustTestMyCardView {
         await this.addBackground();
         await this.addRaceButton();
         await this.addRaceButtonEffect();
+        await this.addCards();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -154,6 +160,21 @@ export class TCGJustTestMyCardView {
             }
         } catch (error) {
             console.error('Failed to add background:', error);
+        }
+    }
+
+    private async addCards(): Promise<void> {
+        try {
+            const cardMap = this.myCardScreenCardMapRepository.getCurrentMyCardScreenCardMap();
+            const cardIdList = this.myCardScreenCardMapRepository.getCardIdList();
+            const cardGroup = await this.myCardScreenCardService.createMyCardScreenCardWithPosition(cardMap);
+
+            if (cardGroup) {
+                this.scene.add(cardGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add cards:', error);
         }
     }
 
