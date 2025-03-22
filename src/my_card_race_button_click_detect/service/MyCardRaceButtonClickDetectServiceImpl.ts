@@ -5,6 +5,7 @@ import {MyCardRaceButton} from "../../my_card_race_button/entity/MyCardRaceButto
 import {MyCardRaceButtonRepositoryImpl} from "../../my_card_race_button/repository/MyCardRaceButtonRepositoryImpl"
 import {MyCardRaceButtonClickDetectRepositoryImpl} from "../repository/MyCardRaceButtonClickDetectRepositoryImpl";
 import {MyCardScreenCardRepositoryImpl} from "../../my_card_screen_card/repository/MyCardScreenCardRepositoryImpl";
+import {MyCardScreenCardEffectRepositoryImpl} from "../../my_card_screen_card_effect/repository/MyCardScreenCardEffectRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -18,6 +19,7 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
     private raceButtonRepository: MyCardRaceButtonRepositoryImpl;
     private raceButtonClickDetectRepository: MyCardRaceButtonClickDetectRepositoryImpl;
     private cardRepository: MyCardScreenCardRepositoryImpl;
+    private cardEffectRepository: MyCardScreenCardEffectRepositoryImpl;
     private cameraRepository: CameraRepository;
 
     private raceButtonStateManager: MyCardRaceButtonStateManager;
@@ -30,6 +32,7 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
         this.raceButtonRepository = MyCardRaceButtonRepositoryImpl.getInstance();
         this.raceButtonClickDetectRepository = MyCardRaceButtonClickDetectRepositoryImpl.getInstance();
         this.cardRepository = MyCardScreenCardRepositoryImpl.getInstance();
+        this.cardEffectRepository = MyCardScreenCardEffectRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
         this.raceButtonStateManager = MyCardRaceButtonStateManager.getInstance();
@@ -83,6 +86,7 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
                 this.setRaceButtonVisibility(currentClickedButtonId, false);
                 this.setRaceButtonEffectVisibility(currentClickedButtonId, true);
                 this.setCardGroupPosition(currentClickedButtonId);
+                this.setCardEffectGroupPosition(currentClickedButtonId);
             }
 
             return clickedRaceButton;
@@ -148,6 +152,26 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
                 break;
             case 3:
                 trentCardGroup.position.y = 0;
+                break;
+            default:
+                console.warn(`[WARN] Invalid raceButtonId: ${clickedRaceButtonId}, returning empty group`);
+        }
+    }
+    
+    private setCardEffectGroupPosition(clickedRaceButtonId: number): void {
+        const raceId = clickedRaceButtonId + 1;
+        const humanCardEffectGroup = this.cardEffectRepository.findHumanEffectGroup();
+        const undeadCardEffectGroup = this.cardEffectRepository.findUndeadEffectGroup();
+        const trentCardEffectGroup = this.cardEffectRepository.findTrentEffectGroup();
+        switch (raceId) {
+            case 1:
+                humanCardEffectGroup.position.y = 0;
+                break;
+            case 2:
+                undeadCardEffectGroup.position.y = 0;
+                break;
+            case 3:
+                trentCardEffectGroup.position.y = 0;
                 break;
             default:
                 console.warn(`[WARN] Invalid raceButtonId: ${clickedRaceButtonId}, returning empty group`);
