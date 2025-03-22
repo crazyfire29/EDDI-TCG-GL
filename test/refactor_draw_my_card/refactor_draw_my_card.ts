@@ -31,6 +31,8 @@ import {SideScrollAreaDetectService} from "../../src/side_scroll_area_detect/ser
 import {SideScrollAreaDetectServiceImpl} from "../../src/side_scroll_area_detect/service/SideScrollAreaDetectServiceImpl";
 import {MyCardScreenScrollService} from "../../src/my_card_screen_scroll/service/MyCardScreenScrollService";
 import {MyCardScreenScrollServiceImpl} from "../../src/my_card_screen_scroll/service/MyCardScreenScrollServiceImpl";
+import {MyCardScreenCardHoverDetectService} from "../../src/my_card_screen_card_hover_detect/service/MyCardScreenCardHoverDetectService";
+import {MyCardScreenCardHoverDetectServiceImpl} from "../../src/my_card_screen_card_hover_detect/service/MyCardScreenCardHoverDetectServiceImpl";
 
 export class TCGJustTestMyCardView {
     private static instance: TCGJustTestMyCardView | null = null;
@@ -57,6 +59,7 @@ export class TCGJustTestMyCardView {
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
     private sideScrollAreaDetectService: SideScrollAreaDetectService;
     private myCardScreenScrollService: MyCardScreenScrollService;
+    private myCardScreenCardHoverDetectService: MyCardScreenCardHoverDetectService;
 
     private myCardScreenCardMapRepository = MyCardScreenCardMapRepositoryImpl.getInstance();
     private clippingMaskManager = ClippingMaskManager.getInstance();
@@ -114,6 +117,9 @@ export class TCGJustTestMyCardView {
                 }
             }
         }, false);
+
+        this.myCardScreenCardHoverDetectService = MyCardScreenCardHoverDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousemove', (e) => this.myCardScreenCardHoverDetectService.onMouseMove(e), false);
     }
 
     public static getInstance(simulationMyCardContainer: HTMLElement): TCGJustTestMyCardView {
