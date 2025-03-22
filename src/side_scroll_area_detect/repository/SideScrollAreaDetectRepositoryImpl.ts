@@ -7,6 +7,7 @@ export class SideScrollAreaDetectRepositoryImpl implements SideScrollAreaDetectR
     private static instance: SideScrollAreaDetectRepositoryImpl;
     private isScrollEnabled: boolean = false;
     private isMakeDeckScrollEnabledMap: Map<number, boolean> = new Map(); // scrollAreaId: enable
+    private isMyCardScrollEnabled: boolean = false;
     private raycaster = new THREE.Raycaster();
 
     public static getInstance(): SideScrollAreaDetectRepositoryImpl {
@@ -48,12 +49,20 @@ export class SideScrollAreaDetectRepositoryImpl implements SideScrollAreaDetectR
         this.isScrollEnabled = enable;
     }
 
+    public setMyCardScrollEnabled(enable: boolean): void {
+        this.isMyCardScrollEnabled = enable;
+    }
+
     public setMakeDeckScrollEnabled(id: number, enable: boolean): void {
         this.isMakeDeckScrollEnabledMap.set(id, enable);
     }
 
     public findScrollEnabled(): boolean {
         return this.isScrollEnabled;
+    }
+
+    public findMyCardScrollEnabled(): boolean {
+        return this.isMyCardScrollEnabled;
     }
 
     public findMakeDeckScrollEnabledById(areaId: number): boolean {

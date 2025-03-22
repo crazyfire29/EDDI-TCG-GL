@@ -27,6 +27,8 @@ import {ClippingMaskManager} from "../../src/clipping_mask_manager/ClippingMaskM
 
 import {MyCardRaceButtonClickDetectService} from "../../src/my_card_race_button_click_detect/service/MyCardRaceButtonClickDetectService";
 import {MyCardRaceButtonClickDetectServiceImpl} from "../../src/my_card_race_button_click_detect/service/MyCardRaceButtonClickDetectServiceImpl";
+import {SideScrollAreaDetectService} from "../../src/side_scroll_area_detect/service/SideScrollAreaDetectService";
+import {SideScrollAreaDetectServiceImpl} from "../../src/side_scroll_area_detect/service/SideScrollAreaDetectServiceImpl";
 
 export class TCGJustTestMyCardView {
     private static instance: TCGJustTestMyCardView | null = null;
@@ -51,6 +53,7 @@ export class TCGJustTestMyCardView {
     private myCardScreenCardEffectService = MyCardScreenCardEffectServiceImpl.getInstance();
 
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
+    private sideScrollAreaDetectService: SideScrollAreaDetectService;
 
     private myCardScreenCardMapRepository = MyCardScreenCardMapRepositoryImpl.getInstance();
     private clippingMaskManager = ClippingMaskManager.getInstance();
@@ -94,6 +97,9 @@ export class TCGJustTestMyCardView {
 
         this.myCardRaceButtonClickDetectService = MyCardRaceButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousedown', (e) => this.myCardRaceButtonClickDetectService.onMouseDown(e), false);
+
+        this.sideScrollAreaDetectService = SideScrollAreaDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollAreaDetectService.onMouseMoveMyCard(e), false);
     }
 
     public static getInstance(simulationMyCardContainer: HTMLElement): TCGJustTestMyCardView {
