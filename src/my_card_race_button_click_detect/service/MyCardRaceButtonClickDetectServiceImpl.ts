@@ -6,6 +6,7 @@ import {MyCardRaceButtonRepositoryImpl} from "../../my_card_race_button/reposito
 import {MyCardRaceButtonClickDetectRepositoryImpl} from "../repository/MyCardRaceButtonClickDetectRepositoryImpl";
 import {MyCardScreenCardRepositoryImpl} from "../../my_card_screen_card/repository/MyCardScreenCardRepositoryImpl";
 import {MyCardScreenCardEffectRepositoryImpl} from "../../my_card_screen_card_effect/repository/MyCardScreenCardEffectRepositoryImpl";
+import {TransparentBackgroundRepositoryImpl} from "../../transparent_background/repository/TransparentBackgroundRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -13,6 +14,7 @@ import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl
 import {MyCardRaceButtonStateManager} from "../../my_card_race_button_manager/MyCardRaceButtonStateManager";
 import {MyCardRaceButtonEffectStateManager} from "../../my_card_race_button_manager/MyCardRaceButtonEffectStateManager";
 import {CardStateManager} from "../../my_card_screen_card_manager/CardStateManager";
+import {DetailCardStateManager} from "../../my_card_screen_detail_card_manager/DetailCardStateManager";
 
 export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonClickDetectService {
     private static instance: MyCardRaceButtonClickDetectServiceImpl | null = null;
@@ -20,11 +22,13 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
     private raceButtonClickDetectRepository: MyCardRaceButtonClickDetectRepositoryImpl;
     private cardRepository: MyCardScreenCardRepositoryImpl;
     private cardEffectRepository: MyCardScreenCardEffectRepositoryImpl;
+    private transparentBackgroundRepository : TransparentBackgroundRepositoryImpl;
     private cameraRepository: CameraRepository;
 
     private raceButtonStateManager: MyCardRaceButtonStateManager;
     private raceButtonEffectStateManager: MyCardRaceButtonEffectStateManager;
     private cardStateManager: CardStateManager;
+    private detailCardStateManager: DetailCardStateManager;
 
     private leftMouseDown: boolean = false;
 
@@ -33,11 +37,13 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
         this.raceButtonClickDetectRepository = MyCardRaceButtonClickDetectRepositoryImpl.getInstance();
         this.cardRepository = MyCardScreenCardRepositoryImpl.getInstance();
         this.cardEffectRepository = MyCardScreenCardEffectRepositoryImpl.getInstance();
+        this.transparentBackgroundRepository = TransparentBackgroundRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
         this.raceButtonStateManager = MyCardRaceButtonStateManager.getInstance();
         this.raceButtonEffectStateManager = MyCardRaceButtonEffectStateManager.getInstance();
         this.cardStateManager = CardStateManager.getInstance();
+        this.detailCardStateManager = DetailCardStateManager.getInstance();
     }
 
     static getInstance(camera: THREE.Camera, scene: THREE.Scene): MyCardRaceButtonClickDetectServiceImpl {
@@ -78,6 +84,8 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
                 this.setCardsVisibility(cardIdList, false);
                 this.setRaceButtonVisibility(hiddenRaceButton.id, true);
                 this.setRaceButtonEffectVisibility(hiddenRaceButton.id, false);
+                this.initializeDetailCardVisibility(cardIdList);
+                this.setTransparentBackgroundVisibility(false);
             }
 
             if (currentClickedButtonId !== null) {
@@ -175,6 +183,22 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
                 break;
             default:
                 console.warn(`[WARN] Invalid raceButtonId: ${clickedRaceButtonId}, returning empty group`);
+        }
+    }
+
+    private setDetailCardVisibility(cardId: number, isVisible: boolean): void {
+        this.detailCardStateManager.setCardVisibility(cardId, isVisible);
+    }
+
+    private initializeDetailCardVisibility(cardIdList: number[]): void {
+        this.detailCardStateManager.initializeCardVisibility(cardIdList);
+    }
+
+    private setTransparentBackgroundVisibility(isVisible: boolean): void {
+        if (isVisible == true) {
+            this.transparentBackgroundRepository.showTransparentBackground();
+        } else {
+            this.transparentBackgroundRepository.hideTransparentBackground();
         }
     }
 
