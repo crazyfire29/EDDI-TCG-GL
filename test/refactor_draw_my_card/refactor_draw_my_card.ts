@@ -127,7 +127,7 @@ export class TCGJustTestMyCardView {
         await this.addRaceButtonEffect();
         await this.addScrollArea();
         await this.addCards();
-//         await this.addCardEffects();
+        await this.addCardEffects();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -219,6 +219,7 @@ export class TCGJustTestMyCardView {
             const effectGroup = await this.myCardScreenCardEffectService.createMyCardScreenCardEffectWithPosition(cardMap);
 
             if (effectGroup) {
+                this.myCardScreenCardEffectService.initializeCardEffectVisibility();
                 this.scene.add(effectGroup);
             }
 

@@ -9,6 +9,7 @@ import {MyCardScreenCardEffectPosition} from "../../my_card_screen_card_effect_p
 import {ClippingMaskManager} from "../../clipping_mask_manager/ClippingMaskManager";
 import {SideScrollArea} from "../../side_scroll_area/entity/SideScrollArea";
 import {SideScrollAreaRepositoryImpl} from "../../side_scroll_area/repository/SideScrollAreaRepositoryImpl";
+import {CardEffectStateManager} from "../../my_card_screen_card_effect_manager/CardEffectStateManager";
 
 export class MyCardScreenCardEffectServiceImpl implements MyCardScreenCardEffectService {
     private static instance: MyCardScreenCardEffectServiceImpl;
@@ -16,6 +17,7 @@ export class MyCardScreenCardEffectServiceImpl implements MyCardScreenCardEffect
     private myCardScreenCardEffectPositionRepository: MyCardScreenCardEffectPositionRepositoryImpl;
     private sideScrollAreaRepository: SideScrollAreaRepositoryImpl;
     private clippingMaskManager: ClippingMaskManager;
+    private cardEffectStateManager: CardEffectStateManager;
 
     private constructor() {
         this.myCardScreenCardEffectRepository = MyCardScreenCardEffectRepositoryImpl.getInstance();
@@ -23,6 +25,7 @@ export class MyCardScreenCardEffectServiceImpl implements MyCardScreenCardEffect
         this.sideScrollAreaRepository = SideScrollAreaRepositoryImpl.getInstance();
 
         this.clippingMaskManager = ClippingMaskManager.getInstance();
+        this.cardEffectStateManager = CardEffectStateManager.getInstance();
     }
 
     public static getInstance(): MyCardScreenCardEffectServiceImpl {
@@ -162,6 +165,11 @@ export class MyCardScreenCardEffectServiceImpl implements MyCardScreenCardEffect
 
     private applyClippingPlanesToMesh(mesh: THREE.Mesh, clippingPlanes: THREE.Plane[]): void {
         this.clippingMaskManager.applyClippingPlanesToMesh(mesh, clippingPlanes);
+    }
+
+    public initializeCardEffectVisibility(): void {
+        const allCardIdList = this.getAllCardIdList();
+        this.cardEffectStateManager.initializeEffectVisibility(allCardIdList);
     }
 
 }
