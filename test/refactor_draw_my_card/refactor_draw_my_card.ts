@@ -216,12 +216,35 @@ export class TCGJustTestMyCardView {
         try {
             const cardMap = this.myCardScreenCardMapRepository.getCurrentMyCardScreenCardMap();
             const cardIdList = this.myCardScreenCardMapRepository.getCardIdList();
-            const effectGroup = await this.myCardScreenCardEffectService.createMyCardScreenCardEffectWithPosition(cardMap);
+            await this.myCardScreenCardEffectService.createMyCardScreenCardEffectWithPosition(cardMap);
 
-            if (effectGroup) {
-                this.myCardScreenCardEffectService.initializeCardEffectVisibility();
+            const effect = this.myCardScreenCardEffectService.getAllCardEffect();
+            const effectGroup = this.myCardScreenCardEffectService.getAllCardEffectGroups();
+            const scrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(2, 0);
+            let clippingPlanes: THREE.Plane[] = [];
+
+            if (scrollArea) {
+                clippingPlanes = this.clippingMaskManager.setClippingPlanes(1, scrollArea);
+            }
+            this.myCardScreenCardEffectService.initializeCardEffectVisibility();
+
+            effect.forEach((effect) => {
+                const effectMesh = effect.getMesh();
+
+                if (clippingPlanes.length > 0) {
+                    this.clippingMaskManager.applyClippingPlanesToMesh(effectMesh, clippingPlanes);
+                }
+                 effectGroup.add(effectMesh);
+            });
+
+            if (!this.scene.children.includes(effectGroup)) {
                 this.scene.add(effectGroup);
             }
+//
+//             if (effectGroup) {
+//                 this.myCardScreenCardEffectService.initializeCardEffectVisibility();
+//                 this.scene.add(effectGroup);
+//             }
 
         } catch (error) {
             console.error('Failed to add card effects:', error);

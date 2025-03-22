@@ -119,6 +119,15 @@ export class MyCardScreenCardEffectServiceImpl implements MyCardScreenCardEffect
             effectMesh.geometry.dispose();
             effectMesh.geometry = new THREE.PlaneGeometry(effectWidth, effectHeight);
             effectMesh.position.set(newPositionX, newPositionY, 0);
+
+            const scrollArea = this.getScrollArea();
+            if (scrollArea) {
+                scrollArea.width = 0.735 * windowWidth;
+                scrollArea.height = 0.8285 * windowHeight;
+                scrollArea.position.set(0.013 * window.innerWidth, -0.02 * window.innerHeight);
+                const clippingPlanes = this.clippingMaskManager.setClippingPlanes(1, scrollArea);
+                this.applyClippingPlanesToMesh(effectMesh, clippingPlanes);
+            }
         }
     }
 
