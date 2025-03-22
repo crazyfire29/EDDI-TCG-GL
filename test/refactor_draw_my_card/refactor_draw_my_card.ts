@@ -245,7 +245,9 @@ export class TCGJustTestMyCardView {
             await this.myCardScreenCardEffectService.createMyCardScreenCardEffectWithPosition(cardMap);
 
             const effect = this.myCardScreenCardEffectService.getAllCardEffect();
-            const effectGroup = this.myCardScreenCardEffectService.getAllCardEffectGroups();
+            const humanEffectGroup = this.myCardScreenCardEffectService.getHumanEffectGroups();
+            const undeadEffectGroup = this.myCardScreenCardEffectService.getUndeadEffectGroups();
+            const trentEffectGroup = this.myCardScreenCardEffectService.getTrentEffectGroups();
             const scrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(2, 0);
             let clippingPlanes: THREE.Plane[] = [];
 
@@ -254,18 +256,21 @@ export class TCGJustTestMyCardView {
             }
             this.myCardScreenCardEffectService.initializeCardEffectVisibility();
 
-            effect.forEach((effect) => {
-                const effectMesh = effect.getMesh();
+            const effectGroups = [humanEffectGroup, undeadEffectGroup, trentEffectGroup];
+            effectGroups.forEach((effectGroup) => {
+                effectGroup.children.forEach((effectObject) => {
+                    if (effectObject instanceof THREE.Mesh) {
+                        this.clippingMaskManager.applyClippingPlanesToMesh(effectObject, clippingPlanes);
+                    } else {
+                        console.warn("[WARN] Skipping non-mesh object in effectGroup:", effectObject);
+                    }
+                });
 
-                if (clippingPlanes.length > 0) {
-                    this.clippingMaskManager.applyClippingPlanesToMesh(effectMesh, clippingPlanes);
+                if (!this.scene.children.includes(effectGroup)) {
+                    this.scene.add(effectGroup);
                 }
-                 effectGroup.add(effectMesh);
+                effectGroup.position.y = 0;
             });
-
-            if (!this.scene.children.includes(effectGroup)) {
-                this.scene.add(effectGroup);
-            }
 //
 //             if (effectGroup) {
 //                 this.myCardScreenCardEffectService.initializeCardEffectVisibility();

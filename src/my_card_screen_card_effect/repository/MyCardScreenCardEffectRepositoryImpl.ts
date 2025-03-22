@@ -9,7 +9,10 @@ import {getCardById} from "../../card/utility";
 export class MyCardScreenCardEffectRepositoryImpl implements MyCardScreenCardEffectRepository {
     private static instance: MyCardScreenCardEffectRepositoryImpl;
     private effectMap: Map<number, { cardId: number, effectMesh: MyCardScreenCardEffect }> = new Map(); // effectUniqueId: {cardId: mesh}
-    private effectGroup: THREE.Group | null = null;
+    private raceMap: Map<string, number[]> = new Map(); // race: cardIdList
+    private humanEffectGroup: THREE.Group | null = null;
+    private undeadEffectGroup: THREE.Group | null = null;
+    private trentEffectGroup: THREE.Group | null = null;
     private textureManager: TextureManager;
 
     private readonly EFFECT_WIDTH: number = 0.109
@@ -38,6 +41,8 @@ export class MyCardScreenCardEffectRepositoryImpl implements MyCardScreenCardEff
             throw new Error(`Texture for card ${cardId} not found`);
         }
 
+        const race = card.종족;
+
         const effectWidth = this.EFFECT_WIDTH * window.innerWidth;
         const effectHeight = this.EFFECT_HEIGHT * window.innerHeight;
 
@@ -49,6 +54,13 @@ export class MyCardScreenCardEffectRepositoryImpl implements MyCardScreenCardEff
 
         const newEffect = new MyCardScreenCardEffect(effectMesh, position);
         this.effectMap.set(newEffect.id, { cardId: cardId, effectMesh: newEffect });
+
+        if (!this.raceMap.has(race)) {
+            this.raceMap.set(race, []);
+        }
+        const cardIdList = this.raceMap.get(race)!;
+        cardIdList.push(cardId);
+        this.raceMap.set(race, cardIdList);
 
         return newEffect;
     }
@@ -121,18 +133,57 @@ export class MyCardScreenCardEffectRepositoryImpl implements MyCardScreenCardEff
         }
     }
 
-    public findAllEffectGroups(): THREE.Group {
-        if (!this.effectGroup) {
-            this.effectGroup = new THREE.Group();
-            for (const { effectMesh } of this.effectMap.values()) {
-                this.effectGroup.add(effectMesh.getMesh());
-            }
+    public findEffectListByRaceId(raceId: string): MyCardScreenCardEffect[] | null {
+        const cardIdList = this.raceMap.get(raceId);
+        if (cardIdList === undefined) {
+            return null;
         }
-        return this.effectGroup;
+        const effectMeshList: MyCardScreenCardEffect[] = [];
+        cardIdList.forEach((cardId) => {
+            const effectMesh = this.findEffectByCardId(cardId);
+            if (effectMesh) {
+                effectMeshList.push(effectMesh);
+            } else {
+                console.warn(`[WARN] Card Effect with Card ID ${cardId} not found in raceMap`);
+            }
+        });
+        return effectMeshList;
+    }
+
+    public findHumanEffectGroup(): THREE.Group {
+        if (!this.humanEffectGroup) {
+            this.humanEffectGroup = new THREE.Group();
+            this.findEffectListByRaceId("1")?.forEach((effect) => {
+                this.humanEffectGroup!.add(effect.getMesh());
+            });
+        }
+        return this.humanEffectGroup;
+    }
+
+    public findUndeadEffectGroup(): THREE.Group {
+        if (!this.undeadEffectGroup) {
+            this.undeadEffectGroup = new THREE.Group();
+            this.findEffectListByRaceId("2")?.forEach((effect) => {
+                this.undeadEffectGroup!.add(effect.getMesh());
+            });
+        }
+        return this.undeadEffectGroup;
+    }
+
+    public findTrentEffectGroup(): THREE.Group {
+        if (!this.trentEffectGroup) {
+            this.trentEffectGroup = new THREE.Group();
+            this.findEffectListByRaceId("3")?.forEach((effect) => {
+                this.trentEffectGroup!.add(effect.getMesh());
+            });
+        }
+        return this.trentEffectGroup;
     }
 
     public resetEffectGroups(): void {
-        this.effectGroup = null;
+        this.humanEffectGroup = null;
+        this.undeadEffectGroup = null;
+        this.trentEffectGroup = null;
     }
 
 }

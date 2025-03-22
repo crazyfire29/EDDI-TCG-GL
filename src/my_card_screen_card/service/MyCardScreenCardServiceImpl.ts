@@ -181,10 +181,6 @@ export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
         this.cardStateManager.initializeCardVisibility(trentCardIdList);
     }
 
-    public getAllCardGroups(): THREE.Group {
-        return this.myCardScreenCardRepository.findAllCardGroups();
-    }
-
     public getHumanCardGroups(): THREE.Group {
         return this.myCardScreenCardRepository.findHumanCardGroup();
     }
