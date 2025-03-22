@@ -82,6 +82,7 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
                 this.setCardsVisibility(cardIdList, true);
                 this.setRaceButtonVisibility(currentClickedButtonId, false);
                 this.setRaceButtonEffectVisibility(currentClickedButtonId, true);
+                this.setCardGroupPosition(currentClickedButtonId);
             }
 
             return clickedRaceButton;
@@ -131,6 +132,26 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
         cardIdList.forEach((cardId) => {
             this.cardStateManager.setCardVisibility(cardId, isVisible)
         });
+    }
+
+    private setCardGroupPosition(clickedRaceButtonId: number): void {
+        const raceId = clickedRaceButtonId + 1;
+        const humanCardGroup = this.cardRepository.findHumanCardGroup();
+        const undeadCardGroup = this.cardRepository.findUndeadCardGroup();
+        const trentCardGroup = this.cardRepository.findTrentCardGroup();
+        switch (raceId) {
+            case 1:
+                humanCardGroup.position.y = 0;
+                break;
+            case 2:
+                undeadCardGroup.position.y = 0;
+                break;
+            case 3:
+                trentCardGroup.position.y = 0;
+                break;
+            default:
+                console.warn(`[WARN] Invalid raceButtonId: ${clickedRaceButtonId}, returning empty group`);
+        }
     }
 
 }

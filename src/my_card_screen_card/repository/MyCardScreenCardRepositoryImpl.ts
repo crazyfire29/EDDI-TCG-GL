@@ -11,7 +11,9 @@ export class MyCardScreenCardRepositoryImpl implements MyCardScreenCardRepositor
     private cardMap: Map<number, { cardId: number, cardMesh: MyCardScreenCard }> = new Map(); // cardUniqueId: {cardId: mesh}
     private raceMap: Map<string, number[]> = new Map(); // race: cardIdList
     private cardCountMap: Map<number, number> = new Map(); // card Id: count
-    private cardGroup: THREE.Group | null = null;
+    private humanCardGroup: THREE.Group | null = null;
+    private undeadCardGroup: THREE.Group | null = null;
+    private trentCardGroup: THREE.Group | null = null;
     private textureManager: TextureManager;
 
     private readonly CARD_WIDTH: number = 0.109 // 0.112
@@ -147,18 +149,58 @@ export class MyCardScreenCardRepositoryImpl implements MyCardScreenCardRepositor
         }
     }
 
-    public findAllCardGroups(): THREE.Group {
-        if (!this.cardGroup) {
-            this.cardGroup = new THREE.Group();
-            for (const { cardMesh } of this.cardMap.values()) {
-                this.cardGroup.add(cardMesh.getMesh());
-            }
+    public findHumanCardGroup(): THREE.Group {
+        if (!this.humanCardGroup) {
+            this.humanCardGroup = new THREE.Group();
+            this.findCardListByRaceId("1")?.forEach((card) => {
+                this.humanCardGroup!.add(card.getMesh());
+            });
         }
-        return this.cardGroup;
+        return this.humanCardGroup;
+    }
+
+    public findUndeadCardGroup(): THREE.Group {
+        if (!this.undeadCardGroup) {
+            this.undeadCardGroup = new THREE.Group();
+            this.findCardListByRaceId("2")?.forEach((card) => {
+                this.undeadCardGroup!.add(card.getMesh());
+            });
+        }
+        return this.undeadCardGroup;
+    }
+
+    public findTrentCardGroup(): THREE.Group {
+        if (!this.trentCardGroup) {
+            this.trentCardGroup = new THREE.Group();
+            this.findCardListByRaceId("3")?.forEach((card) => {
+                this.trentCardGroup!.add(card.getMesh());
+            });
+        }
+        return this.trentCardGroup;
+    }
+
+    public findCardGroupsByRaceId(raceId: string): THREE.Group {
+        const cardIdList = this.findCardIdsByRaceId(raceId);
+        const cardGroup = new THREE.Group();
+
+        cardIdList.forEach((cardId) => {
+            const cardMesh = this.findCardByCardId(cardId);
+            if (cardMesh) {
+                cardGroup.add(cardMesh.getMesh());
+            } else {
+                console.warn(`[WARN] Card with ID ${cardId} not found in cardMap`);
+            }
+        });
+
+        return cardGroup;
     }
 
     public resetCardGroups(): void {
         this.cardGroup = null;
+    }
+
+    public getCardCountByRaceId(raceId: string): number {
+        return this.raceMap.get(raceId)?.length || 0;
     }
 
 }
