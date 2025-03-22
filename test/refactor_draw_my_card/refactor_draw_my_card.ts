@@ -18,6 +18,7 @@ import {MyCardRaceButtonServiceImpl} from "../../src/my_card_race_button/service
 import {MyCardRaceButtonEffectServiceImpl} from "../../src/my_card_race_button_effect/service/MyCardRaceButtonEffectServiceImpl";
 import {MyCardScreenCardServiceImpl} from "../../src/my_card_screen_card/service/MyCardScreenCardServiceImpl";
 import {SideScrollAreaServiceImpl} from "../../src/side_scroll_area/service/SideScrollAreaServiceImpl";
+import {MyCardScreenCardEffectServiceImpl} from "../../src/my_card_screen_card_effect/service/MyCardScreenCardEffectServiceImpl";
 
 import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
 import {MyCardRaceButtonEffectConfigList} from "../../src/my_card_race_button_effect/entity/MyCardRaceButtonEffectConfigList";
@@ -47,6 +48,7 @@ export class TCGJustTestMyCardView {
     private myCardRaceButtonEffectService = MyCardRaceButtonEffectServiceImpl.getInstance();
     private myCardScreenCardService = MyCardScreenCardServiceImpl.getInstance();
     private sideScrollAreaService = SideScrollAreaServiceImpl.getInstance();
+    private myCardScreenCardEffectService = MyCardScreenCardEffectServiceImpl.getInstance();
 
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
 
@@ -125,6 +127,7 @@ export class TCGJustTestMyCardView {
         await this.addRaceButtonEffect();
         await this.addScrollArea();
         await this.addCards();
+//         await this.addCardEffects();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -209,6 +212,21 @@ export class TCGJustTestMyCardView {
         }
     }
 
+    private async addCardEffects(): Promise<void> {
+        try {
+            const cardMap = this.myCardScreenCardMapRepository.getCurrentMyCardScreenCardMap();
+            const cardIdList = this.myCardScreenCardMapRepository.getCardIdList();
+            const effectGroup = await this.myCardScreenCardEffectService.createMyCardScreenCardEffectWithPosition(cardMap);
+
+            if (effectGroup) {
+                this.scene.add(effectGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add card effects:', error);
+        }
+    }
+
     private async addRaceButton(): Promise<void> {
         try {
             const configList = new MyCardRaceButtonConfigList();
@@ -280,6 +298,7 @@ export class TCGJustTestMyCardView {
             this.myCardRaceButtonService.adjustRaceButtonPosition();
             this.myCardRaceButtonEffectService.adjustRaceButtonEffectPosition();
             this.myCardScreenCardService.adjustMyCardScreenCardPosition();
+            this.myCardScreenCardEffectService.adjustMyCardScreenCardEffectPosition();
             this.sideScrollAreaService.adjustMyCardSideScrollAreaPosition();
 
         }
