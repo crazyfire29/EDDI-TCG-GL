@@ -160,8 +160,16 @@ export class MyCardScreenCardEffectServiceImpl implements MyCardScreenCardEffect
         return this.myCardScreenCardEffectRepository.findAllCardIdList();
     }
 
-    public getAllCardEffectGroups(): THREE.Group {
-        return this.myCardScreenCardEffectRepository.findAllEffectGroups();
+    public getHumanEffectGroups(): THREE.Group {
+        return this.myCardScreenCardEffectRepository.findHumanEffectGroup();
+    }
+
+    public getUndeadEffectGroups(): THREE.Group {
+        return this.myCardScreenCardEffectRepository.findUndeadEffectGroup();
+    }
+
+    public getTrentEffectGroups(): THREE.Group {
+        return this.myCardScreenCardEffectRepository.findTrentEffectGroup();
     }
 
     public resetCardEffectGroups(): void {

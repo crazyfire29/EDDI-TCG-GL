@@ -196,7 +196,9 @@ export class MyCardScreenCardRepositoryImpl implements MyCardScreenCardRepositor
     }
 
     public resetCardGroups(): void {
-        this.cardGroup = null;
+        this.humanCardGroup = null;
+        this.undeadCardGroup = null;
+        this.trentCardGroup = null;
     }
 
     public getCardCountByRaceId(raceId: string): number {
