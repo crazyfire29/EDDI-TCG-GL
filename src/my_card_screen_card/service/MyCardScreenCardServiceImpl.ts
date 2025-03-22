@@ -185,6 +185,18 @@ export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
         return this.myCardScreenCardRepository.findAllCardGroups();
     }
 
+    public getHumanCardGroups(): THREE.Group {
+        return this.myCardScreenCardRepository.findHumanCardGroup();
+    }
+
+    public getUndeadCardGroups(): THREE.Group {
+        return this.myCardScreenCardRepository.findUndeadCardGroup();
+    }
+
+    public getTrentCardGroups(): THREE.Group {
+        return this.myCardScreenCardRepository.findTrentCardGroup();
+    }
+
     public resetCardGroups(): void {
         this.myCardScreenCardRepository.resetCardGroups();
     }

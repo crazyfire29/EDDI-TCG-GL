@@ -7,4 +7,5 @@ export interface SideScrollAreaDetectService {
     onMouseMoveMyCard(event: MouseEvent): Promise<void>;
     getScrollEnabled(): boolean;
     getMakeDeckScrollEnabledById(areaId: number): boolean;
+    getMyCardScrollEnabled(): boolean;
 }

@@ -29,6 +29,8 @@ import {MyCardRaceButtonClickDetectService} from "../../src/my_card_race_button_
 import {MyCardRaceButtonClickDetectServiceImpl} from "../../src/my_card_race_button_click_detect/service/MyCardRaceButtonClickDetectServiceImpl";
 import {SideScrollAreaDetectService} from "../../src/side_scroll_area_detect/service/SideScrollAreaDetectService";
 import {SideScrollAreaDetectServiceImpl} from "../../src/side_scroll_area_detect/service/SideScrollAreaDetectServiceImpl";
+import {MyCardScreenScrollService} from "../../src/my_card_screen_scroll/service/MyCardScreenScrollService";
+import {MyCardScreenScrollServiceImpl} from "../../src/my_card_screen_scroll/service/MyCardScreenScrollServiceImpl";
 
 export class TCGJustTestMyCardView {
     private static instance: TCGJustTestMyCardView | null = null;
@@ -54,6 +56,7 @@ export class TCGJustTestMyCardView {
 
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
     private sideScrollAreaDetectService: SideScrollAreaDetectService;
+    private myCardScreenScrollService: MyCardScreenScrollService;
 
     private myCardScreenCardMapRepository = MyCardScreenCardMapRepositoryImpl.getInstance();
     private clippingMaskManager = ClippingMaskManager.getInstance();
@@ -100,6 +103,17 @@ export class TCGJustTestMyCardView {
 
         this.sideScrollAreaDetectService = SideScrollAreaDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollAreaDetectService.onMouseMoveMyCard(e), false);
+
+        this.myCardScreenScrollService = MyCardScreenScrollServiceImpl.getInstance(this.camera, this.scene, this.renderer);
+        this.renderer.domElement.addEventListener('wheel', async (e) => {
+            const scrollAreaDetect = this.sideScrollAreaDetectService.getMyCardScrollEnabled();
+            const clickedRaceButtonId = this.myCardScreenScrollService.getCurrentClickedRaceButtonId();
+            if (scrollAreaDetect == true && clickedRaceButtonId !== null) {
+                if (this.myCardScreenScrollService.getCardCountByRaceId(clickedRaceButtonId) > 10) {
+                    this.myCardScreenScrollService.onWheelScroll(e, clickedRaceButtonId);
+                }
+            }
+        }, false);
     }
 
     public static getInstance(simulationMyCardContainer: HTMLElement): TCGJustTestMyCardView {
@@ -185,7 +199,10 @@ export class TCGJustTestMyCardView {
             await this.myCardScreenCardService.createMyCardScreenCardWithPosition(cardMap);
 
             const card = this.myCardScreenCardService.getAllCard();
-            const cardGroup = this.myCardScreenCardService.getAllCardGroups();
+            const humanCardGroup = this.myCardScreenCardService.getHumanCardGroups();
+            const undeadCardGroup = this.myCardScreenCardService.getUndeadCardGroups();
+            const trentCardGroup = this.myCardScreenCardService.getTrentCardGroups();
+
             const scrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(2, 0);
             let clippingPlanes: THREE.Plane[] = [];
 
@@ -194,18 +211,21 @@ export class TCGJustTestMyCardView {
             }
             this.myCardScreenCardService.initializeCardVisibility();
 
-            card.forEach((card) => {
-                const cardMesh = card.getMesh();
+            const cardGroups = [humanCardGroup, undeadCardGroup, trentCardGroup];
+            cardGroups.forEach((cardGroup) => {
+                cardGroup.children.forEach((cardObject) => {
+                    if (cardObject instanceof THREE.Mesh) {
+                        this.clippingMaskManager.applyClippingPlanesToMesh(cardObject, clippingPlanes);
+                    } else {
+                        console.warn("[WARN] Skipping non-mesh object in cardGroup:", cardObject);
+                    }
+                });
 
-                if (clippingPlanes.length > 0) {
-                    this.clippingMaskManager.applyClippingPlanesToMesh(cardMesh, clippingPlanes);
+                if (!this.scene.children.includes(cardGroup)) {
+                    this.scene.add(cardGroup);
                 }
-                cardGroup.add(cardMesh);
+                cardGroup.position.y = 0;
             });
-
-            if (!this.scene.children.includes(cardGroup)) {
-                this.scene.add(cardGroup);
-            }
 
 //             if (cardGroup) {
 //                 this.myCardScreenCardService.initializeCardVisibility();
@@ -265,6 +285,7 @@ export class TCGJustTestMyCardView {
 
                 if (button) {
                     this.myCardRaceButtonService.initializeRaceButtonVisible();
+                    this.myCardRaceButtonService.saveCurrentClickedRaceButtonId(0);
                     this.scene.add(button);
                     console.log(`Draw Race Button ${config.id}`);
                 }
