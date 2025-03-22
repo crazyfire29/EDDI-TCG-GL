@@ -19,6 +19,8 @@ import {MyCardRaceButtonEffectServiceImpl} from "../../src/my_card_race_button_e
 import {MyCardScreenCardServiceImpl} from "../../src/my_card_screen_card/service/MyCardScreenCardServiceImpl";
 import {SideScrollAreaServiceImpl} from "../../src/side_scroll_area/service/SideScrollAreaServiceImpl";
 import {MyCardScreenCardEffectServiceImpl} from "../../src/my_card_screen_card_effect/service/MyCardScreenCardEffectServiceImpl";
+import {TransparentBackgroundServiceImpl} from "../../src/transparent_background/service/TransparentBackgroundServiceImpl";
+import {MyCardScreenDetailCardServiceImpl} from "../../src/my_card_screen_detail_card/service/MyCardScreenDetailCardServiceImpl";
 
 import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
 import {MyCardRaceButtonEffectConfigList} from "../../src/my_card_race_button_effect/entity/MyCardRaceButtonEffectConfigList";
@@ -33,6 +35,8 @@ import {MyCardScreenScrollService} from "../../src/my_card_screen_scroll/service
 import {MyCardScreenScrollServiceImpl} from "../../src/my_card_screen_scroll/service/MyCardScreenScrollServiceImpl";
 import {MyCardScreenCardHoverDetectService} from "../../src/my_card_screen_card_hover_detect/service/MyCardScreenCardHoverDetectService";
 import {MyCardScreenCardHoverDetectServiceImpl} from "../../src/my_card_screen_card_hover_detect/service/MyCardScreenCardHoverDetectServiceImpl";
+import {MyCardScreenCardClickDetectService} from "../../src/my_card_screen_card_click_detect/service/MyCardScreenCardClickDetectService";
+import {MyCardScreenCardClickDetectServiceImpl} from "../../src/my_card_screen_card_click_detect/service/MyCardScreenCardClickDetectServiceImpl";
 
 export class TCGJustTestMyCardView {
     private static instance: TCGJustTestMyCardView | null = null;
@@ -55,11 +59,14 @@ export class TCGJustTestMyCardView {
     private myCardScreenCardService = MyCardScreenCardServiceImpl.getInstance();
     private sideScrollAreaService = SideScrollAreaServiceImpl.getInstance();
     private myCardScreenCardEffectService = MyCardScreenCardEffectServiceImpl.getInstance();
+    private transparentBackgroundService = TransparentBackgroundServiceImpl.getInstance();
+    private detailCardService = MyCardScreenDetailCardServiceImpl.getInstance();
 
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
     private sideScrollAreaDetectService: SideScrollAreaDetectService;
     private myCardScreenScrollService: MyCardScreenScrollService;
     private myCardScreenCardHoverDetectService: MyCardScreenCardHoverDetectService;
+    private myCardScreenCardClickDetectService: MyCardScreenCardClickDetectService;
 
     private myCardScreenCardMapRepository = MyCardScreenCardMapRepositoryImpl.getInstance();
     private clippingMaskManager = ClippingMaskManager.getInstance();
@@ -120,6 +127,9 @@ export class TCGJustTestMyCardView {
 
         this.myCardScreenCardHoverDetectService = MyCardScreenCardHoverDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousemove', (e) => this.myCardScreenCardHoverDetectService.onMouseMove(e), false);
+
+        this.myCardScreenCardClickDetectService = MyCardScreenCardClickDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousedown', (e) => this.myCardScreenCardClickDetectService.onMouseDown(e), false);
     }
 
     public static getInstance(simulationMyCardContainer: HTMLElement): TCGJustTestMyCardView {
@@ -154,6 +164,8 @@ export class TCGJustTestMyCardView {
         await this.addScrollArea();
         await this.addCards();
         await this.addCardEffects();
+        await this.addTransparentBackground();
+//         await this.addDetailCards();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -337,6 +349,37 @@ export class TCGJustTestMyCardView {
         }
     }
 
+    private async addTransparentBackground(): Promise<void> {
+        try{
+            const transparentBackground = await this.transparentBackgroundService.createTransparentBackground();
+            if (transparentBackground) {
+                this.transparentBackgroundService.initialTransparentBackgroundVisible();
+                this.scene.add(transparentBackground);
+            } else {
+                console.warn(`No transparentBackground found`);
+            }
+        } catch (error) {
+            console.error('Failed to add TransparentBackground:', error);
+        }
+    }
+
+    private async addDetailCards(): Promise<void> {
+        try {
+            const cardMap = this.myCardScreenCardMapRepository.getCurrentMyCardScreenCardMap();
+            const cardIdList = this.myCardScreenCardMapRepository.getCardIdList();
+
+            for (const cardId of cardIdList) {
+                const cardGroup = await this.detailCardService.createMyCardDetailCard(cardId);
+                if (cardGroup) {
+                    this.scene.add(cardGroup);
+                }
+            }
+
+        } catch (error) {
+            console.error('Failed to add Detail Cards:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -362,6 +405,7 @@ export class TCGJustTestMyCardView {
             this.myCardScreenCardService.adjustMyCardScreenCardPosition();
             this.myCardScreenCardEffectService.adjustMyCardScreenCardEffectPosition();
             this.sideScrollAreaService.adjustMyCardSideScrollAreaPosition();
+            this.detailCardService.adjustDetailCardPosition();
 
         }
     }
