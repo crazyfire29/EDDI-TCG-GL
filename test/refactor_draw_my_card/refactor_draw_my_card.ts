@@ -17,10 +17,13 @@ import {BackgroundRepositoryImpl} from "../../src/background/repository/Backgrou
 import {MyCardRaceButtonServiceImpl} from "../../src/my_card_race_button/service/MyCardRaceButtonServiceImpl";
 import {MyCardRaceButtonEffectServiceImpl} from "../../src/my_card_race_button_effect/service/MyCardRaceButtonEffectServiceImpl";
 import {MyCardScreenCardServiceImpl} from "../../src/my_card_screen_card/service/MyCardScreenCardServiceImpl";
+import {SideScrollAreaServiceImpl} from "../../src/side_scroll_area/service/SideScrollAreaServiceImpl";
+import {MyCardScreenCardEffectServiceImpl} from "../../src/my_card_screen_card_effect/service/MyCardScreenCardEffectServiceImpl";
 
 import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
 import {MyCardRaceButtonEffectConfigList} from "../../src/my_card_race_button_effect/entity/MyCardRaceButtonEffectConfigList";
 import {MyCardScreenCardMapRepositoryImpl} from "../../src/my_card_screen_card/repository/MyCardScreenCardMapRepositoryImpl";
+import {ClippingMaskManager} from "../../src/clipping_mask_manager/ClippingMaskManager";
 
 import {MyCardRaceButtonClickDetectService} from "../../src/my_card_race_button_click_detect/service/MyCardRaceButtonClickDetectService";
 import {MyCardRaceButtonClickDetectServiceImpl} from "../../src/my_card_race_button_click_detect/service/MyCardRaceButtonClickDetectServiceImpl";
@@ -44,10 +47,13 @@ export class TCGJustTestMyCardView {
     private myCardRaceButtonService = MyCardRaceButtonServiceImpl.getInstance();
     private myCardRaceButtonEffectService = MyCardRaceButtonEffectServiceImpl.getInstance();
     private myCardScreenCardService = MyCardScreenCardServiceImpl.getInstance();
+    private sideScrollAreaService = SideScrollAreaServiceImpl.getInstance();
+    private myCardScreenCardEffectService = MyCardScreenCardEffectServiceImpl.getInstance();
 
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
 
     private myCardScreenCardMapRepository = MyCardScreenCardMapRepositoryImpl.getInstance();
+    private clippingMaskManager = ClippingMaskManager.getInstance();
 
     private readonly windowSceneRepository = WindowSceneRepositoryImpl.getInstance();
     private readonly windowSceneService = WindowSceneServiceImpl.getInstance(this.windowSceneRepository);
@@ -65,6 +71,7 @@ export class TCGJustTestMyCardView {
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.simulationMyCardContainer.appendChild(this.renderer.domElement);
+        this.clippingMaskManager.setRenderer(this.renderer);
 
         this.userWindowSize = UserWindowSize.getInstance()
 
@@ -118,7 +125,9 @@ export class TCGJustTestMyCardView {
         await this.addBackground();
         await this.addRaceButton();
         await this.addRaceButtonEffect();
+        await this.addScrollArea();
         await this.addCards();
+//         await this.addCardEffects();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -167,15 +176,54 @@ export class TCGJustTestMyCardView {
         try {
             const cardMap = this.myCardScreenCardMapRepository.getCurrentMyCardScreenCardMap();
             const cardIdList = this.myCardScreenCardMapRepository.getCardIdList();
-            const cardGroup = await this.myCardScreenCardService.createMyCardScreenCardWithPosition(cardMap);
+            await this.myCardScreenCardService.createMyCardScreenCardWithPosition(cardMap);
 
-            if (cardGroup) {
-                this.myCardScreenCardService.initializeCardVisibility(cardIdList);
+            const card = this.myCardScreenCardService.getAllCard();
+            const cardGroup = this.myCardScreenCardService.getAllCardGroups();
+            const scrollArea = this.sideScrollAreaService.getSideScrollAreaByTypeAndId(2, 0);
+            let clippingPlanes: THREE.Plane[] = [];
+
+            if (scrollArea) {
+                clippingPlanes = this.clippingMaskManager.setClippingPlanes(1, scrollArea);
+            }
+            this.myCardScreenCardService.initializeCardVisibility();
+
+            card.forEach((card) => {
+                const cardMesh = card.getMesh();
+
+                if (clippingPlanes.length > 0) {
+                    this.clippingMaskManager.applyClippingPlanesToMesh(cardMesh, clippingPlanes);
+                }
+                cardGroup.add(cardMesh);
+            });
+
+            if (!this.scene.children.includes(cardGroup)) {
                 this.scene.add(cardGroup);
             }
 
+//             if (cardGroup) {
+//                 this.myCardScreenCardService.initializeCardVisibility();
+// //                 this.myCardScreenCardService.initializeCardVisibility(cardIdList);
+//                 this.scene.add(cardGroup);
+//             }
+
         } catch (error) {
             console.error('Failed to add cards:', error);
+        }
+    }
+
+    private async addCardEffects(): Promise<void> {
+        try {
+            const cardMap = this.myCardScreenCardMapRepository.getCurrentMyCardScreenCardMap();
+            const cardIdList = this.myCardScreenCardMapRepository.getCardIdList();
+            const effectGroup = await this.myCardScreenCardEffectService.createMyCardScreenCardEffectWithPosition(cardMap);
+
+            if (effectGroup) {
+                this.scene.add(effectGroup);
+            }
+
+        } catch (error) {
+            console.error('Failed to add card effects:', error);
         }
     }
 
@@ -186,6 +234,7 @@ export class TCGJustTestMyCardView {
                 const button = await this.myCardRaceButtonService.createRaceButton(config.id,config.position);
 
                 if (button) {
+                    this.myCardRaceButtonService.initializeRaceButtonVisible();
                     this.scene.add(button);
                     console.log(`Draw Race Button ${config.id}`);
                 }
@@ -212,6 +261,20 @@ export class TCGJustTestMyCardView {
         }
     }
 
+    private async addScrollArea(): Promise<void> {
+        try{
+            const areaMesh = await this.sideScrollAreaService.createSideScrollArea('myCardSideScrollArea', 2, 0.735, 0.8285, 0.013, -0.02);
+            if (areaMesh) {
+                this.scene.add(areaMesh);
+            } else {
+                console.warn(`No Side Scroll Area Mesh found`);
+            }
+
+        } catch (error) {
+            console.error('Failed to add Side Scroll Area:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -235,6 +298,8 @@ export class TCGJustTestMyCardView {
             this.myCardRaceButtonService.adjustRaceButtonPosition();
             this.myCardRaceButtonEffectService.adjustRaceButtonEffectPosition();
             this.myCardScreenCardService.adjustMyCardScreenCardPosition();
+            this.myCardScreenCardEffectService.adjustMyCardScreenCardEffectPosition();
+            this.sideScrollAreaService.adjustMyCardSideScrollAreaPosition();
 
         }
     }

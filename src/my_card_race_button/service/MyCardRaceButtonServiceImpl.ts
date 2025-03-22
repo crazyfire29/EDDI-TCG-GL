@@ -4,13 +4,16 @@ import {MyCardRaceButton} from "../entity/MyCardRaceButton";
 import {MyCardRaceButtonRepositoryImpl} from "../repository/MyCardRaceButtonRepositoryImpl";
 import {CardRace} from "../../card/race";
 import {Vector2d} from "../../common/math/Vector2d";
+import {MyCardRaceButtonStateManager} from "../../my_card_race_button_manager/MyCardRaceButtonStateManager";
 
 export class MyCardRaceButtonServiceImpl implements MyCardRaceButtonService {
     private static instance: MyCardRaceButtonServiceImpl;
     private myCardRaceButtonRepository: MyCardRaceButtonRepositoryImpl;
+    private raceButtonStateManager: MyCardRaceButtonStateManager;
 
     private constructor() {
         this.myCardRaceButtonRepository = MyCardRaceButtonRepositoryImpl.getInstance();
+        this.raceButtonStateManager = MyCardRaceButtonStateManager.getInstance();
     }
 
     public static getInstance(): MyCardRaceButtonServiceImpl {
@@ -71,6 +74,12 @@ export class MyCardRaceButtonServiceImpl implements MyCardRaceButtonService {
 
     public deleteAllRaceButtons(): void {
         this.myCardRaceButtonRepository.deleteAll();
+    }
+
+    public initializeRaceButtonVisible(): void {
+        this.raceButtonStateManager.setVisibility(0, false);
+        this.raceButtonStateManager.setVisibility(1, true);
+        this.raceButtonStateManager.setVisibility(2, true);
     }
 
 }

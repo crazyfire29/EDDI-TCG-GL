@@ -7,17 +7,25 @@ import {MyCardScreenCardRepositoryImpl} from "../../my_card_screen_card/reposito
 import {MyCardScreenCardPositionRepositoryImpl} from "../../my_card_screen_card_position/repository/MyCardScreenCardPositionRepositoryImpl";
 import {MyCardScreenCardPosition} from "../../my_card_screen_card_position/entity/MyCardScreenCardPosition";
 import {CardStateManager} from "../../my_card_screen_card_manager/CardStateManager";
+import {ClippingMaskManager} from "../../clipping_mask_manager/ClippingMaskManager";
+import {SideScrollArea} from "../../side_scroll_area/entity/SideScrollArea";
+import {SideScrollAreaRepositoryImpl} from "../../side_scroll_area/repository/SideScrollAreaRepositoryImpl";
 
 export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
     private static instance: MyCardScreenCardServiceImpl;
     private myCardScreenCardRepository: MyCardScreenCardRepositoryImpl;
     private myCardScreenCardPositionRepository: MyCardScreenCardPositionRepositoryImpl;
+    private sideScrollAreaRepository: SideScrollAreaRepositoryImpl;
     private cardStateManager: CardStateManager;
+    private clippingMaskManager: ClippingMaskManager;
 
     private constructor() {
         this.myCardScreenCardRepository = MyCardScreenCardRepositoryImpl.getInstance();
         this.myCardScreenCardPositionRepository = MyCardScreenCardPositionRepositoryImpl.getInstance();
+        this.sideScrollAreaRepository = SideScrollAreaRepositoryImpl.getInstance();
+
         this.cardStateManager = CardStateManager.getInstance();
+        this.clippingMaskManager = ClippingMaskManager.getInstance();
     }
 
     public static getInstance(): MyCardScreenCardServiceImpl {
@@ -117,6 +125,15 @@ export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
             cardMesh.geometry.dispose();
             cardMesh.geometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
             cardMesh.position.set(newPositionX, newPositionY, 0);
+
+            const scrollArea = this.getScrollArea();
+            if (scrollArea) {
+                scrollArea.width = 0.735 * windowWidth;
+                scrollArea.height = 0.8285 * windowHeight;
+                scrollArea.position.set(0.013 * window.innerWidth, -0.02 * window.innerHeight);
+                const clippingPlanes = this.clippingMaskManager.setClippingPlanes(1, scrollArea);
+                this.applyClippingPlanesToMesh(cardMesh, clippingPlanes);
+            }
         }
     }
 
@@ -142,12 +159,42 @@ export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
         return cardMesh;
     }
 
+    public getAllCard(): MyCardScreenCard[] {
+        return this.myCardScreenCardRepository.findAllCard();
+    }
+
     public getAllCardIdList(): number[] {
         return this.myCardScreenCardRepository.findAllCardIdList();
     }
 
-    public initializeCardVisibility(cardIdList: number[]): void {
-        this.cardStateManager.initializeCardVisibility(cardIdList);
+//     public initializeCardVisibility(cardIdList: number[]): void {
+//         this.cardStateManager.initializeCardVisibility(cardIdList);
+//     }
+
+    // 첫 화면에 휴먼 종족 버튼 클릭된 것으로 나타나야 함.
+    public initializeCardVisibility(): void {
+        const humanCardIdList = this.myCardScreenCardRepository.findCardIdsByRaceId("1");
+        const undeadCardIdList = this.myCardScreenCardRepository.findCardIdsByRaceId("2");
+        const trentCardIdList = this.myCardScreenCardRepository.findCardIdsByRaceId("3");
+        humanCardIdList.forEach((cardId) => this.cardStateManager.setCardVisibility(cardId, true));
+        this.cardStateManager.initializeCardVisibility(undeadCardIdList);
+        this.cardStateManager.initializeCardVisibility(trentCardIdList);
+    }
+
+    public getAllCardGroups(): THREE.Group {
+        return this.myCardScreenCardRepository.findAllCardGroups();
+    }
+
+    public resetCardGroups(): void {
+        this.myCardScreenCardRepository.resetCardGroups();
+    }
+
+    private getScrollArea(): SideScrollArea | null {
+        return this.sideScrollAreaRepository.findAreaByTypeAndId(2, 0);
+    }
+
+    private applyClippingPlanesToMesh(mesh: THREE.Mesh, clippingPlanes: THREE.Plane[]): void {
+        this.clippingMaskManager.applyClippingPlanesToMesh(mesh, clippingPlanes);
     }
 
 }
