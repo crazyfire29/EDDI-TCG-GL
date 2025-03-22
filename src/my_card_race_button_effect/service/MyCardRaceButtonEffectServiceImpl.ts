@@ -76,11 +76,17 @@ export class MyCardRaceButtonEffectServiceImpl implements MyCardRaceButtonEffect
         this.myCardRaceButtonEffectRepository.deleteAll();
     }
 
+//     public initializeRaceButtonEffectVisible(): void {
+//         const allEffectIds = this.myCardRaceButtonEffectRepository.findAllEffectIds();
+//         allEffectIds.forEach(
+//             (effectId) => this.raceButtonEffectStateManager.setVisibility(effectId, false)
+//         );
+//     }
+
     public initializeRaceButtonEffectVisible(): void {
-        const allEffectIds = this.myCardRaceButtonEffectRepository.findAllEffectIds();
-        allEffectIds.forEach(
-            (effectId) => this.raceButtonEffectStateManager.setVisibility(effectId, false)
-        );
+        this.raceButtonEffectStateManager.setVisibility(0, true);
+        this.raceButtonEffectStateManager.setVisibility(1, false);
+        this.raceButtonEffectStateManager.setVisibility(2, false);
     }
 
 }

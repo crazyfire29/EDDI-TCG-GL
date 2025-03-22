@@ -34,7 +34,7 @@ export class SideScrollAreaRepositoryImpl implements SideScrollAreaRepository {
         const areaPositionY = positionY * window.innerHeight;
         const position = new THREE.Vector2(areaPositionX, areaPositionY);
 
-        const area = new TransparentRectangle(position, areaWidth, areaHeight, 0x000000, 0.2, id);
+        const area = new TransparentRectangle(position, areaWidth, areaHeight, 0xffffff, 0.2, id);
         const areaMesh = area.getMesh();
 
         const newArea = new SideScrollArea(type, areaMesh, position, areaWidth, areaHeight);
@@ -75,5 +75,14 @@ export class SideScrollAreaRepositoryImpl implements SideScrollAreaRepository {
 
     public deleteAreasByType(type: SideScrollAreaType): void {
         this.areaMap.delete(type);
+    }
+
+    public getAllTypes(): SideScrollAreaType[] {
+        console.log(`all area type: ${Array.from(this.areaMap.keys())}`);
+        return Array.from(this.areaMap.keys());
+    }
+
+    public getAreaIdsByType(type: SideScrollAreaType): number[] {
+        return this.areaMap.get(type)?.map(entry => entry.areaId) || [];
     }
 }

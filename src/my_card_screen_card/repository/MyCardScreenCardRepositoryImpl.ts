@@ -11,6 +11,7 @@ export class MyCardScreenCardRepositoryImpl implements MyCardScreenCardRepositor
     private cardMap: Map<number, { cardId: number, cardMesh: MyCardScreenCard }> = new Map(); // cardUniqueId: {cardId: mesh}
     private raceMap: Map<string, number[]> = new Map(); // race: cardIdList
     private cardCountMap: Map<number, number> = new Map(); // card Id: count
+    private cardGroup: THREE.Group | null = null;
     private textureManager: TextureManager;
 
     private readonly CARD_WIDTH: number = 0.109 // 0.112
@@ -144,6 +145,20 @@ export class MyCardScreenCardRepositoryImpl implements MyCardScreenCardRepositor
         if (card) {
             card.getMesh().visible = true;
         }
+    }
+
+    public findAllCardGroups(): THREE.Group {
+        if (!this.cardGroup) {
+            this.cardGroup = new THREE.Group();
+            for (const { cardMesh } of this.cardMap.values()) {
+                this.cardGroup.add(cardMesh.getMesh());
+            }
+        }
+        return this.cardGroup;
+    }
+
+    public resetCardGroups(): void {
+        this.cardGroup = null;
     }
 
 }
