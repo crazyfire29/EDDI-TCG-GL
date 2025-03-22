@@ -4,13 +4,16 @@ import {getCardById} from "../../card/utility";
 import {MyCardScreenDetailCardService} from "./MyCardScreenDetailCardService";
 import {MyCardScreenDetailCard} from "../entity/MyCardScreenDetailCard";
 import {MyCardScreenDetailCardRepositoryImpl} from "../repository/MyCardScreenDetailCardRepositoryImpl";
+import {DetailCardStateManager} from "../../my_card_screen_detail_card_manager/DetailCardStateManager";
 
 export class MyCardScreenDetailCardServiceImpl implements MyCardScreenDetailCardService {
     private static instance: MyCardScreenDetailCardServiceImpl;
     private myCardScreenDetailCardRepository: MyCardScreenDetailCardRepositoryImpl;
+    private detailCardStateManager: DetailCardStateManager;
 
     private constructor() {
         this.myCardScreenDetailCardRepository = MyCardScreenDetailCardRepositoryImpl.getInstance();
+        this.detailCardStateManager = DetailCardStateManager.getInstance();
     }
 
     public static getInstance(): MyCardScreenDetailCardServiceImpl {
@@ -80,6 +83,10 @@ export class MyCardScreenDetailCardServiceImpl implements MyCardScreenDetailCard
 
     public getAllCardIdList(): number[] {
         return this.myCardScreenDetailCardRepository.findAllCardIdList();
+    }
+
+    public setCardVisibility(cardId: number, isVisible: boolean): void {
+        this.detailCardStateManager.setCardVisibility(cardId, isVisible);
     }
 
 }

@@ -6,6 +6,8 @@ import {MyCardScreenCardClickDetectRepositoryImpl} from "../repository/MyCardScr
 import {MyCardScreenCard} from "../../my_card_screen_card/entity/MyCardScreenCard";
 import {MyCardScreenCardRepositoryImpl} from "../../my_card_screen_card/repository/MyCardScreenCardRepositoryImpl";
 import {MyCardRaceButtonClickDetectRepositoryImpl} from "../../my_card_race_button_click_detect/repository/MyCardRaceButtonClickDetectRepositoryImpl";
+import {DetailCardStateManager} from "../../my_card_screen_detail_card_manager/DetailCardStateManager";
+import {TransparentBackgroundRepositoryImpl} from "../../transparent_background/repository/TransparentBackgroundRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -15,6 +17,8 @@ export class MyCardScreenCardClickDetectServiceImpl implements MyCardScreenCardC
     private myCardScreenCardRepository: MyCardScreenCardRepositoryImpl;
     private myCardScreenCardClickDetectRepository: MyCardScreenCardClickDetectRepositoryImpl;
     private raceButtonClickDetectRepository: MyCardRaceButtonClickDetectRepositoryImpl;
+    private detailCardStateManager: DetailCardStateManager;
+    private transparentBackgroundRepository : TransparentBackgroundRepositoryImpl;
 
     private cameraRepository: CameraRepository;
     private mouseDown: boolean = false;
@@ -23,6 +27,8 @@ export class MyCardScreenCardClickDetectServiceImpl implements MyCardScreenCardC
         this.myCardScreenCardRepository = MyCardScreenCardRepositoryImpl.getInstance();
         this.myCardScreenCardClickDetectRepository = MyCardScreenCardClickDetectRepositoryImpl.getInstance();
         this.raceButtonClickDetectRepository = MyCardRaceButtonClickDetectRepositoryImpl.getInstance();
+        this.detailCardStateManager = DetailCardStateManager.getInstance();
+        this.transparentBackgroundRepository = TransparentBackgroundRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
     }
 
@@ -59,8 +65,17 @@ export class MyCardScreenCardClickDetectServiceImpl implements MyCardScreenCardC
             console.log(`[DEBUG] Clicked Card Unique Id: ${clickedCard.id}, Card ID: ${cardId}`);
             this.saveCurrentClickedCardId(cardId);
 
+            const currentClickId = this.getCurrentClickedCardId();
+            if (currentClickId !== null) {
+                this.initializeDetailCardVisibility(cardIdList);
+                this.setDetailCardVisibility(currentClickId, true);
+                this.setTransparentBackgroundVisibility(true);
+            }
             return clickedCard;
 
+        } else {
+            this.initializeDetailCardVisibility(cardIdList);
+            this.setTransparentBackgroundVisibility(false);
         }
         return null;
     }
@@ -97,6 +112,22 @@ export class MyCardScreenCardClickDetectServiceImpl implements MyCardScreenCardC
 
     public getCurrentClickedCardId(): number | null {
         return this.myCardScreenCardClickDetectRepository.findCurrentClickedCardId();
+    }
+
+    public setDetailCardVisibility(cardId: number, isVisible: boolean): void {
+        this.detailCardStateManager.setCardVisibility(cardId, isVisible);
+    }
+
+    public initializeDetailCardVisibility(cardIdList: number[]): void {
+        this.detailCardStateManager.initializeCardVisibility(cardIdList);
+    }
+
+    private setTransparentBackgroundVisibility(isVisible: boolean): void {
+        if (isVisible == true) {
+            this.transparentBackgroundRepository.showTransparentBackground();
+        } else {
+            this.transparentBackgroundRepository.hideTransparentBackground();
+        }
     }
 
 }

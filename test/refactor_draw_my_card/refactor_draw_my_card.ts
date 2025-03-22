@@ -165,7 +165,7 @@ export class TCGJustTestMyCardView {
         await this.addCards();
         await this.addCardEffects();
         await this.addTransparentBackground();
-//         await this.addDetailCards();
+        await this.addDetailCards();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -370,6 +370,7 @@ export class TCGJustTestMyCardView {
 
             for (const cardId of cardIdList) {
                 const cardGroup = await this.detailCardService.createMyCardDetailCard(cardId);
+                this.detailCardService.setCardVisibility(cardId, false);
                 if (cardGroup) {
                     this.scene.add(cardGroup);
                 }
