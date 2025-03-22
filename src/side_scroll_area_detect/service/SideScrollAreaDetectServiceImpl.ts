@@ -71,10 +71,45 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
         return null;
     }
 
+    async detectMyCardSideScrollArea(detectPoint: { x: number; y: number }): Promise<SideScrollArea | null> {
+        const { x, y } = detectPoint;
+        const sideScrollArea = this.getSideScrollAreasByType(2);
+        if (sideScrollArea == null) {
+            console.error("[ERROR]Side Scroll Area is null.");
+            return null;
+        }
+
+        const detectSideScrollArea = this.sideScrollAreaDetectRepository.isSideScrollAreaDetect(
+            { x, y },
+            sideScrollArea,
+            this.camera
+        );
+
+        if (detectSideScrollArea) {
+            console.log(`[DEBUG] Detected Side Scroll Area`);
+            this.setMyCardScrollEnabled(true);
+
+        } else {
+            console.log(`No Detected Side Scroll Area`);
+            this.setMyCardScrollEnabled(false);
+        }
+
+        return null;
+    }
+
+    // To-do: 메서드명 변경 필요
     public async onMouseMove(event: MouseEvent): Promise<void> {
         if (event.button === 0) {
             const detectPoint = { x: event.clientX, y: event.clientY };
             await this.detectMakeDeckSideScrollArea(detectPoint);
+        }
+    }
+
+    // To-do: 메서드명 변경 필요
+    public async onMouseMoveMyCard(event: MouseEvent): Promise<void> {
+        if (event.button === 0) {
+            const detectPoint = { x: event.clientX, y: event.clientY };
+            await this.detectMyCardSideScrollArea(detectPoint);
         }
     }
 
@@ -96,6 +131,14 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
 
     private getSideScrollAreasByType(type: SideScrollAreaType): SideScrollArea[] | null {
         return this.sideScrollAreaRepository.findAreasByType(type);
+    }
+
+    public setMyCardScrollEnabled(enable: boolean): void {
+        this.sideScrollAreaDetectRepository.setMyCardScrollEnabled(enable);
+    }
+
+    public getMyCardScrollEnabled(): boolean {
+        return this.sideScrollAreaDetectRepository.findMyCardScrollEnabled();
     }
 
 }
