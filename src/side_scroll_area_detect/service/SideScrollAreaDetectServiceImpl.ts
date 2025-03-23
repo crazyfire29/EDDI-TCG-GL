@@ -6,6 +6,7 @@ import {SideScrollAreaRepositoryImpl} from "../../side_scroll_area/repository/Si
 import {SideScrollAreaDetectRepositoryImpl} from "../repository/SideScrollAreaDetectRepositoryImpl";
 import {SelectedCardBlockRepositoryImpl} from "../../selected_card_block/repository/SelectedCardBlockRepositoryImpl";
 import {SideScrollAreaType} from "../../side_scroll_area/entity/SideScrollAreaType";
+import {MyCardScrollBarRepositoryImpl} from "../../my_card_scroll_bar/repository/MyCardScrollBarRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -15,14 +16,17 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
     private sideScrollAreaDetectRepository: SideScrollAreaDetectRepositoryImpl;
     private sideScrollAreaRepository: SideScrollAreaRepositoryImpl;
     private selectedCardBlockRepository: SelectedCardBlockRepositoryImpl;
+    private myCardScrollBarRepository: MyCardScrollBarRepositoryImpl;
 
     private cameraRepository: CameraRepository;
     private leftMouseDown: boolean = false;
+    private myCardScrollAreaDetectState: boolean = true;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.sideScrollAreaDetectRepository = SideScrollAreaDetectRepositoryImpl.getInstance();
         this.sideScrollAreaRepository = SideScrollAreaRepositoryImpl.getInstance();
         this.selectedCardBlockRepository = SelectedCardBlockRepositoryImpl.getInstance();
+        this.myCardScrollBarRepository = MyCardScrollBarRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
     }
 
@@ -39,6 +43,14 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
 
     isLeftMouseDown(): boolean {
         return this.leftMouseDown;
+    }
+
+    setMyCardScrollAreaDetectState(state: boolean): void {
+        this.myCardScrollAreaDetectState = state;
+    }
+
+    getMyCardScrollAreaDetectState(): boolean {
+        return this.myCardScrollAreaDetectState;
     }
 
     async detectMakeDeckSideScrollArea(detectPoint: { x: number; y: number }): Promise<SideScrollArea | null> {
@@ -88,10 +100,12 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
         if (detectSideScrollArea) {
             console.log(`[DEBUG] Detected Side Scroll Area`);
             this.setMyCardScrollEnabled(true);
+            this.setMyCardScrollBarVisibility(true);
 
         } else {
             console.log(`No Detected Side Scroll Area`);
             this.setMyCardScrollEnabled(false);
+            this.setMyCardScrollBarVisibility(false);
         }
 
         return null;
@@ -139,6 +153,15 @@ export class SideScrollAreaDetectServiceImpl implements SideScrollAreaDetectServ
 
     public getMyCardScrollEnabled(): boolean {
         return this.sideScrollAreaDetectRepository.findMyCardScrollEnabled();
+    }
+
+    private setMyCardScrollBarVisibility(isVisible: boolean): void {
+        const scrollBarIds = this.myCardScrollBarRepository.findAllScrollBarIds();
+        if (isVisible == true) {
+            scrollBarIds.forEach((id) => this.myCardScrollBarRepository.showScrollBar(id));
+        } else {
+            scrollBarIds.forEach((id) => this.myCardScrollBarRepository.hideScrollBar(id));
+        }
     }
 
 }

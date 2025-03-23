@@ -1,6 +1,8 @@
 export interface SideScrollAreaDetectService {
     setLeftMouseDown(state: boolean): void;
     isLeftMouseDown(): boolean;
+    setMyCardScrollAreaDetectState(state: boolean): void;
+    getMyCardScrollAreaDetectState(): boolean;
     detectMakeDeckSideScrollArea(detectPoint: { x: number; y: number }): Promise<any | null>;
     detectMyCardSideScrollArea(detectPoint: { x: number; y: number }): Promise<any | null>
     onMouseMove(event: MouseEvent): Promise<void>;
