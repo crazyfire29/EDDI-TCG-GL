@@ -408,6 +408,23 @@ export class TCGJustTestMyCardView {
         }
     }
 
+//     private async addScrollBar(): Promise<void> {
+//         try {
+//             const configList = new MyCardScrollBarConfigList();
+//
+//             for (const config of configList.scrollBarConfigs) {
+//                 const scrollBar = await this.myCardScrollBarService.createScrollBar(config.id, config.position);
+//                 if (scrollBar) {
+//                     this.myCardScrollBarService.initializeScrollBarVisibility();
+//                     this.scene.add(scrollBar);
+//                     console.log(`Draw Scroll Bar ${config.id}`);
+//                 }
+//             }
+//         } catch (error) {
+//             console.error('Failed to add Scroll Bar:', error);
+//         }
+//     }
+
     private async addScrollBar(): Promise<void> {
         try {
             const configList = new MyCardScrollBarConfigList();
@@ -416,14 +433,31 @@ export class TCGJustTestMyCardView {
                 const scrollBar = await this.myCardScrollBarService.createScrollBar(config.id, config.position);
                 if (scrollBar) {
                     this.myCardScrollBarService.initializeScrollBarVisibility();
-                    this.scene.add(scrollBar);
-                    console.log(`Draw Scroll Bar ${config.id}`);
+
+                    // config.id가 1일 때만 추가
+                    if (config.id === 1) {
+                        this.scene.add(scrollBar);
+                        console.log(`Draw Scroll Bar ${config.id}`);
+                    }
                 }
             }
+
+            const scrollHandleMesh = this.myCardScrollBarService.getScrollBarMeshById(1);
+            if (scrollHandleMesh) {
+                const handleGroup = this.myCardScrollBarService.getScrollHandleGroup();
+                handleGroup.add(scrollHandleMesh);
+
+                if (!this.scene.children.includes(handleGroup)) {
+                    this.scene.add(handleGroup);
+                }
+                handleGroup.position.y = 0;
+            }
+
         } catch (error) {
             console.error('Failed to add Scroll Bar:', error);
         }
     }
+
 
     private async addTransparentBackground(): Promise<void> {
         try{

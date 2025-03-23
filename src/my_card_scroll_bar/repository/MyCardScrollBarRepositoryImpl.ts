@@ -9,6 +9,7 @@ export class MyCardScrollBarRepositoryImpl implements MyCardScrollBarRepository 
     private static instance: MyCardScrollBarRepositoryImpl;
     private scrollBarMap: Map<number, MyCardScrollBar> = new Map();
     private textureManager: TextureManager;
+    private scrollHandleGroup: THREE.Group | null = null;
 
     private readonly SCROLL_BAR_WIDTH: number = 0.032
     private readonly SCROLL_BAR_HEIGHT: number = 0.78
@@ -68,6 +69,17 @@ export class MyCardScrollBarRepositoryImpl implements MyCardScrollBarRepository 
 
     public findAllScrollBar(): MyCardScrollBar[] {
         return Array.from(this.scrollBarMap.values());
+    }
+
+    public findScrollHandleGroup(): THREE.Group {
+        if (!this.scrollHandleGroup) {
+            this.scrollHandleGroup = new THREE.Group();
+            const scrollHandle = this.findScrollBarById(1);
+            if (scrollHandle) {
+                this.scrollHandleGroup!.add(scrollHandle.getMesh());
+            }
+        }
+        return this.scrollHandleGroup;
     }
 
     public deleteById(id: number): void {

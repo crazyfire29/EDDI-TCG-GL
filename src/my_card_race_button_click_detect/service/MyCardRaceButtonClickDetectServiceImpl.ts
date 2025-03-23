@@ -7,6 +7,7 @@ import {MyCardRaceButtonClickDetectRepositoryImpl} from "../repository/MyCardRac
 import {MyCardScreenCardRepositoryImpl} from "../../my_card_screen_card/repository/MyCardScreenCardRepositoryImpl";
 import {MyCardScreenCardEffectRepositoryImpl} from "../../my_card_screen_card_effect/repository/MyCardScreenCardEffectRepositoryImpl";
 import {TransparentBackgroundRepositoryImpl} from "../../transparent_background/repository/TransparentBackgroundRepositoryImpl";
+import {MyCardScrollBarRepositoryImpl} from "../../my_card_scroll_bar/repository/MyCardScrollBarRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -23,6 +24,7 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
     private cardRepository: MyCardScreenCardRepositoryImpl;
     private cardEffectRepository: MyCardScreenCardEffectRepositoryImpl;
     private transparentBackgroundRepository : TransparentBackgroundRepositoryImpl;
+    private myCardScrollBarRepository: MyCardScrollBarRepositoryImpl;
     private cameraRepository: CameraRepository;
 
     private raceButtonStateManager: MyCardRaceButtonStateManager;
@@ -38,6 +40,7 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
         this.cardRepository = MyCardScreenCardRepositoryImpl.getInstance();
         this.cardEffectRepository = MyCardScreenCardEffectRepositoryImpl.getInstance();
         this.transparentBackgroundRepository = TransparentBackgroundRepositoryImpl.getInstance();
+        this.myCardScrollBarRepository = MyCardScrollBarRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
 
         this.raceButtonStateManager = MyCardRaceButtonStateManager.getInstance();
@@ -95,6 +98,7 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
                 this.setRaceButtonEffectVisibility(currentClickedButtonId, true);
                 this.setCardGroupPosition(currentClickedButtonId);
                 this.setCardEffectGroupPosition(currentClickedButtonId);
+                this.setScrollHandleGroupPosition();
             }
 
             return clickedRaceButton;
@@ -184,6 +188,11 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
             default:
                 console.warn(`[WARN] Invalid raceButtonId: ${clickedRaceButtonId}, returning empty group`);
         }
+    }
+
+    private setScrollHandleGroupPosition(): void {
+        const handleGroup = this.myCardScrollBarRepository.findScrollHandleGroup();
+        handleGroup.position.y = 0;
     }
 
     private setDetailCardVisibility(cardId: number, isVisible: boolean): void {

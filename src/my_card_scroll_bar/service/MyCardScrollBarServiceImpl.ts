@@ -95,4 +95,17 @@ export class MyCardScrollBarServiceImpl implements MyCardScrollBarService {
         allScrollBarIds.forEach((id) => this.myCardScrollBarRepository.hideScrollBar(id));
     }
 
+    public getScrollHandleGroup(): THREE.Group {
+        return this.myCardScrollBarRepository.findScrollHandleGroup();
+    }
+
+    public getScrollBarMeshById(id: number): THREE.Mesh | null {
+        const scrollBar = this.myCardScrollBarRepository.findScrollBarById(id);
+        if (!scrollBar) {
+            console.warn(`[WARN] Scroll Bar (ID: ${id}) not found`);
+            return null;
+        }
+        return scrollBar.getMesh();
+    }
+
 }
