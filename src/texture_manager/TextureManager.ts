@@ -52,6 +52,7 @@ export class TextureManager {
     private ownedCardEffectTextureList: { [id: number]: THREE.Texture } = {};
     private myCardRaceButtonTextureList: { [id: number]: THREE.Texture } = {};
     private myCardRaceButtonEffectTextureList: { [id: number]: THREE.Texture } = {};
+    private myCardCloseButtonTextureList: { [id: number]: THREE.Texture } = {};
 
     private constructor() {}
 
@@ -117,6 +118,7 @@ export class TextureManager {
                 this.loadTextures(imageData.owned_card_effect, this.ownedCardEffectTextureList),
                 this.loadTextures(imageData.my_card_race_button, this.myCardRaceButtonTextureList),
                 this.loadTextures(imageData.my_card_race_button_effect, this.myCardRaceButtonEffectTextureList),
+                this.loadTextures(imageData.my_card_close_button, this.myCardCloseButtonTextureList),
             ]);
 
             console.log('All textures preloaded from TextureManager.ts');
@@ -278,6 +280,8 @@ export class TextureManager {
                 return this.myCardRaceButtonTextureList[id];
             case 'my_card_race_button_effect':
                 return this.myCardRaceButtonEffectTextureList[id];
+            case 'my_card_close_button':
+                return this.myCardCloseButtonTextureList[id];
             default:
                 return undefined;
         }

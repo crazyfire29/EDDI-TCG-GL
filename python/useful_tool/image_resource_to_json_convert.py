@@ -49,6 +49,7 @@ class WillBeReferenceImageLocation(Enum):
     OWNED_CARD_EFFECT = "resource/my_card/card_effect/"
     MY_CARD_RACE_BUTTON = "resource/my_card/race_button/"
     MY_CARD_RACE_BUTTON_EFFECT = "resource/my_card/race_button_effect/"
+    MY_CARD_CLOSE_BUTTON = "resource/my_card/close_button/"
 
 class RelativeImageLocation(Enum):
     CARD = "../../resource/battle_field_unit/card/"
@@ -94,6 +95,7 @@ class RelativeImageLocation(Enum):
     OWNED_CARD_EFFECT = "../../resource/my_card/card_effect/"
     MY_CARD_RACE_BUTTON = "../../resource/my_card/race_button/"
     MY_CARD_RACE_BUTTON_EFFECT = "../../resource/my_card/race_button_effect/"
+    MY_CARD_CLOSE_BUTTON = "../../resource/my_card/close_button/"
 
 # 디렉토리 경로 설정
 relative_paths = {
@@ -140,6 +142,7 @@ relative_paths = {
     RelativeImageLocation.OWNED_CARD_EFFECT: RelativeImageLocation.OWNED_CARD_EFFECT.value,
     RelativeImageLocation.MY_CARD_RACE_BUTTON: RelativeImageLocation.MY_CARD_RACE_BUTTON.value,
     RelativeImageLocation.MY_CARD_RACE_BUTTON_EFFECT: RelativeImageLocation.MY_CARD_RACE_BUTTON_EFFECT.value,
+    RelativeImageLocation.MY_CARD_CLOSE_BUTTON: RelativeImageLocation.MY_CARD_CLOSE_BUTTON.value,
 }
 
 reference_paths = {
@@ -186,6 +189,7 @@ reference_paths = {
     WillBeReferenceImageLocation.OWNED_CARD_EFFECT: WillBeReferenceImageLocation.OWNED_CARD_EFFECT.value,
     WillBeReferenceImageLocation.MY_CARD_RACE_BUTTON: WillBeReferenceImageLocation.MY_CARD_RACE_BUTTON.value,
     WillBeReferenceImageLocation.MY_CARD_RACE_BUTTON_EFFECT: WillBeReferenceImageLocation.MY_CARD_RACE_BUTTON_EFFECT.value,
+    WillBeReferenceImageLocation.MY_CARD_CLOSE_BUTTON: WillBeReferenceImageLocation.MY_CARD_CLOSE_BUTTON.value,
 }
 
 image_paths = {
@@ -232,6 +236,7 @@ image_paths = {
     "owned_card_effect": [],
     "my_card_race_button": [],
     "my_card_race_button_effect": [],
+    "my_card_close_button": [],
 }
 
 ####### active_panel_skill은 실험 중 -> 문제 발생하면 이 부분 주석하고 생성 #######

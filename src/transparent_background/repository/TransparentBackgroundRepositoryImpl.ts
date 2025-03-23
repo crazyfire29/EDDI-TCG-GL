@@ -28,7 +28,7 @@ export class TransparentBackgroundRepositoryImpl implements TransparentBackgroun
         const backgroundHeight = window.innerHeight;
         const position = new THREE.Vector2(0, 0);
 
-        const transparentBackground = new TransparentRectangle(position, backgroundWidth, backgroundHeight, 0x000000, 0.8, id);
+        const transparentBackground = new TransparentRectangle(position, backgroundWidth, backgroundHeight, 0x000000, 0.85, id);
         const transparentBackgroundMesh = transparentBackground.getMesh();
 
         const newTransparentBackground = new TransparentBackground(transparentBackgroundMesh, backgroundWidth, backgroundHeight, position);
