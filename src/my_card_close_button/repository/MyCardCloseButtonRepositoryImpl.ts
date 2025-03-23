@@ -1,37 +1,36 @@
 import * as THREE from 'three';
-import {MyCardRaceButtonRepository} from './MyCardRaceButtonRepository';
-import {MyCardRaceButton} from "../entity/MyCardRaceButton";
+import {MyCardCloseButtonRepository} from './MyCardCloseButtonRepository';
+import {MyCardCloseButton} from "../entity/MyCardCloseButton";
 import {TextureManager} from "../../texture_manager/TextureManager";
-import {CardRace} from "../../card/race";
 import {MeshGenerator} from "../../mesh/generator";
 import {Vector2d} from "../../common/math/Vector2d";
 
-export class MyCardRaceButtonRepositoryImpl implements MyCardRaceButtonRepository {
-    private static instance: MyCardRaceButtonRepositoryImpl;
-    private buttonMap: Map<number, MyCardRaceButton> = new Map();
+export class MyCardCloseButtonRepositoryImpl implements MyCardCloseButtonRepository {
+    private static instance: MyCardCloseButtonRepositoryImpl;
+    private buttonMap: Map<number, MyCardCloseButton> = new Map();
     private textureManager: TextureManager;
 
-    private readonly BUTTON_WIDTH: number = 0.068
-    private readonly BUTTON_HEIGHT: number = 0.1323243243
+    private readonly BUTTON_WIDTH: number = 0.032
+    private readonly BUTTON_HEIGHT: number = 0.06227
 
     private constructor(textureManager: TextureManager) {
         this.textureManager = textureManager;
     }
 
-    public static getInstance(): MyCardRaceButtonRepositoryImpl {
-        if (!MyCardRaceButtonRepositoryImpl.instance) {
+    public static getInstance(): MyCardCloseButtonRepositoryImpl {
+        if (!MyCardCloseButtonRepositoryImpl.instance) {
             const textureManager = TextureManager.getInstance()
-            MyCardRaceButtonRepositoryImpl.instance = new MyCardRaceButtonRepositoryImpl(textureManager);
+            MyCardCloseButtonRepositoryImpl.instance = new MyCardCloseButtonRepositoryImpl(textureManager);
         }
-        return MyCardRaceButtonRepositoryImpl.instance;
+        return MyCardCloseButtonRepositoryImpl.instance;
     }
 
-    public async createRaceButton(type: CardRace, position: Vector2d): Promise<MyCardRaceButton> {
-        const texture = await this.textureManager.getTexture('my_card_race_button', type);
+    public async createCloseButton(type: number, position: Vector2d): Promise<MyCardCloseButton> {
+        const texture = await this.textureManager.getTexture('my_card_close_button', type);
 
         if (!texture) {
             console.error('Failed to load texture for type:', type);
-            throw new Error('My Card Race Button texture not found.');
+            throw new Error('My Card Close Button texture not found.');
         }
 
         const buttonWidth = this.BUTTON_WIDTH * window.innerWidth;
@@ -43,17 +42,17 @@ export class MyCardRaceButtonRepositoryImpl implements MyCardRaceButtonRepositor
         const buttonMesh = MeshGenerator.createMesh(texture, buttonWidth, buttonHeight, position);
         buttonMesh.position.set(buttonPositionX, buttonPositionY, 0);
 
-        const newButton = new MyCardRaceButton(type, buttonWidth, buttonHeight, buttonMesh, position);
+        const newButton = new MyCardCloseButton(type, buttonWidth, buttonHeight, buttonMesh, position);
         this.buttonMap.set(newButton.id, newButton);
 
         return newButton;
     }
 
-    public findButtonById(id: number): MyCardRaceButton | null {
+    public findButtonById(id: number): MyCardCloseButton | null {
         return this.buttonMap.get(id) || null;
     }
 
-    public findAllButton(): MyCardRaceButton[] {
+    public findAllButton(): MyCardCloseButton[] {
         return Array.from(this.buttonMap.values());
     }
 
@@ -70,16 +69,16 @@ export class MyCardRaceButtonRepositoryImpl implements MyCardRaceButtonRepositor
     }
 
     public hideButton(buttonId: number): void {
-        const raceButton = this.findButtonById(buttonId);
-        if (raceButton) {
-            raceButton.getMesh().visible = false;
+        const closeButton = this.findButtonById(buttonId);
+        if (closeButton) {
+            closeButton.getMesh().visible = false;
         }
     }
 
     public showButton(buttonId: number): void {
-        const raceButton = this.findButtonById(buttonId);
-        if (raceButton) {
-            raceButton.getMesh().visible = true;
+        const closeButton = this.findButtonById(buttonId);
+        if (closeButton) {
+            closeButton.getMesh().visible = true;
         }
     }
 }

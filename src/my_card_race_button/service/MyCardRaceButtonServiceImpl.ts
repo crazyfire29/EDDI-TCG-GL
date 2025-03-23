@@ -50,7 +50,7 @@ export class MyCardRaceButtonServiceImpl implements MyCardRaceButtonService {
             const initialPosition = button.position;
 
             const buttonWidth = 0.068 * windowWidth;
-            const buttonHeight = 0.131 * windowHeight;
+            const buttonHeight = 0.1323243243 * windowHeight;
 
             const newPositionX = initialPosition.getX() * windowWidth;
             const newPositionY = initialPosition.getY() * windowHeight;

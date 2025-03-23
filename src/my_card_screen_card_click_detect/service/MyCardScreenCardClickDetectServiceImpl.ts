@@ -8,6 +8,7 @@ import {MyCardScreenCardRepositoryImpl} from "../../my_card_screen_card/reposito
 import {MyCardRaceButtonClickDetectRepositoryImpl} from "../../my_card_race_button_click_detect/repository/MyCardRaceButtonClickDetectRepositoryImpl";
 import {DetailCardStateManager} from "../../my_card_screen_detail_card_manager/DetailCardStateManager";
 import {TransparentBackgroundRepositoryImpl} from "../../transparent_background/repository/TransparentBackgroundRepositoryImpl";
+import {MyCardCloseButtonRepositoryImpl} from "../../my_card_close_button/repository/MyCardCloseButtonRepositoryImpl";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -19,6 +20,7 @@ export class MyCardScreenCardClickDetectServiceImpl implements MyCardScreenCardC
     private raceButtonClickDetectRepository: MyCardRaceButtonClickDetectRepositoryImpl;
     private detailCardStateManager: DetailCardStateManager;
     private transparentBackgroundRepository : TransparentBackgroundRepositoryImpl;
+    private closeButtonRepository: MyCardCloseButtonRepositoryImpl;
 
     private cameraRepository: CameraRepository;
     private mouseDown: boolean = false;
@@ -29,6 +31,7 @@ export class MyCardScreenCardClickDetectServiceImpl implements MyCardScreenCardC
         this.raceButtonClickDetectRepository = MyCardRaceButtonClickDetectRepositoryImpl.getInstance();
         this.detailCardStateManager = DetailCardStateManager.getInstance();
         this.transparentBackgroundRepository = TransparentBackgroundRepositoryImpl.getInstance();
+        this.closeButtonRepository = MyCardCloseButtonRepositoryImpl.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
     }
 
@@ -70,12 +73,14 @@ export class MyCardScreenCardClickDetectServiceImpl implements MyCardScreenCardC
                 this.initializeDetailCardVisibility(cardIdList);
                 this.setDetailCardVisibility(currentClickId, true);
                 this.setTransparentBackgroundVisibility(true);
+                this.setCloseButtonVisibility(true);
             }
             return clickedCard;
 
         } else {
             this.initializeDetailCardVisibility(cardIdList);
             this.setTransparentBackgroundVisibility(false);
+            this.setCloseButtonVisibility(false);
         }
         return null;
     }
@@ -127,6 +132,14 @@ export class MyCardScreenCardClickDetectServiceImpl implements MyCardScreenCardC
             this.transparentBackgroundRepository.showTransparentBackground();
         } else {
             this.transparentBackgroundRepository.hideTransparentBackground();
+        }
+    }
+
+    private setCloseButtonVisibility(isVisible: boolean): void {
+        if (isVisible == true) {
+            this.closeButtonRepository.showButton(0);
+        } else {
+            this.closeButtonRepository.hideButton(0);
         }
     }
 

@@ -21,9 +21,11 @@ import {SideScrollAreaServiceImpl} from "../../src/side_scroll_area/service/Side
 import {MyCardScreenCardEffectServiceImpl} from "../../src/my_card_screen_card_effect/service/MyCardScreenCardEffectServiceImpl";
 import {TransparentBackgroundServiceImpl} from "../../src/transparent_background/service/TransparentBackgroundServiceImpl";
 import {MyCardScreenDetailCardServiceImpl} from "../../src/my_card_screen_detail_card/service/MyCardScreenDetailCardServiceImpl";
+import {MyCardCloseButtonServiceImpl} from "../../src/my_card_close_button/service/MyCardCloseButtonServiceImpl";
 
 import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
 import {MyCardRaceButtonEffectConfigList} from "../../src/my_card_race_button_effect/entity/MyCardRaceButtonEffectConfigList";
+import {MyCardCloseButtonConfigList} from "../../src/my_card_close_button/entity/MyCardCloseButtonConfigList";
 import {MyCardScreenCardMapRepositoryImpl} from "../../src/my_card_screen_card/repository/MyCardScreenCardMapRepositoryImpl";
 import {ClippingMaskManager} from "../../src/clipping_mask_manager/ClippingMaskManager";
 
@@ -37,6 +39,8 @@ import {MyCardScreenCardHoverDetectService} from "../../src/my_card_screen_card_
 import {MyCardScreenCardHoverDetectServiceImpl} from "../../src/my_card_screen_card_hover_detect/service/MyCardScreenCardHoverDetectServiceImpl";
 import {MyCardScreenCardClickDetectService} from "../../src/my_card_screen_card_click_detect/service/MyCardScreenCardClickDetectService";
 import {MyCardScreenCardClickDetectServiceImpl} from "../../src/my_card_screen_card_click_detect/service/MyCardScreenCardClickDetectServiceImpl";
+import {CloseButtonClickDetectService} from "../../src/my_card_close_button_click_detect/service/CloseButtonClickDetectService";
+import {CloseButtonClickDetectServiceImpl} from "../../src/my_card_close_button_click_detect/service/CloseButtonClickDetectServiceImpl";
 
 export class TCGJustTestMyCardView {
     private static instance: TCGJustTestMyCardView | null = null;
@@ -61,12 +65,14 @@ export class TCGJustTestMyCardView {
     private myCardScreenCardEffectService = MyCardScreenCardEffectServiceImpl.getInstance();
     private transparentBackgroundService = TransparentBackgroundServiceImpl.getInstance();
     private detailCardService = MyCardScreenDetailCardServiceImpl.getInstance();
+    private myCardCloseButtonService = MyCardCloseButtonServiceImpl.getInstance();
 
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
     private sideScrollAreaDetectService: SideScrollAreaDetectService;
     private myCardScreenScrollService: MyCardScreenScrollService;
     private myCardScreenCardHoverDetectService: MyCardScreenCardHoverDetectService;
     private myCardScreenCardClickDetectService: MyCardScreenCardClickDetectService;
+    private closeButtonClickDetectService: CloseButtonClickDetectService;
 
     private myCardScreenCardMapRepository = MyCardScreenCardMapRepositoryImpl.getInstance();
     private clippingMaskManager = ClippingMaskManager.getInstance();
@@ -128,8 +134,24 @@ export class TCGJustTestMyCardView {
         this.myCardScreenCardHoverDetectService = MyCardScreenCardHoverDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousemove', (e) => this.myCardScreenCardHoverDetectService.onMouseMove(e), false);
 
+        this.closeButtonClickDetectService = CloseButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.myCardScreenCardClickDetectService = MyCardScreenCardClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.myCardScreenCardClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
+            const clickCard = await this.myCardScreenCardClickDetectService.onMouseDown(e);
+            if (clickCard) {
+                this.closeButtonClickDetectService.setCloseButtonClickState(true);
+            }
+        }, false);
+
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
+            const hasCloseButtonBeenClicked = this.closeButtonClickDetectService.getCloseButtonClickState();
+            if (hasCloseButtonBeenClicked == true) {
+                const clickButton = await this.closeButtonClickDetectService.onMouseDown(e);
+                if (clickButton) {
+                    this.closeButtonClickDetectService.setCloseButtonClickState(false);
+                }
+            }
+        }, false);
     }
 
     public static getInstance(simulationMyCardContainer: HTMLElement): TCGJustTestMyCardView {
@@ -166,6 +188,7 @@ export class TCGJustTestMyCardView {
         await this.addCardEffects();
         await this.addTransparentBackground();
         await this.addDetailCards();
+        await this.addCloseButton();
 
         this.initialized = true;
         this.isAnimating = true;
@@ -381,6 +404,22 @@ export class TCGJustTestMyCardView {
         }
     }
 
+    private async addCloseButton(): Promise<void> {
+        try {
+            const configList = new MyCardCloseButtonConfigList();
+            await Promise.all(configList.buttonConfigs.map(async (config) => {
+                const button = await this.myCardCloseButtonService.createCloseButton(config.id, config.position);
+                if (button) {
+                    this.myCardCloseButtonService.initializeCloseButtonVisibility();
+                    this.scene.add(button);
+                    console.log(`Draw Close Button ${config.id}`);
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to add Close Button:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -406,7 +445,9 @@ export class TCGJustTestMyCardView {
             this.myCardScreenCardService.adjustMyCardScreenCardPosition();
             this.myCardScreenCardEffectService.adjustMyCardScreenCardEffectPosition();
             this.sideScrollAreaService.adjustMyCardSideScrollAreaPosition();
+            this.transparentBackgroundService.adjustTransparentBackgroundPosition();
             this.detailCardService.adjustDetailCardPosition();
+            this.myCardCloseButtonService.adjustCloseButtonPosition();
 
         }
     }
