@@ -127,7 +127,12 @@ export class TCGJustTestMyCardView {
         }, false);
 
         this.sideScrollAreaDetectService = SideScrollAreaDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollAreaDetectService.onMouseMoveMyCard(e), false);
+        this.renderer.domElement.addEventListener('mousemove', async (e) => {
+            const scrollAreaDetectState = this.sideScrollAreaDetectService.getMyCardScrollAreaDetectState();
+            if (scrollAreaDetectState == true) {
+                this.sideScrollAreaDetectService.onMouseMoveMyCard(e);
+            }
+        }, false);
 
         this.myCardScreenScrollService = MyCardScreenScrollServiceImpl.getInstance(this.camera, this.scene, this.renderer);
         this.renderer.domElement.addEventListener('wheel', async (e) => {
@@ -170,6 +175,7 @@ export class TCGJustTestMyCardView {
                 this.myCardScreenScrollService.setScrollState(false);
                 this.myCardRaceButtonClickDetectService.setButtonClickState(false);
                 this.myCardScreenCardHoverDetectService.setCardDetectState(false);
+                this.sideScrollAreaDetectService.setMyCardScrollAreaDetectState(false);
                 const clickButton = await this.closeButtonClickDetectService.onMouseDown(e);
                 if (clickButton) {
                     this.closeButtonClickDetectService.setCloseButtonClickState(false);
@@ -177,6 +183,7 @@ export class TCGJustTestMyCardView {
                     this.myCardScreenScrollService.setScrollState(true);
                     this.myCardRaceButtonClickDetectService.setButtonClickState(true);
                     this.myCardScreenCardHoverDetectService.setCardDetectState(true);
+                    this.sideScrollAreaDetectService.setMyCardScrollAreaDetectState(true);
                 }
             }
         }, false);
