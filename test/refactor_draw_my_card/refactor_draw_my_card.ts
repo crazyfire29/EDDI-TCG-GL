@@ -22,10 +22,13 @@ import {MyCardScreenCardEffectServiceImpl} from "../../src/my_card_screen_card_e
 import {TransparentBackgroundServiceImpl} from "../../src/transparent_background/service/TransparentBackgroundServiceImpl";
 import {MyCardScreenDetailCardServiceImpl} from "../../src/my_card_screen_detail_card/service/MyCardScreenDetailCardServiceImpl";
 import {MyCardCloseButtonServiceImpl} from "../../src/my_card_close_button/service/MyCardCloseButtonServiceImpl";
+import {MyCardScrollBarServiceImpl} from "../../src/my_card_scroll_bar/service/MyCardScrollBarServiceImpl";
 
 import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
 import {MyCardRaceButtonEffectConfigList} from "../../src/my_card_race_button_effect/entity/MyCardRaceButtonEffectConfigList";
 import {MyCardCloseButtonConfigList} from "../../src/my_card_close_button/entity/MyCardCloseButtonConfigList";
+import {MyCardScrollBarConfigList} from "../../src/my_card_scroll_bar/entity/MyCardScrollBarConfigList";
+
 import {MyCardScreenCardMapRepositoryImpl} from "../../src/my_card_screen_card/repository/MyCardScreenCardMapRepositoryImpl";
 import {ClippingMaskManager} from "../../src/clipping_mask_manager/ClippingMaskManager";
 
@@ -66,6 +69,7 @@ export class TCGJustTestMyCardView {
     private transparentBackgroundService = TransparentBackgroundServiceImpl.getInstance();
     private detailCardService = MyCardScreenDetailCardServiceImpl.getInstance();
     private myCardCloseButtonService = MyCardCloseButtonServiceImpl.getInstance();
+    private myCardScrollBarService = MyCardScrollBarServiceImpl.getInstance();
 
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
     private sideScrollAreaDetectService: SideScrollAreaDetectService;
@@ -210,6 +214,7 @@ export class TCGJustTestMyCardView {
         await this.addScrollArea();
         await this.addCards();
         await this.addCardEffects();
+        await this.addScrollBar();
         await this.addTransparentBackground();
         await this.addDetailCards();
         await this.addCloseButton();
@@ -396,6 +401,23 @@ export class TCGJustTestMyCardView {
         }
     }
 
+    private async addScrollBar(): Promise<void> {
+        try {
+            const configList = new MyCardScrollBarConfigList();
+
+            for (const config of configList.scrollBarConfigs) {
+                const scrollBar = await this.myCardScrollBarService.createScrollBar(config.id, config.position);
+                if (scrollBar) {
+                    this.myCardScrollBarService.initializeScrollBarVisibility();
+                    this.scene.add(scrollBar);
+                    console.log(`Draw Scroll Bar ${config.id}`);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to add Scroll Bar:', error);
+        }
+    }
+
     private async addTransparentBackground(): Promise<void> {
         try{
             const transparentBackground = await this.transparentBackgroundService.createTransparentBackground();
@@ -472,6 +494,8 @@ export class TCGJustTestMyCardView {
             this.transparentBackgroundService.adjustTransparentBackgroundPosition();
             this.detailCardService.adjustDetailCardPosition();
             this.myCardCloseButtonService.adjustCloseButtonPosition();
+            this.myCardScrollBarService.adjustScrollBarPosition();
+            this.myCardScrollBarService.adjustScrollHandlePosition();
 
         }
     }
