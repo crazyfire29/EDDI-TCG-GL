@@ -4,6 +4,9 @@ import {CloseButtonClickDetectService} from "./CloseButtonClickDetectService";
 import {CloseButtonClickDetectRepositoryImpl} from "../repository/CloseButtonClickDetectRepositoryImpl";
 import {MyCardCloseButton} from "../../my_card_close_button/entity/MyCardCloseButton";
 import {MyCardCloseButtonRepositoryImpl} from "../../my_card_close_button/repository/MyCardCloseButtonRepositoryImpl";
+import {MyCardScreenCardClickDetectRepositoryImpl} from "../../my_card_screen_card_click_detect/repository/MyCardScreenCardClickDetectRepositoryImpl";
+import {TransparentBackgroundRepositoryImpl} from "../../transparent_background/repository/TransparentBackgroundRepositoryImpl";
+import {DetailCardStateManager} from "../../my_card_screen_detail_card_manager/DetailCardStateManager";
 
 import {CameraRepository} from "../../camera/repository/CameraRepository";
 import {CameraRepositoryImpl} from "../../camera/repository/CameraRepositoryImpl";
@@ -12,6 +15,9 @@ export class CloseButtonClickDetectServiceImpl implements CloseButtonClickDetect
     private static instance: CloseButtonClickDetectServiceImpl | null = null;
     private closeButtonClickDetectRepository: CloseButtonClickDetectRepositoryImpl;
     private myCardCloseButtonRepository: MyCardCloseButtonRepositoryImpl;
+    private cardClickDetectRepository: MyCardScreenCardClickDetectRepositoryImpl;
+    private transparentBackgroundRepository : TransparentBackgroundRepositoryImpl;
+    private detailCardStateManager: DetailCardStateManager;
     private cameraRepository: CameraRepository;
 
     private hasCloseButtonBeenClicked: boolean = false;
@@ -19,6 +25,9 @@ export class CloseButtonClickDetectServiceImpl implements CloseButtonClickDetect
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.closeButtonClickDetectRepository = CloseButtonClickDetectRepositoryImpl.getInstance();
         this.myCardCloseButtonRepository = MyCardCloseButtonRepositoryImpl.getInstance();
+        this.cardClickDetectRepository = MyCardScreenCardClickDetectRepositoryImpl.getInstance();
+        this.transparentBackgroundRepository = TransparentBackgroundRepositoryImpl.getInstance();
+        this.detailCardStateManager = DetailCardStateManager.getInstance();
         this.cameraRepository = CameraRepositoryImpl.getInstance();
     }
 
@@ -48,6 +57,13 @@ export class CloseButtonClickDetectServiceImpl implements CloseButtonClickDetect
 
             if (clickedButton) {
                 console.log(`!!![DEBUG] Clicked Close Button ID: ${clickedButton.id}`);
+                this.setTransparentBackgroundVisibility(false);
+                this.setCloseButtonVisibility(false);
+                const currentClickedCardId = this.getCurrentClickedCardId();
+                if (currentClickedCardId) {
+                    this.setDetailCardVisibility(currentClickedCardId, false);
+                }
+                this.setTransparentBackgroundVisibility(false);
                 return clickedButton;
             }
         }
@@ -64,6 +80,30 @@ export class CloseButtonClickDetectServiceImpl implements CloseButtonClickDetect
 
     private getCloseButton(): MyCardCloseButton | null {
         return this.myCardCloseButtonRepository.findButtonById(0);
+    }
+
+    private getCurrentClickedCardId(): number | null {
+        return this.cardClickDetectRepository.findCurrentClickedCardId();
+    }
+
+    private setTransparentBackgroundVisibility(isVisible: boolean): void {
+        if (isVisible == true) {
+            this.transparentBackgroundRepository.showTransparentBackground();
+        } else {
+            this.transparentBackgroundRepository.hideTransparentBackground();
+        }
+    }
+
+    private setCloseButtonVisibility(isVisible: boolean): void {
+        if (isVisible == true) {
+            this.myCardCloseButtonRepository.showButton(0);
+        } else {
+            this.myCardCloseButtonRepository.hideButton(0);
+        }
+    }
+
+    private setDetailCardVisibility(cardId: number, isVisible: boolean): void {
+        this.detailCardStateManager.setCardVisibility(cardId, isVisible);
     }
 
 }
