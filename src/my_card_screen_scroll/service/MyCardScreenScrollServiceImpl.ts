@@ -16,6 +16,8 @@ export class MyCardScreenScrollServiceImpl implements MyCardScreenScrollService 
     private myCardScreenCardEffectRepository: MyCardScreenCardEffectRepositoryImpl;
     private raceButtonClickDetectRepository: MyCardRaceButtonClickDetectRepositoryImpl;
 
+    private scrollState: boolean = true;
+
     private constructor(camera: THREE.Camera, scene: THREE.Scene, renderer: THREE.WebGLRenderer) {
         this.renderer = renderer;
         this.cameraRepository = CameraRepositoryImpl.getInstance();
@@ -29,6 +31,14 @@ export class MyCardScreenScrollServiceImpl implements MyCardScreenScrollService 
             MyCardScreenScrollServiceImpl.instance = new MyCardScreenScrollServiceImpl(camera, scene, renderer);
         }
         return MyCardScreenScrollServiceImpl.instance;
+    }
+
+    public setScrollState(state: boolean): void {
+        this.scrollState = state;
+    }
+
+    public getScrollState(): boolean {
+        return this.scrollState;
     }
 
     public async onWheelScroll(event: WheelEvent, currentClickRaceButtonId: number): Promise<void> {

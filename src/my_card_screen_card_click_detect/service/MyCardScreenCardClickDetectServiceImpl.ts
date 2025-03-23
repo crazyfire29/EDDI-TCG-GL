@@ -23,7 +23,7 @@ export class MyCardScreenCardClickDetectServiceImpl implements MyCardScreenCardC
     private closeButtonRepository: MyCardCloseButtonRepositoryImpl;
 
     private cameraRepository: CameraRepository;
-    private mouseDown: boolean = false;
+    private mouseDown: boolean = true;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.myCardScreenCardRepository = MyCardScreenCardRepositoryImpl.getInstance();
