@@ -115,7 +115,12 @@ export class TCGJustTestMyCardView {
         window.addEventListener('click', () => this.initializeAudio(), { once: true });
 
         this.myCardRaceButtonClickDetectService = MyCardRaceButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousedown', (e) => this.myCardRaceButtonClickDetectService.onMouseDown(e), false);
+        this.renderer.domElement.addEventListener('mousedown', async (e) => {
+            const raceButtonClickState = this.myCardRaceButtonClickDetectService.getButtonClickState();
+            if (raceButtonClickState == true) {
+                this.myCardRaceButtonClickDetectService.onMouseDown(e);
+            }
+        }, false);
 
         this.sideScrollAreaDetectService = SideScrollAreaDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousemove', (e) => this.sideScrollAreaDetectService.onMouseMoveMyCard(e), false);
@@ -126,29 +131,48 @@ export class TCGJustTestMyCardView {
             const clickedRaceButtonId = this.myCardScreenScrollService.getCurrentClickedRaceButtonId();
             if (scrollAreaDetect == true && clickedRaceButtonId !== null) {
                 if (this.myCardScreenScrollService.getCardCountByRaceId(clickedRaceButtonId) > 10) {
-                    this.myCardScreenScrollService.onWheelScroll(e, clickedRaceButtonId);
+                    const scrollState = this.myCardScreenScrollService.getScrollState();
+                    if (scrollState == true) {
+                        this.myCardScreenScrollService.onWheelScroll(e, clickedRaceButtonId);
+                    }
                 }
             }
         }, false);
 
         this.myCardScreenCardHoverDetectService = MyCardScreenCardHoverDetectServiceImpl.getInstance(this.camera, this.scene);
-        this.renderer.domElement.addEventListener('mousemove', (e) => this.myCardScreenCardHoverDetectService.onMouseMove(e), false);
+        this.renderer.domElement.addEventListener('mousemove', async (e) => {
+            const cardDetectState = this.myCardScreenCardHoverDetectService.getCardDetectState();
+            if (cardDetectState == true) {
+                this.myCardScreenCardHoverDetectService.onMouseMove(e)
+            }
+        }, false);
 
         this.closeButtonClickDetectService = CloseButtonClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.myCardScreenCardClickDetectService = MyCardScreenCardClickDetectServiceImpl.getInstance(this.camera, this.scene);
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
-            const clickCard = await this.myCardScreenCardClickDetectService.onMouseDown(e);
-            if (clickCard) {
-                this.closeButtonClickDetectService.setCloseButtonClickState(true);
+            const cardClickState = this.myCardScreenCardClickDetectService.isMouseDown();
+            if (cardClickState == true) {
+                const clickCard = await this.myCardScreenCardClickDetectService.onMouseDown(e);
+                if (clickCard) {
+                    this.closeButtonClickDetectService.setCloseButtonClickState(true);
+                }
             }
         }, false);
 
         this.renderer.domElement.addEventListener('mousedown', async (e) => {
             const hasCloseButtonBeenClicked = this.closeButtonClickDetectService.getCloseButtonClickState();
             if (hasCloseButtonBeenClicked == true) {
+                this.myCardScreenCardClickDetectService.setMouseDown(false);
+                this.myCardScreenScrollService.setScrollState(false);
+                this.myCardRaceButtonClickDetectService.setButtonClickState(false);
+                this.myCardScreenCardHoverDetectService.setCardDetectState(false);
                 const clickButton = await this.closeButtonClickDetectService.onMouseDown(e);
                 if (clickButton) {
                     this.closeButtonClickDetectService.setCloseButtonClickState(false);
+                    this.myCardScreenCardClickDetectService.setMouseDown(true);
+                    this.myCardScreenScrollService.setScrollState(true);
+                    this.myCardRaceButtonClickDetectService.setButtonClickState(true);
+                    this.myCardScreenCardHoverDetectService.setCardDetectState(true);
                 }
             }
         }, false);

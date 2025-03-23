@@ -26,7 +26,7 @@ export class MyCardScreenCardHoverDetectServiceImpl implements MyCardScreenCardH
     private cardEffectStateManager: CardEffectStateManager;
 
     private cameraRepository: CameraRepository;
-    private leftMouseDown: boolean = false;
+    private cardDetectState: boolean = true;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.myCardScreenCardRepository = MyCardScreenCardRepositoryImpl.getInstance();
@@ -46,12 +46,12 @@ export class MyCardScreenCardHoverDetectServiceImpl implements MyCardScreenCardH
         return MyCardScreenCardHoverDetectServiceImpl.instance;
     }
 
-    setMouseMove(state: boolean): void {
-        this.leftMouseDown = state;
+    setCardDetectState(state: boolean): void {
+        this.cardDetectState = state;
     }
 
-    isMouseMove(): boolean {
-        return this.leftMouseDown;
+    getCardDetectState(): boolean {
+        return this.cardDetectState;
     }
 
     async handleHover(hoverPoint: { x: number; y: number }): Promise<MyCardScreenCard | null> {

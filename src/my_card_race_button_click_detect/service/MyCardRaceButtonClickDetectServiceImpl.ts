@@ -30,7 +30,7 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
     private cardStateManager: CardStateManager;
     private detailCardStateManager: DetailCardStateManager;
 
-    private leftMouseDown: boolean = false;
+    private raceButtonClickState: boolean = true;
 
     private constructor(private camera: THREE.Camera, private scene: THREE.Scene) {
         this.raceButtonRepository = MyCardRaceButtonRepositoryImpl.getInstance();
@@ -53,12 +53,12 @@ export class MyCardRaceButtonClickDetectServiceImpl implements MyCardRaceButtonC
         return MyCardRaceButtonClickDetectServiceImpl.instance;
     }
 
-    setLeftMouseDown(state: boolean): void {
-        this.leftMouseDown = state;
+    setButtonClickState(state: boolean): void {
+        this.raceButtonClickState = state;
     }
 
-    isLeftMouseDown(): boolean {
-        return this.leftMouseDown;
+    getButtonClickState(): boolean {
+        return this.raceButtonClickState;
     }
 
     async handleRaceButtonClick(clickPoint: { x: number; y: number }): Promise<MyCardRaceButton | null> {
