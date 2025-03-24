@@ -111,8 +111,8 @@ export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
                 continue;
             }
 
-            const cardWidth = 0.109 * window.innerWidth;
-            const cardHeight = 0.3471 * window.innerHeight;
+            const cardWidth = 0.12 * window.innerWidth;
+            const cardHeight = 0.3821284404 * window.innerHeight;
 
             const newPositionX = initialPosition.getX() * windowWidth;
             const newPositionY = initialPosition.getY() * windowHeight;
@@ -128,9 +128,9 @@ export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
 
             const scrollArea = this.getScrollArea();
             if (scrollArea) {
-                scrollArea.width = 0.735 * windowWidth;
-                scrollArea.height = 0.8285 * windowHeight;
-                scrollArea.position.set(0.013 * window.innerWidth, -0.02 * window.innerHeight);
+                scrollArea.width = 0.832 * windowWidth;
+                scrollArea.height = 0.8215 * windowHeight;
+                scrollArea.position.set(0.0326 * window.innerWidth, -0.027 * window.innerHeight);
                 const clippingPlanes = this.clippingMaskManager.setClippingPlanes(1, scrollArea);
                 this.applyClippingPlanesToMesh(cardMesh, clippingPlanes);
             }

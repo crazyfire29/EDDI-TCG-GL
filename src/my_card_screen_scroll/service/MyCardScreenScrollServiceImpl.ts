@@ -67,7 +67,7 @@ export class MyCardScreenScrollServiceImpl implements MyCardScreenScrollService 
         scrollTargetCardEffect.position.y += event.deltaY * scrollSpeed;
         scrollTargetHandle.position.y -= event.deltaY * 0.3;
 
-        const lowerLimit = 0.401 * window.innerHeight * (cardRowCount - 2); // 보이지 않는 카드가 차지하는 전체 높이
+        const lowerLimit = 0.481 * window.innerHeight * (cardRowCount - 2); // 보이지 않는 카드가 차지하는 전체 높이
         const upperLimit = 0;
         console.log(`upperLimit: ${upperLimit}`); // 최대로 올릴 수 있는 범위
         console.log(`lowerLimit: ${lowerLimit}`); // 최대로 내릴 수 있는 범위
