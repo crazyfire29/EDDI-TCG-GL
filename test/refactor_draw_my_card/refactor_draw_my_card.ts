@@ -396,7 +396,7 @@ export class TCGJustTestMyCardView {
 
     private async addScrollArea(): Promise<void> {
         try{
-            const areaMesh = await this.sideScrollAreaService.createSideScrollArea('myCardSideScrollArea', 2, 0.832, 0.8215, 0.0326, -0.027);
+            const areaMesh = await this.sideScrollAreaService.createSideScrollArea('myCardSideScrollArea', 2, 0.902, 0.884, 0.048, -0.06);
             if (areaMesh) {
                 this.scene.add(areaMesh);
             } else {

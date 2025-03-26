@@ -6,10 +6,10 @@ export class MyCardScreenCardEffectPositionRepositoryImpl implements MyCardScree
     private static instance: MyCardScreenCardEffectPositionRepositoryImpl;
     private positionMap: Map<number, { cardId: number, position: MyCardScreenCardEffectPosition }>;
 
-    private initialX = - 0.2935;
-    private incrementX = 0.162;
-    private initialY =  0.14;
-    private incrementY = - 0.481;
+    private initialX = - 0.311;
+    private incrementX = 0.177;
+    private initialY =  0.1;
+    private incrementY = - 0.491;
     private maxEffectsPerRow = 5;
     private effectsPerPage = 10;
 

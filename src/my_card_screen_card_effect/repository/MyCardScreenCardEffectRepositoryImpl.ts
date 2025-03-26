@@ -15,8 +15,8 @@ export class MyCardScreenCardEffectRepositoryImpl implements MyCardScreenCardEff
     private trentEffectGroup: THREE.Group | null = null;
     private textureManager: TextureManager;
 
-    private readonly EFFECT_WIDTH: number = 0.12
-    private readonly EFFECT_HEIGHT: number = 0.3821284404
+    private readonly EFFECT_WIDTH: number = 0.125
+    private readonly EFFECT_HEIGHT: number = 0.3980
 
     private constructor(textureManager: TextureManager) {
         this.textureManager = textureManager;
