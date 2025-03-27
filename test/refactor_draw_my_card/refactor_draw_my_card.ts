@@ -23,11 +23,13 @@ import {TransparentBackgroundServiceImpl} from "../../src/transparent_background
 import {MyCardScreenDetailCardServiceImpl} from "../../src/my_card_screen_detail_card/service/MyCardScreenDetailCardServiceImpl";
 import {MyCardCloseButtonServiceImpl} from "../../src/my_card_close_button/service/MyCardCloseButtonServiceImpl";
 import {MyCardScrollBarServiceImpl} from "../../src/my_card_scroll_bar/service/MyCardScrollBarServiceImpl";
+import {GlobalNavigationBarServiceImpl} from "../../src/global_navigation_bar/service/GlobalNavigationBarServiceImpl";
 
 import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
 import {MyCardRaceButtonEffectConfigList} from "../../src/my_card_race_button_effect/entity/MyCardRaceButtonEffectConfigList";
 import {MyCardCloseButtonConfigList} from "../../src/my_card_close_button/entity/MyCardCloseButtonConfigList";
 import {MyCardScrollBarConfigList} from "../../src/my_card_scroll_bar/entity/MyCardScrollBarConfigList";
+import {GlobalNavigationBarConfigList} from "../../src/global_navigation_bar/entity/GlobalNavigationBarConfigList";
 
 import {MyCardScreenCardMapRepositoryImpl} from "../../src/my_card_screen_card/repository/MyCardScreenCardMapRepositoryImpl";
 import {ClippingMaskManager} from "../../src/clipping_mask_manager/ClippingMaskManager";
@@ -70,6 +72,7 @@ export class TCGJustTestMyCardView {
     private detailCardService = MyCardScreenDetailCardServiceImpl.getInstance();
     private myCardCloseButtonService = MyCardCloseButtonServiceImpl.getInstance();
     private myCardScrollBarService = MyCardScrollBarServiceImpl.getInstance();
+    private globalNavigationBarService = GlobalNavigationBarServiceImpl.getInstance();
 
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
     private sideScrollAreaDetectService: SideScrollAreaDetectService;
@@ -217,6 +220,7 @@ export class TCGJustTestMyCardView {
 
         await this.addBackground();
         await this.addRaceButton();
+        await this.addGlobalNavigationBarButton();
         await this.addRaceButtonEffect();
         await this.addScrollArea();
         await this.addCards();
@@ -507,6 +511,22 @@ export class TCGJustTestMyCardView {
         }
     }
 
+    private async addGlobalNavigationBarButton(): Promise<void> {
+        try {
+            const configList = new GlobalNavigationBarConfigList();
+            await Promise.all(configList.buttonConfigs.map(async (config) => {
+                const button = await this.globalNavigationBarService.createGlobalNavigationBar(config.id,config.position);
+
+                if (button) {
+                    this.scene.add(button);
+                    console.log(`Draw GNB Button ${config.id}`);
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to add GNB Button:', error);
+        }
+    }
+
     private onWindowResize(): void {
         const newWidth = window.innerWidth;
         const newHeight = window.innerHeight;
@@ -537,7 +557,7 @@ export class TCGJustTestMyCardView {
             this.myCardCloseButtonService.adjustCloseButtonPosition();
             this.myCardScrollBarService.adjustScrollBarPosition();
             this.myCardScrollBarService.adjustScrollHandlePosition();
-
+            this.globalNavigationBarService.adjustGlobalNavigationBarPosition();
         }
     }
 
