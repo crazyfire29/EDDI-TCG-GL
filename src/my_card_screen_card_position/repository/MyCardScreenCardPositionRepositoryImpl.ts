@@ -6,10 +6,10 @@ export class MyCardScreenCardPositionRepositoryImpl implements MyCardScreenCardP
     private static instance: MyCardScreenCardPositionRepositoryImpl;
     private positionMap: Map<number, { cardId: number, position: MyCardScreenCardPosition }>;
 
-    private initialX = - 0.2905;
-    private incrementX = 0.152;
-    private initialY =  0.1929;
-    private incrementY = - 0.401;
+    private initialX = - 0.311;
+    private incrementX = 0.177;
+    private initialY =  0.1;
+    private incrementY = - 0.491;
     private maxCardsPerRow = 5;
     private cardsPerPage = 10;
 

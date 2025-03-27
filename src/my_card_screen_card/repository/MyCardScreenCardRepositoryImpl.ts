@@ -16,8 +16,8 @@ export class MyCardScreenCardRepositoryImpl implements MyCardScreenCardRepositor
     private trentCardGroup: THREE.Group | null = null;
     private textureManager: TextureManager;
 
-    private readonly CARD_WIDTH: number = 0.109 // 0.112
-    private readonly CARD_HEIGHT: number = 0.3471 // 0.36
+    private readonly CARD_WIDTH: number = 0.125  //0.12 //0.109 // 0.112
+    private readonly CARD_HEIGHT: number = 0.3980 //0.3821284404 //0.3471 // 0.356653211
 
     private constructor(textureManager: TextureManager) {
         this.textureManager = textureManager;
