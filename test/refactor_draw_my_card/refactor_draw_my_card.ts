@@ -24,6 +24,7 @@ import {MyCardScreenDetailCardServiceImpl} from "../../src/my_card_screen_detail
 import {MyCardCloseButtonServiceImpl} from "../../src/my_card_close_button/service/MyCardCloseButtonServiceImpl";
 import {MyCardScrollBarServiceImpl} from "../../src/my_card_scroll_bar/service/MyCardScrollBarServiceImpl";
 import {GlobalNavigationBarServiceImpl} from "../../src/global_navigation_bar/service/GlobalNavigationBarServiceImpl";
+import {GlobalNavigationBarEffectServiceImpl} from "../../src/global_navigation_bar_effect/service/GlobalNavigationBarEffectServiceImpl";
 
 import {MyCardRaceButtonConfigList} from "../../src/my_card_race_button/entity/MyCardRaceButtonConfigList";
 import {MyCardRaceButtonEffectConfigList} from "../../src/my_card_race_button_effect/entity/MyCardRaceButtonEffectConfigList";
@@ -73,6 +74,7 @@ export class TCGJustTestMyCardView {
     private myCardCloseButtonService = MyCardCloseButtonServiceImpl.getInstance();
     private myCardScrollBarService = MyCardScrollBarServiceImpl.getInstance();
     private globalNavigationBarService = GlobalNavigationBarServiceImpl.getInstance();
+    private globalNavigationBarEffectService = GlobalNavigationBarEffectServiceImpl.getInstance();
 
     private myCardRaceButtonClickDetectService: MyCardRaceButtonClickDetectService;
     private sideScrollAreaDetectService: SideScrollAreaDetectService;
@@ -221,6 +223,7 @@ export class TCGJustTestMyCardView {
         await this.addBackground();
         await this.addRaceButton();
         await this.addGlobalNavigationBarButton();
+        await this.addGlobalNavigationBarButtonEffect();
         await this.addRaceButtonEffect();
         await this.addScrollArea();
         await this.addCards();
@@ -518,12 +521,30 @@ export class TCGJustTestMyCardView {
                 const button = await this.globalNavigationBarService.createGlobalNavigationBar(config.id,config.position);
 
                 if (button) {
+                    this.globalNavigationBarService.initializeButtonVisible();
                     this.scene.add(button);
                     console.log(`Draw GNB Button ${config.id}`);
                 }
             }));
         } catch (error) {
             console.error('Failed to add GNB Button:', error);
+        }
+    }
+
+    private async addGlobalNavigationBarButtonEffect(): Promise<void> {
+        try {
+            const configList = new GlobalNavigationBarConfigList();
+            await Promise.all(configList.buttonConfigs.map(async (config) => {
+                const effect = await this.globalNavigationBarEffectService.createGlobalNavigationBarEffect(config.id,config.position);
+
+                if (effect) {
+                    this.globalNavigationBarEffectService.initializeButtonEffectVisible();
+                    this.scene.add(effect);
+                    console.log(`Draw GNB Button Effect ${config.id}`);
+                }
+            }));
+        } catch (error) {
+            console.error('Failed to add GNB Button Effect:', error);
         }
     }
 
@@ -558,6 +579,7 @@ export class TCGJustTestMyCardView {
             this.myCardScrollBarService.adjustScrollBarPosition();
             this.myCardScrollBarService.adjustScrollHandlePosition();
             this.globalNavigationBarService.adjustGlobalNavigationBarPosition();
+            this.globalNavigationBarEffectService.adjustGlobalNavigationBarEffectPosition();
         }
     }
 
