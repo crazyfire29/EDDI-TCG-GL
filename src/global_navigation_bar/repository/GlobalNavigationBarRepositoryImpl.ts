@@ -74,7 +74,7 @@ export class GlobalNavigationBarRepositoryImpl implements GlobalNavigationBarRep
         }
     }
 
-    public showCard(buttonId: number): void {
+    public showButton(buttonId: number): void {
         const button = this.findButtonById(buttonId);
         if (button) {
             button.getMesh().visible = true;
