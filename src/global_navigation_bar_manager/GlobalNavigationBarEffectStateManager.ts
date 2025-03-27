@@ -21,9 +21,9 @@ export class GlobalNavigationBarEffectStateManager {
     public setVisibility(effectId: number, isVisible: boolean): void {
         this.effectVisibilityState.set(effectId, isVisible);
         if (isVisible == true) {
-            this.globalNavigationBarEffectRepository.showButton(effectId);
+            this.globalNavigationBarEffectRepository.showEffect(effectId);
         } else {
-            this.globalNavigationBarEffectRepository.hideButton(effectId);
+            this.globalNavigationBarEffectRepository.hideEffect(effectId);
         }
     }
 

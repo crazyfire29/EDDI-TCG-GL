@@ -4,13 +4,16 @@ import {Vector2d} from "../../common/math/Vector2d";
 import {GlobalNavigationBarEffectService} from './GlobalNavigationBarEffectService';
 import {GlobalNavigationBarEffect} from "../entity/GlobalNavigationBarEffect";
 import {GlobalNavigationBarEffectRepositoryImpl} from "../repository/GlobalNavigationBarEffectRepositoryImpl";
+import {GlobalNavigationBarEffectStateManager} from "../../global_navigation_bar_manager/GlobalNavigationBarEffectStateManager";
 
 export class GlobalNavigationBarEffectServiceImpl implements GlobalNavigationBarEffectService {
     private static instance: GlobalNavigationBarEffectServiceImpl;
     private globalNavigationBarEffectRepository: GlobalNavigationBarEffectRepositoryImpl;
+    private globalNavigationBarEffectStateManager: GlobalNavigationBarEffectStateManager;
 
     private constructor() {
         this.globalNavigationBarEffectRepository = GlobalNavigationBarEffectRepositoryImpl.getInstance();
+        this.globalNavigationBarEffectStateManager = GlobalNavigationBarEffectStateManager.getInstance();
     }
 
     public static getInstance(): GlobalNavigationBarEffectServiceImpl {
@@ -71,6 +74,14 @@ export class GlobalNavigationBarEffectServiceImpl implements GlobalNavigationBar
 
     public deleteAllGlobalNavigationBarButtonEffect(): void {
         this.globalNavigationBarEffectRepository.deleteAllEffect();
+    }
+
+    public initializeButtonEffectVisible(): void {
+        const effectIdList = this.globalNavigationBarEffectRepository.findAllEffectIdList();
+        effectIdList.forEach(effectId => {
+            this.globalNavigationBarEffectStateManager.setVisibility(effectId, false);
+        });
+        this.globalNavigationBarEffectStateManager.setVisibility(2, true);
     }
 
 }

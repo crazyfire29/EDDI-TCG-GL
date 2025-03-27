@@ -4,13 +4,16 @@ import {Vector2d} from "../../common/math/Vector2d";
 import {GlobalNavigationBarService} from './GlobalNavigationBarService';
 import {GlobalNavigationBar} from "../entity/GlobalNavigationBar";
 import {GlobalNavigationBarRepositoryImpl} from "../repository/GlobalNavigationBarRepositoryImpl";
+import {GlobalNavigationBarStateManager} from "../../global_navigation_bar_manager/GlobalNavigationBarStateManager";
 
 export class GlobalNavigationBarServiceImpl implements GlobalNavigationBarService {
     private static instance: GlobalNavigationBarServiceImpl;
     private globalNavigationBarRepository: GlobalNavigationBarRepositoryImpl;
+    private globalNavigationBarStateManager: GlobalNavigationBarStateManager;
 
     private constructor() {
         this.globalNavigationBarRepository = GlobalNavigationBarRepositoryImpl.getInstance();
+        this.globalNavigationBarStateManager = GlobalNavigationBarStateManager.getInstance();
     }
 
     public static getInstance(): GlobalNavigationBarServiceImpl {
@@ -71,6 +74,14 @@ export class GlobalNavigationBarServiceImpl implements GlobalNavigationBarServic
 
     public deleteAllGlobalNavigationBarButton(): void {
         this.globalNavigationBarRepository.deleteAllButton();
+    }
+
+    public initializeButtonVisible(): void {
+        const buttonIdList = this.globalNavigationBarRepository.findAllButtonIdList();
+        buttonIdList.forEach(buttonId => {
+            this.globalNavigationBarStateManager.setVisibility(buttonId, true);
+        });
+        this.globalNavigationBarStateManager.setVisibility(2, false);
     }
 
 }

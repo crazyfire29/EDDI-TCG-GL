@@ -223,7 +223,7 @@ export class TCGJustTestMyCardView {
         await this.addBackground();
         await this.addRaceButton();
         await this.addGlobalNavigationBarButton();
-//         await this.addGlobalNavigationBarButtonEffect();
+        await this.addGlobalNavigationBarButtonEffect();
         await this.addRaceButtonEffect();
         await this.addScrollArea();
         await this.addCards();
@@ -521,6 +521,7 @@ export class TCGJustTestMyCardView {
                 const button = await this.globalNavigationBarService.createGlobalNavigationBar(config.id,config.position);
 
                 if (button) {
+                    this.globalNavigationBarService.initializeButtonVisible();
                     this.scene.add(button);
                     console.log(`Draw GNB Button ${config.id}`);
                 }
@@ -537,6 +538,7 @@ export class TCGJustTestMyCardView {
                 const effect = await this.globalNavigationBarEffectService.createGlobalNavigationBarEffect(config.id,config.position);
 
                 if (effect) {
+                    this.globalNavigationBarEffectService.initializeButtonEffectVisible();
                     this.scene.add(effect);
                     console.log(`Draw GNB Button Effect ${config.id}`);
                 }
