@@ -59,8 +59,29 @@ export class GnbButtonHoverDetectServiceImpl implements GnbButtonHoverDetectServ
 
             const currentHoveredButtonId = this.getCurrentHoveredButtonId();
 
+            const hiddenButton = buttonList.find(
+                (button) => this.getGnbButtonVisibility(button.id) == false
+            );
+
+            if (currentHoveredButtonId !== null && currentHoveredButtonId !== 2) {
+                this.setButtonVisibility(currentHoveredButtonId, false);
+                this.setButtonEffectVisibility(currentHoveredButtonId, true);
+            }
+
+            if (hiddenButton && hiddenButton.id !== currentHoveredButtonId && hiddenButton.id !== 2) {
+                this.setButtonVisibility(hiddenButton.id, true);
+                this.setButtonEffectVisibility(hiddenButton.id, false);
+            }
             return hoveredButton;
 
+        } else {
+            const allButtonIdList = this.getAllButtonIdList();
+            allButtonIdList.forEach((buttonId) => {
+                if (buttonId !== 2) {
+                    this.setButtonVisibility(buttonId, true);
+                    this.setButtonEffectVisibility(buttonId, false);
+                }
+            });
         }
         return null;
     }
@@ -83,6 +104,22 @@ export class GnbButtonHoverDetectServiceImpl implements GnbButtonHoverDetectServ
 
     public getCurrentHoveredButtonId(): number | null {
         return this.gnbButtonHoverDetectRepository.findCurrentHoveredButtonId();
+    }
+
+    private getGnbButtonVisibility(buttonId: number): boolean {
+        return this.gnbButtonStateManager.findVisibility(buttonId);
+    }
+
+    private setButtonVisibility(buttonId: number, isVisible: boolean): void {
+        this.gnbButtonStateManager.setVisibility(buttonId, isVisible);
+    }
+
+    private setButtonEffectVisibility(effectId: number, isVisible: boolean): void {
+        this.gnbButtonEffectStateManager.setVisibility(effectId, isVisible);
+    }
+
+    private getAllButtonIdList(): number[] {
+        return this.gnbButtonRepository.findAllButtonIdList();
     }
 
 }
