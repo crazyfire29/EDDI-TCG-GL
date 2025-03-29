@@ -47,6 +47,8 @@ import {MyCardScreenCardClickDetectService} from "../../src/my_card_screen_card_
 import {MyCardScreenCardClickDetectServiceImpl} from "../../src/my_card_screen_card_click_detect/service/MyCardScreenCardClickDetectServiceImpl";
 import {CloseButtonClickDetectService} from "../../src/my_card_close_button_click_detect/service/CloseButtonClickDetectService";
 import {CloseButtonClickDetectServiceImpl} from "../../src/my_card_close_button_click_detect/service/CloseButtonClickDetectServiceImpl";
+import {GnbButtonHoverDetectService} from "../../src/global_navigation_bar_button_hover_detect/service/GnbButtonHoverDetectService";
+import {GnbButtonHoverDetectServiceImpl} from "../../src/global_navigation_bar_button_hover_detect/service/GnbButtonHoverDetectServiceImpl";
 
 export class TCGJustTestMyCardView {
     private static instance: TCGJustTestMyCardView | null = null;
@@ -82,6 +84,7 @@ export class TCGJustTestMyCardView {
     private myCardScreenCardHoverDetectService: MyCardScreenCardHoverDetectService;
     private myCardScreenCardClickDetectService: MyCardScreenCardClickDetectService;
     private closeButtonClickDetectService: CloseButtonClickDetectService;
+    private gnbButtonHoverDetectService: GnbButtonHoverDetectService;
 
     private myCardScreenCardMapRepository = MyCardScreenCardMapRepositoryImpl.getInstance();
     private clippingMaskManager = ClippingMaskManager.getInstance();
@@ -128,6 +131,14 @@ export class TCGJustTestMyCardView {
             const raceButtonClickState = this.myCardRaceButtonClickDetectService.getButtonClickState();
             if (raceButtonClickState == true) {
                 this.myCardRaceButtonClickDetectService.onMouseDown(e);
+            }
+        }, false);
+
+        this.gnbButtonHoverDetectService = GnbButtonHoverDetectServiceImpl.getInstance(this.camera, this.scene);
+        this.renderer.domElement.addEventListener('mousemove', async (e) => {
+            const buttonDetectState = this.gnbButtonHoverDetectService.getButtonHoverDetectState();
+            if (buttonDetectState == true) {
+                this.gnbButtonHoverDetectService.onMouseMove(e)
             }
         }, false);
 
@@ -181,6 +192,7 @@ export class TCGJustTestMyCardView {
                 this.myCardRaceButtonClickDetectService.setButtonClickState(false);
                 this.myCardScreenCardHoverDetectService.setCardDetectState(false);
                 this.sideScrollAreaDetectService.setMyCardScrollAreaDetectState(false);
+                this.gnbButtonHoverDetectService.setButtonHoverDetectState(false);
                 const clickButton = await this.closeButtonClickDetectService.onMouseDown(e);
                 if (clickButton) {
                     this.closeButtonClickDetectService.setCloseButtonClickState(false);
@@ -189,6 +201,7 @@ export class TCGJustTestMyCardView {
                     this.myCardRaceButtonClickDetectService.setButtonClickState(true);
                     this.myCardScreenCardHoverDetectService.setCardDetectState(true);
                     this.sideScrollAreaDetectService.setMyCardScrollAreaDetectState(true);
+                    this.gnbButtonHoverDetectService.setButtonHoverDetectState(true);
                 }
             }
         }, false);
