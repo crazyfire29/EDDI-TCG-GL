@@ -106,7 +106,7 @@ export class MyCardScreenCardEffectServiceImpl implements MyCardScreenCardEffect
             }
 
             const effectWidth = 0.125 * window.innerWidth;
-            const effectHeight = 0.3980 * window.innerHeight;
+            const effectHeight = effectWidth * 1.6176;
 
             const newPositionX = initialPosition.getX() * windowWidth;
             const newPositionY = initialPosition.getY() * windowHeight;

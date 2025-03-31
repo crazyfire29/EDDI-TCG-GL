@@ -47,7 +47,7 @@ export class GlobalNavigationBarEffectServiceImpl implements GlobalNavigationBar
             const initialPosition = effect.position;
 
             const effectWidth = effect.getWidthPercent() * windowWidth;
-            const effectHeight = effect.getHeightPercent() * windowHeight;
+            const effectHeight = effectWidth * 0.6;
 
             const newPositionX = initialPosition.getX() * windowWidth;
             const newPositionY = initialPosition.getY() * windowHeight;

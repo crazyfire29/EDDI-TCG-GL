@@ -35,7 +35,8 @@ export class MyCardRaceButtonRepositoryImpl implements MyCardRaceButtonRepositor
         }
 
         const buttonWidth = this.BUTTON_WIDTH * window.innerWidth;
-        const buttonHeight = this.BUTTON_HEIGHT * window.innerHeight;
+//         const buttonHeight = this.BUTTON_HEIGHT * window.innerHeight;
+        const buttonHeight = buttonWidth;
 
         const buttonPositionX = position.getX() * window.innerWidth;
         const buttonPositionY = position.getY() * window.innerHeight;

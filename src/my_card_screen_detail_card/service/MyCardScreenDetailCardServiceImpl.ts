@@ -51,7 +51,7 @@ export class MyCardScreenDetailCardServiceImpl implements MyCardScreenDetailCard
             }
 
             const cardWidth = 0.2 * window.innerWidth;
-            const cardHeight = 0.63688 * window.innerHeight;
+            const cardHeight = cardWidth * 1.6176;
 
             const newPositionX = 0 * windowWidth;
             const newPositionY = 0 * windowHeight;

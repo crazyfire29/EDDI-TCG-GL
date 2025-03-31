@@ -45,7 +45,8 @@ export class MyCardScreenCardRepositoryImpl implements MyCardScreenCardRepositor
         const race = card.종족;
 
         const cardWidth = this.CARD_WIDTH * window.innerWidth;
-        const cardHeight = this.CARD_HEIGHT * window.innerHeight;
+//         const cardHeight = this.CARD_HEIGHT * window.innerHeight;
+        const cardHeight = cardWidth * 1.6176;
 
         const cardPositionX = position.getX() * window.innerWidth;
         const cardPositionY = position.getY() * window.innerHeight;

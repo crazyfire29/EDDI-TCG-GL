@@ -35,7 +35,7 @@ export class MyCardRaceButtonEffectRepositoryImpl implements MyCardRaceButtonEff
         }
 
         const effectWidth = this.EFFECT_WIDTH * window.innerWidth;
-        const effectHeight = this.EFFECT_HEIGHT * window.innerHeight;
+        const effectHeight = effectWidth;
 
         const effectPositionX = position.getX() * window.innerWidth;
         const effectPositionY = position.getY() * window.innerHeight;

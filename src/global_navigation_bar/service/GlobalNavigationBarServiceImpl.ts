@@ -47,7 +47,7 @@ export class GlobalNavigationBarServiceImpl implements GlobalNavigationBarServic
             const initialPosition = button.position;
 
             const buttonWidth = button.getWidthPercent() * windowWidth;
-            const buttonHeight = button.getHeightPercent() * windowHeight;
+            const buttonHeight = buttonWidth * 0.6;
 
             const newPositionX = initialPosition.getX() * windowWidth;
             const newPositionY = initialPosition.getY() * windowHeight;

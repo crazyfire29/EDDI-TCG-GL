@@ -112,7 +112,8 @@ export class MyCardScreenCardServiceImpl implements MyCardScreenCardService {
             }
 
             const cardWidth = 0.125 * window.innerWidth;
-            const cardHeight = 0.3980 * window.innerHeight;
+//             const cardHeight = 0.3980 * window.innerHeight;
+            const cardHeight = cardWidth * 1.6176;
 
             const newPositionX = initialPosition.getX() * windowWidth;
             const newPositionY = initialPosition.getY() * windowHeight;
