@@ -32,7 +32,8 @@ export class GlobalNavigationBarEffectRepositoryImpl implements GlobalNavigation
         }
 
         const effectWidth = this.EFFECT_WIDTH * window.innerWidth;
-        const effectHeight = this.EFFECT_HEIGHT * window.innerHeight;
+//         const effectHeight = this.EFFECT_HEIGHT * window.innerHeight;
+        const effectHeight = effectWidth * 0.6;
 
         const effectPositionX = position.getX() * window.innerWidth;
         const effectPositionY = position.getY() * window.innerHeight;

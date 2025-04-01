@@ -44,7 +44,7 @@ export class MyCardScreenCardEffectRepositoryImpl implements MyCardScreenCardEff
         const race = card.종족;
 
         const effectWidth = this.EFFECT_WIDTH * window.innerWidth;
-        const effectHeight = this.EFFECT_HEIGHT * window.innerHeight;
+        const effectHeight = effectWidth * 1.6176;
 
         const effectPositionX = position.getX() * window.innerWidth;
         const effectPositionY = position.getY() * window.innerHeight;
